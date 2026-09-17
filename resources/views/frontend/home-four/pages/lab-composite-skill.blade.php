@@ -713,7 +713,9 @@
             </li>
             @endforeach
           </ul>
-          <a href="http://cshop.local/cart"
+          <a href="#"
+             class="vl-plan-btn"
+             data-plan-url="http://pro.local/club-shop/annual-activity-kit-custom-204"
              style="display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--vl-navy); color:var(--vl-navy); padding:13px 20px; font-size:.9rem; font-weight:600; text-decoration:none; border-radius:2px; transition:background .2s; font-family:'IBM Plex Sans',sans-serif;"
              onmouseover="this.style.background='rgba(23,35,63,.06)'" onmouseout="this.style.background='transparent'">
             View Basic Plan →
@@ -738,7 +740,9 @@
             </li>
             @endforeach
           </ul>
-          <a href="{{ route('advance-plan') }}"
+          <a href="#"
+             class="vl-plan-btn"
+             data-plan-url="http://pro.local/club-shop/annual-activity-kit-10-box-203"
              style="display:inline-flex; align-items:center; justify-content:center; background:var(--vl-marigold); color:var(--vl-navy-deep); padding:13px 20px; font-size:.9rem; font-weight:600; text-decoration:none; border-radius:2px; transition:background .2s; font-family:'IBM Plex Sans',sans-serif; border:none;"
              onmouseover="this.style.background='#F0A643'" onmouseout="this.style.background='var(--vl-marigold)'">
             View Advance Plan →
@@ -762,7 +766,8 @@
             </li>
             @endforeach
           </ul>
-          <a href="{{ route('premium-plan') }}"
+          <a href="http://pro.local/club-shop/mega-sample-package-15-items"
+             target="_blank"
              style="display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--vl-navy); color:var(--vl-navy); padding:13px 20px; font-size:.9rem; font-weight:600; text-decoration:none; border-radius:2px; transition:background .2s; font-family:'IBM Plex Sans',sans-serif;"
              onmouseover="this.style.background='rgba(23,35,63,.06)'" onmouseout="this.style.background='transparent'">
             View Premium Plan →
