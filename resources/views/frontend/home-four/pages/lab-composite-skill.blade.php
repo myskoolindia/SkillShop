@@ -713,7 +713,7 @@
             </li>
             @endforeach
           </ul>
-          <a href="{{ route('basic-plan') }}"
+          <a href="http://cshop.local/cart"
              style="display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--vl-navy); color:var(--vl-navy); padding:13px 20px; font-size:.9rem; font-weight:600; text-decoration:none; border-radius:2px; transition:background .2s; font-family:'IBM Plex Sans',sans-serif;"
              onmouseover="this.style.background='rgba(23,35,63,.06)'" onmouseout="this.style.background='transparent'">
             View Basic Plan →
