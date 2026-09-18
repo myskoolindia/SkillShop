@@ -7,6 +7,7 @@ use App\Http\Controllers\Frontend\BlogController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\CheckOutController;
 use App\Http\Controllers\Frontend\ContactController;
+use App\Http\Controllers\Frontend\CourseEnquiryController;
 use App\Http\Controllers\Frontend\CourseContentController;
 use App\Http\Controllers\Frontend\CoursePageController;
 use App\Http\Controllers\Frontend\HomePageController;
@@ -462,6 +463,7 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
     /** Contact page routes */
     Route::get('contact', [ContactController::class, 'index'])->name('contact.index');
     Route::post('contact/send-mail', [ContactController::class, 'sendMail'])->name('contact.send-mail');
+    Route::post('course-enquiry', [CourseEnquiryController::class, 'store'])->name('course.enquiry.store');
 
     /** Custom pages */
     Route::get('page/{slug}', [HomePageController::class, 'customPage'])->name('custom-page');

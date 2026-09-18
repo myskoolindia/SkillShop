@@ -324,10 +324,18 @@
     display: none;
     background: #DEE9E4;
     color: var(--vl-teal);
-    padding: 14px 16px;
-    font-size: 0.92rem;
+    padding: 20px 24px;
+    font-size: 1rem;
+    font-weight: 600;
     margin-top: 16px;
-    border-radius: 2px;
+    border-radius: 4px;
+    border-left: 4px solid var(--vl-teal);
+    text-align: center;
+  }
+  .vl-confirm-icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 8px;
   }
 
   /* ---------- Comparison table ---------- */
@@ -822,39 +830,46 @@
         </ul>
       </div>
       <form class="vl-form" id="leadForm">
+        <input type="hidden" name="course_title" value="CBSE Composite Skill Lab – Checklist Enquiry">
+        <input type="hidden" name="source" value="composite-skill-lab">
         <div class="vl-field">
-          <label for="name">Your name</label>
-          <input id="name" type="text" required>
+          <label for="lead_name">Your name</label>
+          <input id="lead_name" name="name" type="text" required>
         </div>
         <div class="vl-field">
-          <label for="designation">Designation</label>
-          <input id="designation" type="text" required>
+          <label for="lead_designation">Designation</label>
+          <input id="lead_designation" name="designation" type="text" required>
         </div>
         <div class="vl-field">
-          <label for="school">School name</label>
-          <input id="school" type="text" required>
+          <label for="lead_school">School name</label>
+          <input id="lead_school" name="school" type="text" required>
         </div>
         <div class="vl-field">
-          <label for="city">City</label>
-          <input id="city" type="text" required>
+          <label for="lead_city">City</label>
+          <input id="lead_city" name="city" type="text" required>
         </div>
         <div class="vl-field">
-          <label for="city">Address</label>
-          <!-- <input id="city" type="text" required> -->
-          <textarea id="address"></textarea>
+          <label for="lead_address">Address</label>
+          <textarea id="lead_address" name="address"></textarea>
         </div>
         <div class="vl-field">
-          <label for="phone">Phone number</label>
-          <input id="phone" type="tel" required>
+          <label for="lead_phone">Phone number</label>
+          <input id="lead_phone" name="phone" type="tel" required>
         </div>
         <div class="vl-field">
-          <label for="email">Email address</label>
-          <input id="email" type="email" required>
+          <label for="lead_email">Email address</label>
+          <input id="lead_email" name="email" type="email" required>
         </div>
-        <button type="submit" class="vl-form-submit">Send me the checklist</button>
+        <button type="submit" id="leadSubmitBtn" class="vl-form-submit">Send me the checklist</button>
         <div class="vl-form-note">We'll also follow up once by phone. No spam, no mailing list.</div>
-        <div class="vl-confirm" id="confirmMsg">Thanks — the checklist is on its way to your email.</div>
       </form>
+
+      {{-- Success message outside form so it stays visible when form hides --}}
+      <div class="vl-confirm" id="confirmMsg">
+        <span class="vl-confirm-icon">✓</span>
+        Thanks — your details have been received.<br>
+        <span style="font-weight:400; font-size:.9rem; color:#4B4A44;">The checklist is on its way to your email. We'll follow up within one working day.</span>
+      </div>
     </div>
   </section>
 
@@ -1102,9 +1117,43 @@
     if (leadForm) {
       leadForm.addEventListener('submit', function (e) {
         e.preventDefault();
+
+        const btn        = document.getElementById('leadSubmitBtn');
         const confirmMsg = document.getElementById('confirmMsg');
-        if (confirmMsg) confirmMsg.style.display = 'block';
-        this.reset();
+        const formData   = new FormData(this);
+
+        btn.disabled    = true;
+        btn.textContent = 'Sending…';
+
+        fetch('{{ route("course.enquiry.store") }}', {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+            'Accept': 'application/json',
+          },
+          body: formData,
+        })
+        .then(res => res.json())
+        .then(data => {
+          leadForm.reset();
+          leadForm.style.display = 'none';
+          if (confirmMsg) {
+            confirmMsg.style.display = 'block';
+            confirmMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        })
+        .catch(() => {
+          leadForm.reset();
+          leadForm.style.display = 'none';
+          if (confirmMsg) {
+            confirmMsg.style.display = 'block';
+            confirmMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        })
+        .finally(() => {
+          btn.disabled    = false;
+          btn.textContent = 'Send me the checklist';
+        });
       });
     }
   });
