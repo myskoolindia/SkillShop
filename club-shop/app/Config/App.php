@@ -16,14 +16,13 @@ class App extends BaseConfig
      *
      * E.g., http://example.com/
      */
-    // public string $baseURL = 'http://localhost:8080/';
-    // public string $baseURL = 'http://localhost/myskill.club-shop/';
-    // public string $baseURL = 'http://localhost/club-shop/';
-    // public string $baseURL = 'http://49.207.63.179/myskill.club-shop/';
-    // public string $baseURL = 'http://pro.local/cshop/';
-    // public string $baseURL = 'http://cshop.local/';
-    public string $baseURL = 'http://localhost/skillvation.comphp/club-shop/';
 
+   public string $baseURL = '';
+    public function __construct()
+    {
+        parent::__construct();
+        $this->baseURL = env('app.baseURL');
+    }
     /**
      * Allowed Hostnames in the Site URL other than the hostname in the baseURL.
      * If you want to accept multiple Hostnames, set this.

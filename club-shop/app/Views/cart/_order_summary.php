@@ -17,11 +17,14 @@
                 foreach ($cart->items as $cartItem): 
                     $itemIndex++;
                 ?>
+                    <?php
+                    $productEditUrl = esc($cartItem->product_url) . (!empty($cartItem->id) ? '?cart_item_id=' . $cartItem->id : '') . (!empty($cartItem->is_bundle) ? '#tab_bundle_contents' : '');
+                    ?>
                     <div class="item" style="display: block; width: 100%; margin-bottom: 16px; padding-bottom: 16px; <?= $itemIndex < $totalItemCount ? 'border-bottom: 1px solid #f1f5f9;' : ''; ?>">
                         <!-- Top Header: Image + Product Info -->
                         <div style="display: flex; align-items: flex-start; gap: 12px; width: 100%;">
                             <div style="flex-shrink: 0;">
-                                <a href="<?= esc($cartItem->product_url); ?>">
+                                <a href="<?= $productEditUrl; ?>">
                                     <div class="product-image-box product-image-box-xs" style="width: 60px; height: 60px; border-radius: 6px; overflow: hidden; border: 1px solid #e2e8f0;">
                                         <img src="<?= getOrderImageUrl($cartItem->product_image_data, $cartItem->product_id); ?>" data-src="<?= getOrderImageUrl($cartItem->product_image_data, $cartItem->product_id); ?>" alt="<?= esc($cartItem->product_title); ?>" class="lazyload img-fluid img-product" style="width: 100%; height: 100%; object-fit: cover;">
                                     </div>
@@ -39,7 +42,7 @@
                                     </div>
                                 <?php endif; ?>
                                 <div style="margin-bottom: 4px; line-height: 1.35;">
-                                    <a href="<?= esc($cartItem->product_url); ?>" style="font-weight: 600; font-size: 14px; color: #1e293b; text-decoration: none;">
+                                    <a href="<?= $productEditUrl; ?>" style="font-weight: 600; font-size: 14px; color: #1e293b; text-decoration: none;">
                                         <?= esc($cartItem->product_title); ?>
                                     </a>
                                 </div>
