@@ -680,7 +680,7 @@
 
         <div class="vl-row-item">
           <div class="vl-row-img">
-            <img src="https://images.unsplash.com/photo-1568716353609-e7f7b8e78e05?auto=format&fit=crop&w=360&q=80"
+            <img src="{{ asset('frontend/img/skillbox/compliance_documentation.jpg') }}"
                  alt="CBSE compliance documentation and inspection readiness" loading="lazy" />
           </div>
           <div class="vl-row-text">
@@ -721,9 +721,8 @@
             </li>
             @endforeach
           </ul>
-          <a href="#"
-             class="vl-plan-btn"
-             data-plan-url="http://pro.local/club-shop/annual-activity-kit-custom-204"
+          <a href="http://localhost/skillvation.comphp/club-shop/test-skill-1"
+             target="_blank"
              style="display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--vl-navy); color:var(--vl-navy); padding:13px 20px; font-size:.9rem; font-weight:600; text-decoration:none; border-radius:2px; transition:background .2s; font-family:'IBM Plex Sans',sans-serif;"
              onmouseover="this.style.background='rgba(23,35,63,.06)'" onmouseout="this.style.background='transparent'">
             View Basic Plan →
@@ -749,8 +748,7 @@
             @endforeach
           </ul>
           <a href="#"
-             class="vl-plan-btn"
-             data-plan-url="http://pro.local/club-shop/annual-activity-kit-10-box-203"
+          target="_blank"
              style="display:inline-flex; align-items:center; justify-content:center; background:var(--vl-marigold); color:var(--vl-navy-deep); padding:13px 20px; font-size:.9rem; font-weight:600; text-decoration:none; border-radius:2px; transition:background .2s; font-family:'IBM Plex Sans',sans-serif; border:none;"
              onmouseover="this.style.background='#F0A643'" onmouseout="this.style.background='var(--vl-marigold)'">
             View Advance Plan →
@@ -774,7 +772,7 @@
             </li>
             @endforeach
           </ul>
-          <a href="http://pro.local/club-shop/mega-sample-package-15-items"
+          <a href="#"
              target="_blank"
              style="display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--vl-navy); color:var(--vl-navy); padding:13px 20px; font-size:.9rem; font-weight:600; text-decoration:none; border-radius:2px; transition:background .2s; font-family:'IBM Plex Sans',sans-serif;"
              onmouseover="this.style.background='rgba(23,35,63,.06)'" onmouseout="this.style.background='transparent'">

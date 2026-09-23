@@ -1,0 +1,40 @@
+# === Dependencies ===
+/vendor/
+/node_modules/
+
+# === Environment ===
+.env
+.env.*
+
+# CodeIgniter database config (contains secrets)
+app/Config/Database.php
+
+# === Writable / Runtime (CI4) ===
+/writable/*
+!/writable/.gitignore
+
+# === Cache & Logs ===
+/uploads/*
+/application/cache/*
+/application/logs/*
+/app/Logs/*
+/app/Cache/*
+*.log
+
+# === IDE / OS ===
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# === PHPUnit ===
+.phpunit.result.cache
+phpunit.xml
+
+# === Frontend build ===
+/public/build/
+/public/hot/
+
+# === Temporary files ===
+*.swp
+*.swo

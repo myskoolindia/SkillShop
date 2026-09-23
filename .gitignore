@@ -19,43 +19,47 @@
 # /vendor/srmklive/paypal/tests/Mocks/samples
 # public/uploads/media/
 
-# /vendor/
+**/vendor/
 node_modules/
 npm-debug.log
 yarn-error.log
 
-# Laravel 4 specific
+# Laravel
 bootstrap/compiled.php
 app/storage/
-
-# Laravel 5 & Lumen specific
 public/storage
 public/hot
-
-# Laravel 5 & Lumen specific with changed public path
-public_html/storage
-public_html/hot
-
 storage/*.key
 .env
+.env.*
+.env.backup
+.env.production
+.phpunit.result.cache
 Homestead.yaml
 Homestead.json
 /.vagrant
-.phpunit.result.cache
-
 /public/build
 /storage/pail
-.env.backup
-.env.production
 .phpactor.json
 auth.json
-
-**/vendor/
-# Composer
 /composer.lock
-
-# Local design files
 /prodesign/
-
-# Uploaded images
 /public/uploads/custom-images/
+
+# CodeIgniter 4 (club-shop)
+club-shop/.env
+club-shop/.env.*
+club-shop/app/Config/Database.php
+club-shop/writable/*
+!club-shop/writable/.gitignore
+club-shop/uploads/*
+club-shop/vendor/
+club-shop/vendor.zip
+
+# Large archives & temporary
+*.zip
+*.tar.gz
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

@@ -24,7 +24,27 @@
 @endphp
 
 <footer
-    class="footer__area {{ Cache::get('setting')?->site_theme && Route::is('home') == 'theme-two' ? 'footer__area-two' : '' }} mt-0">
+    class="footer__area mt-0" style="margin-top: 0 !important;">
+    <style>
+        .footer__area .footer__top,
+        .footer__area-two .footer__top,
+        .footer__area.footer__area-two .footer__top {
+            padding: 48px 0 32px !important;
+        }
+        .footer__area .footer__widget .logo {
+            margin-bottom: 22px !important;
+        }
+        .footer__area .footer__bottom {
+            padding: 20px 0 !important;
+        }
+        @media (max-width: 767.98px) {
+            .footer__area .footer__top,
+            .footer__area-two .footer__top,
+            .footer__area.footer__area-two .footer__top {
+                padding: 36px 0 24px !important;
+            }
+        }
+    </style>
 
     <div class="footer__top">
         <div class="container">

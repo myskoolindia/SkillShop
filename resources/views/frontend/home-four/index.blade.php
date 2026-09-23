@@ -50,21 +50,27 @@
 
   /* ── Hero Banner ─────────────────────────────────── */
   .unesco-hero-banner {
-    background-image: url("{{asset('frontend/img/banner/homeban01.jpeg')}}");
-    /* background: linear-gradient(135deg, #0b2545 0%, #0077d4 100%); */
+    background: linear-gradient(rgba(11, 37, 69, 0.8), rgba(0, 86, 179, 0.75)), url("{{asset('frontend/img/banner/homeban01.jpeg')}}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     color: #ffffff;
-    padding: 60px 0;
+    padding: 70px 0;
   }
   .unesco-hero-banner h1 {
     color: #ffffff;
     font-size: clamp(34px, 4.5vw, 52px);
     margin-bottom: 12px;
+    font-weight: 700;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
   }
   .unesco-hero-banner p {
     font-size: 20px;
-    color: #e2e8f0;
+    color: #f0f4f8;
     margin: 0;
     max-width: 800px;
+    font-weight: 500;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
   }
 
   /* ── Pill Buttons ─────────────────────────────────── */
@@ -563,12 +569,15 @@
         </div>
         
         <div>
-          <div class="unesco-media-card" style="    height: auto !important;">
-            <!-- <img src="https://www.unesco.org/sites/default/files/styles/banner_tablet/public/2024-04/global-skills-academy.jpg.webp?itok=u0wH1aKC" alt="Global Skills Academy Mission"> -->
-            <img src="{{ asset('/frontend/img/skillbox/homeimg01.jpeg')}}" alt="Global Skills Academy Mission">
-            <!-- <a href="https://www.youtube.com/watch?v=pRSPI0cEXnE" target="_blank" rel="noopener" class="unesco-play-btn" aria-label="Play GSA Mission Video">
-              <i class="fa-solid fa-play"></i>
-            </a> -->
+          <div class="unesco-media-card" style="height: auto !important; aspect-ratio: 16/9; overflow: hidden; border-radius: 8px;">
+            <iframe
+              src="https://www.youtube.com/embed/LGab-8Rf1jQ"
+              title="Skillvation Education Video"
+              style="width: 100%; height: 100%; min-height: 280px; border: none; display: block;"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen>
+            </iframe>
           </div>
           <!-- <div class="unesco-media-caption">© UNESCO</div> -->
         </div>
@@ -620,11 +629,8 @@
         </div>
 
         <div>
-          <div class="unesco-media-card">
-            <img src="https://www.unesco.org/sites/default/files/styles/split_tablet/public/2024-05/global-skills-academy-opportunities.jpg.webp?itok=5GfJn6uJ" alt="Skills for the Future Global Platform">
-            <!-- <a href="https://www.youtube.com/watch?v=ItnwUnRESUc" target="_blank" rel="noopener" class="unesco-play-btn" aria-label="Play Skills Platform Video">
-              <i class="fa-solid fa-play"></i>
-            </a> -->
+          <div class="unesco-media-card" style="height: auto !important; background: #ffffff; border: 1px solid var(--unesco-border); padding: 10px;">
+            <img src="{{ asset('/frontend/img/skillbox/homeimg01.jpeg')}}" alt="Skills for the Future" style="width: 100%; height: auto; object-fit: contain;">
           </div>
           <!-- <div class="unesco-media-caption">© UNESCO</div> -->
         </div>
@@ -690,9 +696,9 @@
 
         <div>
           <div class="unesco-media-card">
-            <img src="https://www.unesco.org/sites/default/files/styles/paragraph_medium_tablet/public/2026-07/ai-empowered-2.JPG?itok=gTcKy0mc" alt="AI EmpowerED Learning Session">
+            <img src="{{ asset('/frontend/img/skillbox/ai_empowered.jpg') }}" alt="AI EmpowerED Learning Session">
           </div>
-          <!-- <div class="unesco-media-caption">© Tablet Academy</div> -->
+          <!-- <div class="unesco-media-caption">© Skillvation LATAA AI LMS</div> -->
         </div>
       </div>
 
@@ -767,9 +773,9 @@
           </div>
           <div>
             <div class="unesco-media-card">
-              <img src="https://www.unesco.org/sites/default/files/styles/paragraph_medium_tablet/public/2024-04/global-skills-academy-digital.jpg.webp?itok=nU_r_Oc7" alt="Digital Skills Training">
+              <img src="{{ asset('/frontend/img/skillbox/Workonlifeforms.jpeg') }}" alt="Work on Life Forms">
             </div>
-            <!-- <div class="unesco-media-caption">© UNESCO</div> -->
+            <!-- <div class="unesco-media-caption">© Skillvation Life Forms Lab</div> -->
           </div>
         </div>
       </div>
@@ -808,9 +814,9 @@
           </div>
           <div>
             <div class="unesco-media-card">
-              <img src="https://www.unesco.org/sites/default/files/styles/paragraph_medium_tablet/public/2024-04/global-skills-academy-green.jpg.webp?itok=6NYmTPp0" alt="Green Skills Training">
+              <img src="{{ asset('/frontend/img/skillbox/Workonmaterialsandmachines.jpeg') }}" alt="Work on Materials and Machines">
             </div>
-            <!-- <div class="unesco-media-caption">© UNESCO</div> -->
+            <!-- <div class="unesco-media-caption">© Skillvation Materials & Machines Lab</div> -->
           </div>
         </div>
       </div>
@@ -844,9 +850,9 @@
           </div>
           <div>
             <div class="unesco-media-card">
-              <img src="https://www.unesco.org/sites/default/files/styles/paragraph_medium_tablet/public/2024-04/global-skills-academy-entrepreneurial.jpg.webp?itok=6tZLaLrK" alt="Entrepreneurial Skills Training">
+              <img src="{{ asset('/frontend/img/skillbox/work_on_human_services.jpg') }}" alt="Work on Human Services">
             </div>
-            <!-- <div class="unesco-media-caption">© UNESCO</div> -->
+            <!-- <div class="unesco-media-caption">© Skillvation Human Services Lab</div> -->
           </div>
         </div>
       </div>
@@ -935,10 +941,10 @@
         </div>
 
         <div>
-          <div class="unesco-media-card bg-white p-4 border border-gray-200">
-            <img src="https://www.unesco.org/sites/default/files/styles/paragraph_medium_tablet/public/2025-12/gsa-logos.png.webp?itok=qtvIx9k6" alt="UNESCO GSA Partner Logos" style="object-fit: contain;">
+          <div class="unesco-media-card">
+            <img src="{{ asset('/frontend/img/skillbox/leaders_of_learning.jpg') }}" alt="Leaders of Learning - School with Children">
           </div>
-          <!-- <div class="unesco-media-caption">© UNESCO</div> -->
+          <!-- <div class="unesco-media-caption">© Skillvation Leaders of Learning</div> -->
         </div>
       </div>
     </div>
