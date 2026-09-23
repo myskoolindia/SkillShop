@@ -19,10 +19,13 @@
 # /vendor/srmklive/paypal/tests/Mocks/samples
 # public/uploads/media/
 
-**/vendor/
+/vendor/
 node_modules/
 npm-debug.log
 yarn-error.log
+
+# Allow frontend asset vendor folders
+!**/assets/**/vendor/**
 
 # Laravel
 bootstrap/compiled.php
