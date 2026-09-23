@@ -24,8 +24,9 @@ node_modules/
 npm-debug.log
 yarn-error.log
 
-# Allow frontend asset vendor folders
+# Allow frontend asset vendor folders and ThirdParty bundled libraries
 !**/assets/**/vendor/**
+!**/ThirdParty/**
 
 # Laravel
 bootstrap/compiled.php
