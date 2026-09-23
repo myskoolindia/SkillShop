@@ -57,6 +57,24 @@ if (!empty($bundleComponents)) {
 $totalCategoriesCount = count($groupedComponents);
 ?>
 
+<style>
+.bundle-category-header-row {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s ease;
+}
+.bundle-category-header-row:hover {
+    background: #e2e8f0 !important;
+}
+.bundle-cat-chevron {
+    transition: transform 0.25s ease;
+    display: inline-block;
+}
+.bundle-cat-chevron.collapsed {
+    transform: rotate(-90deg);
+}
+</style>
+
 <div class="bundle-contents-wrapper p-3">
     <!-- Top Summary Banner -->
     <div class="d-flex justify-content-between align-items-center flex-wrap mb-3 p-3 bg-light rounded" style="border: 1px solid #e2e8f0; gap: 10px;">
@@ -76,24 +94,33 @@ $totalCategoriesCount = count($groupedComponents);
         </div>
     </div>
 
-    <!-- Category Filter Pills & Search Bar -->
+    <!-- Category Filter Pills, Search Bar & Collapse Toggles -->
     <div class="bundle-filter-controls mb-3">
         <div class="row align-items-center">
-            <div class="col-md-6 col-12 mb-2 mb-md-0">
+            <div class="col-md-5 col-12 mb-2 mb-md-0">
                 <div class="input-group">
                     <div class="input-group-prepend">
                         <span class="input-group-text bg-white" style="border-right: none;"><i class="fa fa-search text-muted"></i></span>
                     </div>
-                    <input type="text" id="bundle_storefront_filter" class="form-control" placeholder="Search products, SKU or category in this package..." onkeyup="filterStorefrontBundle();" style="border-left: none;">
+                    <input type="text" id="bundle_storefront_filter" class="form-control" placeholder="Search products, SKU or category..." onkeyup="filterStorefrontBundle();" style="border-left: none;">
                     <div class="input-group-append" id="bundle_search_clear_btn" style="display: none;">
                         <button class="btn btn-outline-secondary" type="button" onclick="clearBundleSearch();" title="Clear search">&times;</button>
                     </div>
                 </div>
             </div>
-            <?php if ($totalCategoriesCount > 1): ?>
-                <div class="col-md-6 col-12 text-md-right">
-                    <div class="d-flex align-items-center justify-content-md-end flex-wrap" style="gap: 6px;">
-                        <span class="text-muted small mr-1 d-none d-lg-inline"><i class="fa fa-filter"></i> Filter:</span>
+            
+            <div class="col-md-7 col-12 text-md-right">
+                <div class="d-flex align-items-center justify-content-md-end flex-wrap" style="gap: 6px;">
+                    <?php if ($totalCategoriesCount > 1): ?>
+                        <div class="btn-group btn-group-sm mr-1">
+                            <button type="button" class="btn btn-light border" onclick="expandAllBundleCategories();" title="Expand all categories" style="font-size: 11px; padding: 4px 8px;">
+                                <i class="fa fa-plus-square-o mr-1 text-primary"></i>Expand All
+                            </button>
+                            <button type="button" class="btn btn-light border" onclick="collapseAllBundleCategories();" title="Collapse all categories" style="font-size: 11px; padding: 4px 8px;">
+                                <i class="fa fa-minus-square-o mr-1 text-muted"></i>Collapse All
+                            </button>
+                        </div>
+                        
                         <button type="button" class="btn btn-sm btn-primary bundle-cat-pill active" data-cat-key="all" onclick="filterBundleCategory('all', this);">
                             All <span class="badge badge-light ml-1"><?= count($bundleComponents); ?></span>
                         </button>
@@ -102,9 +129,9 @@ $totalCategoriesCount = count($groupedComponents);
                                 <?= esc($catGroup['name']); ?> <span class="badge badge-secondary ml-1"><?= count($catGroup['items']); ?></span>
                             </button>
                         <?php endforeach; ?>
-                    </div>
+                    <?php endif; ?>
                 </div>
-            <?php endif; ?>
+            </div>
         </div>
     </div>
 
@@ -126,15 +153,19 @@ $totalCategoriesCount = count($groupedComponents);
                 <?php if (!empty($groupedComponents)): ?>
                     <?php $globalCounter = 1; ?>
                     <?php foreach ($groupedComponents as $catKey => $catGroup): ?>
-                        <!-- Category Header Row -->
-                        <tr class="bundle-category-header-row" data-cat-key="<?= esc($catKey); ?>" data-cat-name="<?= esc(strtolower($catGroup['name'])); ?>" style="background: #f1f5f9; border-top: 2px solid #e2e8f0; border-bottom: 1px solid #cbd5e0;">
+                        <!-- Category Header Row (Collapsible) -->
+                        <tr class="bundle-category-header-row" data-cat-key="<?= esc($catKey); ?>" data-cat-name="<?= esc(strtolower($catGroup['name'])); ?>" onclick="toggleBundleCategory('<?= esc($catKey); ?>');" style="background: #f1f5f9; border-top: 2px solid #e2e8f0; border-bottom: 1px solid #cbd5e0;" title="Click to collapse / expand this category">
                             <td colspan="7" class="py-2 px-3">
                                 <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: 10px;">
                                     <div class="d-flex align-items-center">
-                                        <i class="fa fa-folder-open text-primary mr-2" style="font-size: 15px;"></i>
+                                        <i class="fa fa-chevron-down bundle-cat-chevron text-muted mr-2" data-cat-key="<?= esc($catKey); ?>" style="font-size: 11px;"></i>
+                                        <i class="fa fa-folder-open bundle-cat-folder text-primary mr-2" data-cat-key="<?= esc($catKey); ?>" style="font-size: 15px;"></i>
                                         <span class="font-weight-bold text-dark" style="font-size: 13.5px;"><?= esc($catGroup['name']); ?></span>
                                         <span class="badge badge-primary ml-2 px-2 py-1" style="font-size: 11px; font-weight: 500;">
                                             <?= count($catGroup['items']); ?> <?= count($catGroup['items']) == 1 ? 'item' : 'items'; ?>
+                                        </span>
+                                        <span class="text-muted small ml-2 d-none d-sm-inline" style="font-size: 11px; opacity: 0.65;">
+                                            (Click to collapse/expand)
                                         </span>
                                     </div>
                                     <div class="text-muted small">
@@ -343,6 +374,7 @@ $totalCategoriesCount = count($groupedComponents);
 
 <script>
 var activeBundleCategoryKey = 'all';
+var collapsedBundleCategories = {};
 
 function formatBundleCurrency(amount) {
     var formatted = parseFloat(amount).toFixed(2);
@@ -360,10 +392,65 @@ function formatBundleCurrency(amount) {
     return dir === 'left' ? (symbol + space + formatted) : (formatted + space + symbol);
 }
 
+function toggleBundleCategory(catKey) {
+    if (collapsedBundleCategories[catKey]) {
+        delete collapsedBundleCategories[catKey];
+    } else {
+        collapsedBundleCategories[catKey] = true;
+    }
+    updateCategoryCollapseUI(catKey);
+}
+
+function expandAllBundleCategories() {
+    collapsedBundleCategories = {};
+    $('.bundle-category-header-row').each(function() {
+        var catKey = $(this).attr('data-cat-key');
+        if (catKey) {
+            updateCategoryCollapseUI(catKey);
+        }
+    });
+}
+
+function collapseAllBundleCategories() {
+    $('.bundle-category-header-row').each(function() {
+        var catKey = $(this).attr('data-cat-key');
+        if (catKey) {
+            collapsedBundleCategories[catKey] = true;
+            updateCategoryCollapseUI(catKey);
+        }
+    });
+}
+
+function updateCategoryCollapseUI(catKey) {
+    var isCollapsed = !!collapsedBundleCategories[catKey];
+    var $chevron = $('.bundle-cat-chevron[data-cat-key="' + catKey + '"]');
+    var $folder = $('.bundle-cat-folder[data-cat-key="' + catKey + '"]');
+
+    if (isCollapsed) {
+        $chevron.addClass('collapsed');
+        $folder.removeClass('fa-folder-open').addClass('fa-folder');
+    } else {
+        $chevron.removeClass('collapsed');
+        $folder.removeClass('fa-folder').addClass('fa-folder-open');
+    }
+
+    applyBundleStorefrontFilters();
+}
+
 function filterBundleCategory(catKey, btn) {
     activeBundleCategoryKey = catKey;
     $('.bundle-cat-pill').removeClass('active btn-primary').addClass('btn-outline-secondary');
     $(btn).removeClass('btn-outline-secondary').addClass('active btn-primary');
+
+    // Auto-expand the selected category if it was collapsed
+    if (catKey !== 'all' && collapsedBundleCategories[catKey]) {
+        delete collapsedBundleCategories[catKey];
+        var $chevron = $('.bundle-cat-chevron[data-cat-key="' + catKey + '"]');
+        var $folder = $('.bundle-cat-folder[data-cat-key="' + catKey + '"]');
+        $chevron.removeClass('collapsed');
+        $folder.removeClass('fa-folder').addClass('fa-folder-open');
+    }
+
     applyBundleStorefrontFilters();
 }
 
@@ -399,9 +486,16 @@ function applyBundleStorefrontFilters() {
         var searchMatch = (query === '' || title.indexOf(query) > -1 || sku.indexOf(query) > -1 || catName.indexOf(query) > -1);
 
         if (categoryMatch && searchMatch) {
-            $row.show();
-            totalVisibleRows++;
+            // Count matching items
             categoryVisibleCount[rowCatKey] = (categoryVisibleCount[rowCatKey] || 0) + 1;
+            totalVisibleRows++;
+
+            // If category is collapsed by user, and not searching, keep hidden
+            if (collapsedBundleCategories[rowCatKey] && query === '') {
+                $row.hide();
+            } else {
+                $row.show();
+            }
         } else {
             $row.hide();
         }
