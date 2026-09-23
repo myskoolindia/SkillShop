@@ -50,9 +50,18 @@ auth.json
 club-shop/.env
 club-shop/.env.*
 club-shop/app/Config/Database.php
-club-shop/writable/*
-!club-shop/writable/.gitignore
-club-shop/uploads/*
+club-shop/writable/cache/*
+!club-shop/writable/cache/index.html
+club-shop/writable/debugbar/*
+!club-shop/writable/debugbar/index.html
+club-shop/writable/logs/*
+!club-shop/writable/logs/index.html
+club-shop/writable/session/*
+!club-shop/writable/session/index.html
+club-shop/writable/uploads/*
+!club-shop/writable/uploads/index.html
+!club-shop/writable/index.html
+!club-shop/writable/.htaccess
 club-shop/vendor/
 club-shop/vendor.zip
 
