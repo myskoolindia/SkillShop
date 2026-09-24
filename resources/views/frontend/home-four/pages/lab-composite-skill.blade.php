@@ -6,960 +6,1798 @@
 @push('styles')
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
   :root {
-    --vl-navy: #17233F;
-    --vl-navy-deep: #101A30;
-    --vl-paper: #F5F2EA;
-    --vl-marigold: #D98E2B;
-    --vl-marigold-deep: #B9721B;
-    --vl-teal: #2F6F62;
-    --vl-ink: #2A2A28;
-    --vl-hair: #D8D2C2;
-    --vl-hair-on-navy: rgba(245, 242, 234, 0.22);
+    --vl-primary: #6366f1;
+    --vl-primary-deep: #4338ca;
+    --vl-heading: #0f172a;
+    --vl-body: #334155;
+    --vl-muted: #64748b;
+    
+    --vl-pink: #ec4899;
+    --vl-rose: #f43f5e;
+    --vl-coral: #f97316;
+    --vl-amber: #f59e0b;
+    --vl-violet: #8b5cf6;
+    --vl-teal: #0d9488;
+    --vl-cyan: #0284c7;
+
+    --vl-bg-white: #ffffff;
+    --vl-bg-soft: #fbf9fd;
+    --vl-bg-peach: #fffaf5;
+    --vl-bg-mint: #f4fbf9;
+    --vl-bg-lavender: #f7f4fc;
+
+    --vl-shadow-card: 0 10px 30px -5px rgba(99, 102, 241, 0.08), 0 4px 12px -2px rgba(236, 72, 153, 0.05);
+    --vl-shadow-hover: 0 20px 40px -8px rgba(99, 102, 241, 0.16), 0 10px 20px -4px rgba(236, 72, 153, 0.12);
+    --vl-shadow-featured: 0 25px 50px -12px rgba(99, 102, 241, 0.35);
   }
 
   .vidyalab-page {
-    background: var(--vl-paper);
-    color: var(--vl-ink);
-    font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+    background-color: var(--vl-bg-white);
+    color: var(--vl-body);
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     font-size: 16px;
-    line-height: 1.6;
+    line-height: 1.65;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Typography Scale */
   .vidyalab-page h1,
   .vidyalab-page h2,
   .vidyalab-page h3,
-  .vidyalab-page .serif {
-    font-family: 'Newsreader', Georgia, serif;
-    font-weight: 500;
-    color: var(--vl-navy);
-    line-height: 1.15;
+  .vidyalab-page .display-heading {
+    font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    color: var(--vl-heading);
+    line-height: 1.14;
+    letter-spacing: -0.03em;
     margin: 0;
   }
 
-  .vidyalab-page a {
-    color: inherit;
-  }
-
   .vidyalab-wrap {
-    max-width: 1120px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 0 24px;
   }
 
-  .vidyalab-page button,
-  .vidyalab-page .btn {
-    font-family: 'IBM Plex Sans', sans-serif;
-    cursor: pointer;
+  /* Gradient Text Fills (WOW effect) */
+  .vl-grad-text {
+    background: linear-gradient(135deg, #0284c7 0%, #6366f1 35%, #ec4899 75%, #f97316 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline;
   }
 
-  /* ---------- Hero ---------- */
-  .vl-hero {
-    background:#d390c1;
-    color: var(--vl-paper);
-    padding: 40px 0 40px;
+  .vl-grad-sunset {
+    background: linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #f97316 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline;
   }
-  .vl-hero-grid {
-    display: grid;
-    grid-template-columns: 1.05fr 0.95fr;
-    gap: 56px;
-    align-items: center;
+
+  .vl-grad-violet {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline;
   }
-  @media (max-width: 860px) {
-    .vl-hero-grid { grid-template-columns: 1fr; }
+
+  .vl-grad-gold {
+    background: linear-gradient(135deg, #ffffff 0%, #fef08a 60%, #fed7aa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline;
   }
-  .vl-hero h1 {
-    font-size: clamp(2.05rem, 4vw, 2.9rem);
-    color: var(--vl-paper);
-  }
-  .vl-hero p.lead {
-    margin-top: 20px;
-    font-size: 1.08rem;
-    max-width: 46ch;
-    color: #D9D5C8;
-    line-height: 1.65;
-  }
-  .vl-hero-ctas {
-    margin-top: 32px;
-    display: flex;
-    gap: 14px;
-    flex-wrap: wrap;
-  }
-  .vl-btn-primary {
+
+  /* Eyebrows & Subheadings */
+  .vl-eyebrow {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    background: var(--vl-marigold);
-    color: var(--vl-navy-deep) !important;
-    border: none;
-    padding: 14px 26px;
-    font-size: 0.98rem;
-    font-weight: 600;
-    border-radius: 2px;
-    text-decoration: none;
-    transition: background 0.2s ease;
-  }
-  .vl-btn-primary:hover {
-    background: #F0A643;
-    color: var(--vl-navy-deep) !important;
-  }
-  .vl-btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    color: var(--vl-paper) !important;
-    border: 1px solid var(--vl-hair-on-navy);
-    padding: 14px 26px;
-    font-size: 0.98rem;
-    border-radius: 2px;
-    text-decoration: none;
-    transition: border-color 0.2s ease, background 0.2s ease;
-  }
-  .vl-btn-secondary:hover {
-    border-color: var(--vl-paper);
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  /* stat strip */
-  .vl-stat-strip {
-    margin-top: 44px;
-    display: flex;
-    border-top: 1px solid var(--vl-hair-on-navy);
-    padding-top: 22px;
-    gap: 36px;
-    flex-wrap: wrap;
-  }
-  .vl-stat-strip div { min-width: 120px; }
-  .vl-stat-strip .num {
-    font-family: 'Newsreader', serif;
-    font-size: 1.7rem;
-    color: var(--vl-marigold);
-    display: block;
-    line-height: 1.2;
-  }
-  .vl-stat-strip .label {
-    font-size: 0.85rem;
-    color: #B8B4A6;
-  }
-
-  /* blueprint svg */
-  .vl-blueprint {
-    background: var(--vl-navy-deep);
-    border: 1px solid var(--vl-hair-on-navy);
-    border-radius: 2px;
-    padding: 20px;
-  }
-  .vl-blueprint svg { width: 100%; height: auto; display: block; }
-  .vl-blueprint-cap {
-    margin-top: 12px;
-    font-size: 0.8rem;
-    color: #9B9688;
-  }
-
-  /* ---------- Section shell ---------- */
-  .vl-section { padding: 76px 0; }
-  .vl-eyebrow-line {
-    width: 44px;
-    height: 2px;
-    background: var(--vl-marigold);
-    margin-bottom: 18px;
-  }
-  .vl-section-head { max-width: 60ch; margin-bottom: 44px; }
-  .vl-section-head h2 { font-size: clamp(1.6rem, 3vw, 2.15rem); }
-  .vl-section-head p { margin-top: 14px; color: #4B4A44; font-size: 1.02rem; }
-
-  /* ---------- Problem/Solution ---------- */
-  .vl-split {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-    border: 1px solid var(--vl-hair);
-  }
-  @media (max-width: 760px) {
-    .vl-split { grid-template-columns: 1fr; }
-  }
-  .vl-split > div { padding: 38px; }
-  .vl-split .problem { border-right: 1px solid var(--vl-hair); }
-  @media (max-width: 760px) {
-    .vl-split .problem { border-right: none; border-bottom: 1px solid var(--vl-hair); }
-  }
-  .vl-split h3 { font-size: 1.25rem; margin-bottom: 14px; }
-  .vl-split p { color: #4B4A44; margin: 0; }
-  .vl-tag {
-    display: inline-block;
-    font-size: 0.78rem;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 2px;
-    margin-bottom: 16px;
-  }
-  .vl-tag.warn { background: #F1E3D2; color: #8A5A1E; }
-  .vl-tag.good { background: #DEE9E4; color: var(--vl-teal); }
-
-  /* ---------- Included rows ---------- */
-  .vl-row-list { border-top: 1px solid var(--vl-hair); }
-  .vl-row-item {
-    display: grid;
-    grid-template-columns: 120px 220px 1fr;
-    gap: 0 32px;
-    padding: 26px 0;
-    border-bottom: 1px solid var(--vl-hair);
-    align-items: center;
-  }
-  @media (max-width: 860px) {
-    .vl-row-item { grid-template-columns: 88px 1fr; gap: 0 20px; }
-    .vl-row-item .vl-row-text { grid-column: 2; }
-  }
-  @media (max-width: 580px) {
-    .vl-row-item { grid-template-columns: 1fr; gap: 14px; }
-    .vl-row-item .vl-row-img { width: 100%; height: 180px; }
-    .vl-row-item .vl-row-text { grid-column: 1; }
-  }
-  .vl-row-img {
-    width: 120px; height: 88px;
-    border-radius: 4px; overflow: hidden;
-    background: #D6D2C8; flex-shrink: 0;
-  }
-  .vl-row-img img {
-    width: 100%; height: 100%;
-    object-fit: cover; display: block;
-    transition: transform .4s ease;
-  }
-  .vl-row-item:hover .vl-row-img img { transform: scale(1.07); }
-  .vl-row-text { display: flex; flex-direction: column; gap: 6px; }
-  .vl-row-item h3 { font-size: 1.15rem; margin: 0; }
-  .vl-row-item p { color: #4B4A44; margin: 0; }
-
-  /* ---------- Testimonial ---------- */
-  .vl-testimonial {
-    background: var(--vl-navy);
-    color: var(--vl-paper);
-    padding: 70px 0;
-  }
-  .vl-testimonial blockquote {
-    font-family: 'Newsreader', serif;
-    font-style: italic;
-    font-size: clamp(1.35rem, 2.6vw, 1.9rem);
-    max-width: 44ch;
-    margin: 0;
-    color: black;
-    line-height: 1.45;
-  }
-  .vl-testimonial cite {
-    display: block;
-    margin-top: 24px;
-    font-style: normal;
-    font-size: 0.92rem;
-    color: #B8B4A6;
-  }
-
-  /* ---------- Lead form ---------- */
-  .vl-form-panel {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 56px;
-    align-items: start;
-  }
-  @media (max-width: 820px) {
-    .vl-form-panel { grid-template-columns: 1fr; }
-  }
-  .vl-form-copy h2 { font-size: clamp(1.5rem, 3vw, 2rem); }
-  .vl-form-copy ul { margin-top: 22px; padding-left: 0; list-style: none; }
-  .vl-form-copy li {
-    padding-left: 26px;
-    position: relative;
-    margin-bottom: 12px;
-    color: #4B4A44;
-  }
-  .vl-form-copy li::before {
-    content: "";
-    position: absolute; left: 0; top: 9px;
-    width: 8px; height: 8px;
-    background: var(--vl-teal);
-  }
-  .vl-form {
-    background: #fff;
-    border: 1px solid var(--vl-hair);
-    padding: 32px;
-  }
-  .vl-field { margin-bottom: 16px; }
-  .vl-field label { display: block; font-size: 0.85rem; margin-bottom: 6px; color: #4B4A44; font-weight: 500; }
-  .vl-field input {
-    width: 100%;
-    padding: 11px 12px;
-    border: 1px solid var(--vl-hair);
+    gap: 8px;
+    font-family: 'Outfit', sans-serif;
     font-size: 0.95rem;
-    font-family: inherit;
-    background: var(--vl-paper);
-    border-radius: 2px;
-    box-sizing: border-box;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #e11d48;
+    margin-bottom: 12px;
   }
-  .vl-field input:focus {
-    outline: 2.5px solid var(--vl-marigold);
-    outline-offset: 1px;
-    border-color: transparent;
+
+  .vl-eyebrow.purple { color: #7c3aed; }
+  .vl-eyebrow.coral  { color: #ea580c; }
+  .vl-eyebrow.teal   { color: #0d9488; }
+  .vl-eyebrow.hero   { color: #fef08a; }
+
+  .vl-badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 9999px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
-  .vl-form-submit {
-    width: 100%;
-    margin-top: 6px;
-    background: var(--vl-navy);
-    color: var(--vl-paper);
+
+  .vl-badge-pill.hero {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(8px);
+  }
+
+  /* Buttons */
+  .vl-btn-vibrant-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #ffffff 0%, #ffedd5 100%);
+    color: #db2777 !important;
     border: none;
-    padding: 14px;
-    font-weight: 600;
-    font-size: 0.98rem;
-    border-radius: 2px;
-    cursor: pointer;
-    transition: background 0.2s ease;
+    padding: 16px 32px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    border-radius: 14px;
+    text-decoration: none;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(219, 39, 119, 0.2);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .vl-form-submit:hover { background: var(--vl-navy-deep); }
-  .vl-form-note { font-size: 0.8rem; color: #807C70; margin-top: 12px; }
-  .vl-confirm {
-    display: none;
-    background: #DEE9E4;
-    color: var(--vl-teal);
-    padding: 20px 24px;
-    font-size: 1rem;
+
+  .vl-btn-vibrant-cta:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2), 0 6px 16px rgba(219, 39, 119, 0.3);
+    color: #be185d !important;
+  }
+
+  .vl-btn-glass-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
+    padding: 16px 30px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    border-radius: 14px;
+    text-decoration: none;
+    backdrop-filter: blur(10px);
+    transition: all 0.25s ease;
+  }
+
+  .vl-btn-glass-cta:hover {
+    background: rgba(255, 255, 255, 0.28);
+    border-color: #ffffff;
+    transform: translateY(-3px);
+  }
+
+  /* ==================== HERO SECTION ==================== */
+  .vl-hero-vibrant {
+    position: relative;
+    background: linear-gradient(135deg, #4338ca 0%, #6366f1 30%, #a855f7 65%, #ec4899 100%);
+    color: #ffffff;
+    padding: 76px 0 90px;
+    overflow: hidden;
+  }
+
+  .vl-hero-vibrant::before {
+    content: "";
+    position: absolute;
+    top: -100px;
+    right: -60px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(254, 240, 138, 0.3) 0%, rgba(244, 114, 182, 0.2) 45%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .vl-hero-vibrant::after {
+    content: "";
+    position: absolute;
+    bottom: -120px;
+    left: -80px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 65%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .vl-hero-grid {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 52px;
+    align-items: center;
+  }
+
+  @media (max-width: 980px) {
+    .vl-hero-grid {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+  }
+
+  .vl-hero-vibrant h1 {
+    font-size: clamp(2.5rem, 4.8vw, 3.85rem);
+    color: #ffffff;
+    line-height: 1.1;
+    margin-top: 14px;
+    letter-spacing: -0.035em;
+  }
+
+  .vl-hero-vibrant p.lead {
+    margin-top: 22px;
+    font-size: 1.18rem;
+    max-width: 50ch;
+    color: #f8fafc;
+    line-height: 1.7;
+    font-weight: 500;
+  }
+
+  .vl-hero-ctas {
+    margin-top: 36px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  /* Hero Stat Blocks */
+  .vl-hero-stats {
+    margin-top: 48px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    padding-top: 30px;
+  }
+
+  .vl-stat-box {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 14px;
+    padding: 14px 18px;
+    backdrop-filter: blur(8px);
+  }
+
+  .vl-stat-box .num {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: #fef08a;
+    display: block;
+    line-height: 1.05;
+  }
+
+  .vl-stat-box .label {
+    font-size: 0.82rem;
+    color: #ffffff;
     font-weight: 600;
-    margin-top: 16px;
-    border-radius: 4px;
-    border-left: 4px solid var(--vl-teal);
+    margin-top: 5px;
+    display: block;
+  }
+
+  /* Floor Plan Card */
+  .vl-blueprint-glass {
+    background: rgba(255, 255, 255, 0.96);
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    border-radius: 22px;
+    padding: 26px;
+    box-shadow: 0 24px 50px -10px rgba(76, 29, 149, 0.35), 0 10px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .vl-blueprint-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1.5px solid #ede9fe;
+  }
+
+  .vl-blueprint-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #4338ca;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .vl-blueprint-badge {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.76rem;
+    padding: 5px 14px;
+    background: #fdf2f8;
+    color: #db2777;
+    border: 1px solid #fbcfe8;
+    border-radius: 20px;
+    font-weight: 800;
+  }
+
+  .vl-blueprint-svg-wrap {
+    background: #faf5ff;
+    border: 1.5px solid #e9d5ff;
+    border-radius: 14px;
+    padding: 12px;
+  }
+
+  .vl-blueprint-svg-wrap svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .vl-blueprint-cap {
+    margin-top: 14px;
+    font-size: 0.86rem;
+    color: #6d28d9;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ==================== SECTIONS & HEADINGS ==================== */
+  .vl-section {
+    padding: 92px 0;
+    position: relative;
+  }
+
+  .vl-section.bg-soft     { background-color: var(--vl-bg-soft); }
+  .vl-section.bg-peach    { background-color: var(--vl-bg-peach); }
+  .vl-section.bg-mint     { background-color: var(--vl-bg-mint); }
+  .vl-section.bg-lavender { background-color: var(--vl-bg-lavender); }
+  .vl-section.bg-white    { background-color: var(--vl-bg-white); }
+
+  .vl-section-head {
+    max-width: 720px;
+    margin-bottom: 52px;
+  }
+
+  .vl-section-head.center {
+    margin-left: auto;
+    margin-right: auto;
     text-align: center;
   }
-  .vl-confirm-icon {
-    font-size: 2rem;
-    display: block;
-    margin-bottom: 8px;
+
+  .vl-section-head h2 {
+    font-size: clamp(2.1rem, 3.8vw, 3rem);
+    color: var(--vl-heading);
+    margin-top: 8px;
   }
 
-  /* ---------- Comparison table ---------- */
-  .vl-table-wrap {
-    overflow-x: auto;
-  }
-  .vl-table {
-    width: 100%;
-    border-collapse: collapse;
-    border: 1px solid var(--vl-hair);
-    background: #fff;
-  }
-  .vl-table th, 
-  .vl-table td {
-    text-align: left;
-    padding: 16px 18px;
-    border-bottom: 1px solid var(--vl-hair);
-    font-size: 0.95rem;
-  }
-  .vl-table th {
-    font-family: 'Newsreader', serif;
+  .vl-section-head p {
+    margin-top: 16px;
+    color: var(--vl-body);
+    font-size: 1.14rem;
+    line-height: 1.68;
     font-weight: 500;
-    color: var(--vl-navy);
-    font-size: 1rem;
-    background: #EDEADF;
-  }
-  .vl-table td.yes { color: var(--vl-teal); font-weight: 600; }
-  .vl-table td.no { color: #9C6B3E; }
-  .vl-table tr:last-child td { border-bottom: none; }
-
-  /* ---------- FAQ Card Carousel ---------- */
-  .vl-faq-carousel { position: relative; }
-
-  .vl-faq-slide {
-    display: none;
-    animation: vl-fade-in .3s ease;
-  }
-  .vl-faq-slide.active { display: block; }
-
-  @keyframes vl-fade-in {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* 3-col card grid */
-  .vl-faq-grid {
+  /* ==================== OUTCOMES ==================== */
+  .vl-outcomes-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-  }
-  @media (max-width: 860px) {
-    .vl-faq-grid { grid-template-columns: repeat(2, 1fr); }
-  }
-  @media (max-width: 560px) {
-    .vl-faq-grid { grid-template-columns: 1fr; }
+    grid-template-columns: 1fr 1fr;
+    gap: 36px;
   }
 
-  /* Individual card */
-  .vl-faq-card {
-    background: var(--vl-paper);
-    border: 1px solid var(--vl-hair);
-    border-radius: 4px;
-    padding: 28px 24px;
+  @media (max-width: 840px) {
+    .vl-outcomes-grid {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+  }
+
+  .vl-outcome-card {
+    background: #ffffff;
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: var(--vl-shadow-card);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
-    gap: 0;
-    transition: box-shadow .25s, border-color .25s;
-  }
-  .vl-faq-card:hover {
-    border-color: var(--vl-navy);
-    box-shadow: 0 6px 24px rgba(23,35,63,.09);
   }
 
-  .vl-faq-card__q {
-    font-family: 'Newsreader', serif;
-    font-size: 1.05rem;
+  .vl-outcome-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--vl-shadow-hover);
+  }
+
+  .vl-outcome-card.problem {
+    border: 2px solid #fed7aa;
+    border-top: 6px solid #f97316;
+  }
+
+  .vl-outcome-card.solution {
+    border: 2px solid #ddd6fe;
+    border-top: 6px solid #8b5cf6;
+    box-shadow: 0 16px 36px -4px rgba(139, 92, 246, 0.18), var(--vl-shadow-card);
+  }
+
+  .vl-outcome-img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    position: relative;
+    background: #fdf2f8;
+  }
+
+  .vl-outcome-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s ease;
+  }
+
+  .vl-outcome-card:hover .vl-outcome-img img {
+    transform: scale(1.05);
+  }
+
+  .vl-outcome-content {
+    padding: 34px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .vl-outcome-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+    padding: 6px 14px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    width: fit-content;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .vl-outcome-tag.warn {
+    background: #fff7ed;
+    color: #ea580c;
+    border: 1px solid #ffedd5;
+  }
+
+  .vl-outcome-tag.good {
+    background: #fdf2f8;
+    color: #db2777;
+    border: 1px solid #fbcfe8;
+  }
+
+  .vl-outcome-card h3 {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: var(--vl-heading);
+    margin-bottom: 12px;
+  }
+
+  .vl-outcome-card p {
+    color: var(--vl-body);
+    font-size: 1.02rem;
+    line-height: 1.68;
+    margin: 0 0 22px;
+  }
+
+  .vl-outcome-features {
+    list-style: none;
+    padding: 0;
+    margin: auto 0 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 1.5px solid #f1f5f9;
+    padding-top: 22px;
+  }
+
+  .vl-outcome-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.96rem;
     font-weight: 600;
-    color: var(--vl-navy);
-    line-height: 1.4;
-    margin-bottom: 16px;
   }
 
-  .vl-faq-card__divider {
-    width: 32px;
-    height: 2px;
-    background: var(--vl-marigold);
-    margin-bottom: 16px;
-    flex-shrink: 0;
+  .vl-outcome-card.problem .vl-outcome-features li { color: #c2410c; }
+  .vl-outcome-card.solution .vl-outcome-features li { color: #6d28d9; }
+
+  /* ==================== WHAT'S INCLUDED ==================== */
+  .vl-features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 30px;
   }
 
-  .vl-faq-card__a {
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: .9rem;
-    color: #4B4A44;
+  @media (max-width: 640px) {
+    .vl-features-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .vl-feature-card {
+    background: #ffffff;
+    border: 2px solid #f1f5f9;
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: var(--vl-shadow-card);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .vl-feature-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--vl-shadow-hover);
+    border-color: #ddd6fe;
+  }
+
+  .vl-feature-card-img {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    background: #fdf2f8;
+    position: relative;
+  }
+
+  .vl-feature-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  .vl-feature-card:hover .vl-feature-card-img img {
+    transform: scale(1.06);
+  }
+
+  .vl-feature-card-body {
+    padding: 28px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .vl-feature-pill {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 5px 12px;
+    border-radius: 6px;
+    width: fit-content;
+    margin-bottom: 12px;
+  }
+
+  .vl-feature-pill.f1 { background: #ede9fe; color: #6d28d9; }
+  .vl-feature-pill.f2 { background: #fdf2f8; color: #db2777; }
+  .vl-feature-pill.f3 { background: #fff7ed; color: #ea580c; }
+  .vl-feature-pill.f4 { background: #f0fdfa; color: #0d9488; }
+  .vl-feature-pill.f5 { background: #fef3c7; color: #d97706; }
+
+  .vl-feature-card h3 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--vl-heading);
+    margin-bottom: 10px;
+  }
+
+  .vl-feature-card p {
+    color: var(--vl-body);
+    font-size: 0.98rem;
     line-height: 1.65;
+    margin: 0;
+  }
+
+  /* ==================== PRICING PLANS ==================== */
+  .vl-plans-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    align-items: stretch;
+  }
+
+  @media (max-width: 960px) {
+    .vl-plans-grid {
+      grid-template-columns: 1fr;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+  }
+
+  .vl-plan-card {
+    background: #ffffff;
+    border: 2px solid #ede9fe;
+    border-radius: 24px;
+    padding: 40px 32px;
+    box-shadow: var(--vl-shadow-card);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .vl-plan-card:hover {
+    transform: translateY(-7px);
+    box-shadow: var(--vl-shadow-hover);
+  }
+
+  .vl-plan-card.featured {
+    background: linear-gradient(160deg, #4338ca 0%, #6366f1 40%, #a855f7 78%, #ec4899 100%);
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    box-shadow: var(--vl-shadow-featured);
+  }
+
+  .vl-plan-badge-top {
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #fef08a 0%, #facc15 100%);
+    color: #713f12;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 7px 22px;
+    border-radius: 20px;
+    box-shadow: 0 4px 14px rgba(234, 179, 8, 0.45);
+    white-space: nowrap;
+  }
+
+  .vl-plan-tier {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #7c3aed;
+    margin-bottom: 12px;
+  }
+
+  .vl-plan-card.featured .vl-plan-tier { color: #fef08a; }
+
+  .vl-plan-price {
+    font-family: 'Outfit', sans-serif;
+    font-size: 3.2rem;
+    font-weight: 900;
+    color: var(--vl-heading);
+    line-height: 1;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .vl-plan-card.featured .vl-plan-price { color: #ffffff; }
+
+  .vl-plan-price span {
+    font-size: 1.25rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 600;
+    color: var(--vl-muted);
+  }
+
+  .vl-plan-card.featured .vl-plan-price span { color: #f1f5f9; }
+
+  .vl-plan-desc {
+    font-size: 0.92rem;
+    color: var(--vl-muted);
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+
+  .vl-plan-card.featured .vl-plan-desc { color: #e2e8f0; }
+
+  .vl-plan-summary {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--vl-heading);
+    padding-bottom: 22px;
+    margin-bottom: 22px;
+    border-bottom: 1.5px solid #f1f5f9;
+    line-height: 1.55;
+  }
+
+  .vl-plan-card.featured .vl-plan-summary {
+    color: #ffffff;
+    border-bottom: 1.5px solid rgba(255, 255, 255, 0.25);
+  }
+
+  .vl-plan-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 34px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
     flex: 1;
   }
 
-  /* Navigation bar */
+  .vl-plan-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 0.98rem;
+    color: var(--vl-body);
+    font-weight: 600;
+  }
+
+  .vl-plan-card.featured .vl-plan-list li { color: #ffffff; }
+
+  .vl-plan-check-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #ede9fe;
+    color: #7c3aed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 900;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .vl-plan-card.featured .vl-plan-check-icon {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fef08a;
+  }
+
+  .vl-plan-btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 15px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    border-radius: 12px;
+    text-decoration: none;
+    background: #ffffff;
+    color: #6d28d9;
+    border: 2px solid #ddd6fe;
+    transition: all 0.25s ease;
+  }
+
+  .vl-plan-btn-outline:hover {
+    background: #f5f3ff;
+    border-color: #8b5cf6;
+    transform: translateY(-2px);
+  }
+
+  .vl-plan-btn-featured {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 16px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 900;
+    border-radius: 12px;
+    text-decoration: none;
+    background: linear-gradient(135deg, #ffffff 0%, #ffedd5 100%);
+    color: #db2777 !important;
+    border: none;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    transition: all 0.25s ease;
+  }
+
+  .vl-plan-btn-featured:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  }
+
+  /* ==================== LEAD FORM ==================== */
+  .vl-form-panel {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 52px;
+    align-items: center;
+  }
+
+  @media (max-width: 900px) {
+    .vl-form-panel {
+      grid-template-columns: 1fr;
+      gap: 36px;
+    }
+  }
+
+  .vl-checklist-items {
+    margin-top: 30px;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .vl-checklist-items li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    font-size: 1.06rem;
+    color: var(--vl-body);
+    font-weight: 600;
+  }
+
+  .vl-checklist-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #fdf2f8;
+    color: #db2777;
+    border: 1.5px solid #fbcfe8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-weight: 900;
+    font-size: 0.9rem;
+  }
+
+  .vl-form-card {
+    background: #ffffff;
+    border: 2px solid #e0e7ff;
+    border-radius: 26px;
+    padding: 40px;
+    box-shadow: 0 18px 40px rgba(99, 102, 241, 0.12);
+  }
+
+  .vl-form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+
+  @media (max-width: 540px) {
+    .vl-form-grid-2 {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .vl-field {
+    margin-bottom: 18px;
+  }
+
+  .vl-field label {
+    display: block;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--vl-heading);
+    margin-bottom: 6px;
+  }
+
+  .vl-field input,
+  .vl-field textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 0.98rem;
+    font-family: inherit;
+    background: #faf5ff;
+    color: var(--vl-heading);
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+  }
+
+  .vl-field textarea {
+    resize: vertical;
+    min-height: 74px;
+  }
+
+  .vl-field input:focus,
+  .vl-field textarea:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.16);
+  }
+
+  .vl-form-submit-vibrant {
+    width: 100%;
+    background: linear-gradient(135deg, #f97316 0%, #ec4899 50%, #8b5cf6 100%);
+    color: #ffffff;
+    border: none;
+    padding: 17px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(236, 72, 153, 0.4);
+    transition: all 0.25s ease;
+  }
+
+  .vl-form-submit-vibrant:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 32px rgba(236, 72, 153, 0.55);
+  }
+
+  .vl-form-note {
+    font-size: 0.86rem;
+    color: var(--vl-muted);
+    margin-top: 14px;
+    text-align: center;
+    font-weight: 500;
+  }
+
+  .vl-confirm {
+    display: none;
+    background: #fdf2f8;
+    color: #db2777;
+    padding: 32px;
+    border-radius: 18px;
+    border: 2px solid #fbcfe8;
+    text-align: center;
+    box-shadow: var(--vl-shadow-card);
+  }
+
+  .vl-confirm-icon {
+    font-size: 3rem;
+    display: inline-block;
+    margin-bottom: 12px;
+  }
+
+  /* ==================== COMPARISON TABLE ==================== */
+  .vl-table-card {
+    background: #ffffff;
+    border: 2px solid #ede9fe;
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: var(--vl-shadow-card);
+  }
+
+  .vl-table-wrap {
+    overflow-x: auto;
+  }
+
+  .vl-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  .vl-table th {
+    padding: 22px 26px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 900;
+  }
+
+  .vl-table th:first-child {
+    background: #faf5ff;
+    color: #6d28d9;
+    width: 30%;
+  }
+
+  .vl-table th:nth-child(2) {
+    background: #fff7ed;
+    color: #ea580c;
+    width: 35%;
+  }
+
+  .vl-table th:nth-child(3) {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    color: #ffffff;
+    width: 35%;
+  }
+
+  .vl-table td {
+    padding: 20px 26px;
+    border-bottom: 1.5px solid #f1f5f9;
+    font-size: 0.98rem;
+  }
+
+  .vl-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .vl-table td:first-child {
+    font-weight: 700;
+    color: var(--vl-heading);
+    background: #faf5ff;
+  }
+
+  .vl-table td.no {
+    color: #ea580c;
+    background: #fffbf7;
+    font-weight: 600;
+  }
+
+  .vl-table td.yes {
+    color: #6d28d9;
+    font-weight: 800;
+    background: #faf5ff;
+  }
+
+  /* ==================== FAQ CAROUSEL ==================== */
+  .vl-faq-carousel {
+    position: relative;
+  }
+
+  .vl-faq-slide {
+    display: none;
+    animation: vl-fade-in 0.35s ease;
+  }
+
+  .vl-faq-slide.active {
+    display: block;
+  }
+
+  @keyframes vl-fade-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .vl-faq-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 26px;
+  }
+
+  @media (max-width: 920px) {
+    .vl-faq-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .vl-faq-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .vl-faq-card {
+    background: #ffffff;
+    border: 2px solid #ede9fe;
+    border-radius: 20px;
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--vl-shadow-card);
+    transition: all 0.25s ease;
+  }
+
+  .vl-faq-card:hover {
+    border-color: #c084fc;
+    box-shadow: var(--vl-shadow-hover);
+    transform: translateY(-5px);
+  }
+
+  .vl-faq-card__q {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.26rem;
+    font-weight: 800;
+    color: var(--vl-heading);
+    line-height: 1.35;
+    margin-bottom: 14px;
+  }
+
+  .vl-faq-card__divider {
+    width: 40px;
+    height: 4px;
+    background: linear-gradient(90deg, #f97316 0%, #ec4899 100%);
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+
+  .vl-faq-card__a {
+    font-size: 0.96rem;
+    color: var(--vl-body);
+    line-height: 1.68;
+    flex: 1;
+  }
+
+  .vl-faq-card__a ul {
+    padding-left: 18px;
+    margin: 8px 0 0;
+  }
+
+  .vl-faq-card__a li {
+    margin-bottom: 6px;
+  }
+
   .vl-faq-nav {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 16px;
-    margin-top: 32px;
-    padding-top: 24px;
-    border-top: 1px solid var(--vl-hair);
+    gap: 20px;
+    margin-top: 40px;
+    padding-top: 26px;
+    border-top: 2px solid #ede9fe;
   }
 
   .vl-faq-btn {
-    width: 40px; height: 40px;
-    border-radius: 2px;
-    border: 1px solid var(--vl-hair);
-    background: var(--vl-paper);
-    color: var(--vl-navy);
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    border: 2px solid #ddd6fe;
+    background: #ffffff;
+    color: #6d28d9;
     cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: background .2s, border-color .2s, color .2s;
-    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: var(--vl-shadow-card);
   }
-  .vl-faq-btn:hover:not(:disabled) {
-    background: var(--vl-navy);
-    border-color: var(--vl-navy);
-    color: var(--vl-paper);
-  }
-  .vl-faq-btn:disabled { opacity: .3; cursor: not-allowed; }
 
-  .vl-faq-dots { display: flex; gap: 8px; align-items: center; }
-  .vl-faq-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: #C8C4BA;
-    cursor: pointer;
-    transition: background .2s, transform .2s;
-    border: none; padding: 0;
+  .vl-faq-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    border-color: #6366f1;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
   }
+
+  .vl-faq-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .vl-faq-dots {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .vl-faq-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ddd6fe;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    border: none;
+    padding: 0;
+  }
+
   .vl-faq-dot.active {
-    background: var(--vl-navy);
-    transform: scale(1.35);
+    background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+    width: 28px;
+    border-radius: 12px;
   }
 
   .vl-faq-counter {
-    font-size: .8rem;
-    color: #807C70;
-    font-family: 'IBM Plex Sans', sans-serif;
-    letter-spacing: .04em;
-    min-width: 36px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    color: #6d28d9;
+    font-weight: 800;
+    min-width: 50px;
     text-align: center;
   }
-    border-bottom: 1px solid var(--vl-hair);
-    padding: 20px 0;
-  }
-  .vl-summary {
-    font-family: 'Newsreader', serif;
-    font-size: 1.08rem;
-    color: var(--vl-navy);
-    cursor: pointer;
-    list-style: none;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .vl-summary::-webkit-details-marker { display: none; }
-  .vl-summary::after {
-    content: "+";
-    font-size: 1.3rem;
-    color: var(--vl-marigold);
-    font-family: 'IBM Plex Sans', sans-serif;
-  }
-  .vl-details[open] .vl-summary::after { content: "–"; }
-  .vl-details p { margin-top: 14px; color: #4B4A44; max-width: 66ch; }
 
-  /* ---------- Final CTA ---------- */
-  .vl-final-cta {
-    background: var(--vl-navy-deep);
-    color: var(--vl-paper);
-    padding: 70px 0;
-    text-align: left;
+  /* ==================== FINAL CALL TO ACTION ==================== */
+  .vl-final-cta-vibrant {
+    background: linear-gradient(135deg, #4338ca 0%, #7c3aed 38%, #db2777 75%, #f97316 100%);
+    color: #ffffff;
+    padding: 90px 0;
+    position: relative;
+    overflow: hidden;
   }
-  .vl-final-cta h2 {
-    color: var(--vl-paper);
-    font-size: clamp(1.6rem, 3vw, 2.2rem);
-    max-width: 20ch;
+
+  .vl-final-cta-vibrant::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 8%;
+    transform: translateY(-50%);
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(254, 240, 138, 0.35) 0%, transparent 65%);
+    border-radius: 50%;
+    pointer-events: none;
   }
-  .vl-final-cta p {
-    color: #B8B4A6;
-    margin-top: 14px;
+
+  .vl-final-cta-vibrant h2 {
+    color: #ffffff;
+    font-size: clamp(2.3rem, 4.2vw, 3.2rem);
+    max-width: 24ch;
   }
-  .vl-final-cta .vl-hero-ctas { margin-top: 28px; }
+
+  .vl-final-cta-vibrant p {
+    color: #ffffff;
+    margin-top: 18px;
+    font-size: 1.2rem;
+    max-width: 56ch;
+    font-weight: 500;
+  }
 </style>
 @endpush
 
 @section('contents')
 <div class="vidyalab-page">
 
-  <!-- Hero Section -->
-  <section class="vl-hero">
+  <!-- ==================== HERO SECTION ==================== -->
+  <section class="vl-hero-vibrant">
     <div class="vidyalab-wrap vl-hero-grid">
       <div>
-        <h1>The skill lab your NEP&nbsp;2020 review committee will actually approve.</h1>
-        <!-- <p class="lead">Turnkey Robotics, AI, and coding labs built to CBSE specifications — installed, mapped to your syllabus, and staffed with trained teachers before the term starts.</p> -->
-        <div class="vl-hero-ctas">
-          <a href="#book" class="vl-btn-primary">Visit our experience center</a>
-          <a href="#checklist" class="vl-btn-secondary">Download brochure</a>
+        <div class="vl-badge-pill hero">
+          <span>✨</span> NEP 2020 &amp; CBSE COMPLIANT SKILL LABS
         </div>
-        <!-- <div class="vl-stat-strip">
-          <div><span class="num">212</span><span class="label">CBSE schools fitted</span></div>
-          <div><span class="num">18</span><span class="label">states covered</span></div>
-          <div><span class="num">46,000+</span><span class="label">students learning hands-on</span></div>
-        </div> -->
+        
+        <h1>The composite skill lab your <span class="vl-grad-gold">NEP&nbsp;2020 committee</span> will celebrate &amp; approve.</h1>
+        
+        <p class="lead">Turnkey Robotics, AI, and coding labs built to CBSE specifications — completely installed, mapped to your syllabus, and staffed with certified teachers before the academic term starts.</p>
+        
+        <div class="vl-hero-ctas">
+          <a href="#book" class="vl-btn-vibrant-cta">
+            Visit Experience Center
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+          </a>
+          <a href="#checklist" class="vl-btn-glass-cta">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Download CBSE Checklist
+          </a>
+        </div>
+        
+        <div class="vl-hero-stats">
+          <div class="vl-stat-box">
+            <span class="num">212+</span>
+            <span class="label">CBSE Schools Fitted</span>
+          </div>
+          <div class="vl-stat-box">
+            <span class="num">18</span>
+            <span class="label">States Covered</span>
+          </div>
+          <div class="vl-stat-box">
+            <span class="num">46,000+</span>
+            <span class="label">Students Learning</span>
+          </div>
+          <div class="vl-stat-box">
+            <span class="num">100%</span>
+            <span class="label">Syllabus Mapped</span>
+          </div>
+        </div>
       </div>
-      <div class="vl-blueprint">
-        <svg viewBox="0 0 420 320" role="img" aria-label="Floor plan diagram of a skill lab showing robotics, AI, electronics, and coding zones">
-          <rect x="4" y="4" width="412" height="312" fill="none" stroke="#3A4665" stroke-width="1"/>
-          <line x1="4" y1="106" x2="416" y2="106" stroke="#3A4665" stroke-width="1"/>
-          <line x1="4" y1="212" x2="416" y2="212" stroke="#3A4665" stroke-width="1"/>
-          <line x1="210" y1="4" x2="210" y2="316" stroke="#3A4665" stroke-width="1"/>
 
-          <text x="20" y="30" fill="#D98E2B" font-family="IBM Plex Sans" font-size="12" font-weight="600">ROBOTICS BENCH</text>
-          <circle cx="40" cy="66" r="14" fill="none" stroke="#7C87A6"/>
-          <circle cx="80" cy="66" r="14" fill="none" stroke="#7C87A6"/>
-          <circle cx="120" cy="66" r="14" fill="none" stroke="#7C87A6"/>
-          <circle cx="160" cy="66" r="14" fill="none" stroke="#7C87A6"/>
+      <!-- Floor Plan Schematic Card -->
+      <div class="vl-blueprint-glass">
+        <div class="vl-blueprint-head">
+          <div class="vl-blueprint-title">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+            Interactive Floor Plan Blueprint
+          </div>
+          <span class="vl-blueprint-badge">🌸 900 sq ft Standard</span>
+        </div>
 
-          <text x="228" y="30" fill="#D98E2B" font-family="IBM Plex Sans" font-size="12" font-weight="600">AI &amp; DATA STATION</text>
-          <rect x="228" y="46" width="60" height="40" fill="none" stroke="#7C87A6"/>
-          <rect x="300" y="46" width="60" height="40" fill="none" stroke="#7C87A6"/>
+        <div class="vl-blueprint-svg-wrap">
+          <svg viewBox="0 0 420 320" role="img" aria-label="Floor plan diagram of a skill lab showing robotics, AI, electronics, and coding zones">
+            <defs>
+              <pattern id="vibrantGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e9d5ff" stroke-width="1"/>
+              </pattern>
+            </defs>
+            
+            <rect width="420" height="320" fill="url(#vibrantGrid)" />
+            <rect x="4" y="4" width="412" height="312" fill="none" stroke="#c084fc" stroke-width="1.5" stroke-dasharray="4,2"/>
+            <line x1="4" y1="106" x2="416" y2="106" stroke="#c084fc" stroke-width="1"/>
+            <line x1="4" y1="212" x2="416" y2="212" stroke="#c084fc" stroke-width="1"/>
+            <line x1="210" y1="4" x2="210" y2="316" stroke="#c084fc" stroke-width="1"/>
 
-          <text x="20" y="132" fill="#D98E2B" font-family="IBM Plex Sans" font-size="12" font-weight="600">ELECTRONICS LAB</text>
-          <rect x="20" y="148" width="170" height="46" fill="none" stroke="#7C87A6"/>
-          <line x1="63" y1="148" x2="63" y2="194" stroke="#7C87A6"/>
-          <line x1="106" y1="148" x2="106" y2="194" stroke="#7C87A6"/>
-          <line x1="149" y1="148" x2="149" y2="194" stroke="#7C87A6"/>
+            <!-- Robotics Bench -->
+            <rect x="12" y="12" width="186" height="84" rx="6" fill="#fff1f2" stroke="#f43f5e" stroke-width="1.5"/>
+            <text x="22" y="30" fill="#e11d48" font-family="'Outfit', sans-serif" font-size="11" font-weight="800">ROBOTICS &amp; MECHANICS BENCH</text>
+            <circle cx="45" cy="66" r="14" fill="#fecdd3" stroke="#e11d48" stroke-width="1.2"/>
+            <circle cx="85" cy="66" r="14" fill="#fecdd3" stroke="#e11d48" stroke-width="1.2"/>
+            <circle cx="125" cy="66" r="14" fill="#fecdd3" stroke="#e11d48" stroke-width="1.2"/>
+            <circle cx="165" cy="66" r="14" fill="#fecdd3" stroke="#e11d48" stroke-width="1.2"/>
 
-          <text x="228" y="132" fill="#D98E2B" font-family="IBM Plex Sans" font-size="12" font-weight="600">CODING PODS</text>
-          <rect x="228" y="148" width="30" height="30" fill="none" stroke="#7C87A6"/>
-          <rect x="268" y="148" width="30" height="30" fill="none" stroke="#7C87A6"/>
-          <rect x="308" y="148" width="30" height="30" fill="none" stroke="#7C87A6"/>
-          <rect x="348" y="148" width="30" height="30" fill="none" stroke="#7C87A6"/>
+            <!-- AI & Data Station -->
+            <rect x="222" y="12" width="186" height="84" rx="6" fill="#f3e8ff" stroke="#9333ea" stroke-width="1.5"/>
+            <text x="232" y="30" fill="#7e22ce" font-family="'Outfit', sans-serif" font-size="11" font-weight="800">AI &amp; DATA SCIENCE STATION</text>
+            <rect x="236" y="46" width="68" height="38" rx="4" fill="#e9d5ff" stroke="#9333ea" stroke-width="1.2"/>
+            <rect x="326" y="46" width="68" height="38" rx="4" fill="#e9d5ff" stroke="#9333ea" stroke-width="1.2"/>
 
-          <text x="20" y="238" fill="#D98E2B" font-family="IBM Plex Sans" font-size="12" font-weight="600">TEACHER STATION</text>
-          <rect x="20" y="254" width="120" height="36" fill="none" stroke="#7C87A6"/>
+            <!-- Electronics Lab -->
+            <rect x="12" y="118" width="186" height="84" rx="6" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.5"/>
+            <text x="22" y="136" fill="#0f766e" font-family="'Outfit', sans-serif" font-size="11" font-weight="800">ELECTRONICS &amp; IOT LAB</text>
+            <rect x="20" y="148" width="170" height="44" rx="4" fill="#ccfbf1" stroke="#0d9488" stroke-width="1.2"/>
+            <line x1="63" y1="148" x2="63" y2="192" stroke="#0d9488" stroke-width="1"/>
+            <line x1="106" y1="148" x2="106" y2="192" stroke="#0d9488" stroke-width="1"/>
+            <line x1="149" y1="148" x2="149" y2="192" stroke="#0d9488" stroke-width="1"/>
 
-          <text x="228" y="238" fill="#D98E2B" font-family="IBM Plex Sans" font-size="12" font-weight="600">DISPLAY &amp; REVIEW WALL</text>
-          <rect x="228" y="254" width="160" height="36" fill="none" stroke="#7C87A6"/>
-        </svg>
-        <div class="vl-blueprint-cap">A typical 900 sq ft skill lab layout — adapted to your available classroom space.</div>
+            <!-- Coding Pods -->
+            <rect x="222" y="118" width="186" height="84" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.5"/>
+            <text x="232" y="136" fill="#3730a3" font-family="'Outfit', sans-serif" font-size="11" font-weight="800">COMPUTING &amp; CODING PODS</text>
+            <rect x="234" y="150" width="34" height="34" rx="4" fill="#c7d2fe" stroke="#4f46e5" stroke-width="1.2"/>
+            <rect x="278" y="150" width="34" height="34" rx="4" fill="#c7d2fe" stroke="#4f46e5" stroke-width="1.2"/>
+            <rect x="322" y="150" width="34" height="34" rx="4" fill="#c7d2fe" stroke="#4f46e5" stroke-width="1.2"/>
+            <rect x="366" y="150" width="34" height="34" rx="4" fill="#c7d2fe" stroke="#4f46e5" stroke-width="1.2"/>
+
+            <!-- Teacher Station -->
+            <rect x="12" y="224" width="186" height="84" rx="6" fill="#fff7ed" stroke="#f97316" stroke-width="1.5"/>
+            <text x="22" y="242" fill="#c2410c" font-family="'Outfit', sans-serif" font-size="11" font-weight="800">TEACHER COMMAND DESK</text>
+            <rect x="24" y="256" width="130" height="36" rx="4" fill="#ffedd5" stroke="#f97316" stroke-width="1.2"/>
+
+            <!-- Display & Review Wall -->
+            <rect x="222" y="224" width="186" height="84" rx="6" fill="#fefce8" stroke="#eab308" stroke-width="1.5"/>
+            <text x="232" y="242" fill="#a16207" font-family="'Outfit', sans-serif" font-size="11" font-weight="800">INTERACTIVE REVIEW WALL</text>
+            <rect x="234" y="256" width="162" height="36" rx="4" fill="#fef08a" stroke="#eab308" stroke-width="1.2"/>
+          </svg>
+        </div>
+
+        <div class="vl-blueprint-cap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          Tailored to your available classroom space (400 to 1,200 sq ft).
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Outcomes Section -->
-  <section class="vl-section" id="outcomes">
+  <!-- ==================== OUTCOMES / COMPARISON ==================== -->
+  <section class="vl-section bg-soft" id="outcomes">
     <div class="vidyalab-wrap">
       <div class="vl-section-head">
-        <div class="vl-eyebrow-line"></div>
-        <h2>Most skill labs get installed once and inspected forever after.</h2>
-        <p>We've walked into enough school storerooms to know the pattern. Here's the difference between a lab that sits idle and one your students actually use.</p>
+        <div class="vl-eyebrow">
+          <span>★</span> The Real-World Difference
+        </div>
+        <h2>Most skill labs get installed once and <span class="vl-grad-text">inspected forever after.</span></h2>
+        <p>We've walked into dozens of school storerooms to see dusty equipment boxes. Here is the critical difference between a lab that sits idle and one teachers and students love using every single week.</p>
       </div>
-      <div class="vl-split">
-        <div class="problem">
-          <div style="width:100%; aspect-ratio:16/9; border-radius:4px; overflow:hidden; margin-bottom:24px; background:#E8E4DA;">
+
+      <div class="vl-outcomes-grid">
+        <!-- The Problem -->
+        <div class="vl-outcome-card problem">
+          <div class="vl-outcome-img">
             <img
               src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=900&q=80"
-              alt="Unused lab equipment stored in a school cupboard"
-              style="width:100%; height:100%; object-fit:cover; display:block; filter:grayscale(30%);"
+              alt="Unused lab equipment locked in school cupboard"
             />
           </div>
-          <span class="vl-tag warn">What usually happens</span>
-          <h3>A kit arrives, nobody is trained on it</h3>
-          <p>Vendors deliver hardware against a purchase order, run one orientation session, and leave. Six months later the robotics kits are in a cupboard and the "lab" is a line item in the prospectus, not a place students go.</p>
+          <div class="vl-outcome-content">
+            <span class="vl-outcome-tag warn">✕ What Usually Happens</span>
+            <h3>A kit arrives, nobody is certified to run it</h3>
+            <p>Vendors dump hardware against a purchase order, run one hasty orientation, and leave. Six months later the kits are locked in a cupboard and the "lab" is merely a brochure bullet point, not an active learning hub.</p>
+            
+            <ul class="vl-outcome-features">
+              <li>✕ Zero alignment with weekly school timetable</li>
+              <li>✕ Teachers left anxious about operating complex kits</li>
+              <li>✕ Missing replacement parts cause permanent shutdowns</li>
+            </ul>
+          </div>
         </div>
-        <div>
-          <div style="width:100%; aspect-ratio:16/9; border-radius:4px; overflow:hidden; margin-bottom:24px; background:#E8E4DA;">
+
+        <!-- The Solution -->
+        <div class="vl-outcome-card solution">
+          <div class="vl-outcome-img">
             <img
               src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=900&q=80"
-              alt="Students actively working in a composite skill lab"
-              style="width:100%; height:100%; object-fit:cover; display:block;"
+              alt="Students actively engaged in composite skill lab"
             />
           </div>
-          <span class="vl-tag good">What we install instead</span>
-          <h3>A lab mapped to what your teachers already teach</h3>
-          <p>Every module is tied to a CBSE syllabus unit before installation. Teachers are certified to run it independently. We check in every term, not just at handover.</p>
+          <div class="vl-outcome-content">
+            <span class="vl-outcome-tag good">✓ The Skillvation Standard</span>
+            <h3>A complete lab mapped directly to your curriculum</h3>
+            <p>Every single activity is mapped to CBSE syllabus units before installation. Your existing science and computer teachers receive supportive certification, and we perform ongoing term health audits.</p>
+            
+            <ul class="vl-outcome-features">
+              <li>✓ 100% matched to CBSE Grade VI–XII chapters</li>
+              <li>✓ Faculty trained for full operational independence</li>
+              <li>✓ Guaranteed AMC, quick spares &amp; software updates</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Program Section -->
-  <section class="vl-section" id="program" style="background:#EDEADF;">
+  <!-- ==================== WHAT'S INCLUDED ==================== -->
+  <section class="vl-section bg-white" id="program">
     <div class="vidyalab-wrap">
       <div class="vl-section-head">
-        <div class="vl-eyebrow-line"></div>
-        <h2>What's included in the setup</h2>
-        <p>One vendor, one contract, one team accountable for the lab working — not just existing.</p>
+        <div class="vl-eyebrow coral">
+          <span>★</span> Turnkey Implementation
+        </div>
+        <h2>What's included in the <span class="vl-grad-sunset">complete setup</span></h2>
+        <p>One dedicated partner, one transparent contract, and complete accountability for continuous learning.</p>
       </div>
-      <div class="vl-row-list">
 
-        <div class="vl-row-item">
-          <div class="vl-row-img">
-            <img src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=360&q=80"
+      <div class="vl-features-grid">
+        <!-- Feature 1 -->
+        <div class="vl-feature-card">
+          <div class="vl-feature-card-img">
+            <img src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=600&q=80"
                  alt="Robotics kits and hardware workstations" loading="lazy" />
           </div>
-          <div class="vl-row-text">
-            <h3>Lab hardware &amp; workstations</h3>
+          <div class="vl-feature-card-body">
+            <div class="vl-feature-pill f1">Hardware &amp; Furniture</div>
+            <h3>Lab Hardware &amp; Workstations</h3>
+            <p>Robotics kits, AI/data stations, electronics benches, and coding pods ergonomically sized to your classroom footprint.</p>
           </div>
-          <p>Robotics kits, AI/data stations, electronics benches, and coding pods sized to your enrolment and classroom footprint.</p>
         </div>
 
-        <div class="vl-row-item">
-          <div class="vl-row-img">
-            <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=360&q=80"
+        <!-- Feature 2 -->
+        <div class="vl-feature-card">
+          <div class="vl-feature-card-img">
+            <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=600&q=80"
                  alt="Curriculum mapping aligned to CBSE syllabus" loading="lazy" />
           </div>
-          <div class="vl-row-text">
-            <h3>Curriculum mapping</h3>
+          <div class="vl-feature-card-body">
+            <div class="vl-feature-pill f2">Academics &amp; Pedagogy</div>
+            <h3>CBSE Curriculum Mapping</h3>
+            <p>Every project is mapped to specific CBSE syllabus units (Grades VI–XII) so lab sessions reinforce regular classroom theory.</p>
           </div>
-          <p>Every activity is matched to a specific CBSE syllabus unit and grade, so the lab supports what's already being taught — not a separate elective nobody has time for.</p>
         </div>
 
-        <div class="vl-row-item">
-          <div class="vl-row-img">
-            <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=360&q=80"
+        <!-- Feature 3 -->
+        <div class="vl-feature-card">
+          <div class="vl-feature-card-img">
+            <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=600&q=80"
                  alt="Teacher training and certification session" loading="lazy" />
           </div>
-          <div class="vl-row-text">
-            <h3>Teacher training &amp; certification</h3>
+          <div class="vl-feature-card-body">
+            <div class="vl-feature-pill f3">Faculty Empowerment</div>
+            <h3>Teacher Training &amp; Certification</h3>
+            <p>Your existing faculty are empowered and certified to facilitate practical sessions independently with no recurring vendor reliance.</p>
           </div>
-          <p>Your existing science and computer faculty are trained and certified to run sessions independently, with no dependence on our staff after handover.</p>
         </div>
 
-        <div class="vl-row-item">
-          <div class="vl-row-img">
-            <img src="https://images.unsplash.com/photo-1621905251918-48416bd8575a?auto=format&fit=crop&w=360&q=80"
+        <!-- Feature 4 -->
+        <div class="vl-feature-card">
+          <div class="vl-feature-card-img">
+            <img src="https://images.unsplash.com/photo-1621905251918-48416bd8575a?auto=format&fit=crop&w=600&q=80"
                  alt="Annual maintenance and technical support" loading="lazy" />
           </div>
-          <div class="vl-row-text">
-            <h3>Annual maintenance &amp; support</h3>
+          <div class="vl-feature-card-body">
+            <div class="vl-feature-pill f4">Care &amp; Spares</div>
+            <h3>Annual Maintenance &amp; Support</h3>
+            <p>Routine hardware servicing, continuous software updates, replacement spares, and a dedicated support helpline.</p>
           </div>
-          <p>Hardware servicing, software updates, and a direct line to our support team for the life of the contract.</p>
         </div>
 
-        <div class="vl-row-item">
-          <div class="vl-row-img">
+        <!-- Feature 5 -->
+        <div class="vl-feature-card">
+          <div class="vl-feature-card-img">
             <img src="{{ asset('frontend/img/skillbox/compliance_documentation.jpg') }}"
                  alt="CBSE compliance documentation and inspection readiness" loading="lazy" />
           </div>
-          <div class="vl-row-text">
-            <h3>Compliance documentation</h3>
+          <div class="vl-feature-card-body">
+            <div class="vl-feature-pill f5">Regulatory Readiness</div>
+            <h3>Compliance Documentation</h3>
+            <p>Ready-to-present NEP 2020 and CBSE skill-lab audit dossiers prepared for your school inspection committee and trustees.</p>
           </div>
-          <p>NEP 2020 and CBSE skill-lab documentation prepared and ready to hand to your inspection committee.</p>
         </div>
 
       </div>
     </div>
   </section>
 
-  <!-- Subscription Plans Section -->
-  <section class="vl-section" id="plans">
+  <!-- ==================== PRICING PLANS ==================== -->
+  <section class="vl-section bg-peach" id="plans">
     <div class="vidyalab-wrap">
-      <div class="vl-section-head">
-        <div class="vl-eyebrow-line"></div>
-        <h2>Choose the right plan for your school</h2>
-        <p>Every plan includes installation, curriculum mapping, and teacher training. Pick the tier that matches your school's size and ambition.</p>
+      <div class="vl-section-head center">
+        <div class="vl-eyebrow purple">
+          <span>★</span> Transparent Packages
+        </div>
+        <h2>Choose the right lab package for <span class="vl-grad-violet">your campus</span></h2>
+        <p>Every tier includes complete hardware setup, curriculum integration, and teacher certification. Select the plan tailored to your school's size.</p>
       </div>
 
-      <div style="display:grid; grid-template-columns: repeat(3,1fr); gap:0; border:1px solid var(--vl-hair);">
+      <div class="vl-plans-grid">
 
         <!-- Basic Plan -->
-        <div style="padding:36px 32px; border-right:1px solid var(--vl-hair); display:flex; flex-direction:column; gap:0;">
-          <div style="font-size:.8rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#807C70; margin-bottom:14px;">Basic</div>
-          <div style="font-family:'Newsreader',serif; font-size:2.4rem; color:var(--vl-navy); line-height:1; margin-bottom:4px;">₹3 <span style="font-size:1rem; color:#807C70; font-family:'IBM Plex Sans',sans-serif;">Lakh</span></div>
-          <div style="font-size:.85rem; color:#807C70; margin-bottom:24px;">one-time setup</div>
-          <div style="font-size:.95rem; color:var(--vl-navy); font-weight:500; margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid var(--vl-hair);">For schools up to 500 students — single classroom lab, core CBSE compliance ready.</div>
-          <ul style="list-style:none; padding:0; margin:0 0 28px; display:flex; flex-direction:column; gap:12px; flex:1;">
-            @foreach([
-              'Lab hardware for one 400 sq ft room',
-              'Robotics & coding kits (Grades VI–X)',
-            ] as $item)
-            <li style="display:flex; align-items:flex-start; gap:10px; font-size:.9rem; color:#4B4A44;">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0; margin-top:2px;"><circle cx="8" cy="8" r="8" fill="#DEE9E4"/><path d="M5 8l2 2 4-4" stroke="#2F6F62" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              {{ $item }}
+        <div class="vl-plan-card">
+          <div class="vl-plan-tier">Basic Package</div>
+          <div class="vl-plan-price">₹3 <span>Lakh</span></div>
+          <div class="vl-plan-desc">One-time turnkey setup</div>
+          <div class="vl-plan-summary">For schools up to 500 students — single classroom lab, core CBSE compliance ready.</div>
+          
+          <ul class="vl-plan-list">
+            <li>
+              <div class="vl-plan-check-icon">✓</div>
+              <span>Lab hardware for one 400 sq ft room</span>
             </li>
-            @endforeach
+            <li>
+              <div class="vl-plan-check-icon">✓</div>
+              <span>Robotics &amp; coding kits (Grades VI–X)</span>
+            </li>
+            <li>
+              <div class="vl-plan-check-icon">✓</div>
+              <span>Teacher training for 2 faculty members</span>
+            </li>
+            <li>
+              <div class="vl-plan-check-icon">✓</div>
+              <span>CBSE inspection readiness dossier</span>
+            </li>
           </ul>
-          <a href="http://localhost/skillvation.comphp/club-shop/test-skill-1"
-             target="_blank"
-             style="display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--vl-navy); color:var(--vl-navy); padding:13px 20px; font-size:.9rem; font-weight:600; text-decoration:none; border-radius:2px; transition:background .2s; font-family:'IBM Plex Sans',sans-serif;"
-             onmouseover="this.style.background='rgba(23,35,63,.06)'" onmouseout="this.style.background='transparent'">
+          
+          <a href="{{ url('/club-shop/cart/shipping') }}" target="_blank" class="vl-plan-btn-outline">
             View Basic Plan →
           </a>
         </div>
 
-        <!-- Advance Plan -->
-        <div style="padding:36px 32px; border-right:1px solid var(--vl-hair); display:flex; flex-direction:column; gap:0; background:var(--vl-navy); position:relative;">
-          <div style="position:absolute; top:0; left:0; right:0; background:var(--vl-marigold); color:var(--vl-navy-deep); font-size:.75rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; text-align:center; padding:7px;">Most Popular</div>
-          <div style="margin-top:28px; font-size:.8rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#9B9688; margin-bottom:14px;">Advance</div>
-          <div style="font-family:'Newsreader',serif; font-size:2.4rem; color:var(--vl-paper); line-height:1; margin-bottom:4px;">₹6 <span style="font-size:1rem; color:#9B9688; font-family:'IBM Plex Sans',sans-serif;">Lakh</span></div>
-          <div style="font-size:.85rem; color:#9B9688; margin-bottom:24px;">one-time setup</div>
-          <div style="font-size:.95rem; color:#D9D5C8; font-weight:500; margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid rgba(245,242,234,.15);">For schools up to 1,000 students — full composite lab, AI modules, and ongoing curriculum refresh.</div>
-          <ul style="list-style:none; padding:0; margin:0 0 28px; display:flex; flex-direction:column; gap:12px; flex:1;">
-            @foreach([
-              'Everything in Basic',
-              '600 sq ft combined lab layout',
-            ] as $item)
-            <li style="display:flex; align-items:flex-start; gap:10px; font-size:.9rem; color:#D9D5C8;">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0; margin-top:2px;"><circle cx="8" cy="8" r="8" fill="rgba(217,142,43,.25)"/><path d="M5 8l2 2 4-4" stroke="#D98E2B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              {{ $item }}
+        <!-- Advance Plan (Featured) -->
+        <div class="vl-plan-card featured">
+          <div class="vl-plan-badge-top">★ Most Popular Choice</div>
+          <div class="vl-plan-tier">Advance Package</div>
+          <div class="vl-plan-price">₹6 <span>Lakh</span></div>
+          <div class="vl-plan-desc">One-time turnkey setup</div>
+          <div class="vl-plan-summary">For schools up to 1,000 students — full composite lab with AI modules &amp; ongoing curriculum refresh.</div>
+          
+          <ul class="vl-plan-list">
+            <li>
+              <div class="vl-plan-check-icon">✓</div>
+              <span>Everything included in Basic</span>
             </li>
-            @endforeach
+            <li>
+              <div class="vl-plan-check-icon">✓</div>
+              <span>600 sq ft expanded composite layout</span>
+            </li>
+            <li>
+              <div class="vl-plan-check-icon">✓</div>
+              <span>Dedicated AI, IoT &amp; Electronics stations</span>
+            </li>
+            <li>
+              <div class="vl-plan-check-icon">✓</div>
+              <span>Full certification for up to 5 teachers</span>
+            </li>
+            <li>
+              <div class="vl-plan-check-icon">✓</div>
+              <span>Quarterly on-site faculty refresher sessions</span>
+            </li>
           </ul>
-          <a href="#"
-          target="_blank"
-             style="display:inline-flex; align-items:center; justify-content:center; background:var(--vl-marigold); color:var(--vl-navy-deep); padding:13px 20px; font-size:.9rem; font-weight:600; text-decoration:none; border-radius:2px; transition:background .2s; font-family:'IBM Plex Sans',sans-serif; border:none;"
-             onmouseover="this.style.background='#F0A643'" onmouseout="this.style.background='var(--vl-marigold)'">
-            View Advance Plan →
+          
+          <a href="#checklist" class="vl-plan-btn-featured">
+            Get Advance Plan Quote →
           </a>
         </div>
 
         <!-- Premium Plan -->
-        <div style="padding:36px 32px; display:flex; flex-direction:column; gap:0;">
-          <div style="font-size:.8rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#807C70; margin-bottom:14px;">Premium</div>
-          <div style="font-family:'Newsreader',serif; font-size:2.4rem; color:var(--vl-navy); line-height:1; margin-bottom:4px;">₹10 <span style="font-size:1rem; color:#807C70; font-family:'IBM Plex Sans',sans-serif;">Lakh</span></div>
-          <div style="font-size:.85rem; color:#807C70; margin-bottom:24px;">one-time setup</div>
-          <div style="font-size:.95rem; color:var(--vl-navy); font-weight:500; margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid var(--vl-hair);">For large schools and groups — dual-room composite lab, full digital infrastructure, and dedicated support.</div>
-          <ul style="list-style:none; padding:0; margin:0 0 28px; display:flex; flex-direction:column; gap:12px; flex:1;">
-            @foreach([
-              'Everything in Advance',
-              'Two separate labs (400 sq ft each)',
-            ] as $item)
-            <li style="display:flex; align-items:flex-start; gap:10px; font-size:.9rem; color:#4B4A44;">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0; margin-top:2px;"><circle cx="8" cy="8" r="8" fill="#DEE9E4"/><path d="M5 8l2 2 4-4" stroke="#2F6F62" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              {{ $item }}
+        <div class="vl-plan-card">
+          <div class="vl-plan-tier">Premium Package</div>
+          <div class="vl-plan-price">₹10 <span>Lakh</span></div>
+          <div class="vl-plan-desc">One-time turnkey setup</div>
+          <div class="vl-plan-summary">For large institutions &amp; group schools — dual lab setup, digital infrastructure &amp; priority support.</div>
+          
+          <ul class="vl-plan-list">
+            <li>
+              <div class="vl-plan-check-icon">✓</div>
+              <span>Everything included in Advance</span>
             </li>
-            @endforeach
+            <li>
+              <div class="vl-plan-check-icon">✓</div>
+              <span>Two separate labs (400 sq ft each)</span>
+            </li>
+            <li>
+              <div class="vl-plan-check-icon">✓</div>
+              <span>High-grade 3D printers, drones &amp; robotics</span>
+            </li>
+            <li>
+              <div class="vl-plan-check-icon">✓</div>
+              <span>Dedicated relationship manager &amp; quick spares</span>
+            </li>
           </ul>
-          <a href="#"
-             target="_blank"
-             style="display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--vl-navy); color:var(--vl-navy); padding:13px 20px; font-size:.9rem; font-weight:600; text-decoration:none; border-radius:2px; transition:background .2s; font-family:'IBM Plex Sans',sans-serif;"
-             onmouseover="this.style.background='rgba(23,35,63,.06)'" onmouseout="this.style.background='transparent'">
-            View Premium Plan →
+          
+          <a href="#checklist" class="vl-plan-btn-outline">
+            Request Premium Plan →
           </a>
         </div>
 
       </div>
 
-      {{-- Responsive mobile stack --}}
-      <style>
-        @media (max-width: 740px) {
-          #plans > .vidyalab-wrap > div[style*="grid-template-columns"] {
-            grid-template-columns: 1fr !important;
-          }
-          #plans > .vidyalab-wrap > div[style*="grid-template-columns"] > div {
-            border-right: none !important;
-            border-bottom: 1px solid var(--vl-hair);
-          }
-          #plans > .vidyalab-wrap > div[style*="grid-template-columns"] > div:last-child {
-            border-bottom: none;
-          }
-        }
-      </style>
-
-      <p style="margin-top:20px; font-size:.82rem; color:#807C70; text-align:center;">
-        All prices are indicative. Final quote provided after a free site assessment. &nbsp;·&nbsp;
-        <a href="#checklist" style="color:var(--vl-marigold); text-decoration:none;">Contact us</a> for multi-school or trust pricing.
+      <p style="margin-top:30px; font-size:0.92rem; color:var(--vl-muted); text-align:center; font-weight:500;">
+        All package prices are indicative. Exact proposal provided after a free spatial assessment. &nbsp;·&nbsp;
+        <a href="#checklist" style="color:#db2777; font-weight:800; text-decoration:underline;">Contact our advisors</a> for trust &amp; multi-branch concessions.
       </p>
     </div>
   </section>
 
-  <!-- Testimonial Section -->
-  <!-- <section class="vl-testimonial">
-    <div class="vidyalab-wrap">
-      <blockquote>"Our last STEM kit sat in a storeroom for two years. This one has a timetable slot every week, and our own teachers run it without calling anyone for help."</blockquote>
-      <cite>— Principal, Sacred Heart CBSE Sr. Sec. School, Coimbatore</cite>
-    </div>
-  </section> -->
-
-  <!-- Checklist / Lead Form Section -->
-  <section class="vl-section" id="checklist">
+  <!-- ==================== LEAD FORM ==================== -->
+  <section class="vl-section bg-mint" id="checklist">
     <div class="vidyalab-wrap vl-form-panel">
       <div class="vl-form-copy">
-        <div class="vl-eyebrow-line"></div>
-        <h2>Get the CBSE Skill Lab Compliance Checklist 2026</h2>
-        <p style="margin-top:14px; color:#4B4A44;">A working document you can hand to your inspection committee or trustees — before you talk to any vendor, including us.</p>
-        <ul>
-          <li>What CBSE and NEP 2020 actually require of a skill lab</li>
-          <li>Space, wiring, and safety specifications</li>
-          <li>Questions to ask any vendor before signing</li>
-          <li>A budget range by school size</li>
+        <div class="vl-eyebrow teal">
+          <span>★</span> Free Compliance Guide
+        </div>
+        <h2>Get the CBSE Skill Lab <span class="vl-grad-sunset">Compliance Checklist 2026</span></h2>
+        <p style="margin-top:14px; color:var(--vl-body); font-size:1.08rem;">A comprehensive handbook you can hand directly to your inspection committee or trustees — before making any vendor commitments.</p>
+        
+        <ul class="vl-checklist-items">
+          <li>
+            <div class="vl-checklist-badge">✓</div>
+            <span>Exact CBSE &amp; NEP 2020 regulatory compliance criteria</span>
+          </li>
+          <li>
+            <div class="vl-checklist-badge">✓</div>
+            <span>Floor space, electrical safety &amp; student seating benchmarks</span>
+          </li>
+          <li>
+            <div class="vl-checklist-badge">✓</div>
+            <span>Key questions to evaluate any equipment supplier</span>
+          </li>
+          <li>
+            <div class="vl-checklist-badge">✓</div>
+            <span>Budget estimators mapped by student batch size</span>
+          </li>
         </ul>
       </div>
-      <form class="vl-form" id="leadForm">
-        <input type="hidden" name="course_title" value="CBSE Composite Skill Lab – Checklist Enquiry">
-        <input type="hidden" name="source" value="composite-skill-lab">
-        <div class="vl-field">
-          <label for="lead_name">Your name</label>
-          <input id="lead_name" name="name" type="text" required>
-        </div>
-        <div class="vl-field">
-          <label for="lead_designation">Designation</label>
-          <input id="lead_designation" name="designation" type="text" required>
-        </div>
-        <div class="vl-field">
-          <label for="lead_school">School name</label>
-          <input id="lead_school" name="school" type="text" required>
-        </div>
-        <div class="vl-field">
-          <label for="lead_city">City</label>
-          <input id="lead_city" name="city" type="text" required>
-        </div>
-        <div class="vl-field">
-          <label for="lead_address">Address</label>
-          <textarea id="lead_address" name="address"></textarea>
-        </div>
-        <div class="vl-field">
-          <label for="lead_phone">Phone number</label>
-          <input id="lead_phone" name="phone" type="tel" required>
-        </div>
-        <div class="vl-field">
-          <label for="lead_email">Email address</label>
-          <input id="lead_email" name="email" type="email" required>
-        </div>
-        <button type="submit" id="leadSubmitBtn" class="vl-form-submit">Send me the checklist</button>
-        <div class="vl-form-note">We'll also follow up once by phone. No spam, no mailing list.</div>
-      </form>
 
-      {{-- Success message outside form so it stays visible when form hides --}}
-      <div class="vl-confirm" id="confirmMsg">
-        <span class="vl-confirm-icon">✓</span>
-        Thanks — your details have been received.<br>
-        <span style="font-weight:400; font-size:.9rem; color:#4B4A44;">The checklist is on its way to your email. We'll follow up within one working day.</span>
+      <div class="vl-form-card">
+        <form class="vl-form" id="leadForm">
+          <input type="hidden" name="course_title" value="CBSE Composite Skill Lab – Checklist Enquiry">
+          <input type="hidden" name="source" value="composite-skill-lab">
+          
+          <div class="vl-form-grid-2">
+            <div class="vl-field">
+              <label for="lead_name">Your full name</label>
+              <input id="lead_name" name="name" type="text" placeholder="e.g. Dr. Sunita Rao" required>
+            </div>
+            <div class="vl-field">
+              <label for="lead_designation">Designation</label>
+              <input id="lead_designation" name="designation" type="text" placeholder="e.g. Principal / Academic Director" required>
+            </div>
+          </div>
+
+          <div class="vl-form-grid-2">
+            <div class="vl-field">
+              <label for="lead_school">School name</label>
+              <input id="lead_school" name="school" type="text" placeholder="e.g. Blossom International School" required>
+            </div>
+            <div class="vl-field">
+              <label for="lead_city">City</label>
+              <input id="lead_city" name="city" type="text" placeholder="e.g. Bengaluru / Pune" required>
+            </div>
+          </div>
+
+          <div class="vl-form-grid-2">
+            <div class="vl-field">
+              <label for="lead_phone">Phone number</label>
+              <input id="lead_phone" name="phone" type="tel" placeholder="e.g. +91 98765 43210" required>
+            </div>
+            <div class="vl-field">
+              <label for="lead_email">Email address</label>
+              <input id="lead_email" name="email" type="email" placeholder="e.g. principal@school.edu.in" required>
+            </div>
+          </div>
+
+          <div class="vl-field">
+            <label for="lead_address">School campus address (Optional)</label>
+            <textarea id="lead_address" name="address" placeholder="Campus location, road or landmark"></textarea>
+          </div>
+
+          <button type="submit" id="leadSubmitBtn" class="vl-form-submit-vibrant">
+            Send me the compliance checklist
+          </button>
+          
+          <div class="vl-form-note">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" style="display:inline; vertical-align:-2px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            Your information is confidential. No unsolicited spam.
+          </div>
+        </form>
+
+        <div class="vl-confirm" id="confirmMsg">
+          <span class="vl-confirm-icon">🎉</span>
+          <h3 style="font-size:1.4rem; margin-bottom:8px; color:#db2777;">Details received successfully!</h3>
+          <p style="margin:0; font-size:0.98rem; color:var(--vl-body);">The checklist PDF has been sent to your email. Our academic coordinator will reach out shortly to support you.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Compliance Comparison Section -->
-  <section class="vl-section" id="compliance" style="background:#EDEADF;">
+  <!-- ==================== COMPARISON TABLE ==================== -->
+  <section class="vl-section bg-white" id="compliance">
     <div class="vidyalab-wrap">
-      <div class="vl-section-head">
-        <div class="vl-eyebrow-line"></div>
-        <h2>How this compares to a generic setup</h2>
+      <div class="vl-section-head center">
+        <div class="vl-eyebrow purple">
+          <span>★</span> Benchmark Comparison
+        </div>
+        <h2>How Skillvation compares to <span class="vl-grad-text">generic suppliers</span></h2>
+        <p>Why leading CBSE schools trust Skillvation for end-to-end skill lab implementation.</p>
       </div>
-      <div class="vl-table-wrap">
-        <table class="vl-table">
-          <thead>
-            <tr>
-              <th>&nbsp;</th>
-              <th>Generic / DIY vendor</th>
-              <th>Skillvation</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Curriculum alignment</td>
-              <td class="no">Left to your teachers</td>
-              <td class="yes">Mapped before installation</td>
-            </tr>
-            <tr>
-              <td>Installation time</td>
-              <td class="no">8–14 weeks, variable</td>
-              <td class="yes">4–6 weeks, fixed schedule</td>
-            </tr>
-            <tr>
-              <td>Teacher training</td>
-              <td class="no">One orientation session</td>
-              <td class="yes">Full certification, ongoing refreshers</td>
-            </tr>
-            <tr>
-              <td>Maintenance &amp; support</td>
-              <td class="no">Case by case, extra cost</td>
-              <td class="yes">Included for contract term</td>
-            </tr>
-            <tr>
-              <td>Compliance documentation</td>
-              <td class="no">Not provided</td>
-              <td class="yes">Prepared and handed over</td>
-            </tr>
-            <tr>
-              <td>Pricing</td>
-              <td class="no">Itemised, often revised upward</td>
-              <td class="yes">Fixed quote before you sign</td>
-            </tr>
-          </tbody>
-        </table>
+
+      <div class="vl-table-card">
+        <div class="vl-table-wrap">
+          <table class="vl-table">
+            <thead>
+              <tr>
+                <th>Key Criterion</th>
+                <th>Generic / DIY Vendor</th>
+                <th>Skillvation Complete Solution</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Curriculum Alignment</td>
+                <td class="no">✕ Left entirely to teachers</td>
+                <td class="yes">✓ Pre-mapped to CBSE syllabus units</td>
+              </tr>
+              <tr>
+                <td>Deployment Timeline</td>
+                <td class="no">✕ 8–14 weeks, unpredictable</td>
+                <td class="yes">✓ 4–6 weeks guaranteed fixed timeline</td>
+              </tr>
+              <tr>
+                <td>Teacher Certification</td>
+                <td class="no">✕ 1 brief handover demo</td>
+                <td class="yes">✓ Multi-day certification + term refreshers</td>
+              </tr>
+              <tr>
+                <td>Maintenance &amp; Spares</td>
+                <td class="no">✕ High cost per visit, slow spares</td>
+                <td class="yes">✓ Included AMC + express replacement parts</td>
+              </tr>
+              <tr>
+                <td>Compliance Dossier</td>
+                <td class="no">✕ Not provided</td>
+                <td class="yes">✓ Full NEP 2020 inspection documentation</td>
+              </tr>
+              <tr>
+                <td>Price Transparency</td>
+                <td class="no">✕ Hidden hardware &amp; software surcharges</td>
+                <td class="yes">✓ Transparent all-inclusive turnkey quote</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- FAQ Section -->
-  <section class="vl-section" id="faq" style="background:#EDEADF;">
+  <!-- ==================== FAQ CAROUSEL SECTION ==================== -->
+  <section class="vl-section bg-lavender" id="faq">
     <div class="vidyalab-wrap">
-      <div class="vl-section-head">
-        <div class="vl-eyebrow-line"></div>
-        <h2>Questions school owners usually ask</h2>
-        <p>Everything you need to know before signing anything.</p>
+      <div class="vl-section-head center">
+        <div class="vl-eyebrow">
+          <span>★</span> Frequently Asked Questions
+        </div>
+        <h2>Questions school management <span class="vl-grad-sunset">usually ask</span></h2>
+        <p>Everything you need to know about setup, CBSE affiliation guidelines, and ongoing lab operations.</p>
       </div>
 
       {{-- ── FAQ Card Carousel ────────────────────────────────── --}}
       <div class="vl-faq-carousel" id="faqCarousel">
 
-        {{-- Slide 1 — cards 1, 2, 3 --}}
+        {{-- Slide 1 --}}
         <div class="vl-faq-slide active">
           <div class="vl-faq-grid">
 
             <div class="vl-faq-card">
               <div class="vl-faq-card__q">What is a Composite Skill Lab?</div>
               <div class="vl-faq-card__divider"></div>
-              <div class="vl-faq-card__a">A Composite Skill Lab is a hands-on learning space where students learn practical skills through projects, activities, experiments and real-life applications.</div>
+              <div class="vl-faq-card__a">A Composite Skill Lab is an experiential multidisciplinary learning space where students gain hands-on proficiency in Robotics, Coding, AI, Electronics, and Design Thinking through structured curriculum projects.</div>
             </div>
 
             <div class="vl-faq-card">
-              <div class="vl-faq-card__q">Is a Composite Skill Lab required for CBSE schools?</div>
+              <div class="vl-faq-card__q">Is it mandatory for CBSE affiliated schools?</div>
               <div class="vl-faq-card__divider"></div>
-              <div class="vl-faq-card__a">CBSE has provided guidelines for establishing Composite Skill Labs to support experiential Skill Education. Skillvation helps schools set up labs aligned with these guidelines.</div>
+              <div class="vl-faq-card__a">CBSE and NEP 2020 guidelines strongly emphasize setting up Composite Skill Labs for 21st-century skill education. Skillvation ensures your lab satisfies all affiliation inspection norms.</div>
             </div>
 
             <div class="vl-faq-card">
-              <div class="vl-faq-card__q">What lab options does Skillvation offer?</div>
+              <div class="vl-faq-card__q">What lab tiers does Skillvation offer?</div>
               <div class="vl-faq-card__divider"></div>
               <div class="vl-faq-card__a">
                 <ul>
-                  <li>Standard – Essential infrastructure, furniture, tools and materials.</li>
-                  <li>Advanced – Standard package with additional equipment, tools and project resources</li>
-                  <li>Premium – Comprehensive lab with advanced equipment, extensive project kits and enhanced learning resources.</li>
+                  <li><strong>Basic:</strong> Core infrastructure, robotics &amp; coding tools.</li>
+                  <li><strong>Advance:</strong> Expanded composite layout with AI &amp; IoT stations.</li>
+                  <li><strong>Premium:</strong> Dual labs with advanced robotics, 3D printing &amp; dedicated support.</li>
                 </ul>
               </div>
             </div>
@@ -967,108 +1805,122 @@
           </div>
         </div>
 
-        {{-- Slide 2 — cards 4, 5, 6 --}}
+        {{-- Slide 2 --}}
         <div class="vl-faq-slide">
           <div class="vl-faq-grid">
 
             <div class="vl-faq-card">
-              <div class="vl-faq-card__q">How do I choose the right lab?</div>
+              <div class="vl-faq-card__q">How do we select the right package for our campus?</div>
               <div class="vl-faq-card__divider"></div>
-              <div class="vl-faq-card__a">The right package depends on your school's budget, student strength, available space and learning requirements. Our team can help you select the most suitable option.</div>
+              <div class="vl-faq-card__a">The package depends on your student strength, room dimensions, budget, and timetable structure. Our academic advisors offer a free on-site spatial survey to guide your selection.</div>
             </div>
 
             <div class="vl-faq-card">
-              <div class="vl-faq-card__q">Can the lab be customised?</div>
+              <div class="vl-faq-card__q">Can the lab layout and equipment be customized?</div>
               <div class="vl-faq-card__divider"></div>
-              <div class="vl-faq-card__a">Yes. We can customise the lab based on your space, student strength, selected skill areas and existing infrastructure.</div>
+              <div class="vl-faq-card__a">Yes, absolutely. We customize furniture layout, computer stations, safety provisions, and project kit quantities according to your exact room size and student batch counts.</div>
             </div>
 
             <div class="vl-faq-card">
-              <div class="vl-faq-card__q">What does Skillvation provide?</div>
+              <div class="vl-faq-card__q">What deliverables are provided in the kit?</div>
               <div class="vl-faq-card__divider"></div>
-              <div class="vl-faq-card__a">Our solutions can include furniture, tools, equipment, safety resources, consumables, teacher demonstration kits, student project kits and learning materials.</div>
+              <div class="vl-faq-card__a">We supply student DIY project kits, demonstration hardware, teacher manuals, safety gear, software licenses, student workbooks, and digital curriculum portals.</div>
             </div>
 
           </div>
         </div>
 
-        {{-- Slide 3 — cards 7, 8, 9 --}}
+        {{-- Slide 3 --}}
         <div class="vl-faq-slide">
           <div class="vl-faq-grid">
 
             <div class="vl-faq-card">
-              <div class="vl-faq-card__q">Do you provide student project kits?</div>
+              <div class="vl-faq-card__q">Are student DIY project kits provided?</div>
               <div class="vl-faq-card__divider"></div>
-              <div class="vl-faq-card__a">Yes. We provide ready-to-use DIY project kits with materials and easy-to-follow instructions for hands-on activities.</div>
+              <div class="vl-faq-card__a">Yes. We supply modular, reusable STEM &amp; robotics kits with step-by-step guides so students can build tangible working models across physics, computing, and mechanics.</div>
             </div>
 
             <div class="vl-faq-card">
-              <div class="vl-faq-card__q">Do you provide teacher training?</div>
+              <div class="vl-faq-card__q">How is teacher training conducted?</div>
               <div class="vl-faq-card__divider"></div>
-              <div class="vl-faq-card__a">Yes. Teacher orientation and training can be provided to help teachers effectively use the lab and conduct practical activities.</div>
+              <div class="vl-faq-card__a">We conduct an intensive 3 to 5-day on-site training certification for your science and computer faculty, backed by video tutorials, lesson plans, and scheduled term refreshers.</div>
             </div>
 
             <div class="vl-faq-card">
-              <div class="vl-faq-card__q">Can we upgrade the lab later?</div>
+              <div class="vl-faq-card__q">Can we upgrade our tier in future years?</div>
               <div class="vl-faq-card__divider"></div>
-              <div class="vl-faq-card__a">Yes. Our modular approach allows schools to start with Standard and upgrade to Advanced or Premium as their requirements grow.</div>
+              <div class="vl-faq-card__a">Yes. Our modular design allows you to start with the Basic package and seamlessly expand with AI stations, 3D printers, or additional robotics pods as student enrolment increases.</div>
             </div>
 
           </div>
         </div>
 
-        {{-- Slide 4 — cards 10, 11 --}}
+        {{-- Slide 4 --}}
         <div class="vl-faq-slide">
           <div class="vl-faq-grid">
 
             <div class="vl-faq-card">
-              <div class="vl-faq-card__q">What happens after installation — are we on our own?</div>
+              <div class="vl-faq-card__q">What happens after installation — are we supported?</div>
               <div class="vl-faq-card__divider"></div>
-              <div class="vl-faq-card__a">No. Annual maintenance, software updates, and a direct support line are included for the contract term, and we check in with your faculty every term.</div>
+              <div class="vl-faq-card__a">No school is left on their own. Annual preventive maintenance, software patches, fast spare parts replacement, and ongoing pedagogy support are bundled for the full agreement period.</div>
             </div>
 
             <div class="vl-faq-card">
-              <div class="vl-faq-card__q">Why choose Skillvation?</div>
+              <div class="vl-faq-card__q">Why choose Skillvation over open-market vendors?</div>
               <div class="vl-faq-card__divider"></div>
-              <div class="vl-faq-card__a">Skillvation provides more than a physical lab. We bring together Infrastructure + Equipment + Project Kits + Teacher Support + Experiential Learning to create a complete skill-learning environment.</div>
+              <div class="vl-faq-card__a">Skillvation combines Infrastructure + Certified Pedagogy + CBSE Syllabus Integration + Teacher Enablement into one unified, guaranteed ecosystem.</div>
+            </div>
+
+            <div class="vl-faq-card">
+              <div class="vl-faq-card__q">How quickly can the lab be installed and ready?</div>
+              <div class="vl-faq-card__divider"></div>
+              <div class="vl-faq-card__a">Our turnkey rollout takes between 4 to 6 weeks from agreement signing to complete teacher handover, ensuring zero disruption to your school term.</div>
             </div>
 
           </div>
         </div>
 
-
-        {{-- Navigation --}}
+        {{-- Navigation Controls --}}
         <div class="vl-faq-nav">
           <button class="vl-faq-btn" id="faqPrev" aria-label="Previous questions" disabled>
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M11 13L7 9l4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
           </button>
+          
           <div class="vl-faq-dots" id="faqDots">
             <button class="vl-faq-dot active" data-slide="0" aria-label="Slide 1"></button>
             <button class="vl-faq-dot" data-slide="1" aria-label="Slide 2"></button>
             <button class="vl-faq-dot" data-slide="2" aria-label="Slide 3"></button>
             <button class="vl-faq-dot" data-slide="3" aria-label="Slide 4"></button>
           </div>
+          
           <span class="vl-faq-counter" id="faqCounter">1 / 4</span>
+          
           <button class="vl-faq-btn" id="faqNext" aria-label="Next questions">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 5l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
         </div>
 
       </div>
-      {{-- ── End FAQ Card Carousel ────────────────────────────── --}}
-
     </div>
   </section>
 
-  <!-- Final CTA Section -->
-  <section class="vl-final-cta" id="book">
+  <!-- ==================== FINAL CALL TO ACTION ==================== -->
+  <section class="vl-final-cta-vibrant" id="book">
     <div class="vidyalab-wrap">
-      <h2>Ready to see what a working lab looks like at your school?</h2>
-      <p>A 15-minute call with our education consultant — no obligation, no sales pitch, just a straight answer on fit and cost.</p>
-      <div class="vl-hero-ctas">
-        <a href="#checklist" class="vl-btn-primary">Visit our experience center</a>
+      <div class="vl-badge-pill hero" style="margin-bottom:18px;">READY TO GET STARTED?</div>
+      <h2>Ready to experience a vibrant skill lab at your school?</h2>
+      <p>Schedule a friendly 15-minute consultation with our academic specialists — transparent advice on room setup, curriculum mapping, and turnkey costs.</p>
+      
+      <div class="vl-hero-ctas" style="margin-top:34px;">
+        <a href="#checklist" class="vl-btn-vibrant-cta">
+          Schedule School Consultation
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+        </a>
       </div>
-      <p style="margin-top:18px; font-size:0.85rem; color:#9B9688;">We respond within one working day.</p>
+      
+      <p style="margin-top:22px; font-size:1rem; color:#fef08a; font-weight:700;">
+        ✨ Direct callback within 1 working day &nbsp;·&nbsp; 🌸 Free on-campus spatial assessment
+      </p>
     </div>
   </section>
 
@@ -1089,28 +1941,34 @@
     let current    = 0;
 
     function goTo(idx) {
+      if (idx < 0 || idx >= total) return;
+      
       slides[current].classList.remove('active');
       dots[current].classList.remove('active');
 
-      current = (idx + total) % total;
+      current = idx;
 
       slides[current].classList.add('active');
       dots[current].classList.add('active');
 
       if (counter) counter.textContent = (current + 1) + ' / ' + total;
-      prevBtn.disabled = current === 0;
-      nextBtn.disabled = current === total - 1;
+      if (prevBtn) prevBtn.disabled = current === 0;
+      if (nextBtn) nextBtn.disabled = current === total - 1;
     }
 
-    // init state
-    if (prevBtn) prevBtn.disabled = true;
-    if (nextBtn) nextBtn.disabled = total <= 1;
-
-    if (prevBtn) prevBtn.addEventListener('click', () => goTo(current - 1));
-    if (nextBtn) nextBtn.addEventListener('click', () => goTo(current + 1));
+    if (prevBtn) {
+      prevBtn.disabled = true;
+      prevBtn.addEventListener('click', () => goTo(current - 1));
+    }
+    
+    if (nextBtn) {
+      nextBtn.disabled = total <= 1;
+      nextBtn.addEventListener('click', () => goTo(current + 1));
+    }
+    
     dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
 
-    // ── Lead Form ─────────────────────────────────────────────
+    // ── Lead Form Ajax Submission ─────────────────────────────
     const leadForm = document.getElementById('leadForm');
     if (leadForm) {
       leadForm.addEventListener('submit', function (e) {
@@ -1121,7 +1979,8 @@
         const formData   = new FormData(this);
 
         btn.disabled    = true;
-        btn.textContent = 'Sending…';
+        const originalText = btn.textContent;
+        btn.textContent = 'Submitting…';
 
         fetch('{{ route("course.enquiry.store") }}', {
           method: 'POST',
@@ -1150,7 +2009,7 @@
         })
         .finally(() => {
           btn.disabled    = false;
-          btn.textContent = 'Send me the checklist';
+          btn.textContent = originalText;
         });
       });
     }
