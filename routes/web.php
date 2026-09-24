@@ -86,9 +86,9 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
         return view('frontend.home-four.pages.lab-composite-skill');
     })->name('labs.composite-skill');
 
-    Route::get('/labs/composite-skill-10', function () {
-        return view('frontend.home-four.pages.lab-composite-skill-10');
-    })->name('labs.composite-skill-10');
+    Route::get('/labs/composite-skill-details', function () {
+        return view('frontend.home-four.pages.lab-composite-skill-details');
+    })->name('labs.composite-skill-details');
 
     Route::get('/ttt', function () {
         return view('frontend.home-four.pages.ttt');
