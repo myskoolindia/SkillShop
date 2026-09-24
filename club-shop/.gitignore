@@ -7,6 +7,7 @@
 # === Environment ===
 .env
 .env.*
+.htaccess
 
 # CodeIgniter database config (contains secrets)
 app/Config/Database.php

@@ -53,6 +53,7 @@ auth.json
 # CodeIgniter 4 (club-shop)
 club-shop/.env
 club-shop/.env.*
+club-shop/.htaccess
 club-shop/app/Config/Database.php
 club-shop/writable/cache/*
 !club-shop/writable/cache/index.html
