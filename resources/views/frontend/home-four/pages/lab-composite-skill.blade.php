@@ -1528,7 +1528,7 @@
             </li>
           </ul>
           
-          <a href="{{ url('/club-shop/cart/shipping') }}" target="_blank" class="vl-plan-btn-outline">
+          <a href="{{ url('/labs/composite-skill-details') }}" target="_blank" class="vl-plan-btn-outline">
             View Basic Plan →
           </a>
         </div>
