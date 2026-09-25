@@ -502,9 +502,9 @@
   <!-- ── Top Featured Banner (Full Width Screen Edge-to-Edge) ──────────────────────── -->
   <div class="w-full overflow-hidden mb-8">
     <img
-      src="{{ asset('frontend/img/skillbox/skillbox_banner.png') }}"
+      src="{{ asset('frontend/img/skillbox/preschool.jpg') }}"
       alt="SkillBox Hands-on Learning Kit"
-      class="w-full h-auto max-h-[560px] object-cover block shadow-sm"
+      class="w-full h-auto max-h-[460px] object-cover block shadow-sm"
       onerror="this.onerror=null;this.src='https://pedaskills.com/static/media/skillBoxImg.54ef565f4b0836600035.png';"
     />
   </div>

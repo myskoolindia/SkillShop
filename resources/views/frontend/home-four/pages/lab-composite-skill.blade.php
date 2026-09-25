@@ -140,7 +140,7 @@
     background: linear-gradient(135deg, #ffffff 0%, #ffedd5 100%);
     color: #db2777 !important;
     border: none;
-    padding: 16px 32px;
+    padding: 16px 20px;
     font-family: 'Outfit', sans-serif;
     font-size: 1.05rem;
     font-weight: 800;
@@ -1244,16 +1244,16 @@
         
         <h1>The composite skill lab your <span class="vl-grad-gold">NEP&nbsp;2020 committee</span> will celebrate &amp; approve.</h1>
         
-        <p class="lead">Turnkey Robotics, AI, and coding labs built to CBSE specifications — completely installed, mapped to your syllabus, and staffed with certified teachers before the academic term starts.</p>
+        <p class="lead">A complete, CBSE-aligned skill lab solution—from lab setup and curriculum mapping to certified faculty—everything ready before your academic session begins.</p>
         
         <div class="vl-hero-ctas">
-          <a href="#book" class="vl-btn-vibrant-cta">
-            Visit Experience Center
+          <a href="{{ url('/register')}}" class="vl-btn-vibrant-cta">
+            To Visit Our Experience Center
             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
           </a>
           <a href="#checklist" class="vl-btn-glass-cta">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            Download CBSE Checklist
+            Download Brochure
           </a>
         </div>
         
@@ -1278,76 +1278,8 @@
       </div>
 
       <!-- Floor Plan Schematic Card -->
-      <div class="vl-blueprint-glass">
-        <div class="vl-blueprint-head">
-          <div class="vl-blueprint-title">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-            Interactive Floor Plan Blueprint
-          </div>
-          <span class="vl-blueprint-badge">🌸 900 sq ft Standard</span>
-        </div>
-
-        <div class="vl-blueprint-svg-wrap">
-          <svg viewBox="0 0 420 320" role="img" aria-label="Floor plan diagram of a skill lab showing robotics, AI, electronics, and coding zones">
-            <defs>
-              <pattern id="vibrantGrid" width="20" height="20" patternUnits="userSpaceOnUse">
-                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e9d5ff" stroke-width="1"/>
-              </pattern>
-            </defs>
-            
-            <rect width="420" height="320" fill="url(#vibrantGrid)" />
-            <rect x="4" y="4" width="412" height="312" fill="none" stroke="#c084fc" stroke-width="1.5" stroke-dasharray="4,2"/>
-            <line x1="4" y1="106" x2="416" y2="106" stroke="#c084fc" stroke-width="1"/>
-            <line x1="4" y1="212" x2="416" y2="212" stroke="#c084fc" stroke-width="1"/>
-            <line x1="210" y1="4" x2="210" y2="316" stroke="#c084fc" stroke-width="1"/>
-
-            <!-- Robotics Bench -->
-            <rect x="12" y="12" width="186" height="84" rx="6" fill="#fff1f2" stroke="#f43f5e" stroke-width="1.5"/>
-            <text x="22" y="30" fill="#e11d48" font-family="'Outfit', sans-serif" font-size="11" font-weight="800">ROBOTICS &amp; MECHANICS BENCH</text>
-            <circle cx="45" cy="66" r="14" fill="#fecdd3" stroke="#e11d48" stroke-width="1.2"/>
-            <circle cx="85" cy="66" r="14" fill="#fecdd3" stroke="#e11d48" stroke-width="1.2"/>
-            <circle cx="125" cy="66" r="14" fill="#fecdd3" stroke="#e11d48" stroke-width="1.2"/>
-            <circle cx="165" cy="66" r="14" fill="#fecdd3" stroke="#e11d48" stroke-width="1.2"/>
-
-            <!-- AI & Data Station -->
-            <rect x="222" y="12" width="186" height="84" rx="6" fill="#f3e8ff" stroke="#9333ea" stroke-width="1.5"/>
-            <text x="232" y="30" fill="#7e22ce" font-family="'Outfit', sans-serif" font-size="11" font-weight="800">AI &amp; DATA SCIENCE STATION</text>
-            <rect x="236" y="46" width="68" height="38" rx="4" fill="#e9d5ff" stroke="#9333ea" stroke-width="1.2"/>
-            <rect x="326" y="46" width="68" height="38" rx="4" fill="#e9d5ff" stroke="#9333ea" stroke-width="1.2"/>
-
-            <!-- Electronics Lab -->
-            <rect x="12" y="118" width="186" height="84" rx="6" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.5"/>
-            <text x="22" y="136" fill="#0f766e" font-family="'Outfit', sans-serif" font-size="11" font-weight="800">ELECTRONICS &amp; IOT LAB</text>
-            <rect x="20" y="148" width="170" height="44" rx="4" fill="#ccfbf1" stroke="#0d9488" stroke-width="1.2"/>
-            <line x1="63" y1="148" x2="63" y2="192" stroke="#0d9488" stroke-width="1"/>
-            <line x1="106" y1="148" x2="106" y2="192" stroke="#0d9488" stroke-width="1"/>
-            <line x1="149" y1="148" x2="149" y2="192" stroke="#0d9488" stroke-width="1"/>
-
-            <!-- Coding Pods -->
-            <rect x="222" y="118" width="186" height="84" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.5"/>
-            <text x="232" y="136" fill="#3730a3" font-family="'Outfit', sans-serif" font-size="11" font-weight="800">COMPUTING &amp; CODING PODS</text>
-            <rect x="234" y="150" width="34" height="34" rx="4" fill="#c7d2fe" stroke="#4f46e5" stroke-width="1.2"/>
-            <rect x="278" y="150" width="34" height="34" rx="4" fill="#c7d2fe" stroke="#4f46e5" stroke-width="1.2"/>
-            <rect x="322" y="150" width="34" height="34" rx="4" fill="#c7d2fe" stroke="#4f46e5" stroke-width="1.2"/>
-            <rect x="366" y="150" width="34" height="34" rx="4" fill="#c7d2fe" stroke="#4f46e5" stroke-width="1.2"/>
-
-            <!-- Teacher Station -->
-            <rect x="12" y="224" width="186" height="84" rx="6" fill="#fff7ed" stroke="#f97316" stroke-width="1.5"/>
-            <text x="22" y="242" fill="#c2410c" font-family="'Outfit', sans-serif" font-size="11" font-weight="800">TEACHER COMMAND DESK</text>
-            <rect x="24" y="256" width="130" height="36" rx="4" fill="#ffedd5" stroke="#f97316" stroke-width="1.2"/>
-
-            <!-- Display & Review Wall -->
-            <rect x="222" y="224" width="186" height="84" rx="6" fill="#fefce8" stroke="#eab308" stroke-width="1.5"/>
-            <text x="232" y="242" fill="#a16207" font-family="'Outfit', sans-serif" font-size="11" font-weight="800">INTERACTIVE REVIEW WALL</text>
-            <rect x="234" y="256" width="162" height="36" rx="4" fill="#fef08a" stroke="#eab308" stroke-width="1.2"/>
-          </svg>
-        </div>
-
-        <div class="vl-blueprint-cap">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-          Tailored to your available classroom space (400 to 1,200 sq ft).
-        </div>
-      </div>
+      <img src="{{ asset('/frontend/img/skillbox/workonhumanservices.jpeg') }}" alt="Leaders of Learning - School with Children">
+     
     </div>
   </section>
 

@@ -1582,11 +1582,20 @@ $("#form-add-to-cart").submit(function (event) {
             data: serializedData,
             success: function (response) {
                 if (response.result == 1) {
+                    if (response.return_url) {
+                        // return_url present — redirect back to the plan cart (add or update)
+                        window.location.href = response.return_url;
+                        return;
+                    }
                     setTimeout(function () {
                         document.getElementById("contentModalCartProduct").innerHTML = response.htmlCartProduct;
                         $('#form-add-to-cart .btn-product-cart').html('<i class="icon-check"></i>' + MdsConfig.text.addedToCart);
                         $('.span_cart_product_count').html(response.productCount);
                         $('.span_cart_product_count').removeClass('visibility-hidden').addClass('visibility-visible');
+                        if (response.return_url) {
+                            var btn = document.querySelector('#modalAddToCart .js-view-cart-btn');
+                            if (btn) { btn.href = response.return_url; }
+                        }
                         $('#modalAddToCart').modal('show');
                     }, 400);
                     setTimeout(function () {

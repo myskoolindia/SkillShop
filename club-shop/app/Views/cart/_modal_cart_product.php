@@ -27,7 +27,7 @@
             <?php $total = numToDecimal($cartItem->unit_price * $cartItem->quantity); ?>
             <strong><?= priceFormatted($total, $selectedCurrency->code); ?></strong>
         </div>
-        <a href="<?= generateUrl('cart'); ?>" class="btn btn-block btn-custom"><?= trans("view_cart"); ?></a>
+        <a href="<?= generateUrl('cart'); ?>" class="btn btn-block btn-custom js-view-cart-btn"><?= trans("view_cart"); ?></a>
         <?php if ($cartHasPhysicalProduct == true && $productSettings->marketplace_shipping == 1): ?>
             <a href="<?= generateUrl('cart', 'shipping'); ?>" class="btn btn-block btn-custom btn-custom-outline"><?= trans("checkout"); ?></a>
         <?php else: ?>

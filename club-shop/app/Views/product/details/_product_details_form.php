@@ -60,6 +60,9 @@ if ($needsFormWrapper): ?>
     <?php if (!empty($editingCartItem)): ?>
         <input type="hidden" name="cart_item_id" value="<?= esc($editingCartItem->id); ?>">
     <?php endif; ?>
+    <?php if (!empty(inputGet('return'))): ?>
+        <input type="hidden" name="return_url" value="<?= esc(inputGet('return')); ?>">
+    <?php endif; ?>
     <input type="hidden" name="bundle_components_data" id="hidden_bundle_components_data" value="">
     <input type="hidden" name="bundle_total_price" id="hidden_bundle_total_price" value="">
 <?php endif; ?>
@@ -72,7 +75,7 @@ if ($needsFormWrapper): ?>
                         <i class="fa fa-pencil text-warning mr-1"></i>
                         <strong>Customizing Cart Item:</strong> Making changes and clicking <strong>Update Cart</strong> will update your cart item.
                     </div>
-                    <a href="<?= generateUrl('cart'); ?>" class="btn btn-sm btn-outline-dark ml-2" style="font-size:11px; padding:2px 8px; font-weight:600;">Cancel</a>
+                    <a href="<?= esc(inputGet('return') ?: generateUrl('cart')); ?>" class="btn btn-sm btn-outline-dark ml-2" style="font-size:11px; padding:2px 8px; font-weight:600;">Cancel</a>
                 </div>
             </div>
         </div>

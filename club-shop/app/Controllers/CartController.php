@@ -51,6 +51,75 @@ class CartController extends BaseController
     }
 
     /**
+     * Basic Cart
+     */
+    public function basicCart()
+    {
+        // Auto-add the Basic Skill product (id=1, slug=basic-skill-1) only if not already in cart
+        $basicProduct = $this->productModel->getActiveProduct(1);
+        if (!empty($basicProduct)) {
+            $existingCart = $this->cartModel->getCart();
+            $alreadyInCart = false;
+            if (!empty($existingCart) && !empty($existingCart->items)) {
+                foreach ($existingCart->items as $item) {
+                    if ((int)$item->product_id === 1) {
+                        $alreadyInCart = true;
+                        break;
+                    }
+                }
+            }
+            if (!$alreadyInCart) {
+                $this->cartModel->addToCart($basicProduct, 1);
+            }
+        }
+
+        $data = setPageMeta('Basic Plan — Cart');
+        $data['isTranslatable'] = true;
+        $data['cart'] = $this->cartModel->getCart();
+        $data['userSession'] = getUserSession();
+        $data['planKey'] = 'basic';
+        $data['planLabel'] = 'Basic';
+        helperDeleteSession('mds_service_payment');
+        echo view('partials/_header', $data);
+        echo view('cart/basic-cart', $data);
+        echo view('partials/_footer');
+    }
+
+    /**
+     * Advance Cart
+     */
+    public function advanceCart()
+    {
+        $data = setPageMeta('Advance Plan — Cart');
+        $data['isTranslatable'] = true;
+        $data['cart'] = $this->cartModel->getCart();
+        $data['userSession'] = getUserSession();
+        $data['planKey'] = 'advance';
+        $data['planLabel'] = 'Advance';
+        helperDeleteSession('mds_service_payment');
+        echo view('partials/_header', $data);
+        echo view('cart/advance-cart', $data);
+        echo view('partials/_footer');
+    }
+
+    /**
+     * Premium Cart
+     */
+    public function premiumCart()
+    {
+        $data = setPageMeta('Premium Plan — Cart');
+        $data['isTranslatable'] = true;
+        $data['cart'] = $this->cartModel->getCart();
+        $data['userSession'] = getUserSession();
+        $data['planKey'] = 'premium';
+        $data['planLabel'] = 'Premium';
+        helperDeleteSession('mds_service_payment');
+        echo view('partials/_header', $data);
+        echo view('cart/premium-cart', $data);
+        echo view('partials/_footer');
+    }
+
+    /**
      * Add to Cart Bundle
      */
     // public function addToCartBundle()
@@ -440,6 +509,7 @@ class CartController extends BaseController
                 $data = [
                     'result' => 1,
                     'is_update' => !empty(inputPost('cart_item_id')) ? 1 : 0,
+                    'return_url' => inputPost('return_url') ?: generateUrl('cart'),
                     'productCount' => $cart->num_items ?? 1,
                     'htmlCartProduct' => view('cart/_modal_cart_product', ['cartItem' => $cartItem, 'product' => $product, 'relatedProducts' => $relatedProducts, 'cartHasPhysicalProduct' => $cartHasPhysicalProduct])
                 ];

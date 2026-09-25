@@ -65,12 +65,12 @@
       </div>
 
       <!-- See All Link -->
-      <div id="courses-see-all" class="text-center mt-8">
+      <!-- <div id="courses-see-all" class="text-center mt-8">
         <a href="{{ route('courses') }}" class="inline-flex items-center gap-2 px-7 py-3 rounded-full border border-primary text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all shadow-sm">
           <span>View All Courses</span>
           <i class="fa-solid fa-arrow-right text-xs"></i>
         </a>
-      </div>
+      </div> -->
 
     </div>
 

@@ -32,8 +32,8 @@
   </div>
   <div class="container max-w-7xl mx-auto px-4 md:px-8 relative z-10 text-white">
     <div class="max-w-2xl">
-      <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">Why Teacher UpSkilling Is Important for CBSE Skill Education</h1>
-      <p class="text-lg md:text-xl font-light opacity-90 leading-relaxed">Learn from experts through structured, engaging, and career-ready lessons designed to help you grow.</p>
+      <h1 class="text-4xl md:text-4xl font-medium mb-4 leading-tight text-white">Why Teacher UpSkilling Is Important for CBSE Skill Education</h1>
+      <p class="text-lg md:text-xl font-light leading-relaxed text-white">Learn from experts through structured, engaging, and career-ready lessons designed to help you grow.</p>
     </div>
   </div>
 </section>

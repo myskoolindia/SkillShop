@@ -527,6 +527,148 @@
       margin: 10px;
     }
   }
+
+  /* ═══════════════════════════════════════════════════
+     SECTION BACKGROUND COLORS
+  ═══════════════════════════════════════════════════ */
+
+  /* Section 2 — Intro / Video: clean white with subtle blue-left accent */
+  .sv-section-intro {
+    background: #ffffff;
+    border-left: 5px solid #0077d4;
+  }
+
+  /* Section 3 — Skills for the Future: cool light slate */
+  .sv-section-skills {
+    background: linear-gradient(160deg, #eef4fb 0%, #f0f4ff 100%);
+  }
+
+  /* Section 4 — AI EmpowerED: warm amber/cream */
+  .sv-section-ai {
+    background: linear-gradient(160deg, #fffbf0 0%, #fff3e0 100%);
+    border-bottom: 1px solid #ffe0b2;
+  }
+
+  /* Section 5 — Upskilling Opportunities: soft teal/green */
+  .sv-section-upskill {
+    background: linear-gradient(160deg, #f0faf4 0%, #e8f5e9 100%);
+  }
+
+  /* Section 6 — Working Model: soft lavender/purple */
+  .sv-section-model {
+    background: linear-gradient(160deg, #f5f3ff 0%, #ede9fe 100%);
+  }
+
+  /* Section 9 — Leaders of Learning CTA: deep indigo */
+  .sv-section-cta {
+    background: linear-gradient(135deg, #1e3a5f 0%, #0b2545 60%, #0d1b2a 100%);
+    color: #ffffff;
+  }
+  .sv-section-cta h2,
+  .sv-section-cta p {
+    color: #ffffff !important;
+  }
+  .sv-section-cta .text-gray-700 {
+    color: rgba(255, 255, 255, 0.85) !important;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     SCROLL-REVEAL ANIMATION ENGINE
+     Sections start invisible; IntersectionObserver
+     adds .sv-revealed when they enter the viewport,
+     triggering the matching keyframe.
+  ═══════════════════════════════════════════════════ */
+
+  /* --- base hidden state --- */
+  [data-reveal] {
+    opacity: 0;
+    will-change: opacity, transform;
+  }
+
+  /* --- revealed state (added by JS) --- */
+  [data-reveal].sv-revealed {
+    animation-fill-mode: both;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    animation-duration: 0.85s;
+  }
+
+  /* --- per-effect keyframes & trigger classes --- */
+
+  /* fade-up: sections 2, 9 */
+  @keyframes sv-fadeUp {
+    from { opacity: 0; transform: translateY(52px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  [data-reveal="fade-up"].sv-revealed {
+    animation-name: sv-fadeUp;
+  }
+
+  /* slide-right (enters from left): section 3 */
+  @keyframes sv-slideRight {
+    from { opacity: 0; transform: translateX(-60px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  [data-reveal="slide-right"].sv-revealed {
+    animation-name: sv-slideRight;
+  }
+
+  /* slide-left (enters from right): section 4, 6 */
+  @keyframes sv-slideLeft {
+    from { opacity: 0; transform: translateX(60px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  [data-reveal="slide-left"].sv-revealed {
+    animation-name: sv-slideLeft;
+  }
+
+  /* zoom-in: section 5 */
+  @keyframes sv-zoomIn {
+    from { opacity: 0; transform: scale(0.92); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  [data-reveal="zoom-in"].sv-revealed {
+    animation-name: sv-zoomIn;
+  }
+
+  /* flip-up: hero title (optional subtle entrance) */
+  @keyframes sv-flipUp {
+    from { opacity: 0; transform: perspective(600px) rotateX(18deg) translateY(30px); }
+    to   { opacity: 1; transform: perspective(600px) rotateX(0deg) translateY(0); }
+  }
+  [data-reveal="flip-up"].sv-revealed {
+    animation-name: sv-flipUp;
+  }
+
+  /* --- inner child stagger (cards, track divs) --- */
+  [data-reveal].sv-revealed [data-stagger] {
+    opacity: 0;
+    animation-fill-mode: both;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    animation-duration: 0.65s;
+    animation-name: sv-fadeUp;
+  }
+  [data-reveal].sv-revealed [data-stagger="1"] { animation-delay: 0.10s; }
+  [data-reveal].sv-revealed [data-stagger="2"] { animation-delay: 0.22s; }
+  [data-reveal].sv-revealed [data-stagger="3"] { animation-delay: 0.34s; }
+  [data-reveal].sv-revealed [data-stagger="4"] { animation-delay: 0.46s; }
+
+  /* hero text animation on page load */
+  .sv-hero-text {
+    animation: sv-flipUp 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: 0.15s;
+  }
+
+  /* reduce motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal],
+    [data-reveal].sv-revealed,
+    [data-reveal].sv-revealed [data-stagger],
+    .sv-hero-text {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
 </style>
 @endpush
 
@@ -536,13 +678,15 @@
   <!-- 1. Hero Title Banner -->
   <section class="skillvation-hero-banner">
     <div class="skillvation-container">
-      <h1>India's Favorite Skill Platform</h1>
-      <p>Empowering students and teachers for the future of education</p>
+      <div class="sv-hero-text">
+        <h1>India's Favourite Skill Platform</h1>
+        <p>Empowering students and teachers for the future of education</p>
+      </div>
     </div>
   </section>
 
   <!-- 2. Intro Section with Video Feature -->
-  <section class="skillvation-section">
+  <section class="skillvation-section sv-section-intro" data-reveal="fade-up">
     <div class="skillvation-container">
       <div class="skillvation-grid-2col">
         <div>
@@ -610,7 +754,7 @@
   </section>
 
   <!-- 3. Skills for the Future Global Platform -->
-  <section class="skillvation-section bg-light">
+  <section class="skillvation-section bg-light sv-section-skills" data-reveal="slide-right">
     <div class="skillvation-container">
       <div class="skillvation-grid-2col">
         <div>
@@ -622,10 +766,10 @@
           <p class="font-bold text-gray-900 mt-4 mb-6">
             Become part of a global movement to equip young students for the future!
           </p>
-          <a href="/skill2school" target="_blank" rel="noopener" class="skillvation-pill-btn">
+          <!-- <a href="/skill2school" target="_blank" rel="noopener" class="skillvation-pill-btn">
             <span>Explore existing skills initiatives</span>
             <i class="fa-solid fa-arrow-right"></i>
-          </a>
+          </a> -->
         </div>
 
         <div>
@@ -638,24 +782,24 @@
 
       <!-- 4 Colored Stat Cards -->
       <div class="skillvation-stats-grid">
-        <a href="#" target="_blank" rel="noopener" class="skillvation-stat-card stat-card-stem">
+        <a href="#" target="_blank" rel="noopener" class="skillvation-stat-card stat-card-stem" data-stagger="1">
           <div class="stat-title">The Skill Gap</div>
           <div class="stat-desc">Independent findings from the companion India Skills Report 2026 indicate that while national youth employability has marginally risen to 56.35%, nearly 43.65% of Indian graduates still lack the necessary skills to be hired immediately by industry standards.</div>
         </a>
 
-        <a href="#" target="_blank" rel="noopener" class="skillvation-stat-card stat-card-green">
+        <a href="#" target="_blank" rel="noopener" class="skillvation-stat-card stat-card-green" data-stagger="2">
           <div class="stat-title">The NEET Cohort</div>
           <div class="stat-desc">According to the NITI Aayog framework using NSSO baselines, 8.9 crore (89 million) young Indians between the ages of 15 and 29 fall under the category of NEET (Not in Education, Employment, or Training).</div>
         </a>
 
-        <a href="#" target="_blank" rel="noopener" class="skillvation-stat-card stat-card-informal">
+        <a href="#" target="_blank" rel="noopener" class="skillvation-stat-card stat-card-informal" data-stagger="3">
           <div class="stat-title">Graduate Unemployment</div>
           <div class="stat-desc">The transition from university to the corporate sector remains severely strained. Roughly 40% of young graduates under the age of 25 are unemployed. Out of 6.3 crore graduates in the 20–29 age bracket, 1.1 crore remain jobless due to skill mismatches.</div>
         </a>
 
-        <a href="#" target="_blank" rel="noopener" class="skillvation-stat-card stat-card-gender">
+        <a href="#" target="_blank" rel="noopener" class="skillvation-stat-card stat-card-gender" data-stagger="4">
           <div class="stat-title">Gender gap</div>
-          <div class="stat-desc">in digital access and divide is the biggest obstacle for development for skills for the future</div>
+          <div class="stat-desc">In digital access and divide is the biggest obstacle for development for skills for the future</div>
         </a>
       </div>
 
@@ -675,7 +819,7 @@
   </section>
 
   <!-- 4. AI EmpowerED Section -->
-  <section class="skillvation-section">
+  <section class="skillvation-section sv-section-ai" data-reveal="slide-left">
     <div class="skillvation-container">
       <div class="skillvation-grid-2col">
         <div>
@@ -711,7 +855,7 @@
   </section>
 
   <!-- 5. Our Training Opportunities (Split Banner + 4 Tracks) -->
-  <section class="skillvation-section bg-light" id="training-opportunities">
+  <section class="skillvation-section bg-light sv-section-upskill" id="training-opportunities" data-reveal="zoom-in">
     <div class="skillvation-container">
       
       <!-- Split Blue Hero Block -->
@@ -731,7 +875,7 @@
       </div>
 
       <!-- Track 1: Digital Skills -->
-      <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200 mb-8">
+      <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200 mb-8" data-stagger="1">
         <div class="skillvation-grid-2col">
           <div>
             <h2 class="text-2xl font-bold mb-3 text-blue-900">Work on Life Forms</h2>
@@ -781,7 +925,7 @@
       </div>
 
       <!-- Track 2: Green Skills -->
-      <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200 mb-8">
+      <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200 mb-8" data-stagger="2">
         <div class="skillvation-grid-2col">
           <div>
             <h2 class="text-2xl font-bold mb-3 text-green-900">Work on Materials & Machines</h2>
@@ -822,7 +966,7 @@
       </div>
 
       <!-- Track 3: Entrepreneurial Skills -->
-      <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200 mb-8">
+      <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200 mb-8" data-stagger="3">
         <div class="skillvation-grid-2col">
           <div>
             <h2 class="text-2xl font-bold mb-3 text-red-900">Work on Human Services</h2>
@@ -890,7 +1034,7 @@
   </section>
 
   <!-- 6. Our Working Model -->
-  <section class="skillvation-section">
+  <section class="skillvation-section sv-section-model" data-reveal="slide-left">
     <div class="skillvation-container">
       <div class="skillvation-grid-2col">
         <div>
@@ -926,7 +1070,7 @@
   
 
   <!-- 9. Ready to make a positive impact? CTA -->
-  <section class="skillvation-section bg-light">
+  <section class="skillvation-section bg-light sv-section-cta" data-reveal="fade-up">
     <div class="skillvation-container">
       <div class="skillvation-grid-2col">
         <div>
@@ -1002,3 +1146,31 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+  'use strict';
+
+  /* ── IntersectionObserver scroll-reveal ───────────────────────── */
+  var targets = document.querySelectorAll('[data-reveal]');
+  if (!targets.length) return;
+
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('sv-revealed');
+        observer.unobserve(entry.target); // fire once
+      }
+    });
+  }, {
+    threshold: 0.10,   // 10 % of section visible = trigger
+    rootMargin: '0px 0px -60px 0px'
+  });
+
+  targets.forEach(function (el) {
+    observer.observe(el);
+  });
+})();
+</script>
+@endpush

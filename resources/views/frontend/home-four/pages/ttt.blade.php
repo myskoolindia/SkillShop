@@ -113,10 +113,10 @@
       
       <!-- Module 1 -->
       <div class="flex flex-col items-center text-center max-w-xs mx-auto mb-10 md:mb-0 bg-white z-10 px-4">
-        <div class="w-24 h-24 rounded-full bg-blue-50 border-4 border-white shadow-sm flex items-center justify-center mb-6">
-          <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-          </svg>
+        <div class="w-24 h-24 rounded-full border-4 border-white shadow-sm overflow-hidden mb-6">
+          <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=200&h=200&q=80"
+               alt="Educational Psychology"
+               class="w-full h-full object-cover" />
         </div>
         <h3 class="text-lg font-semibold text-blue-600 mb-2">Educational Psychology</h3>
         <p class="text-slate-600 text-sm">Understanding child behaviour, learning styles, motivation, and emotional needs</p>
@@ -124,11 +124,10 @@
 
       <!-- Module 2 -->
       <div class="flex flex-col items-center text-center max-w-xs mx-auto mb-10 md:mb-0 bg-white z-10 px-4">
-        <div class="w-24 h-24 rounded-full bg-blue-50 border-4 border-white shadow-sm flex items-center justify-center mb-6">
-          <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-            <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-          </svg>
+        <div class="w-24 h-24 rounded-full border-4 border-white shadow-sm overflow-hidden mb-6">
+          <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=200&h=200&q=80"
+               alt="Classroom Management"
+               class="w-full h-full object-cover" />
         </div>
         <h3 class="text-lg font-semibold text-blue-600 mb-2">Classroom Management</h3>
         <p class="text-slate-600 text-sm">Techniques to create structured, inclusive, and disciplined learning environments</p>
@@ -136,11 +135,10 @@
 
       <!-- Module 3 -->
       <div class="flex flex-col items-center text-center max-w-xs mx-auto mb-10 md:mb-0 bg-white z-10 px-4">
-        <div class="w-24 h-24 rounded-full bg-blue-50 border-4 border-white shadow-sm flex items-center justify-center mb-6">
-          <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-            <path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-          </svg>
+        <div class="w-24 h-24 rounded-full border-4 border-white shadow-sm overflow-hidden mb-6">
+          <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=200&h=200&q=80"
+               alt="Student Engagement Strategies"
+               class="w-full h-full object-cover" />
         </div>
         <h3 class="text-lg font-semibold text-blue-600 mb-2">Student Engagement Strategies</h3>
         <p class="text-slate-600 text-sm">Interactive methods to encourage participation, curiosity, and critical thinking</p>
@@ -148,10 +146,10 @@
 
       <!-- Module 4 -->
       <div class="flex flex-col items-center text-center max-w-xs mx-auto bg-white z-10 px-4">
-        <div class="w-24 h-24 rounded-full bg-blue-50 border-4 border-white shadow-sm flex items-center justify-center mb-6">
-          <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-          </svg>
+        <div class="w-24 h-24 rounded-full border-4 border-white shadow-sm overflow-hidden mb-6">
+          <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=200&h=200&q=80"
+               alt="Assessment & Feedback Practices"
+               class="w-full h-full object-cover" />
         </div>
         <h3 class="text-lg font-semibold text-blue-600 mb-2">Assessment &amp; Feedback Practices</h3>
         <p class="text-slate-600 text-sm">Designing meaningful assessments and constructive feedback for student growth</p>
@@ -322,10 +320,10 @@
     <p class="text-lg text-slate-600 mb-8">
       Skillvation's Train the Teacher Programme enables educators to teach with clarity, confidence, and creativity, ensuring better learning outcomes and more engaging classrooms.
     </p>
-    <a href="{{ route('contact.index') }}" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-primary hover:bg-primary-dark text-white font-semibold transition-all shadow-md">
+    <!-- <a href="{{ route('contact.index') }}" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-primary hover:bg-primary-dark text-white font-semibold transition-all shadow-md">
       <span>Get Started Today</span>
       <i class="fa-solid fa-arrow-right text-xs"></i>
-    </a>
+    </a> -->
   </div>
 </section>
 <!-- END: CTA Section -->

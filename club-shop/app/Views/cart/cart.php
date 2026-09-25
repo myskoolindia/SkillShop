@@ -97,11 +97,19 @@
                                                     <!-- Left Side: Image + Metadata -->
                                                     <div class="d-flex align-items-center" style="display: flex; align-items: center; gap: 16px; flex: 1 1 320px; min-width: 0;">
                                                         <div class="cart-item-image">
-                                                            <a href="<?= esc($cartItem->product_url); ?>">
-                                                                <div class="product-image-box product-image-box-sm" style="width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0;">
-                                                                    <img src="<?= getOrderImageUrl($cartItem->product_image_data, $cartItem->product_id); ?>" data-src="<?= getOrderImageUrl($cartItem->product_image_data, $cartItem->product_id); ?>" alt="<?= esc($cartItem->product_title); ?>" class="lazyload img-fluid img-product" style="width: 100%; height: 100%; object-fit: cover;">
-                                                                </div>
-                                                            </a>
+                                                            <?php if(!empty($cartItem->is_bundle)): ?>
+                                                                <a href="<?= esc($cartItem->product_url); ?>?cart_item_id=<?= $cartItem->id; ?>#tab_bundle_contents">
+                                                                    <div class="product-image-box product-image-box-sm" style="width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0;">
+                                                                        <img src="<?= getOrderImageUrl($cartItem->product_image_data, $cartItem->product_id); ?>" data-src="<?= getOrderImageUrl($cartItem->product_image_data, $cartItem->product_id); ?>" alt="<?= esc($cartItem->product_title); ?>" class="lazyload img-fluid img-product" style="width: 100%; height: 100%; object-fit: cover;">
+                                                                    </div>
+                                                                </a>
+                                                            <?php else: ?>
+                                                                <a href="<?= esc($cartItem->product_url); ?>">
+                                                                    <div class="product-image-box product-image-box-sm" style="width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0;">
+                                                                        <img src="<?= getOrderImageUrl($cartItem->product_image_data, $cartItem->product_id); ?>" data-src="<?= getOrderImageUrl($cartItem->product_image_data, $cartItem->product_id); ?>" alt="<?= esc($cartItem->product_title); ?>" class="lazyload img-fluid img-product" style="width: 100%; height: 100%; object-fit: cover;">
+                                                                    </div>
+                                                                </a>
+                                                            <?php endif; ?>
                                                         </div>
 
                                                         <div class="cart-item-details">
@@ -115,11 +123,19 @@
                                                                     </label>
                                                                 </div>
                                                             <?php endif; ?>
+
                                                             <div class="product-title" style="margin-bottom: 4px;">
-                                                                <a href="<?= esc($cartItem->product_url); ?>" style="font-size: 16px; font-weight: 700; color: #1e293b; text-decoration: none;">
+                                                                <?php if(!empty($cartItem->is_bundle)): ?>
+                                                                    <a href="<?= esc($cartItem->product_url); ?>?cart_item_id=<?= $cartItem->id; ?>#tab_bundle_contents" style="font-size: 16px; font-weight: 700; color: #1e293b; text-decoration: none;">
                                                                     <?= esc($cartItem->product_title); ?>
                                                                 </a>
+                                                                <?php else: ?>
+                                                                    <a href="<?= esc($cartItem->product_url); ?>" style="font-size: 16px; font-weight: 700; color: #1e293b; text-decoration: none;">
+                                                                        <?= esc($cartItem->product_title); ?>
+                                                                    </a>
+                                                                <?php endif; ?>
                                                             </div>
+
                                                             <?php if (!empty($cartItem->product_options_summary)): ?>
                                                                 <div class="product-variant-info m-b-4">
                                                                     <?= $cartItem->product_options_summary; ?>
