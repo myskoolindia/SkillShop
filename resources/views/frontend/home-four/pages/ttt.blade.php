@@ -100,59 +100,91 @@
 <!-- END: Hero Section -->
 
 <!-- BEGIN: General Teacher Training Modules -->
-<section class="py-20 relative">
-  <div class="absolute left-0 top-20 w-48 h-48 border border-blue-200 rounded-r-full -translate-x-1/2"></div>
+<section class="py-20 bg-white relative">
+  <div class="absolute left-0 top-20 w-48 h-48 border border-blue-200 rounded-r-full -translate-x-1/2 pointer-events-none"></div>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
     <div class="text-center mb-16">
       <p class="text-blue-600 font-medium mb-2">Turning knowledge into powerful learning experience</p>
       <h2 class="text-3xl font-bold text-slate-900 mb-4">General Teacher Training Modules</h2>
-      <p class="text-slate-600 max-w-2xl mx-auto">Our general training modules focus on the core competencies every teacher needs to succeed</p>
+      <p class="text-slate-600 max-w-2xl mx-auto">Our general training modules focus on the core competencies every teacher needs to succeed:</p>
     </div>
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center relative">
-      <div class="hidden md:block absolute top-12 left-24 right-24 h-0.5 bg-slate-200 -z-10"></div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       
-      <!-- Module 1 -->
-      <div class="flex flex-col items-center text-center max-w-xs mx-auto mb-10 md:mb-0 bg-white z-10 px-4">
-        <div class="w-24 h-24 rounded-full border-4 border-white shadow-sm overflow-hidden mb-6">
-          <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=200&h=200&q=80"
-               alt="Educational Psychology"
-               class="w-full h-full object-cover" />
+      <!-- Module 1: Educational Psychology -->
+      <div class="bg-white rounded-2xl overflow-hidden border border-blue-100/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col group">
+        <div class="relative h-44 overflow-hidden bg-slate-100">
+          <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=600&q=80"
+               alt="Educational Psychology Module"
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent"></div>
+          <div class="absolute bottom-3 left-4 flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-white/95 backdrop-blur-sm flex items-center justify-center text-blue-600 shadow-sm">
+              <i class="fa-solid fa-brain text-sm"></i>
+            </span>
+            <span class="text-white font-semibold text-lg drop-shadow-sm">Educational Psychology</span>
+          </div>
         </div>
-        <h3 class="text-lg font-semibold text-blue-600 mb-2">Educational Psychology</h3>
-        <p class="text-slate-600 text-sm">Understanding child behaviour, learning styles, motivation, and emotional needs</p>
+        <div class="p-6 flex-1 flex flex-col justify-between bg-white">
+          <p class="text-slate-600 text-sm leading-relaxed">Understanding child behaviour, learning styles, motivation, and emotional needs.</p>
+        </div>
       </div>
 
-      <!-- Module 2 -->
-      <div class="flex flex-col items-center text-center max-w-xs mx-auto mb-10 md:mb-0 bg-white z-10 px-4">
-        <div class="w-24 h-24 rounded-full border-4 border-white shadow-sm overflow-hidden mb-6">
-          <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=200&h=200&q=80"
-               alt="Classroom Management"
-               class="w-full h-full object-cover" />
+      <!-- Module 2: Classroom Management -->
+      <div class="bg-white rounded-2xl overflow-hidden border border-blue-100/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col group">
+        <div class="relative h-44 overflow-hidden bg-slate-100">
+          <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=600&q=80"
+               alt="Classroom Management Module"
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent"></div>
+          <div class="absolute bottom-3 left-4 flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-white/95 backdrop-blur-sm flex items-center justify-center text-blue-600 shadow-sm">
+              <i class="fa-solid fa-chalkboard-user text-sm"></i>
+            </span>
+            <span class="text-white font-semibold text-lg drop-shadow-sm">Classroom Management</span>
+          </div>
         </div>
-        <h3 class="text-lg font-semibold text-blue-600 mb-2">Classroom Management</h3>
-        <p class="text-slate-600 text-sm">Techniques to create structured, inclusive, and disciplined learning environments</p>
+        <div class="p-6 flex-1 flex flex-col justify-between bg-white">
+          <p class="text-slate-600 text-sm leading-relaxed">Techniques to create structured, inclusive, and disciplined learning environments.</p>
+        </div>
       </div>
 
-      <!-- Module 3 -->
-      <div class="flex flex-col items-center text-center max-w-xs mx-auto mb-10 md:mb-0 bg-white z-10 px-4">
-        <div class="w-24 h-24 rounded-full border-4 border-white shadow-sm overflow-hidden mb-6">
-          <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=200&h=200&q=80"
-               alt="Student Engagement Strategies"
-               class="w-full h-full object-cover" />
+      <!-- Module 3: Student Engagement Strategies -->
+      <div class="bg-white rounded-2xl overflow-hidden border border-blue-100/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col group">
+        <div class="relative h-44 overflow-hidden bg-slate-100">
+          <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=600&q=80"
+               alt="Student Engagement Strategies Module"
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent"></div>
+          <div class="absolute bottom-3 left-4 flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-white/95 backdrop-blur-sm flex items-center justify-center text-blue-600 shadow-sm">
+              <i class="fa-solid fa-users text-sm"></i>
+            </span>
+            <span class="text-white font-semibold text-lg drop-shadow-sm">Student Engagement</span>
+          </div>
         </div>
-        <h3 class="text-lg font-semibold text-blue-600 mb-2">Student Engagement Strategies</h3>
-        <p class="text-slate-600 text-sm">Interactive methods to encourage participation, curiosity, and critical thinking</p>
+        <div class="p-6 flex-1 flex flex-col justify-between bg-white">
+          <p class="text-slate-600 text-sm leading-relaxed">Interactive methods to encourage participation, curiosity, and critical thinking.</p>
+        </div>
       </div>
 
-      <!-- Module 4 -->
-      <div class="flex flex-col items-center text-center max-w-xs mx-auto bg-white z-10 px-4">
-        <div class="w-24 h-24 rounded-full border-4 border-white shadow-sm overflow-hidden mb-6">
-          <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=200&h=200&q=80"
-               alt="Assessment & Feedback Practices"
-               class="w-full h-full object-cover" />
+      <!-- Module 4: Assessment & Feedback Practices -->
+      <div class="bg-white rounded-2xl overflow-hidden border border-blue-100/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col group">
+        <div class="relative h-44 overflow-hidden bg-slate-100">
+          <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=600&q=80"
+               alt="Assessment & Feedback Practices Module"
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent"></div>
+          <div class="absolute bottom-3 left-4 flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-white/95 backdrop-blur-sm flex items-center justify-center text-blue-600 shadow-sm">
+              <i class="fa-solid fa-clipboard-check text-sm"></i>
+            </span>
+            <span class="text-white font-semibold text-lg drop-shadow-sm">Assessment &amp; Feedback</span>
+          </div>
         </div>
-        <h3 class="text-lg font-semibold text-blue-600 mb-2">Assessment &amp; Feedback Practices</h3>
-        <p class="text-slate-600 text-sm">Designing meaningful assessments and constructive feedback for student growth</p>
+        <div class="p-6 flex-1 flex flex-col justify-between bg-white">
+          <p class="text-slate-600 text-sm leading-relaxed">Designing meaningful assessments and constructive feedback for student growth.</p>
+        </div>
       </div>
 
     </div>
@@ -162,7 +194,7 @@
 
 <!-- BEGIN: Subject-Specific Training Modules -->
 <section class="py-20 bg-slate-50 relative">
-  <div class="absolute right-0 top-40 w-64 h-64 border border-blue-200 rounded-l-full translate-x-1/2"></div>
+  <div class="absolute right-0 top-40 w-64 h-64 border border-blue-200 rounded-l-full translate-x-1/2 pointer-events-none"></div>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
     <div class="text-center mb-16">
       <p class="text-blue-600 font-medium mb-2">From subject experts to master facilitator</p>
@@ -170,45 +202,83 @@
       <p class="text-slate-600 max-w-2xl mx-auto">We offer specialised training to help teachers teach subjects conceptually and practically, rather than through rote methods:</p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div class="bg-blue-50/50 rounded-xl p-8 text-center border border-blue-100 hover:shadow-md transition">
-        <h3 class="text-lg font-semibold text-blue-600 mb-6">Mathematics</h3>
-        <div class="w-16 h-16 bg-white rounded-lg shadow-sm flex items-center justify-center mx-auto mb-6">
-          <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-          </svg>
+      
+      <!-- Module 1: Mathematics -->
+      <div class="bg-white rounded-2xl overflow-hidden border border-blue-100/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col group">
+        <div class="relative h-44 overflow-hidden bg-slate-100">
+          <img src="https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=600&q=80"
+               alt="Mathematics Training Module"
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent"></div>
+          <div class="absolute bottom-3 left-4 flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-white/95 backdrop-blur-sm flex items-center justify-center text-blue-600 shadow-sm">
+              <i class="fa-solid fa-calculator text-sm"></i>
+            </span>
+            <span class="text-white font-semibold text-lg drop-shadow-sm">Mathematics</span>
+          </div>
         </div>
-        <p class="text-slate-600 text-sm">Teaching math using real-life applications, visual models, and logical reasoning</p>
+        <div class="p-6 flex-1 flex flex-col justify-between bg-white">
+          <p class="text-slate-600 text-sm leading-relaxed">Teaching math using real-life applications, visual models, and logical reasoning.</p>
+        </div>
       </div>
 
-      <div class="bg-blue-50/50 rounded-xl p-8 text-center border border-blue-100 hover:shadow-md transition">
-        <h3 class="text-lg font-semibold text-blue-600 mb-6">Science</h3>
-        <div class="w-16 h-16 bg-white rounded-lg shadow-sm flex items-center justify-center mx-auto mb-6">
-          <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-          </svg>
+      <!-- Module 2: Science -->
+      <div class="bg-white rounded-2xl overflow-hidden border border-blue-100/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col group">
+        <div class="relative h-44 overflow-hidden bg-slate-100">
+          <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=600&q=80"
+               alt="Science Training Module"
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent"></div>
+          <div class="absolute bottom-3 left-4 flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-white/95 backdrop-blur-sm flex items-center justify-center text-blue-600 shadow-sm">
+              <i class="fa-solid fa-flask text-sm"></i>
+            </span>
+            <span class="text-white font-semibold text-lg drop-shadow-sm">Science</span>
+          </div>
         </div>
-        <p class="text-slate-600 text-sm">Concept explanation through experiments, diagrams, and everyday examples</p>
+        <div class="p-6 flex-1 flex flex-col justify-between bg-white">
+          <p class="text-slate-600 text-sm leading-relaxed">Concept explanation through experiments, diagrams, and everyday examples.</p>
+        </div>
       </div>
 
-      <div class="bg-blue-50/50 rounded-xl p-8 text-center border border-blue-100 hover:shadow-md transition">
-        <h3 class="text-lg font-semibold text-blue-600 mb-6">Languages</h3>
-        <div class="w-16 h-16 bg-white rounded-lg shadow-sm flex items-center justify-center mx-auto mb-6">
-          <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-          </svg>
+      <!-- Module 3: Languages -->
+      <div class="bg-white rounded-2xl overflow-hidden border border-blue-100/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col group">
+        <div class="relative h-44 overflow-hidden bg-slate-100">
+          <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=600&q=80"
+               alt="Languages Training Module"
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent"></div>
+          <div class="absolute bottom-3 left-4 flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-white/95 backdrop-blur-sm flex items-center justify-center text-blue-600 shadow-sm">
+              <i class="fa-solid fa-book-open text-sm"></i>
+            </span>
+            <span class="text-white font-semibold text-lg drop-shadow-sm">Languages</span>
+          </div>
         </div>
-        <p class="text-slate-600 text-sm">Languages improving comprehension, communication, vocabulary, and expression skills</p>
+        <div class="p-6 flex-1 flex flex-col justify-between bg-white">
+          <p class="text-slate-600 text-sm leading-relaxed">Improving comprehension, communication, vocabulary, and expression skills.</p>
+        </div>
       </div>
 
-      <div class="bg-blue-50/50 rounded-xl p-8 text-center border border-blue-100 hover:shadow-md transition">
-        <h3 class="text-lg font-semibold text-blue-600 mb-6">Concept Visualisation</h3>
-        <div class="w-16 h-16 bg-white rounded-lg shadow-sm flex items-center justify-center mx-auto mb-6">
-          <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-          </svg>
+      <!-- Module 4: Concept Visualisation -->
+      <div class="bg-white rounded-2xl overflow-hidden border border-blue-100/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col group">
+        <div class="relative h-44 overflow-hidden bg-slate-100">
+          <img src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80"
+               alt="Concept Visualisation Module"
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent"></div>
+          <div class="absolute bottom-3 left-4 flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-white/95 backdrop-blur-sm flex items-center justify-center text-blue-600 shadow-sm">
+              <i class="fa-solid fa-shapes text-sm"></i>
+            </span>
+            <span class="text-white font-semibold text-lg drop-shadow-sm">Concept Visualisation</span>
+          </div>
         </div>
-        <p class="text-slate-600 text-sm">Effective ways to explain diagrams, processes, and abstract ideas clearly</p>
+        <div class="p-6 flex-1 flex flex-col justify-between bg-white">
+          <p class="text-slate-600 text-sm leading-relaxed">Effective ways to explain diagrams, processes, and abstract ideas clearly.</p>
+        </div>
       </div>
+
     </div>
   </div>
 </section>
@@ -273,40 +343,72 @@
 <!-- END: Course Carousel Section -->
 
 <!-- BEGIN: Specialised Teacher Training Programmes -->
-<section class="py-20 bg-slate-50">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<section class="py-20 bg-slate-50 relative">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
     <div class="text-center mb-16">
       <p class="text-blue-600 font-medium mb-2">Shape trainers who shape futures</p>
       <h2 class="text-3xl font-bold text-slate-900 mb-4">Specialised Teacher Training Programmes</h2>
-      <p class="text-slate-600 max-w-2xl mx-auto">Skillvation also offers structured certification-oriented programmes for early-years educators</p>
+      <p class="text-slate-600 max-w-2xl mx-auto">Skillvation also offers structured certification-oriented programmes for early-years educators:</p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div class="bg-orange-50/50 rounded-2xl overflow-hidden border border-orange-100">
-        <img alt="Nursery Teacher Training" class="w-full h-48 object-cover"
-          src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=600&q=80" />
-        <div class="p-6">
-          <h3 class="text-lg font-bold text-slate-900 mb-2">Nursery Teacher Training</h3>
-          <p class="text-slate-600 text-sm">Foundational training for preschool educators in child development and early learning</p>
+      
+      <!-- Programme 1: Nursery Teacher Training -->
+      <div class="bg-white rounded-2xl overflow-hidden border border-blue-100/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col group">
+        <div class="relative h-52 overflow-hidden bg-slate-100">
+          <img src="https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=600&q=80"
+               alt="Nursery Teacher Training"
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent"></div>
+          <div class="absolute bottom-3 left-4 flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-white/95 backdrop-blur-sm flex items-center justify-center text-blue-600 shadow-sm">
+              <i class="fa-solid fa-seedling text-sm"></i>
+            </span>
+            <span class="text-white font-semibold text-lg drop-shadow-sm">Nursery Teacher Training</span>
+          </div>
+        </div>
+        <div class="p-6 flex-1 flex flex-col justify-between bg-white">
+          <p class="text-slate-600 text-sm leading-relaxed">Foundational training for preschool educators in child development and early learning.</p>
         </div>
       </div>
 
-      <div class="bg-blue-50/50 rounded-2xl overflow-hidden border border-blue-100">
-        <img alt="Montessori Teacher Training" class="w-full h-48 object-cover"
-          src="https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=600&q=80" />
-        <div class="p-6">
-          <h3 class="text-lg font-bold text-slate-900 mb-2">Montessori Teacher Training</h3>
-          <p class="text-slate-600 text-sm">Montessori-based pedagogy focusing on self-directed, activity-based learning</p>
+      <!-- Programme 2: Montessori Teacher Training -->
+      <div class="bg-white rounded-2xl overflow-hidden border border-blue-100/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col group">
+        <div class="relative h-52 overflow-hidden bg-slate-100">
+          <img src="https://images.unsplash.com/photo-1596495577886-d920f1fb7238?auto=format&fit=crop&w=600&q=80"
+               alt="Montessori Teacher Training"
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent"></div>
+          <div class="absolute bottom-3 left-4 flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-white/95 backdrop-blur-sm flex items-center justify-center text-blue-600 shadow-sm">
+              <i class="fa-solid fa-cubes text-sm"></i>
+            </span>
+            <span class="text-white font-semibold text-lg drop-shadow-sm">Montessori Teacher Training</span>
+          </div>
+        </div>
+        <div class="p-6 flex-1 flex flex-col justify-between bg-white">
+          <p class="text-slate-600 text-sm leading-relaxed">Montessori-based pedagogy focusing on self-directed, activity-based learning.</p>
         </div>
       </div>
 
-      <div class="bg-orange-50/50 rounded-2xl overflow-hidden border border-orange-100">
-        <img alt="Early Childhood Education" class="w-full h-48 object-cover"
-          src="https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?auto=format&fit=crop&w=600&q=80" />
-        <div class="p-6">
-          <h3 class="text-lg font-bold text-slate-900 mb-2">Early Childhood Education</h3>
-          <p class="text-slate-600 text-sm">Holistic training in early-years teaching, classroom setup, and child engagement</p>
+      <!-- Programme 3: Early Childhood Education -->
+      <div class="bg-white rounded-2xl overflow-hidden border border-blue-100/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col group">
+        <div class="relative h-52 overflow-hidden bg-slate-100">
+          <img src="https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=600&q=80"
+               alt="Early Childhood Education"
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent"></div>
+          <div class="absolute bottom-3 left-4 flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-white/95 backdrop-blur-sm flex items-center justify-center text-blue-600 shadow-sm">
+              <i class="fa-solid fa-hands-holding-child text-sm"></i>
+            </span>
+            <span class="text-white font-semibold text-lg drop-shadow-sm">Early Childhood Education</span>
+          </div>
+        </div>
+        <div class="p-6 flex-1 flex flex-col justify-between bg-white">
+          <p class="text-slate-600 text-sm leading-relaxed">Holistic training in early-years teaching, classroom setup, and child engagement.</p>
         </div>
       </div>
+
     </div>
   </div>
 </section>
