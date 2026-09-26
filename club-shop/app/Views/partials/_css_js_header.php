@@ -47,6 +47,7 @@ $jsConfig = [
         'acceptTerms' => esc(trans("msg_accept_terms")),
         'addToCart' => esc(trans("add_to_cart")),
         'addedToCart' => esc(trans("added_to_cart")),
+        'updateCart' => esc((function_exists('trans') && trans("update_cart") !== "update_cart") ? trans("update_cart") : "Update Cart"),
         'copyLink' => esc(trans("copy_link")),
         'copied' => esc(trans("copied")),
         'addToWishlist' => esc(trans("add_to_wishlist")),

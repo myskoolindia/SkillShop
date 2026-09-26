@@ -204,6 +204,51 @@ class ApiController extends BaseController
     }
 
     // ----------------------------------------------------------------
+    // GET /api/categories/tree
+    // Returns every category with its parent info — used by the
+    // composite-skill-details page to dynamically classify bundle
+    // component categories into their top-level "Form of Work" group.
+    // ----------------------------------------------------------------
+    public function categoriesTree()
+    {
+        $db = \Config\Database::connect();
+
+        // All categories with their translated names and parent names
+        $rows = $db->query("
+            SELECT
+                c.id,
+                c.slug,
+                c.parent_id,
+                cl.name                     AS name,
+                COALESCE(pcl.name, '')       AS parent_name,
+                c.status
+            FROM categories c
+            LEFT JOIN category_lang cl  ON cl.category_id  = c.id       AND cl.lang_id  = 1
+            LEFT JOIN categories     pc ON pc.id            = c.parent_id
+            LEFT JOIN category_lang pcl ON pcl.category_id = pc.id      AND pcl.lang_id = 1
+            ORDER BY c.parent_id, c.category_order, cl.name
+        ")->getResultArray();
+
+        // Build lookup: category_id → { id, name, parent_id, parent_name }
+        $map = [];
+        foreach ($rows as $r) {
+            $map[(int)$r['id']] = [
+                'id'          => (int)$r['id'],
+                'slug'        => $r['slug'],
+                'name'        => $r['name'] ?? '',
+                'parent_id'   => (int)$r['parent_id'],
+                'parent_name' => $r['parent_name'] ?? '',
+                'status'      => (int)$r['status'],
+            ];
+        }
+
+        return $this->json([
+            'status' => 'success',
+            'data'   => array_values($map),
+        ]);
+    }
+
+    // ----------------------------------------------------------------
     // GET /api/categories
     // ----------------------------------------------------------------
     public function categories()

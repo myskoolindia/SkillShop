@@ -1576,6 +1576,18 @@ $("#form-add-to-cart").submit(function (event) {
 
         var serializedData = form.serializeArray();
         serializedData = setSerializedData(serializedData);
+
+        // Detect edit mode: cart_item_id hidden input present and non-empty
+        var isUpdateMode = (function () {
+            var cid = form.find('input[name="cart_item_id"]').val();
+            return cid && cid !== '';
+        })();
+
+        // Labels for restore after spinner
+        var updateCartLabel = '<span class="btn-cart-icon"><i class="fa fa-refresh"></i></span>&nbsp;' + (MdsConfig.text.updateCart || 'Update Cart');
+        var addToCartLabel  = '<span class="btn-cart-icon"><i class="icon-cart-solid"></i></span>' + MdsConfig.text.addToCart;
+        var restoreLabel    = isUpdateMode ? updateCartLabel : addToCartLabel;
+
         $.ajax({
             type: 'POST',
             url: generateUrl('cart/add-to-cart'),
@@ -1599,13 +1611,19 @@ $("#form-add-to-cart").submit(function (event) {
                         $('#modalAddToCart').modal('show');
                     }, 400);
                     setTimeout(function () {
-                        $('#form-add-to-cart .btn-product-cart').html('<span class="btn-cart-icon"><i class="icon-cart-solid"></i></span>' + MdsConfig.text.addToCart);
+                        // Restore the correct label — Update Cart if editing, Add to Cart if new
+                        $('#form-add-to-cart .btn-product-cart').html(restoreLabel);
                         $('#form-add-to-cart .btn-product-cart').prop('disabled', false);
                     }, 1000);
                 } else {
-                    $('#form-add-to-cart .btn-product-cart').html('<span class="btn-cart-icon"><i class="icon-cart-solid"></i></span>' + MdsConfig.text.addToCart);
+                    // On error, restore the correct label too
+                    $('#form-add-to-cart .btn-product-cart').html(restoreLabel);
                     $('#form-add-to-cart .btn-product-cart').prop('disabled', false);
                 }
+            },
+            error: function () {
+                $('#form-add-to-cart .btn-product-cart').html(restoreLabel);
+                $('#form-add-to-cart .btn-product-cart').prop('disabled', false);
             }
         });
     }

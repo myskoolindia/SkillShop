@@ -48,6 +48,7 @@ $routes->post('test-post', function () {
 });
 $routes->post('api/login',                        'ApiController::login');
 $routes->get('api/categories',                    'ApiController::categories');
+$routes->get('api/categories/tree',               'ApiController::categoriesTree');
 $routes->get('api/categories/(:num)/products',    'ApiController::categoryProducts/$1');
 $routes->get('api/products',                      'ApiController::products');
 $routes->get('api/products/slug/(:any)',           'ApiController::productDetailBySlug/$1');
