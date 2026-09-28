@@ -433,6 +433,60 @@ class ApiController extends BaseController
             ->where('products.is_deleted', 0)
             ->get()->getRow();
 
+        // If not found by exact slug, check if slug is an alias or id
+        if (empty($product)) {
+            if ($slug === 'basic-skill-1' || $slug === 'test-skill-1' || $slug === 'basic-plan') {
+                $this->productModel->setBaseQuery(true);
+                $product = $this->productModel->builder
+                    ->groupStart()
+                        ->where('products.slug', 'basic-skill-1')
+                        ->orWhere('products.slug', 'test-skill-1')
+                        ->orWhere('products.id', 1)
+                    ->groupEnd()
+                    ->where('products.is_active', 1)
+                    ->where('products.is_deleted', 0)
+                    ->get()->getRow();
+            } elseif ($slug === 'advance-skill-1' || $slug === 'advance-plan') {
+                $this->productModel->setBaseQuery(true);
+                $product = $this->productModel->builder
+                    ->groupStart()
+                        ->where('products.slug', 'advance-skill-1')
+                        ->orWhere('products.id', 2)
+                    ->groupEnd()
+                    ->where('products.is_active', 1)
+                    ->where('products.is_deleted', 0)
+                    ->get()->getRow();
+            } elseif ($slug === 'premium-skill-1' || $slug === 'premium-plan') {
+                $this->productModel->setBaseQuery(true);
+                $product = $this->productModel->builder
+                    ->groupStart()
+                        ->where('products.slug', 'premium-skill-1')
+                        ->orWhere('products.id', 3)
+                    ->groupEnd()
+                    ->where('products.is_active', 1)
+                    ->where('products.is_deleted', 0)
+                    ->get()->getRow();
+            }
+
+            if (empty($product) && is_numeric($slug)) {
+                $this->productModel->setBaseQuery(true);
+                $product = $this->productModel->builder
+                    ->where('products.id', (int)$slug)
+                    ->where('products.is_active', 1)
+                    ->where('products.is_deleted', 0)
+                    ->get()->getRow();
+            }
+
+            if (empty($product) && str_contains($slug, 'skill')) {
+                $this->productModel->setBaseQuery(true);
+                $product = $this->productModel->builder
+                    ->where('products.is_bundle', 1)
+                    ->where('products.is_active', 1)
+                    ->where('products.is_deleted', 0)
+                    ->get()->getRow();
+            }
+        }
+
         if (empty($product)) {
             return $this->json(['status' => 'error', 'message' => 'Product not found'], 404);
         }

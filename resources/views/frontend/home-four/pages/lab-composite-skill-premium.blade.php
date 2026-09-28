@@ -1010,7 +1010,11 @@
 (function(){
 'use strict';
 
-var BASE = window.location.protocol + '//' + window.location.hostname + '/club-shop';
+var BASE = (function() {
+  var path = window.location.pathname;
+  var sub = path.indexOf('/skillvation.comphp') === 0 ? '/skillvation.comphp/club-shop' : '/club-shop';
+  return window.location.origin + sub;
+})();
 
 var THEMES = [
   { keys:['life science','life form','biology','agriculture','food','health'],
@@ -1077,7 +1081,7 @@ function openRow(row){
     if(b) b.style.maxHeight='0';
     if(c) c.style.transform='rotate(0deg)';
   });
-  body.style.maxHeight = body.scrollHeight + 200 + 'px';
+  body.style.maxHeight = (body.scrollHeight + 300) + 'px';
   if(chev) chev.style.transform='rotate(180deg)';
   row.dataset.open='1';
 }
@@ -1088,7 +1092,7 @@ function closeRow(row){
   row.dataset.open='0';
 }
 
-function buildRow(catName, comps, theme, productUrl){
+function buildRow(catName, comps, theme, productUrl, isOpenByDefault){
   var icon  = getIcon(catName);
   var rowId = 'sks-r-'+Math.random().toString(36).slice(2,8);
   var totalQ=0, totalV=0;
@@ -1106,27 +1110,40 @@ function buildRow(catName, comps, theme, productUrl){
     var opt    = c.is_optional
       ? '<span style="margin-left:5px;padding:1px 5px;border-radius:3px;background:#fef3c7;color:#92400e;border:1px solid #fde68a;font-size:9px;font-weight:700;">optional</span>'
       : '';
-    var img    = c.image_small
-      ? '<img src="'+esc(c.image_small)+'" alt="'+esc(c.title)+'" loading="lazy" '
-          +'style="width:32px;height:32px;object-fit:cover;border-radius:4px;border:1px solid #e2e8f0;flex-shrink:0;" '
-          +'onerror="this.style.display=\'none\'">'
-      : '<span style="width:32px;height:32px;border-radius:4px;background:#f1f5f9;border:1px solid #e2e8f0;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;">'
-          +'<i class="fa-solid fa-cube" style="color:#cbd5e1;font-size:11px;"></i></span>';
+    var rawImg = c.image_small || c.image || '';
+    var imgSrc = '';
+    if(rawImg){
+      if(rawImg.startsWith('http://') || rawImg.startsWith('https://') || rawImg.startsWith('/')){
+        imgSrc = rawImg;
+      } else {
+        imgSrc = BASE + '/' + (rawImg.startsWith('uploads/') ? rawImg : 'uploads/images/' + rawImg);
+      }
+    }
+    var img = imgSrc
+      ? '<img src="'+esc(imgSrc)+'" alt="'+esc(c.title)+'" loading="lazy" '
+          +'style="width:36px;height:36px;object-fit:cover;border-radius:6px;border:1px solid #e2e8f0;flex-shrink:0;" '
+          +'onerror="this.style.display=\'none\';">'
+      : '<span style="width:36px;height:36px;border-radius:6px;background:#f1f5f9;border:1px solid #e2e8f0;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;">'
+          +'<i class="fa-solid fa-cube" style="color:#cbd5e1;font-size:12px;"></i></span>';
 
-    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid #f1f5f9;">'
+    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #f1f5f9;">'
       +img
       +'<div style="flex:1;min-width:0;">'
-        +'<div style="font-size:12.5px;font-weight:600;color:#1e293b;line-height:1.3;">'+esc(c.title)+opt+'</div>'
-        +(c.sku?'<div style="font-size:10px;color:#94a3b8;font-family:monospace;">'+esc(c.sku)+'</div>':'')
+        +'<div style="font-size:13px;font-weight:600;color:#1e293b;line-height:1.3;">'+esc(c.title)+opt+'</div>'
+        +(c.sku?'<div style="font-size:10.5px;color:#94a3b8;font-family:monospace;margin-top:2px;">'+esc(c.sku)+'</div>':'')
       +'</div>'
       +'<div style="text-align:right;flex-shrink:0;">'
-        +'<div style="font-size:12px;font-weight:700;color:'+(c.is_optional?'#94a3b8':theme.dotColor)+';">'+(c.is_optional?'—':rupee(line))+'</div>'
+        +'<div style="font-size:12.5px;font-weight:700;color:'+(c.is_optional?'#94a3b8':theme.dotColor)+';">'+(c.is_optional?'—':rupee(line))+'</div>'
         +'<div style="font-size:10.5px;color:#94a3b8;">'+(c.is_optional?'0 (opt)':qty+' × '+rupee(c.unit_price))+'</div>'
       +'</div>'
     +'</div>';
   }).join('');
 
-  return '<div class="sks-row" id="'+rowId+'" data-open="0" '
+  var initialOpen = isOpenByDefault ? '1' : '0';
+  var initialMaxHeight = isOpenByDefault ? 'max-height:800px;' : 'max-height:0;';
+  var initialChev = isOpenByDefault ? 'transform:rotate(180deg);' : 'transform:rotate(0deg);';
+
+  return '<div class="sks-row" id="'+rowId+'" data-open="'+initialOpen+'" '
       +'style="border-bottom:1px solid rgba(0,0,0,.06);cursor:pointer;" '
       +'data-hover="'+esc(theme.hoverBg)+'">'
     +'<button type="button" '
@@ -1139,13 +1156,13 @@ function buildRow(catName, comps, theme, productUrl){
         +'<div style="font-size:14px;font-weight:600;color:#1e293b;">'+esc(catName)+'</div>'
         +'<div style="font-size:11px;color:#94a3b8;margin-top:2px;">'+subtitle+'</div>'
       +'</div>'
-      +'<i class="fa-solid fa-chevron-down sks-chev" style="font-size:11px;color:#94a3b8;transition:transform .25s;flex-shrink:0;"></i>'
+      +'<i class="fa-solid fa-chevron-down sks-chev" style="font-size:11px;color:#94a3b8;transition:transform .25s;flex-shrink:0;'+initialChev+'"></i>'
     +'</button>'
-    +'<div class="sks-body" style="max-height:0;overflow:hidden;transition:max-height .3s ease;">'
+    +'<div class="sks-body" style="'+initialMaxHeight+'overflow:hidden;transition:max-height .35s ease;">'
       +itemRows
-      +(totalQ>0?'<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:#f8fafc;border-top:1px solid #e2e8f0;">'
-          +'<span style="font-size:11px;font-weight:700;color:#64748b;">'+comps.length+' item'+(comps.length!==1?'s':'')+' · '+totalQ+' units</span>'
-          +'<span style="font-size:13px;font-weight:800;color:'+theme.dotColor+';">'+rupee(totalV)+'</span>'
+      +(totalQ>0?'<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f8fafc;border-top:1px solid #e2e8f0;">'
+          +'<span style="font-size:11.5px;font-weight:700;color:#64748b;">'+comps.length+' item'+(comps.length!==1?'s':'')+' · '+totalQ+' units</span>'
+          +'<span style="font-size:13.5px;font-weight:800;color:'+theme.dotColor+';">'+rupee(totalV)+'</span>'
         +'</div>':'')
     +'</div>'
   +'</div>';
@@ -1159,40 +1176,31 @@ function bootHover(root){
     var timer=null, btn=row.querySelector('button'), body=row.querySelector('.sks-body');
     var hoverBg=row.getAttribute('data-hover')||'#f1f5f9';
     row.addEventListener('mouseenter',function(){
-      clearTimeout(timer); if(btn) btn.style.background=hoverBg; openRow(row);
+      clearTimeout(timer); if(btn) btn.style.background=hoverBg;
     });
     row.addEventListener('mouseleave',function(){
       if(btn) btn.style.background='transparent';
-      timer=setTimeout(function(){closeRow(row);},150);
     });
-    if(body){
-      body.addEventListener('mouseenter',function(){ clearTimeout(timer); });
-      body.addEventListener('mouseleave',function(){
-        timer=setTimeout(function(){closeRow(row);},150);
-      });
-    }
   });
 }
 
 function buildBox(parentName, parentId, subGroups, theme, productUrl, isCenter){
   var el = document.createElement('div');
-  var flex = isCenter ? '1.4 1 200px' : '1 1 180px';
   el.style.cssText = 'border:2px solid '+theme.border+';background:'+theme.bg+';'
-    +'overflow:hidden;flex:'+flex+';min-width:180px;border-radius:12px;'
-    +(theme.shadow?'box-shadow:0 8px 24px rgba(0,0,0,.08);':'');
+    +'overflow:hidden;min-width:280px;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.05);';
 
   var catNames = Object.keys(subGroups);
 
-  var hdr = '<div style="background:'+theme.hdrBg+';padding:11px 16px;display:flex;align-items:center;gap:10px;">'
-    +'<i class="fa-solid '+getIcon(parentName)+'" style="color:#fff;font-size:15px;"></i>'
-    +'<span style="font-weight:700;color:#fff;font-size:15px;">'+esc(parentName)+'</span>'
-    +'<span style="margin-left:auto;background:rgba(255,255,255,.22);color:#fff;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;">'
+  var hdr = '<div style="background:'+theme.hdrBg+';padding:13px 18px;display:flex;align-items:center;gap:10px;">'
+    +'<i class="fa-solid '+getIcon(parentName)+'" style="color:#fff;font-size:16px;"></i>'
+    +'<span style="font-weight:700;color:#fff;font-size:15.5px;">'+esc(parentName)+'</span>'
+    +'<span style="margin-left:auto;background:rgba(255,255,255,.22);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">'
       +catNames.length+' categor'+(catNames.length!==1?'ies':'y')
     +'</span>'
   +'</div>';
 
   var rows = '<div data-sks-rows>'
-    + catNames.map(function(cn){ return buildRow(cn, subGroups[cn], theme, productUrl); }).join('')
+    + catNames.map(function(cn, idx){ return buildRow(cn, subGroups[cn], theme, productUrl, idx === 0); }).join('')
   + '</div>';
 
   el.innerHTML = hdr + rows;
@@ -1258,6 +1266,7 @@ Promise.all([
     if(count>maxItems){ maxItems=count; maxKey=pid; }
   });
 
+  boxesEl.innerHTML = '';
   parentIds.forEach(function(pid){
     var g      = groups[pid];
     var theme  = getTheme(g.name);
@@ -1267,7 +1276,6 @@ Promise.all([
   });
 
   (function(){
-    var VISIBLE = 2;
     var GAP     = 16;
     var current = 0;
     var boxes   = Array.prototype.slice.call(boxesEl.children);
@@ -1275,9 +1283,19 @@ Promise.all([
     var prevBtn = document.getElementById('sks-box-prev');
     var nextBtn = document.getElementById('sks-box-next');
 
+    function getVisibleCount() {
+      if (window.innerWidth < 768) return 1;
+      if (total === 1) return 1;
+      return 2;
+    }
+
     function getCardW(){
-      var containerW = boxesEl.parentElement.offsetWidth;
-      return Math.floor((containerW - GAP * (VISIBLE - 1)) / VISIBLE);
+      var containerW = (boxesEl.parentElement ? boxesEl.parentElement.offsetWidth : 0) || 900;
+      var vis = getVisibleCount();
+      if (vis <= 1 || total <= 1) {
+        return containerW;
+      }
+      return Math.floor((containerW - GAP * (vis - 1)) / vis);
     }
 
     function applyWidths(){
@@ -1290,25 +1308,44 @@ Promise.all([
     }
 
     function go(idx){
-      current = Math.max(0, Math.min(idx, Math.max(0, total - VISIBLE)));
+      var vis = getVisibleCount();
+      current = Math.max(0, Math.min(idx, Math.max(0, total - vis)));
       var w   = getCardW();
       boxesEl.style.transform = 'translateX(-' + (current * (w + GAP)) + 'px)';
       if(prevBtn) prevBtn.style.opacity = current === 0 ? '.3' : '1';
-      if(nextBtn) nextBtn.style.opacity = current >= total - VISIBLE ? '.3' : '1';
+      if(nextBtn) nextBtn.style.opacity = current >= total - vis ? '.3' : '1';
     }
 
     applyWidths();
     go(0);
 
-    if(total <= VISIBLE){
+    var vis = getVisibleCount();
+    if(total <= vis){
       if(prevBtn) prevBtn.style.display = 'none';
       if(nextBtn) nextBtn.style.display = 'none';
     } else {
-      if(prevBtn) prevBtn.addEventListener('click', function(){ go(current - 1); });
-      if(nextBtn) nextBtn.addEventListener('click', function(){ go(current + 1); });
+      if(prevBtn) {
+        prevBtn.style.display = 'flex';
+        prevBtn.onclick = function(){ go(current - 1); };
+      }
+      if(nextBtn) {
+        nextBtn.style.display = 'flex';
+        nextBtn.onclick = function(){ go(current + 1); };
+      }
     }
 
-    window.addEventListener('resize', function(){ applyWidths(); go(current); });
+    window.addEventListener('resize', function(){
+      applyWidths();
+      var v = getVisibleCount();
+      if(total <= v){
+        if(prevBtn) prevBtn.style.display = 'none';
+        if(nextBtn) nextBtn.style.display = 'none';
+      } else {
+        if(prevBtn) prevBtn.style.display = 'flex';
+        if(nextBtn) nextBtn.style.display = 'flex';
+      }
+      go(current);
+    });
   })();
 
   if(countEl) countEl.textContent = totalCats;
@@ -1323,7 +1360,7 @@ Promise.all([
 .catch(function(e){
   console.log('sks notice (offline/static fallback):', e);
   if(loadEl) loadEl.classList.add('hidden');
-  if(errEl) errEl.classList.add('hidden');
+  if(errEl) errEl.classList.remove('hidden');
 });
 
 })();
