@@ -41,6 +41,67 @@
   #skill-sectors-columns > div.hidden { display: none !important; }
   #skill-sectors-columns > div:not(.hidden):only-child { flex: 0 0 100% !important; }
   .skill-acc-row button:focus-visible { outline: 2px solid #3b82f6; outline-offset: -2px; }
+
+  /* Kit Carousel styles */
+  .sks-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #1e293b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .sks-nav-btn:hover {
+    background: #ffffff;
+    color: #f4742b;
+    border-color: #fdba74;
+    box-shadow: 0 8px 24px rgba(244,116,43,0.22);
+    transform: translateY(-50%) scale(1.08);
+  }
+  .sks-nav-btn:active {
+    transform: translateY(-50%) scale(0.96);
+  }
+  .sks-nav-prev { left: -22px; }
+  .sks-nav-next { right: -22px; }
+  @media (max-width: 768px) {
+    .sks-nav-prev { left: 4px; }
+    .sks-nav-next { right: 4px; }
+    .sks-nav-btn {
+      width: 38px;
+      height: 38px;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    }
+  }
+  .sks-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .sks-dot.active {
+    width: 26px;
+    border-radius: 13px;
+    background: #f4742b;
+  }
+  .sks-box-card {
+    flex-shrink: 0;
+    box-sizing: border-box;
+    width: 100%;
+  }
 </style>
 @endpush
 
@@ -131,20 +192,20 @@
     </div>
 
     {{-- Stats Row --}}
-    <div class="mt-14 grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="mt-12 sm:mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
       @foreach([
         ['icon'=>'fa-scale-balanced', 'stat'=>'CBSE-Aligned', 'label'=>'Circular Skill-75/2024 & 01/2025'],
         ['icon'=>'fa-shapes',         'stat'=>'Multi-Domain', 'label'=>'Life Forms, Machines & Services'],
         ['icon'=>'fa-boxes-stacked',   'stat'=>'100% Turnkey', 'label'=>'Infrastructure + Tools + Storage'],
         ['icon'=>'fa-graduation-cap', 'stat'=>'Classes VI–XII','label'=>'600 sq ft or 2×400 sq ft Options'],
       ] as $s)
-      <div class="bg-white rounded-2xl p-5 flex items-center gap-4 border border-slate-200/90 shadow-sm hover:border-brand-orange/40 transition-colors">
-        <div class="w-12 h-12 rounded-xl bg-brand-navy/10 flex items-center justify-center text-brand-navy text-xl flex-shrink-0">
+      <div class="bg-white rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 sm:gap-4 border border-slate-200/90 shadow-sm hover:border-brand-orange/40 hover:shadow-md transition-all">
+        <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-brand-navy/10 flex items-center justify-center text-brand-navy text-lg sm:text-xl flex-shrink-0">
           <i class="fa-solid {{ $s['icon'] }}"></i>
         </div>
-        <div>
-          <div class="text-lg font-extrabold text-brand-navy leading-tight">{{ $s['stat'] }}</div>
-          <div class="text-xs text-slate-500 font-medium">{{ $s['label'] }}</div>
+        <div class="min-w-0 flex-1">
+          <div class="text-base sm:text-lg font-extrabold text-brand-navy leading-tight truncate sm:whitespace-normal">{{ $s['stat'] }}</div>
+          <div class="text-xs text-slate-500 font-medium mt-0.5 leading-snug">{{ $s['label'] }}</div>
         </div>
       </div>
       @endforeach
@@ -597,7 +658,7 @@
      7. DYNAMIC KIT EXPLORER (Live Category & Component Inventory)
      ===================================================================== --}}
 <section class="py-16 lg:py-20 bg-white" id="skill-sectors-section">
-  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
     <div class="text-center max-w-2xl mx-auto mb-12">
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-navy/10 text-brand-navy text-xs font-bold uppercase tracking-wider mb-3">
@@ -629,26 +690,21 @@
     <div id="sks-content" class="hidden">
       <div style="position:relative;">
         <button id="sks-box-prev" type="button" aria-label="Previous"
-          style="position:absolute;left:-20px;top:50%;transform:translateY(-50%);z-index:10;
-                 width:40px;height:40px;border-radius:50%;border:1px solid #e2e8f0;
-                 background:#fff;color:#475569;cursor:pointer;
-                 display:flex;align-items:center;justify-content:center;
-                 box-shadow:0 2px 8px rgba(0,0,0,.10);transition:all .2s;">
+          class="sks-nav-btn sks-nav-prev">
           <i class="fa-solid fa-chevron-left" style="font-size:12px;"></i>
         </button>
         <button id="sks-box-next" type="button" aria-label="Next"
-          style="position:absolute;right:-20px;top:50%;transform:translateY(-50%);z-index:10;
-                 width:40px;height:40px;border-radius:50%;border:1px solid #e2e8f0;
-                 background:#fff;color:#475569;cursor:pointer;
-                 display:flex;align-items:center;justify-content:center;
-                 box-shadow:0 2px 8px rgba(0,0,0,.10);transition:all .2s;">
+          class="sks-nav-btn sks-nav-next">
           <i class="fa-solid fa-chevron-right" style="font-size:12px;"></i>
         </button>
 
-        <div style="overflow:hidden;border-radius:12px;">
+        <div style="overflow:hidden;border-radius:12px;" id="sks-carousel-viewport">
           <div id="sks-boxes"
-               style="display:flex;gap:16px;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform;align-items:flex-start;"></div>
+               style="display:flex;gap:16px;transition:transform .45s cubic-bezier(.25,1,.5,1);will-change:transform;align-items:flex-start;"></div>
         </div>
+
+        {{-- Dots pagination indicator --}}
+        <div id="sks-dots" style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:18px;"></div>
       </div>
 
       {{-- CTA Bar inside Kit Box --}}
@@ -1258,6 +1314,17 @@ Promise.all([
     if(count>maxItems){ maxItems=count; maxKey=pid; }
   });
 
+  if(countEl) countEl.textContent = totalCats;
+  if(itemsEl) itemsEl.textContent = totalItems;
+  var btnC=document.getElementById('sks-btn-customise'), btnP=document.getElementById('sks-btn-product');
+  if(btnC) btnC.href = customiseUrl;
+  if(btnP) btnP.href = productUrl;
+
+  // Unhide content container BEFORE building cards and measuring layout
+  if(loadEl) loadEl.classList.add('hidden');
+  if(contentEl) contentEl.classList.remove('hidden');
+
+  boxesEl.innerHTML = '';
   parentIds.forEach(function(pid){
     var g      = groups[pid];
     var theme  = getTheme(g.name);
@@ -1267,58 +1334,156 @@ Promise.all([
   });
 
   (function(){
-    var VISIBLE = 2;
-    var GAP     = 16;
+    var GAP = 16;
     var current = 0;
-    var boxes   = Array.prototype.slice.call(boxesEl.children);
-    var total   = boxes.length;
+    var boxes = Array.prototype.slice.call(boxesEl.children);
+    var total = boxes.length;
     var prevBtn = document.getElementById('sks-box-prev');
     var nextBtn = document.getElementById('sks-box-next');
+    var dotsContainer = document.getElementById('sks-dots');
+    var viewport = document.getElementById('sks-carousel-viewport');
+
+    function getVisibleCount(){
+      var w = window.innerWidth;
+      if (w < 640) return 1;
+      if (w < 1024) return Math.min(2, total);
+      return Math.min(3, total);
+    }
+
+    function getContainerW(){
+      var w = 0;
+      if (viewport && viewport.clientWidth > 0) {
+        w = viewport.clientWidth;
+      } else if (contentEl && contentEl.clientWidth > 0) {
+        w = contentEl.clientWidth;
+      } else if (boxesEl.parentElement && boxesEl.parentElement.clientWidth > 0) {
+        w = boxesEl.parentElement.clientWidth;
+      } else {
+        w = Math.max(300, window.innerWidth - 32);
+      }
+      return w;
+    }
 
     function getCardW(){
-      var containerW = boxesEl.parentElement.offsetWidth;
-      return Math.floor((containerW - GAP * (VISIBLE - 1)) / VISIBLE);
+      var visible = getVisibleCount();
+      var containerW = getContainerW();
+      var totalGap = GAP * (visible - 1);
+      var w = Math.floor((containerW - totalGap) / visible);
+      return Math.max(240, w);
     }
 
     function applyWidths(){
       var w = getCardW();
       boxes.forEach(function(b){
+        b.style.width     = w + 'px';
         b.style.minWidth  = w + 'px';
         b.style.maxWidth  = w + 'px';
         b.style.flex      = '0 0 ' + w + 'px';
       });
     }
 
+    function renderDots(){
+      if (!dotsContainer) return;
+      dotsContainer.innerHTML = '';
+      var visible = getVisibleCount();
+      var maxIdx = Math.max(0, total - visible);
+      var dotCount = maxIdx + 1;
+      if (dotCount <= 1) {
+        dotsContainer.style.display = 'none';
+        return;
+      }
+      dotsContainer.style.display = 'flex';
+      for (var i = 0; i < dotCount; i++) {
+        var dot = document.createElement('span');
+        dot.className = 'sks-dot' + (i === current ? ' active' : '');
+        dot.setAttribute('data-idx', i);
+        dot.addEventListener('click', (function(idx){
+          return function(){ go(idx); };
+        })(i));
+        dotsContainer.appendChild(dot);
+      }
+    }
+
+    function updateDots(){
+      if (!dotsContainer) return;
+      var dots = dotsContainer.querySelectorAll('.sks-dot');
+      dots.forEach(function(d, i){
+        if (i === current) {
+          d.classList.add('active');
+        } else {
+          d.classList.remove('active');
+        }
+      });
+    }
+
     function go(idx){
-      current = Math.max(0, Math.min(idx, Math.max(0, total - VISIBLE)));
-      var w   = getCardW();
+      var visible = getVisibleCount();
+      var maxIdx = Math.max(0, total - visible);
+      if (maxIdx === 0) {
+        current = 0;
+      } else if (idx > maxIdx) {
+        current = 0; // Infinite loop wrap-around
+      } else if (idx < 0) {
+        current = maxIdx; // Infinite loop wrap-around to end
+      } else {
+        current = idx;
+      }
+
+      var w = getCardW();
       boxesEl.style.transform = 'translateX(-' + (current * (w + GAP)) + 'px)';
-      if(prevBtn) prevBtn.style.opacity = current === 0 ? '.3' : '1';
-      if(nextBtn) nextBtn.style.opacity = current >= total - VISIBLE ? '.3' : '1';
+      updateDots();
     }
 
-    applyWidths();
-    go(0);
+    requestAnimationFrame(function(){
+      applyWidths();
+      renderDots();
+      go(0);
+    });
 
-    if(total <= VISIBLE){
-      if(prevBtn) prevBtn.style.display = 'none';
-      if(nextBtn) nextBtn.style.display = 'none';
-    } else {
-      if(prevBtn) prevBtn.addEventListener('click', function(){ go(current - 1); });
-      if(nextBtn) nextBtn.addEventListener('click', function(){ go(current + 1); });
+    if (prevBtn) {
+      prevBtn.addEventListener('click', function(){ go(current - 1); });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', function(){ go(current + 1); });
     }
 
-    window.addEventListener('resize', function(){ applyWidths(); go(current); });
+    // Touch & swipe support for mobile
+    var touchStartX = 0;
+    var touchEndX = 0;
+    var touchStartY = 0;
+    var touchEndY = 0;
+
+    if (viewport) {
+      viewport.addEventListener('touchstart', function(e){
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+      }, {passive: true});
+
+      viewport.addEventListener('touchend', function(e){
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+        var diffX = touchStartX - touchEndX;
+        var diffY = touchStartY - touchEndY;
+        if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+          if (diffX > 0) {
+            go(current + 1); // Swiped left -> next
+          } else {
+            go(current - 1); // Swiped right -> prev
+          }
+        }
+      }, {passive: true});
+    }
+
+    var resizeTimer;
+    window.addEventListener('resize', function(){
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function(){
+        applyWidths();
+        renderDots();
+        go(current);
+      }, 80);
+    });
   })();
-
-  if(countEl) countEl.textContent = totalCats;
-  if(itemsEl) itemsEl.textContent = totalItems;
-  var btnC=document.getElementById('sks-btn-customise'), btnP=document.getElementById('sks-btn-product');
-  if(btnC) btnC.href = customiseUrl;
-  if(btnP) btnP.href = productUrl;
-
-  loadEl.classList.add('hidden');
-  contentEl.classList.remove('hidden');
 })
 .catch(function(e){
   console.log('sks notice (offline/static fallback):', e);

@@ -259,8 +259,22 @@
                                                             </div>
                                                         </div>
 
-                                                        <?php if(!empty($cartItem->bundle_categories)): ?>
-                                                            <?php foreach($cartItem->bundle_categories as $bIdx => $bCategory): 
+                                                        <?php if(!empty($cartItem->bundle_categories)): 
+                                                            $displayBundleCats = $cartItem->bundle_categories;
+                                                            uasort($displayBundleCats, function($a, $b) {
+                                                                return strcasecmp($a['name'] ?? '', $b['name'] ?? '');
+                                                            });
+                                                        ?>
+                                                            <?php foreach($displayBundleCats as $bIdx => $bCategory): 
+                                                                $catItems = $bCategory['items'] ?? [];
+                                                                usort($catItems, function($a, $b) {
+                                                                    $aChecked = empty($a->is_optional) || ($a->quantity > 0) ? 1 : 0;
+                                                                    $bChecked = empty($b->is_optional) || ($b->quantity > 0) ? 1 : 0;
+                                                                    if ($aChecked !== $bChecked) {
+                                                                        return $bChecked - $aChecked;
+                                                                    }
+                                                                    return strcasecmp($a->title ?? '', $b->title ?? '');
+                                                                });
                                                                 $cartCatId = 'cart_cat_' . $cartItem->id . '_' . ($bCategory['id'] ?? $bIdx);
                                                                 $bCatKey = !empty($bCategory['id']) ? ('cat_' . (int)$bCategory['id']) : (!empty($bCategory['name']) ? $bCategory['name'] : 'all');
                                                             ?>
@@ -290,7 +304,7 @@
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody>
-                                                                                <?php foreach($bCategory['items'] as $bProd): 
+                                                                                <?php foreach($catItems as $bProd): 
                                                                                     $isOpt = !empty($bProd->is_optional);
                                                                                     $isItemChecked = !$isOpt || ($bProd->quantity > 0);
                                                                                 ?>

@@ -197,14 +197,20 @@ class EmailModel extends BaseModel
             $email->initialize(array_merge($commonConfig, ['protocol' => 'mail']));
         }
 
-        $html = view($data['template_path'], $data);
-        $text = strip_tags($html);
+        $html  = view($data['template_path'], $data);
+        $text  = strip_tags($html);
 
         $email->setFrom($this->emailSettings->mail_reply_to, $this->emailSettings->mail_title);
         $email->setTo($data['to']);
         $email->setSubject($data['subject']);
         $email->setMessage($html);
         $email->setAltMessage($text);
+
+        /* Attach PDF invoice if path supplied and file exists */
+        if (!empty($data['emailRow']->attachment_path)
+            && file_exists($data['emailRow']->attachment_path)) {
+            $email->attach($data['emailRow']->attachment_path);
+        }
 
         if ($email->send()) {
             return true;
@@ -224,23 +230,32 @@ class EmailModel extends BaseModel
     {
         $mail = new PHPMailer(true);
         try {
-            $mail->CharSet = 'UTF-8';
+            $mail->CharSet  = 'UTF-8';
             $mail->Encoding = 'base64';
             $mail->isHTML(true);
             $mail->setFrom($this->emailSettings->mail_reply_to, $this->emailSettings->mail_title);
             $mail->addAddress($data['to']);
             $mail->Subject = $data['subject'];
-            $mail->Body = view($data['template_path'], $data);
+            $mail->Body    = view($data['template_path'], $data);
             $mail->AltBody = strip_tags($mail->Body);
+
+            /* Attach PDF invoice if path supplied and file exists */
+            if (!empty($data['emailRow']->attachment_path)
+                && file_exists($data['emailRow']->attachment_path)) {
+                $mail->addAttachment(
+                    $data['emailRow']->attachment_path,
+                    'Invoice-' . basename($data['emailRow']->attachment_path)
+                );
+            }
 
             if ($protocol === 'smtp') {
                 $mail->isSMTP();
-                $mail->Host = $this->emailSettings->mail_host;
-                $mail->SMTPAuth = true;
-                $mail->Username = $this->emailSettings->mail_username;
-                $mail->Password = $this->emailSettings->mail_password;
+                $mail->Host       = $this->emailSettings->mail_host;
+                $mail->SMTPAuth   = true;
+                $mail->Username   = $this->emailSettings->mail_username;
+                $mail->Password   = $this->emailSettings->mail_password;
                 $mail->SMTPSecure = $encryption;
-                $mail->Port = $this->emailSettings->mail_port;
+                $mail->Port       = $this->emailSettings->mail_port;
             } else {
                 $mail->isMail();
             }

@@ -142,7 +142,7 @@ class BundleModel extends BaseModel
         if (!empty($productIds)) {
             $langId = defaultLangId();
             $productsQuery = $this->db->table('products p')
-                ->select('p.id, p.category_id, p.slug, p.sku, p.price, p.price_discounted, p.currency, p.stock, p.product_type, p.is_active, p.status, p.is_deleted, pd.title')
+                ->select('p.id, p.category_id, p.slug, p.sku, p.price, p.price_discounted, p.currency, p.stock, p.product_type, p.is_active, p.status, p.is_deleted, pd.title, pd.short_description, pd.description')
                 ->join('product_details pd', "pd.product_id = p.id AND pd.lang_id = {$langId}", 'left')
                 ->whereIn('p.id', $productIds);
 
@@ -277,6 +277,8 @@ class BundleModel extends BaseModel
             $item->product_type = $prod->product_type;
             $item->category_id = !empty($prod->category_id) ? (int)$prod->category_id : 0;
             $item->category_name = !empty($prod->category_name) ? $prod->category_name : 'General';
+            $item->short_description = $prod->short_description ?? '';
+            $item->description = $prod->description ?? '';
 
             // Pricing
             if ($row->price_override !== null) {

@@ -405,6 +405,24 @@ class CartModel extends BaseModel
                     $bundleCategories[$cKey]['total_units'] += $bProd->quantity;
                 }
 
+                // 1. Sort Categories Alphabetically
+                uasort($bundleCategories, function($a, $b) {
+                    return strcasecmp($a['name'] ?? '', $b['name'] ?? '');
+                });
+
+                // 2. Sort Items Inside Each Category by Checked (Mandatory/Selected first) then Alphabetically
+                foreach ($bundleCategories as &$bCat) {
+                    usort($bCat['items'], function($a, $b) {
+                        $aChecked = empty($a->is_optional) || ($a->quantity > 0) ? 1 : 0;
+                        $bChecked = empty($b->is_optional) || ($b->quantity > 0) ? 1 : 0;
+                        if ($aChecked !== $bChecked) {
+                            return $bChecked - $aChecked; // Checked (1) first, Unchecked (0) second
+                        }
+                        return strcasecmp($a->title ?? '', $b->title ?? '');
+                    });
+                }
+                unset($bCat);
+
                 $cartItem->bundle_summary = $bundleSummary;
                 $cartItem->bundle_products = $bundleProducts;
                 $cartItem->bundle_categories = array_values($bundleCategories);
@@ -472,7 +490,7 @@ class CartModel extends BaseModel
                 foreach ($parsedBundle as $bItem) {
                     $bPid = (int)($bItem['product_id'] ?? 0);
                     $bVarId = !empty($bItem['variant_id']) ? (int)$bItem['variant_id'] : null;
-                    $bQty = max(1, (int)($bItem['qty'] ?? 1));
+                    $bQty = max(0, (int)($bItem['qty'] ?? 0));
                     $bUnitPrice = isset($bItem['unit_price']) ? (float)$bItem['unit_price'] : 0.0;
 
                     if ($bUnitPrice <= 0 && $bPid > 0) {
