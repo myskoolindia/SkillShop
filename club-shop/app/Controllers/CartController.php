@@ -86,15 +86,14 @@ class CartController extends BaseController
     }
 
     /**
- * Basic Cart
- */
+     * Basic Cart
+     */
     public function basicCart()
     {
         $product = $this->productModel->getActiveProduct(1);
 
         if (!empty($product)) {
             $existingCart = $this->cartModel->getCart();
-
             $alreadyInCart = false;
 
             if (!empty($existingCart) && !empty($existingCart->items)) {
@@ -106,7 +105,13 @@ class CartController extends BaseController
                 }
             }
 
-            if (!$alreadyInCart) {
+            $isRemoved = helperGetSession('plan_removed_basic');
+            if (inputGet('add') == '1' || inputGet('reset') == '1') {
+                $isRemoved = false;
+                helperDeleteSession('plan_removed_basic');
+            }
+
+            if (!$alreadyInCart && !$isRemoved) {
                 $this->cartModel->addToCart($product, 1);
             }
         }
@@ -148,7 +153,13 @@ class CartController extends BaseController
                 }
             }
 
-            if (!$alreadyInCart) {
+            $isRemoved = helperGetSession('plan_removed_advance');
+            if (inputGet('add') == '1' || inputGet('reset') == '1') {
+                $isRemoved = false;
+                helperDeleteSession('plan_removed_advance');
+            }
+
+            if (!$alreadyInCart && !$isRemoved) {
                 $this->cartModel->addToCart($product, 1);
             }
         }
@@ -188,7 +199,13 @@ class CartController extends BaseController
                 }
             }
 
-            if (!$alreadyInCart) {
+            $isRemoved = helperGetSession('plan_removed_premium');
+            if (inputGet('add') == '1' || inputGet('reset') == '1') {
+                $isRemoved = false;
+                helperDeleteSession('plan_removed_premium');
+            }
+
+            if (!$alreadyInCart && !$isRemoved) {
                 $this->cartModel->addToCart($product, 1);
             }
         }
@@ -573,6 +590,10 @@ class CartController extends BaseController
      */
     public function addToCart()
     {
+        helperDeleteSession('plan_removed_basic');
+        helperDeleteSession('plan_removed_advance');
+        helperDeleteSession('plan_removed_premium');
+
         $productId = inputPost('product_id');
         $quantity = (int)inputPost('product_quantity');
         $variantId = inputPost('variant_id');
@@ -623,6 +644,9 @@ class CartController extends BaseController
     {
         $cartItemId = inputPost('cart_item_id');
         $this->cartModel->removeCartItem($cartItemId);
+        helperSetSession('plan_removed_basic', 1);
+        helperSetSession('plan_removed_advance', 1);
+        helperSetSession('plan_removed_premium', 1);
         return jsonResponse();
     }
 

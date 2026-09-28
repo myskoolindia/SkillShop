@@ -68,7 +68,91 @@
                                         <?php if (!empty($orderProducts)):
                                             foreach ($orderProducts as $item): ?>
                                                 <tr>
-                                                    <td style="width: 40%; padding: 15px 0; border-bottom: 1px solid #ddd;"><?= esc($item->product_title); ?></td>
+                                                    <td style="width: 40%; padding: 15px 0; border-bottom: 1px solid #ddd;">
+                                                        <?= esc($item->product_title); ?>
+
+                                                        <?php
+                                                        /* ── Bundle / Package Contents ─────────────────────────────
+                                                           bundle_items JSON: product_id, qty, unit_price (no title/sku)
+                                                           Bulk-fetch title / sku / category from DB.
+                                                        ─────────────────────────────────────────────────────────── */
+                                                        if (!empty($item->is_bundle) && !empty($item->bundle_items)):
+                                                            $_biRaw = is_string($item->bundle_items)
+                                                                ? json_decode($item->bundle_items, true)
+                                                                : $item->bundle_items;
+                                                            if (!empty($_biRaw) && is_array($_biRaw)):
+                                                                $_biIds = [];
+                                                                foreach ($_biRaw as $_bi) {
+                                                                    if ((int)($_bi['qty'] ?? 0) > 0 && !empty($_bi['product_id'])) {
+                                                                        $_biIds[] = (int)$_bi['product_id'];
+                                                                    }
+                                                                }
+                                                                $_biMap = [];
+                                                                if (!empty($_biIds)) {
+                                                                    $_biIdsStr = implode(',', $_biIds);
+                                                                    $_db = \Config\Database::connect();
+                                                                    $_biRows = $_db->query("
+                                                                        SELECT p.id, pd.title, p.sku, cl.name AS category_name
+                                                                        FROM products p
+                                                                        LEFT JOIN product_details pd
+                                                                               ON pd.product_id = p.id AND pd.lang_id = 1
+                                                                        LEFT JOIN categories cat ON cat.id = p.category_id
+                                                                        LEFT JOIN category_lang cl
+                                                                               ON cl.category_id = cat.id AND cl.lang_id = 1
+                                                                        WHERE p.id IN ({$_biIdsStr})
+                                                                    ")->getResult();
+                                                                    foreach ($_biRows as $_r) { $_biMap[(int)$_r->id] = $_r; }
+                                                                }
+                                                                $_biByCategory = [];
+                                                                foreach ($_biRaw as $_bi) {
+                                                                    $_qty = (int)($_bi['qty'] ?? 0);
+                                                                    if ($_qty <= 0) continue;
+                                                                    $_pid  = (int)($_bi['product_id'] ?? 0);
+                                                                    $_pRow = $_biMap[$_pid] ?? null;
+                                                                    $_cat  = $_pRow ? (string)($_pRow->category_name ?? 'Items') : 'Items';
+                                                                    $_biByCategory[$_cat][] = [
+                                                                        'title' => $_pRow ? (string)($_pRow->title ?? '—') : '—',
+                                                                        'sku'   => $_pRow ? (string)($_pRow->sku   ?? '')  : '',
+                                                                        'qty'   => $_qty,
+                                                                        'unit'  => (float)($_bi['unit_price'] ?? 0),
+                                                                        'cur'   => $item->product_currency ?? 'INR',
+                                                                    ];
+                                                                }
+                                                        ?>
+                                                        <div style="margin-top:10px;padding-top:8px;border-top:1px dashed #ddd;">
+                                                            <div style="font-size:12px;font-weight:700;color:#333;margin-bottom:8px;">&#128230; Package Contents</div>
+                                                            <?php foreach ($_biByCategory as $_catName => $_catItems): ?>
+                                                                <div style="margin-bottom:10px;">
+                                                                    <div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;"><?= esc($_catName); ?></div>
+                                                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0"
+                                                                           style="width:100%;font-size:12px;border-collapse:collapse;">
+                                                                        <thead>
+                                                                            <tr style="background:#eeeeee;">
+                                                                                <th style="padding:4px 8px;text-align:left;border:1px solid #ddd;font-weight:600;">Item</th>
+                                                                                <th style="padding:4px 8px;text-align:left;border:1px solid #ddd;font-weight:600;">SKU</th>
+                                                                                <th style="padding:4px 8px;text-align:center;border:1px solid #ddd;font-weight:600;">Qty</th>
+                                                                                <th style="padding:4px 8px;text-align:right;border:1px solid #ddd;font-weight:600;">Unit</th>
+                                                                                <th style="padding:4px 8px;text-align:right;border:1px solid #ddd;font-weight:600;">Total</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                        <?php foreach ($_catItems as $_ci): ?>
+                                                                            <tr>
+                                                                                <td style="padding:4px 8px;border:1px solid #ddd;"><?= esc($_ci['title']); ?></td>
+                                                                                <td style="padding:4px 8px;border:1px solid #ddd;font-family:monospace;font-size:11px;color:#888;"><?= esc($_ci['sku']); ?></td>
+                                                                                <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;"><?= $_ci['qty']; ?></td>
+                                                                                <td style="padding:4px 8px;border:1px solid #ddd;text-align:right;white-space:nowrap;"><?= priceFormatted($_ci['unit'], $_ci['cur']); ?></td>
+                                                                                <td style="padding:4px 8px;border:1px solid #ddd;text-align:right;white-space:nowrap;font-weight:600;"><?= priceFormatted($_ci['unit'] * $_ci['qty'], $_ci['cur']); ?></td>
+                                                                            </tr>
+                                                                        <?php endforeach; ?>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            <?php endforeach; ?>
+                                                        </div>
+                                                        <?php endif; endif; ?>
+
+                                                    </td>
                                                     <td style="padding: 12px 2px; border-bottom: 1px solid #ddd;"><?= priceFormatted($item->product_unit_price, $item->product_currency); ?></td>
                                                     <td style="padding: 12px 2px; border-bottom: 1px solid #ddd;"><?= $item->product_quantity; ?></td>
                                                     <?php if (!empty($order->price_vat)): ?>

@@ -53,6 +53,40 @@ if (!empty($bundleComponents)) {
         $groupedComponents[$catKey]['total_units'] += $pkgQty;
         $groupedComponents[$catKey]['total_price'] += ($unitPrice * $pkgQty);
     }
+
+    // 1. Sort Categories Alphabetically
+    uasort($groupedComponents, function($a, $b) {
+        return strcasecmp($a['name'] ?? '', $b['name'] ?? '');
+    });
+
+    // 2. Sort Items Inside Each Category by Checked (Mandatory/Selected first) then Alphabetically
+    foreach ($groupedComponents as $catKey => &$catGroup) {
+        usort($catGroup['items'], function($a, $b) use ($editItemMap) {
+            $aOpt = !empty($a->is_optional);
+            $bOpt = !empty($b->is_optional);
+
+            $aQty = $aOpt ? max(0, (int)$a->required_quantity) : max(1, (int)$a->required_quantity);
+            $aSaved = $editItemMap['c_' . $a->id] ?? ($editItemMap['p_' . $a->component_product_id] ?? null);
+            if (!empty($aSaved) && isset($aSaved['qty'])) {
+                $aQty = (int)$aSaved['qty'];
+            }
+            $aChecked = (!$aOpt || $aQty > 0) ? 1 : 0;
+
+            $bQty = $bOpt ? max(0, (int)$b->required_quantity) : max(1, (int)$b->required_quantity);
+            $bSaved = $editItemMap['c_' . $b->id] ?? ($editItemMap['p_' . $b->component_product_id] ?? null);
+            if (!empty($bSaved) && isset($bSaved['qty'])) {
+                $bQty = (int)$bSaved['qty'];
+            }
+            $bChecked = (!$bOpt || $bQty > 0) ? 1 : 0;
+
+            if ($aChecked !== $bChecked) {
+                return $bChecked - $aChecked; // Checked (1) comes before Unchecked (0)
+            }
+
+            return strcasecmp($a->title ?? '', $b->title ?? '');
+        });
+    }
+    unset($catGroup);
 }
 $totalCategoriesCount = count($groupedComponents);
 ?>
@@ -242,19 +276,24 @@ $totalCategoriesCount = count($groupedComponents);
                                 </td>
 
                                 <td style="vertical-align: middle;">
-                                    <?php if (!empty($comp->image_small)):
-                                        $compImgUrl = (str_starts_with($comp->image_small, 'http://') || str_starts_with($comp->image_small, 'https://')) ? $comp->image_small : (str_starts_with($comp->image_small, 'uploads/') ? base_url($comp->image_small) : base_url('uploads/images/' . $comp->image_small));
-                                    ?>
-                                        <img src="<?= $compImgUrl; ?>" alt="<?= esc($comp->title); ?>" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0;">
-                                    <?php else: ?>
-                                        <div style="width: 45px; height: 45px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; display:flex; align-items:center; justify-content:center; color:#a0aec0;">
-                                            <i class="fa fa-cube" style="font-size: 18px;"></i>
-                                        </div>
-                                    <?php endif; ?>
+                                    <a href="javascript:void(0);" onclick="openBundleProductQuickView(<?= $comp->id; ?>);" style="cursor: pointer; display: block;" title="View Details: <?= esc($comp->title); ?>">
+                                        <?php if (!empty($comp->image_small)):
+                                            $compImgUrl = (str_starts_with($comp->image_small, 'http://') || str_starts_with($comp->image_small, 'https://')) ? $comp->image_small : (str_starts_with($comp->image_small, 'uploads/') ? base_url($comp->image_small) : base_url('uploads/images/' . $comp->image_small));
+                                        ?>
+                                            <img src="<?= $compImgUrl; ?>" alt="<?= esc($comp->title); ?>" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; transition: transform 0.15s ease;">
+                                        <?php else: ?>
+                                            <div style="width: 45px; height: 45px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; display:flex; align-items:center; justify-content:center; color:#a0aec0;">
+                                                <i class="fa fa-cube" style="font-size: 18px;"></i>
+                                            </div>
+                                        <?php endif; ?>
+                                    </a>
                                 </td>
                                 <td style="vertical-align: middle;">
                                     <div class="font-weight-bold" style="font-size: 13.5px;">
-                                        <a href="<?= generateProductUrl($comp); ?>" target="_blank" class="text-dark hover-primary" style="text-decoration:none;"><?= esc($comp->title); ?></a>
+                                        <a href="javascript:void(0);" onclick="openBundleProductQuickView(<?= $comp->id; ?>);" class="text-dark hover-primary" style="text-decoration:none;" title="View Details: <?= esc($comp->title); ?>">
+                                            <?= esc($comp->title); ?>
+                                            <i class="fa fa-info-circle text-muted ml-1" style="font-size: 11px; opacity: 0.65;"></i>
+                                        </a>
                                     </div>
                                     <div class="d-flex align-items-center flex-wrap mt-1" style="gap: 5px;">
                                         <span class="badge badge-light text-secondary border px-2 py-1" style="font-size: 10.5px;">
@@ -380,6 +419,65 @@ $totalCategoriesCount = count($groupedComponents);
     </div>
 </div>
 
+<!-- Bundle Product Quick View Modal (NO Add-to-Cart button) -->
+<div class="modal fade" id="bundleProductQuickViewModal" tabindex="-1" role="dialog" aria-labelledby="bundleProductQuickViewModalLabel" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document" style="max-width: 720px;">
+        <div class="modal-content" style="border-radius: 12px; overflow: hidden; border: none; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.05);">
+            <div class="modal-header" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 14px 20px;">
+                <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                    <span class="badge badge-primary px-2.5 py-1" id="bp_qv_category" style="font-size: 11.5px; font-weight: 600;">Category</span>
+                    <span class="badge badge-light border text-muted px-2 py-1" id="bp_qv_sku" style="font-size: 11.5px;">SKU: -</span>
+                </div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="outline: none; font-size: 24px; font-weight: 400; opacity: 0.6; line-height: 1;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4" style="background: #ffffff;">
+                <div class="row">
+                    <!-- Left: Product Image Box -->
+                    <div class="col-md-5 col-12 mb-3 mb-md-0">
+                        <div style="width: 100%; aspect-ratio: 1/1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;">
+                            <img id="bp_qv_image" src="" alt="" style="width: 100%; height: 100%; object-fit: contain; padding: 8px;">
+                            <div id="bp_qv_no_image" class="text-muted" style="display:none; text-align: center;">
+                                <i class="fa fa-cube fa-3x text-muted mb-2"></i>
+                                <div style="font-size: 12px;">No image available</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Product Info & Description -->
+                    <div class="col-md-7 col-12 d-flex flex-column justify-content-between">
+                        <div>
+                            <h4 id="bp_qv_title" class="font-weight-bold text-dark mb-2" style="font-size: 18px; line-height: 1.35;"></h4>
+                            
+                            <div class="d-flex align-items-center flex-wrap mb-3" style="gap: 12px;">
+                                <div class="font-weight-bold text-primary" id="bp_qv_price" style="font-size: 18px;"></div>
+                                <span class="badge badge-success" id="bp_qv_stock" style="font-size: 11px; padding: 4px 8px; background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0;">In Stock</span>
+                            </div>
+
+                            <div class="border-top pt-3 mt-2">
+                                <h6 class="text-muted font-weight-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; margin-bottom: 6px;">Product Overview & Specifications</h6>
+                                <div id="bp_qv_description" class="text-secondary" style="font-size: 13.5px; line-height: 1.6; max-height: 200px; overflow-y: auto; padding-right: 4px;"></div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 pt-3 border-top d-flex align-items-center justify-content-between">
+                            <span class="text-muted small" style="font-size: 11.5px;">
+                                <i class="fa fa-cubes mr-1 text-primary"></i> Bundle Package Component Item
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 10px 20px;">
+                <button type="button" class="btn btn-secondary px-4 py-2" data-dismiss="modal" style="border-radius: 6px; font-weight: 600; font-size: 13px;">
+                    <i class="fa fa-times mr-1"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 var activeBundleCategoryKey = 'all';
 var collapsedBundleCategories = {};
@@ -388,6 +486,54 @@ var collapsedBundleCategories = {};
         collapsedBundleCategories['<?= escJs($cK); ?>'] = true;
     <?php endforeach; ?>
 <?php endif; ?>
+
+var bundleProductsMap = {};
+<?php if (!empty($bundleComponents)): ?>
+    <?php foreach ($bundleComponents as $comp): 
+        $compImg = (str_starts_with($comp->image_default ?: ($comp->image_small ?? ''), 'http://') || str_starts_with($comp->image_default ?: ($comp->image_small ?? ''), 'https://')) ? ($comp->image_default ?: $comp->image_small) : (str_starts_with($comp->image_default ?: ($comp->image_small ?? ''), 'uploads/') ? base_url($comp->image_default ?: $comp->image_small) : (!empty($comp->image_default ?: $comp->image_small) ? base_url('uploads/images/' . ($comp->image_default ?: $comp->image_small)) : ''));
+    ?>
+    bundleProductsMap['<?= (int)$comp->id; ?>'] = {
+        id: <?= (int)$comp->component_product_id; ?>,
+        title: <?= json_encode($comp->title); ?>,
+        sku: <?= json_encode($comp->sku); ?>,
+        category: <?= json_encode($comp->category_name); ?>,
+        price: <?= json_encode(priceFormatted($comp->unit_price, $currencyCode, true)); ?>,
+        image: <?= json_encode($compImg); ?>,
+        stock: <?= (int)($comp->available_stock ?? 1); ?>,
+        short_description: <?= json_encode($comp->short_description ?? ''); ?>,
+        description: <?= json_encode($comp->description ?? ''); ?>
+    };
+    <?php endforeach; ?>
+<?php endif; ?>
+
+function openBundleProductQuickView(compId) {
+    var p = bundleProductsMap[compId];
+    if (!p) return;
+
+    $('#bp_qv_title').text(p.title || '');
+    $('#bp_qv_sku').text('SKU: ' + (p.sku || 'N/A'));
+    $('#bp_qv_category').text(p.category || 'General');
+    $('#bp_qv_price').text(p.price || '');
+
+    if (p.image && p.image.length > 0) {
+        $('#bp_qv_image').attr('src', p.image).show();
+        $('#bp_qv_no_image').hide();
+    } else {
+        $('#bp_qv_image').hide();
+        $('#bp_qv_no_image').show();
+    }
+
+    var desc = p.description || p.short_description || 'No additional details provided for this component item.';
+    $('#bp_qv_description').html(desc);
+
+    if (p.stock > 0) {
+        $('#bp_qv_stock').text('In Stock').removeClass('badge-danger').addClass('badge-success').css({background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0'});
+    } else {
+        $('#bp_qv_stock').text('Out of Stock').removeClass('badge-success').addClass('badge-danger').css({background: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca'});
+    }
+
+    $('#bundleProductQuickViewModal').modal('show');
+}
 
 function formatBundleCurrency(amount) {
     var formatted = parseFloat(amount).toFixed(2);

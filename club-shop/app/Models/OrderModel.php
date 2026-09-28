@@ -1039,6 +1039,58 @@ class OrderModel extends BaseModel
         return false;
     }
 
+    //generate invoice PDF for a given order and return the file path (or null on failure)
+    public function generateInvoicePdf(int $orderId): ?string
+    {
+        try {
+            $order = $this->getOrder($orderId);
+            if (empty($order)) return null;
+
+            $invoice = $this->getInvoiceByOrderNumber($order->order_number);
+            if (empty($invoice)) {
+                $this->addInvoice($orderId);
+                $invoice = $this->getInvoiceByOrderNumber($order->order_number);
+            }
+            if (empty($invoice)) return null;
+
+            $orderProducts = $this->getOrderItems($orderId);
+            $invoiceItems  = unserializeData($invoice->invoice_items);
+
+            /* Render the existing invoice HTML view */
+            $html = view('invoice/invoice', [
+                'order'         => $order,
+                'invoice'       => $invoice,
+                'invoiceItems'  => $invoiceItems,
+                'orderProducts' => $orderProducts,
+                'generalSettings' => $this->generalSettings,
+            ]);
+
+            /* Generate PDF with dompdf */
+            $options = new \Dompdf\Options();
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isRemoteEnabled', true);
+            $options->set('defaultFont', 'DejaVu Sans');
+
+            $dompdf = new \Dompdf\Dompdf($options);
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'portrait');
+            $dompdf->render();
+
+            /* Save to writable/uploads/invoices/ */
+            $dir  = WRITEPATH . 'uploads/invoices/';
+            if (!is_dir($dir)) {
+                mkdir($dir, 0775, true);
+            }
+            $file = $dir . 'invoice-' . $order->order_number . '.pdf';
+            file_put_contents($file, $dompdf->output());
+
+            return $file;
+        } catch (\Throwable $e) {
+            log_message('error', '[OrderModel] generateInvoicePdf error: ' . $e->getMessage());
+            return null;
+        }
+    }
+
     //build order email
     public function addOrderEmail($orderId)
     {
@@ -1060,11 +1112,12 @@ class OrderModel extends BaseModel
                         }
                     }
                     $emailData = [
-                        'email_type' => 'new_order',
-                        'email_address' => $to,
-                        'email_subject' => trans("email_text_thank_for_order"),
-                        'email_data' => serialize(['orderId' => $order->id]),
-                        'template_path' => 'email/new_order'
+                        'email_type'      => 'new_order',
+                        'email_address'   => $to,
+                        'email_subject'   => trans("email_text_thank_for_order"),
+                        'email_data'      => serialize(['orderId' => $order->id]),
+                        'template_path'   => 'email/new_order',
+                        'attachment_path' => $this->generateInvoicePdf($order->id),
                     ];
                     addToEmailQueue($emailData);
                     //send to sellers

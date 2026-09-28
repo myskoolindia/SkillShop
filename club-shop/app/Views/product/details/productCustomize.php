@@ -1151,15 +1151,11 @@ document.getElementById('btnAddBundle').onclick=()=>{
         url: generateUrl('cart/add-to-cart-bundle'),
         data: data,
         success: function (response) {
-
-        // console.log(response);
-            location.reload();
             if (response.result == 1) {
-                location.href = generateUrl('cart'); // or modal open
+                location.href = generateUrl('cart');
             } else {
                 alert("Failed to add bundle to cart");
             }
-            
         }
     });
 };
