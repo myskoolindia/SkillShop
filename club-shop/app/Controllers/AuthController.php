@@ -509,4 +509,119 @@ class AuthController extends BaseController
         $this->authModel->logout();
         redirectToBackUrl();
     }
+
+    /**
+     * Single Sign-On (SSO) Login from Skillvation Platform
+     */
+    public function ssoLogin()
+    {
+        $token = $this->request->getGet('token');
+        if (empty($token) || !is_string($token)) {
+            $this->session->setFlashdata('error', 'Invalid SSO token.');
+            return redirect()->to(langBaseUrl());
+        }
+
+        $parts = explode('.', $token, 2);
+        if (count($parts) !== 2) {
+            $this->session->setFlashdata('error', 'Malformed SSO token format.');
+            return redirect()->to(langBaseUrl());
+        }
+
+        list($payloadEncoded, $signature) = $parts;
+
+        $secretKey = env('SSO_SECRET_KEY', 'sk_sso_a9f83e2b17c64d85a109ecf3821094ba723e80d91fca475b83017a4c9b2f6e18');
+        $expectedSignature = hash_hmac('sha256', $payloadEncoded, $secretKey);
+
+        if (!hash_equals($expectedSignature, $signature)) {
+            $this->session->setFlashdata('error', 'Invalid SSO signature.');
+            return redirect()->to(langBaseUrl());
+        }
+
+        $payloadJson = base64_decode(strtr($payloadEncoded, '-_', '+/'));
+        $payload = json_decode($payloadJson, true);
+
+        if (empty($payload) || !is_array($payload)) {
+            $this->session->setFlashdata('error', 'Invalid SSO payload data.');
+            return redirect()->to(langBaseUrl());
+        }
+
+        // Token expiry verification (default 120 seconds TTL)
+        $iat = (int)($payload['iat'] ?? 0);
+        $ttl = (int)env('SSO_TOKEN_TTL', 120);
+        if (time() - $iat > $ttl || $iat > (time() + 60)) {
+            $this->session->setFlashdata('error', 'SSO token has expired. Please try again.');
+            return redirect()->to(langBaseUrl());
+        }
+
+        $user = $this->authModel->loginWithSso($payload);
+
+        if (!$user) {
+            return redirect()->to(langBaseUrl());
+        }
+
+        // Determine target redirect
+        $target = trim($payload['target'] ?? '');
+        if (!empty($target)) {
+            if (str_starts_with($target, '/')) {
+                return redirect()->to(base_url(ltrim($target, '/')));
+            }
+            return redirect()->to($target);
+        }
+
+        // If user is admin in shop and role is admin, redirect to admin panel
+        if ((int)$user->role_id === 1 && (!empty($payload['role']) && $payload['role'] === 'admin')) {
+            return redirect()->to(adminUrl());
+        }
+
+        return redirect()->to(langBaseUrl());
+    }
+
+    /**
+     * Single Sign-On (SSO) Bridge to Skillvation Main Platform (LMS)
+     */
+    public function toMain()
+    {
+        $target = trim($this->request->getGet('target') ?? '');
+
+        if (!authCheck()) {
+            $redirectTarget = !empty($target) ? $target : 'dashboard';
+            return redirect()->to(mainAppUrl('login?redirect=' . urlencode($redirectTarget)));
+        }
+
+        $user = user();
+        $isAdmin = ((int)$user->role_id === 1 || hasPermission('admin_panel', $user));
+        $role = $isAdmin ? 'admin' : 'student';
+
+        // Check if explicit admin param or admin target
+        if ($this->request->getGet('admin') && $isAdmin) {
+            $target = !empty($target) ? $target : 'admin/dashboard';
+        }
+
+        $nameParts = explode(' ', trim(getUsername($user)), 2);
+        $firstName = $user->first_name ?: ($nameParts[0] ?? '');
+        $lastName = $user->last_name ?: ($nameParts[1] ?? '');
+
+        $payload = [
+            'uid'        => (string) $user->id,
+            'email'      => (string) $user->email,
+            'first_name' => (string) $firstName,
+            'last_name'  => (string) $lastName,
+            'phone'      => (string) ($user->phone_number ?? ''),
+            'role'       => (string) $role,
+            'target'     => $target ?: '',
+            'iat'        => time(),
+            'nonce'      => bin2hex(random_bytes(8)),
+        ];
+
+        $secretKey = env('SSO_SECRET_KEY', 'sk_sso_a9f83e2b17c64d85a109ecf3821094ba723e80d91fca475b83017a4c9b2f6e18');
+        $payloadJson = json_encode($payload, JSON_UNESCAPED_SLASHES);
+        $payloadEncoded = rtrim(strtr(base64_encode($payloadJson), '+/', '-_'), '=');
+        $signature = hash_hmac('sha256', $payloadEncoded, $secretKey);
+        $token = $payloadEncoded . '.' . $signature;
+
+        $ssoLoginUrl = mainAppUrl('sso/login') . '?token=' . urlencode($token);
+
+        return redirect()->to($ssoLoginUrl);
+    }
 }
+

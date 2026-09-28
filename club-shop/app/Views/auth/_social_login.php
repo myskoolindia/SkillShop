@@ -1,3 +1,10 @@
+<a href="<?= mainAppUrl('sso/shop?redirect=' . urlencode(getCurrentUrl())); ?>" class="btn btn-social btn-social-skillvation" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; margin-bottom: 10px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+        <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+    </svg>
+    <span><?= 'Log in with Skillvation Account'; ?></span>
+</a>
 <?php if (!empty($generalSettings->facebook_app_id)): ?>
     <a href="<?= base_url('connect-with-facebook'); ?>" class="btn btn-social btn-social-facebook">
         <svg width="24" height="24" viewBox="0 0 14222 14222">
@@ -26,9 +33,7 @@ if (!empty($generalSettings->vk_app_id)): ?>
         </svg>
         <span><?= trans("connect_with_vk"); ?></span>
     </a>
-<?php endif;
-if (!empty($generalSettings->facebook_app_id) || !empty($generalSettings->google_client_id) || !empty($generalSettings->vk_app_id)): ?>
-    <div class="form-group m-b-0">
-        <p class="p-social-media"><?= $orText; ?></p>
-    </div>
 <?php endif; ?>
+<div class="form-group m-b-0">
+    <p class="p-social-media"><?= $orText; ?></p>
+</div>

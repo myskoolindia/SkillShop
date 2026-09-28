@@ -45,6 +45,9 @@
                         <li>
                             <a class="btn btn-sm btn-success pull-left btn-site-prev" target="_blank" href="<?= langBaseUrl(); ?>"><i class="fa fa-eye"></i> &nbsp;<span class="btn-site-prev-text"><?= trans("view_site"); ?></span></a>
                         </li>
+                        <li>
+                            <a class="btn btn-sm btn-primary pull-left btn-site-prev" style="margin-left: 5px; background-color: #0284c7; border-color: #0369a1;" href="<?= ssoMainUrl('dashboard'); ?>"><i class="fa fa-graduation-cap"></i> &nbsp;<span class="btn-site-prev-text">Skillvation LMS</span></a>
+                        </li>
                         <?php if ($generalSettings->multilingual_system == 1 && countItems($activeLanguages) > 1): ?>
                             <li class="nav-item dropdown language-dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">

@@ -35,6 +35,7 @@
                 <div class="navbar-custom-menu">
                     <ul class="nav navbar-nav">
                         <li><a class="btn btn-sm btn-success pull-left btn-site-prev" target="_blank" href="<?= base_url(); ?>"><i class="fa fa-eye"></i> <span class="btn-site-prev-text"><?= trans("view_site"); ?></span></a></li>
+                        <li><a class="btn btn-sm btn-primary pull-left btn-site-prev" style="margin-left: 5px; background-color: #4f46e5; border-color: #4338ca;" href="<?= ssoMainUrl('admin/dashboard'); ?>" target="_blank"><i class="fa fa-graduation-cap"></i> <span class="btn-site-prev-text">LMS Admin</span></a></li>
                         <li class="dropdown user-menu">
                             <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false">
                                 <i class="fa fa-globe"></i>&nbsp;

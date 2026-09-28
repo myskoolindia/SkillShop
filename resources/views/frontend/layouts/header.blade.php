@@ -259,6 +259,8 @@
                                                                 href="{{ route('student.dashboard') }}">{{ __('Student Dashboard') }}</a>
                                                         </li>
                                                     @endif
+                                                    <li><a href="{{ route('sso.shop') }}" target="_blank" style="color:#d97706; font-weight:600;"><i class="fas fa-shopping-bag mr-1"></i> {{ __('Club Shop & Orders') }}</a>
+                                                    </li>
                                                     <li><a
                                                             href="{{ userAuth()->role == 'instructor' ? route('instructor.setting.index') : (userAuth()->role == 'school' ? route('school.profile.index') : route('student.setting.index')) }}">{{ __('Profile') }}</a>
                                                     </li>

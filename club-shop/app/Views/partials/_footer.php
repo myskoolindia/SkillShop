@@ -1,173 +1,160 @@
-<?php $newsletterSettings = getSettingsUnserialized('newsletter');
-echo view("partials/_modals", ['newsletterSettings' => $newsletterSettings]); ?>
+<?php
+$newsletterSettings = getSettingsUnserialized('newsletter');
+echo view("partials/_modals", ['newsletterSettings' => $newsletterSettings]);
 
-<footer id="footer">
-<div class="container">
-<div class="row">
-<div class="col-12">
-<div class="footer-top">
-<div class="row">
-<div class="col-12 col-lg-4 footer-widget">
-<div class="row-custom">
-    <div class="footer-logo">
-        <a href="<?= langBaseUrl(); ?>"><img src="<?= getLogo(); ?>" alt="logo" width="<?= $baseVars->logoWidth; ?>" height="<?= $baseVars->logoHeight; ?>"></a>
-    </div>
-</div>
-<div class="row-custom">
-    <div class="footer-about">
-        <?= $baseSettings->about_footer; ?>
-    </div>
-    <div class="footer-social-links">
-        <?php $socialLinks = getSocialLinksArray($baseSettings, false);
-        if (!empty($socialLinks)):?>
-            <ul>
-                <?php foreach ($socialLinks as $socialLink):
-                    if (!empty($socialLink['value'])): ?>
-                        <li><a href="<?= esc($socialLink['value']); ?>" target="_blank" title="<?= esc(ucfirst($socialLink['name'])); ?>"><i class="icon-<?= esc($socialLink['name']); ?>"></i></a></li>
-                    <?php endif;
-                endforeach;
-                if ($generalSettings->rss_system == 1): ?>
-                    <li><a href="<?= generateUrl('rss_feeds'); ?>" class="rss" target="_blank" title="<?= trans("rss_feeds"); ?>"><i class="icon-rss"></i></a></li>
-                <?php endif; ?>
-            </ul>
-        <?php endif; ?>
-    </div>
-</div>
-</div>
-<div class="col-12 col-lg-8">
-<div class="row">
-    <div class="col-12 col-lg-7">
-        <div class="row">
-            <div class="col-12 col-sm-6 col-lg-6 footer-widget">
-                <div class="nav-footer">
-                    <div class="row-custom">
-                        <h4 class="footer-title"><?= trans("categories"); ?></h4>
-                    </div>
-                    <div class="row-custom">
-                        <?php $i = 0;
-                        if (!empty($parentCategories)): ?>
-                            <ul>
-                                <?php foreach ($parentCategories as $category):
-                                    if ($category->show_on_main_menu == 1 && $i < 12): ?>
-                                        <li><a href="<?= generateCategoryUrl($category); ?>"><?= esc($category->cat_name); ?></a></li>
-                                    <?php endif;
-                                    $i++;
-                                endforeach; ?>
+// Fetch dynamic footer data from Laravel DB
+$footer_menu_one = getPortalMenuBySlug('footer-col-one');
+$footer_menu_two = getPortalMenuBySlug('footer-col-two');
+$footer_menu_three = getPortalMenuBySlug('footer-col-three');
+$footer_settings = getPortalFooterSettings();
+$social_links = getPortalSocialLinks();
+
+// Fallbacks if menus are empty in DB
+if (empty($footer_menu_one)) {
+    $footer_menu_one = [
+        ['label' => 'Home', 'link' => '/'],
+        ['label' => 'Courses', 'link' => '/courses'],
+        ['label' => 'AI & Robotics Lab', 'link' => '/labs/ai-robotics'],
+        ['label' => 'STEM Lab', 'link' => '/labs/stem'],
+        ['label' => 'ECEC Lab', 'link' => '/labs/ecec'],
+        ['label' => 'Composite Skill Lab', 'link' => '/labs/composite-skill'],
+    ];
+}
+
+if (empty($footer_menu_two)) {
+    $footer_menu_two = [
+        ['label' => 'Skill 2 Skool', 'link' => '/skill2school'],
+        ['label' => 'TTT', 'link' => '/ttt'],
+        ['label' => 'Upskill 4 Teacher', 'link' => '/upskill4teacher'],
+        ['label' => 'Shop', 'link' => '/club-shop'],
+        ['label' => 'Blog', 'link' => '/blog'],
+        ['label' => 'Contact', 'link' => '/contact'],
+    ];
+}
+
+if (empty($footer_menu_three)) {
+    $footer_menu_three = [
+        ['label' => 'Terms & Conditions', 'link' => '/terms-and-conditions'],
+        ['label' => 'Privacy Policy', 'link' => '/privacy-policy'],
+    ];
+}
+?>
+
+<footer class="footer__area mt-0" style="margin-top: 0 !important;">
+    <div class="footer__top">
+        <div class="container">
+            <div class="row">
+                <!-- Col 1: Brand & Contact Info -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <div class="footer__widget">
+                        <div class="logo mb-35">
+                            <a href="<?= mainPortalUrl('/'); ?>" class="d-inline-block px-3 py-2 rounded-3 bg-white shadow-sm" style="max-width: 220px;">
+                                <img src="<?= mainPortalUrl('designs/img/logo.png'); ?>" alt="Skillvation" onerror="this.onerror=null;this.src='<?= getLogo(); ?>';" style="max-height: 40px; width: auto; display: block;">
+                            </a>
+                        </div>
+                        <div class="footer__content">
+                            <p><?= !empty($footer_settings?->footer_text) ? esc($footer_settings->footer_text) : (!empty($baseSettings->about_footer) ? $baseSettings->about_footer : "Skillvation is an educational ecosystem dedicated to empowering learners and schools through hands-on skills, experiential labs, and future-ready curriculums."); ?></p>
+                            <ul class="list-wrap">
+                                <li><?= !empty($footer_settings?->address) ? esc($footer_settings->address) : (!empty($baseSettings->contact_address) ? esc($baseSettings->contact_address) : 'India'); ?></li>
+                                <?php if (!empty($footer_settings?->phone) || !empty($baseSettings->contact_phone)): ?>
+                                    <li><?= esc($footer_settings?->phone ?? $baseSettings->contact_phone); ?></li>
+                                <?php endif; ?>
                             </ul>
-                        <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Col 2: Useful Links (Dynamic Menu One) -->
+                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                    <div class="footer__widget">
+                        <h4 class="footer__widget-title"><?= trans("useful_links") ?? "Useful Links"; ?></h4>
+                        <div class="footer__link">
+                            <ul class="list-wrap">
+                                <?php foreach ($footer_menu_one as $mOne):
+                                    $linkLower = strtolower(trim($mOne['link'] ?? ''));
+                                    $labelLower = strtolower(trim($mOne['label'] ?? ''));
+                                    $isShop = ($linkLower === 'shop' || $linkLower === '/shop' || $linkLower === 'club-shop' || $linkLower === '/club-shop' || $labelLower === 'shop');
+                                    $url = $isShop ? langBaseUrl() : mainPortalUrl($mOne['link']);
+                                ?>
+                                    <li><a href="<?= $url; ?>"><?= esc($mOne['label']); ?></a></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Col 3: Our Company (Dynamic Menu Two) -->
+                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                    <div class="footer__widget">
+                        <h4 class="footer__widget-title"><?= trans("our_company") ?? "Our Company"; ?></h4>
+                        <div class="footer__link">
+                            <ul class="list-wrap">
+                                <?php foreach ($footer_menu_two as $mTwo):
+                                    $linkLower = strtolower(trim($mTwo['link'] ?? ''));
+                                    $labelLower = strtolower(trim($mTwo['label'] ?? ''));
+                                    $isShop = ($linkLower === 'shop' || $linkLower === '/shop' || $linkLower === 'club-shop' || $linkLower === '/club-shop' || $labelLower === 'shop');
+                                    $url = $isShop ? langBaseUrl() : mainPortalUrl($mTwo['link']);
+                                ?>
+                                    <li><a href="<?= $url; ?>"><?= esc($mTwo['label']); ?></a></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Col 4: Get In Touch -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <div class="footer__widget">
+                        <h4 class="footer__widget-title"><?= trans("get_in_touch") ?? "Get In Touch"; ?></h4>
+                        <div class="footer__contact-content">
+                            <p><?= !empty($footer_settings?->get_in_touch_text) ? esc($footer_settings->get_in_touch_text) : "Connect with us for partnerships, lab setups, school implementations, and educator training."; ?></p>
+                            <ul class="list-wrap footer__social">
+                                <?php if (!empty($social_links)):
+                                    foreach ($social_links as $sLink): ?>
+                                        <li>
+                                            <a href="<?= esc($sLink['link']); ?>" target="_blank">
+                                                <img src="<?= mainPortalUrl($sLink['icon']); ?>" alt="Social">
+                                            </a>
+                                        </li>
+                                    <?php endforeach;
+                                else: ?>
+                                    <li><a href="https://facebook.com" target="_blank"><img src="<?= mainPortalUrl('frontend/img/icons/facebook.svg'); ?>" alt="Facebook"></a></li>
+                                    <li><a href="https://twitter.com" target="_blank"><img src="<?= mainPortalUrl('frontend/img/icons/twitter.svg'); ?>" alt="Twitter"></a></li>
+                                    <li><a href="https://instagram.com" target="_blank"><img src="<?= mainPortalUrl('frontend/img/icons/instagram.svg'); ?>" alt="Instagram"></a></li>
+                                    <li><a href="https://youtube.com" target="_blank"><img src="<?= mainPortalUrl('frontend/img/icons/youtube.svg'); ?>" alt="YouTube"></a></li>
+                                    <li><a href="https://whatsapp.com" target="_blank"><img src="<?= mainPortalUrl('frontend/img/icons/whatsapp.svg'); ?>" alt="WhatsApp"></a></li>
+                                <?php endif; ?>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-6 col-lg-6 footer-widget">
-                <div class="nav-footer">
-                    <div class="row-custom">
-                        <h4 class="footer-title"><?= trans("footer_quick_links"); ?></h4>
-                    </div>
-                    <div class="row-custom">
-                        <ul>
-                            <li><a href="<?= langBaseUrl(); ?>"><?= trans("home"); ?></a></li>
-                            <?php if (!empty($menuLinks)):
-                                foreach ($menuLinks as $menuLink):
-                                    if ($menuLink->location == 'quick_links'):
-                                        $itemLink = generateMenuItemUrl($menuLink);
-                                        if (!empty($menuLink->page_default_name)):
-                                            $itemLink = generateUrl($menuLink->page_default_name);
-                                        endif; ?>
-                                        <li><a href="<?= $itemLink; ?>"><?= esc($menuLink->title); ?></a></li>
-                                    <?php endif;
-                                endforeach;
-                            endif;
-                            if (getSettingsUnserialized('affiliate')->status == 1): ?>
-                                <li><a href="<?= generateUrl('affiliate-program'); ?>"><?= trans("affiliate_program"); ?></a></li>
-                            <?php endif; ?>
-                            <li><a href="<?= generateUrl('help_center'); ?>"><?= trans("help_center"); ?></a></li>
-                        </ul>
+        </div>
+    </div>
+
+    <!-- Footer Bottom -->
+    <div class="footer__bottom">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-7">
+                    <div class="copy-right-text">
+                        <p>© <?= date('Y'); ?> <?= esc($generalSettings->application_name ?? 'Skillvation'); ?>. All rights reserved.</p>
                     </div>
                 </div>
-                <div class="nav-footer">
-                    <div class="row-custom m-t-15">
-                        <h4 class="footer-title"><?= trans("footer_information"); ?></h4>
-                    </div>
-                    <div class="row-custom">
-                        <ul>
-                            <?php if (!empty($menuLinks)):
-                                foreach ($menuLinks as $menuLink):
-                                    if ($menuLink->location == 'information'):
-                                        $itemLink = generateMenuItemUrl($menuLink);
-                                        if (!empty($menuLink->page_default_name)):
-                                            $itemLink = generateUrl($menuLink->page_default_name);
-                                        endif; ?>
-                                        <li><a href="<?= $itemLink; ?>"><?= esc($menuLink->title); ?></a></li>
-                                    <?php endif;
-                                endforeach;
-                            endif; ?>
+                <div class="col-md-5">
+                    <div class="footer__bottom-menu">
+                        <ul class="list-wrap">
+                            <?php foreach ($footer_menu_three as $mThree): ?>
+                                <li><a href="<?= mainPortalUrl($mThree['link']); ?>"><?= esc($mThree['label']); ?></a></li>
+                            <?php endforeach; ?>
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-12 col-lg-5">
-        <div class="footer-widget">
-            <?php if ($newsletterSettings->status == 1): ?>
-                <div class="newsletter-footer">
-                    <h4 class="footer-title"><?= trans("newsletter"); ?></h4>
-                    <p class="title-desc"><?= trans("newsletter_desc"); ?></p>
-                    <form id="form_newsletter_footer" class="form-newsletter-footer">
-                        <input type="email" name="email" class="form-input" maxlength="249" placeholder="<?= trans("enter_email"); ?>" required>
-                        <button type="submit" name="submit" value="form" class="btn btn-custom"><?= trans("subscribe"); ?></button>
-                        <input type="text" name="url">
-                    </form>
-                </div>
-            <?php endif; ?>
-        </div>
-        <?php $envPaymentIcons = env('PAYMENT_ICONS');
-        if (!empty($envPaymentIcons)):
-            $paymentIconsArray = explode(',', $envPaymentIcons ?? '');
-            if (!empty($paymentIconsArray) && countItems($paymentIconsArray) > 0):?>
-                <div class="footer-payment-icons">
-                    <?php foreach ($paymentIconsArray as $icon):
-                        if (file_exists(FCPATH . 'assets/img/payment/' . $icon . '.svg')):?>
-                            <img data-src="<?= base_url('assets/img/payment/' . $icon . '.svg'); ?>" alt="<?= $icon; ?>" width="30" height="22" class="lazyload">
-                        <?php endif;
-                    endforeach; ?>
-                </div>
-            <?php
-            endif;
-        endif; ?>
-    </div>
-</div>
-</div>
-</div>
-</div>
-<div class="footer-bottom">
-<div class="row">
-<div class="col-lg-4 col-md-12">
-<div class="copyright">
-    <?= esc($baseSettings->copyright); ?>
-</div>
-</div>
-<div class="col-lg-8 col-md-12">
-<ul class="nav-footer-bottom">
-    <?php if (!empty($menuLinks)):
-        foreach ($menuLinks as $menuLink):
-            if ($menuLink->location == 'footer_bottom'):
-                $itemLink = generateMenuItemUrl($menuLink);
-                if (!empty($menuLink->page_default_name)):
-                    $itemLink = generateUrl($menuLink->page_default_name);
-                endif; ?>
-                <li><a href="<?= $itemLink; ?>"><?= esc($menuLink->title); ?></a></li>
-            <?php endif;
-        endforeach;
-    endif; ?>
-</ul>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
 </footer>
+
 <?php if (empty(helperGetCookie('cks_warning')) && $baseSettings->cookies_warning): ?>
 <div class="cookies-warning">
 <button type="button" aria-label="close" class="close" onclick="hideCookiesWarning();"><i class="icon-close"></i></button>
@@ -177,6 +164,7 @@ echo view("partials/_modals", ['newsletterSettings' => $newsletterSettings]); ?>
 <button type="button" class="btn btn-md btn-block" aria-label="close" onclick="hideCookiesWarning();"><?= trans("accept_cookies"); ?></button>
 </div>
 <?php endif; ?>
+
 <button type="button" class="scrollup" aria-label="scroll-up"><i class="icon-arrow-up"></i></button>
 <script src="<?= base_url('assets/js/jquery-3.5.1.min.js'); ?>"></script>
 <script src="<?= base_url('assets/vendor/bootstrap/js/bootstrap.bundle.min.js'); ?>"></script>
