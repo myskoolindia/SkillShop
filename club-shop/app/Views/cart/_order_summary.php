@@ -123,10 +123,10 @@
                                         <div class="bundle-items-summary" style="margin-top: 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; width: 100%; padding: 6px;">
                                             <?php foreach($cartItem->bundle_categories as $bCategory): ?>
                                                 <div style="margin-top: 4px; margin-bottom: 6px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
-                                                    <div style="background: #f1f5f9; font-weight: 700; font-size: 11px; color: #334155; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; padding: 5px 8px;">
-                                                        <span><i class="fa fa-folder-open" style="color: #4f46e5;"></i> <?= esc($bCategory['name']); ?></span>
+                                                    <div style="background: #f1f5f9; font-weight: 700; font-size: 11px; color: #334155; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; padding: 5px 8px; flex-wrap: wrap; gap: 4px;">
+                                                        <span><i class="fa fa-folder-open" style="color: #4f46e5;"></i> <?= esc($bCategory['name']); ?> <strong style="color: #1d4ed8;">(<?= priceDecimal($bCategory['subtotal'], $cart->currency_code); ?>)</strong></span>
                                                         <span style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 1px 6px; border-radius: 4px; font-weight: 700; font-size: 10.5px;">
-                                                            <span style="font-size: 9.5px; color: #2563eb; text-transform: uppercase;">Subtotal: </span><?= priceDecimal($bCategory['subtotal'], $cart->currency_code); ?>
+                                                            <span style="font-size: 9.5px; color: #2563eb; text-transform: uppercase;">Total: </span><?= priceDecimal($bCategory['subtotal'], $cart->currency_code); ?>
                                                         </span>
                                                     </div>
                                                     <div style="padding: 4px 6px;">

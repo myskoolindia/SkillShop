@@ -51,9 +51,9 @@ class CartController extends BaseController
     }
 
     /**
-     * Basic Cart
+     * Basic Cart BB
      */
-    public function basicCart()
+    public function basicCartBB()
     {
         // Auto-add the Basic Skill product (id=1, slug=basic-skill-1) only if not already in cart
         $basicProduct = $this->productModel->getActiveProduct(1);
@@ -86,10 +86,73 @@ class CartController extends BaseController
     }
 
     /**
+ * Basic Cart
+ */
+    public function basicCart()
+    {
+        $product = $this->productModel->getActiveProduct(1);
+
+        if (!empty($product)) {
+            $existingCart = $this->cartModel->getCart();
+
+            $alreadyInCart = false;
+
+            if (!empty($existingCart) && !empty($existingCart->items)) {
+                foreach ($existingCart->items as $item) {
+                    if ((int) $item->product_id === 1) {
+                        $alreadyInCart = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!$alreadyInCart) {
+                $this->cartModel->addToCart($product, 1);
+            }
+        }
+
+        $data = setPageMeta('Basic Plan — Cart');
+        $data['isTranslatable'] = true;
+        $data['cart'] = $this->cartModel->getCart();
+        $data['userSession'] = getUserSession();
+        $data['planKey'] = 'basic';
+        $data['planLabel'] = 'Basic';
+
+        helperDeleteSession('mds_service_payment');
+
+        echo view('partials/_header', $data);
+        echo view('cart/basic-cart', $data);
+        echo view('partials/_footer');
+    }
+
+    /**
      * Advance Cart
      */
     public function advanceCart()
     {
+        $product = $this->productModel->getProductBySlug('advance-skill-1');
+        if (empty($product)) {
+            $product = $this->productModel->getActiveProduct(2);
+        }
+
+        if (!empty($product)) {
+            $existingCart = $this->cartModel->getCart();
+            $alreadyInCart = false;
+
+            if (!empty($existingCart) && !empty($existingCart->items)) {
+                foreach ($existingCart->items as $item) {
+                    if ((int)$item->product_id === (int)$product->id) {
+                        $alreadyInCart = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!$alreadyInCart) {
+                $this->cartModel->addToCart($product, 1);
+            }
+        }
+
         $data = setPageMeta('Advance Plan — Cart');
         $data['isTranslatable'] = true;
         $data['cart'] = $this->cartModel->getCart();
@@ -107,6 +170,29 @@ class CartController extends BaseController
      */
     public function premiumCart()
     {
+        $product = $this->productModel->getProductBySlug('premium-skill-1');
+        if (empty($product)) {
+            $product = $this->productModel->getActiveProduct(3);
+        }
+
+        if (!empty($product)) {
+            $existingCart = $this->cartModel->getCart();
+            $alreadyInCart = false;
+
+            if (!empty($existingCart) && !empty($existingCart->items)) {
+                foreach ($existingCart->items as $item) {
+                    if ((int)$item->product_id === (int)$product->id) {
+                        $alreadyInCart = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!$alreadyInCart) {
+                $this->cartModel->addToCart($product, 1);
+            }
+        }
+
         $data = setPageMeta('Premium Plan — Cart');
         $data['isTranslatable'] = true;
         $data['cart'] = $this->cartModel->getCart();

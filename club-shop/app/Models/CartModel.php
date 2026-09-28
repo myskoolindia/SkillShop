@@ -277,6 +277,18 @@ class CartModel extends BaseModel
                 $bundleSummary = [];
                 $bundleProducts = [];
 
+                $bundleModel = new \App\Models\BundleModel();
+                $bundleComps = $bundleModel->getBundleComponents($product->id, true);
+                $optMap = [];
+                if (!empty($bundleComps)) {
+                    foreach ($bundleComps as $bc) {
+                        $optMap[(int)$bc->component_product_id] = !empty($bc->is_optional) ? 1 : 0;
+                        if (!empty($bc->id)) {
+                            $optMap['c_' . $bc->id] = !empty($bc->is_optional) ? 1 : 0;
+                        }
+                    }
+                }
+
                 if (is_array($bundle) && !empty($bundle)) {
                     foreach ($bundle as $b) {
                         $qty = (int)($b['qty'] ?? 0);
@@ -321,12 +333,12 @@ class CartModel extends BaseModel
                             $itemObj->has_discount = ($origChildPrice > $unitPrice);
                             $itemObj->sku = $p->sku ?? '';
                             $itemObj->image_data = $p->image_data ?? null;
+                            $itemObj->is_optional = $optMap['c_' . ($b['comp_id'] ?? 0)] ?? ($optMap[(int)$p->id] ?? 0);
                             $bundleProducts[] = $itemObj;
                         }
                     }
                 } else {
-                    $bundleModel = new \App\Models\BundleModel();
-                    $comps = $bundleModel->getBundleComponents($product->id, true);
+                    $comps = $bundleComps;
                     if (!empty($comps)) {
                         foreach ($comps as $c) {
                             if (!empty($c->is_optional) && (int)$c->required_quantity == 0) {
@@ -370,6 +382,7 @@ class CartModel extends BaseModel
                             $itemObj->has_discount = ($origChildPrice > $unitPrice);
                             $itemObj->sku = $c->sku ?? '';
                             $itemObj->image_data = null;
+                            $itemObj->is_optional = !empty($c->is_optional) ? 1 : 0;
                             $bundleProducts[] = $itemObj;
                         }
                     }

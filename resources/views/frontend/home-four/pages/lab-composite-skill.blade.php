@@ -1460,7 +1460,7 @@
             </li>
           </ul>
           
-          <a href="{{ url('/labs/composite-skill-details') }}" target="_blank" class="vl-plan-btn-outline">
+          <a href="{{ url('/labs/composite-skill-basic') }}" target="_blank" class="vl-plan-btn-outline">
             View Basic Plan →
           </a>
         </div>
@@ -1496,8 +1496,8 @@
             </li>
           </ul>
           
-          <a href="#checklist" class="vl-plan-btn-featured">
-            Get Advance Plan Quote →
+          <a href="{{ url('/labs/composite-skill-advance') }}" target="_blank" class="vl-plan-btn-featured">
+            View Advance Plan →
           </a>
         </div>
 
@@ -1527,8 +1527,8 @@
             </li>
           </ul>
           
-          <a href="#checklist" class="vl-plan-btn-outline">
-            Request Premium Plan →
+          <a href="{{ url('/labs/composite-skill-premium') }}" target="_blank" class="vl-plan-btn-outline">
+            View Premium Plan →
           </a>
         </div>
 

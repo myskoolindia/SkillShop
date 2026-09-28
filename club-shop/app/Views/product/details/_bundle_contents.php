@@ -73,60 +73,57 @@ $totalCategoriesCount = count($groupedComponents);
 .bundle-cat-chevron.collapsed {
     transform: rotate(-90deg);
 }
+.bundle-row-disabled {
+    background: #fafafa !important;
+    opacity: 0.65;
+    transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+.bundle-row-disabled:hover {
+    opacity: 0.9;
+}
+.bundle-item-checkbox {
+    cursor: pointer;
+    width: 18px !important;
+    height: 18px !important;
+    accent-color: #2563eb;
+    display: inline-block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    vertical-align: middle;
+    margin: 0 auto;
+}
+.bundle-item-checkbox[disabled] {
+    cursor: not-allowed;
+    accent-color: #16a34a;
+    opacity: 0.95 !important;
+}
 </style>
 
 <div class="bundle-contents-wrapper p-3">
-    <!-- Top Summary Banner -->
-    <div class="d-flex justify-content-between align-items-center flex-wrap mb-3 p-3 bg-light rounded" style="border: 1px solid #e2e8f0; gap: 10px;">
-        <div>
-            <h5 class="font-weight-bold mb-1"><i class="fa fa-cubes text-primary"></i> Package Details</h5>
-            <span class="text-muted small">
-                This package contains <strong><?= count($bundleComponents); ?></strong> unique items across <strong><?= $totalCategoriesCount; ?></strong> <?= $totalCategoriesCount == 1 ? 'category' : 'categories'; ?> (Total <strong id="storefront_bundle_total_units"><?= $bundleMetrics['total_units']; ?></strong> units).
-            </span>
-        </div>
-        <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
-            <span class="badge badge-primary p-2" style="font-size: 13px; font-weight: 600;">
-                Items Value: <strong id="storefront_bundle_total_price"><?= priceFormatted($bundleMetrics['sum_price'], $currencyCode, true); ?></strong>
-            </span>
-            <span class="badge badge-success p-2" style="font-size: 13px;">
-                <i class="fa fa-check-circle"></i> Package Complete & In Stock
-            </span>
-        </div>
-    </div>
-
-    <!-- Category Filter Pills, Search Bar & Collapse Toggles -->
+    <!-- Category Filter Pills & Search Bar -->
     <div class="bundle-filter-controls mb-3">
-        <div class="row align-items-center">
-            <div class="col-md-5 col-12 mb-2 mb-md-0">
-                <div class="input-group">
+        <div class="row align-items-center" style="row-gap: 10px;">
+            <div class="col-lg-4 col-md-5 col-12">
+                <div class="input-group" style="box-shadow: 0 1px 2px rgba(0,0,0,0.04); border-radius: 6px; overflow: hidden;">
                     <div class="input-group-prepend">
-                        <span class="input-group-text bg-white" style="border-right: none;"><i class="fa fa-search text-muted"></i></span>
+                        <span class="input-group-text bg-white" style="border-right: none; border-color: #cbd5e1;"><i class="fa fa-search text-muted"></i></span>
                     </div>
-                    <input type="text" id="bundle_storefront_filter" class="form-control" placeholder="Search products, SKU or category..." onkeyup="filterStorefrontBundle();" style="border-left: none;">
+                    <input type="text" id="bundle_storefront_filter" class="form-control" placeholder="Search products, SKU or category..." onkeyup="filterStorefrontBundle();" style="border-left: none; border-color: #cbd5e1; font-size: 13.5px;">
                     <div class="input-group-append" id="bundle_search_clear_btn" style="display: none;">
-                        <button class="btn btn-outline-secondary" type="button" onclick="clearBundleSearch();" title="Clear search">&times;</button>
+                        <button class="btn btn-outline-secondary" type="button" onclick="clearBundleSearch();" title="Clear search" style="border-color: #cbd5e1;">&times;</button>
                     </div>
                 </div>
             </div>
             
-            <div class="col-md-7 col-12 text-md-right">
+            <div class="col-lg-8 col-md-7 col-12">
                 <div class="d-flex align-items-center justify-content-md-end flex-wrap" style="gap: 6px;">
                     <?php if ($totalCategoriesCount > 1): ?>
-                        <div class="btn-group btn-group-sm mr-1">
-                            <button type="button" class="btn btn-light border" onclick="expandAllBundleCategories();" title="Expand all categories" style="font-size: 11px; padding: 4px 8px;">
-                                <i class="fa fa-plus-square-o mr-1 text-primary"></i>Expand All
-                            </button>
-                            <button type="button" class="btn btn-light border" onclick="collapseAllBundleCategories();" title="Collapse all categories" style="font-size: 11px; padding: 4px 8px;">
-                                <i class="fa fa-minus-square-o mr-1 text-muted"></i>Collapse All
-                            </button>
-                        </div>
-                        
-                        <button type="button" class="btn btn-sm btn-primary bundle-cat-pill active" data-cat-key="all" onclick="filterBundleCategory('all', this);">
-                            All <span class="badge badge-light ml-1"><?= count($bundleComponents); ?></span>
+                        <button type="button" class="btn btn-sm btn-primary bundle-cat-pill active" data-cat-key="all" onclick="filterBundleCategory('all', this);" style="border-radius: 6px; font-weight: 600; padding: 5px 12px; font-size: 12.5px;">
+                            All <span class="badge badge-light ml-1" style="color: #2563eb; background: #ffffff;"><?= count($bundleComponents); ?></span>
                         </button>
                         <?php foreach ($groupedComponents as $catKey => $catGroup): ?>
-                            <button type="button" class="btn btn-sm btn-outline-secondary bundle-cat-pill" data-cat-key="<?= esc($catKey); ?>" onclick="filterBundleCategory('<?= esc($catKey); ?>', this);">
-                                <?= esc($catGroup['name']); ?> <span class="badge badge-secondary ml-1"><?= count($catGroup['items']); ?></span>
+                            <button type="button" class="btn btn-sm btn-outline-secondary bundle-cat-pill" data-cat-key="<?= esc($catKey); ?>" onclick="filterBundleCategory('<?= esc($catKey); ?>', this);" style="border-radius: 6px; font-weight: 500; padding: 5px 12px; font-size: 12.5px; background: #ffffff; border-color: #cbd5e1; color: #334155;">
+                                <?= esc($catGroup['name']); ?> <span class="badge badge-secondary ml-1" style="background: #e2e8f0; color: #475569;"><?= count($catGroup['items']); ?></span>
                             </button>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -140,13 +137,14 @@ $totalCategoriesCount = count($groupedComponents);
         <table class="table table-hover mb-0" id="table_storefront_bundle">
             <thead class="thead-light" style="position: sticky; top:0; z-index:3; background:#f8f9fa;">
                 <tr>
-                    <th style="width: 45px;" class="text-center">#</th>
-                    <th style="width: 65px;">Item</th>
+                    <th style="width: 40px;" class="text-center">#</th>
+                    <th style="width: 65px;" class="text-center">Select</th>
+                    <th style="width: 60px;">Item</th>
                     <th>Product & Details</th>
-                    <th style="width: 120px;">SKU</th>
-                    <th style="width: 110px;" class="text-center">Unit Price</th>
-                    <th style="width: 155px;" class="text-center">Quantity</th>
-                    <th style="width: 120px;" class="text-right">Total</th>
+                    <th style="width: 110px;">SKU</th>
+                    <th style="width: 105px;" class="text-center">Unit Price</th>
+                    <th style="width: 145px;" class="text-center">Quantity</th>
+                    <th style="width: 115px;" class="text-right">Total</th>
                 </tr>
             </thead>
             <tbody>
@@ -154,23 +152,22 @@ $totalCategoriesCount = count($groupedComponents);
                     <?php $globalCounter = 1; ?>
                     <?php foreach ($groupedComponents as $catKey => $catGroup): ?>
                         <!-- Category Header Row (Collapsible) -->
-                        <tr class="bundle-category-header-row" data-cat-key="<?= esc($catKey); ?>" data-cat-name="<?= esc(strtolower($catGroup['name'])); ?>" onclick="toggleBundleCategory('<?= esc($catKey); ?>');" style="background: #f1f5f9; border-top: 2px solid #e2e8f0; border-bottom: 1px solid #cbd5e0;" title="Click to collapse / expand this category">
-                            <td colspan="7" class="py-2 px-3">
+                        <tr class="bundle-category-header-row" id="bundle_cat_row_<?= esc($catKey); ?>" data-cat-key="<?= esc($catKey); ?>" data-cat-name="<?= esc(strtolower($catGroup['name'])); ?>" onclick="toggleBundleCategory('<?= esc($catKey); ?>');" style="background: #f1f5f9; border-top: 2px solid #e2e8f0; border-bottom: 1px solid #cbd5e0; cursor: pointer;" title="Click to collapse / expand this category">
+                            <td colspan="8" class="py-2 px-3">
                                 <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: 10px;">
-                                    <div class="d-flex align-items-center">
-                                        <i class="fa fa-chevron-down bundle-cat-chevron text-muted mr-2" data-cat-key="<?= esc($catKey); ?>" style="font-size: 11px;"></i>
-                                        <i class="fa fa-folder-open bundle-cat-folder text-primary mr-2" data-cat-key="<?= esc($catKey); ?>" style="font-size: 15px;"></i>
-                                        <span class="font-weight-bold text-dark" style="font-size: 13.5px;"><?= esc($catGroup['name']); ?></span>
-                                        <span class="badge badge-primary ml-2 px-2 py-1" style="font-size: 11px; font-weight: 500;">
-                                            <?= count($catGroup['items']); ?> <?= count($catGroup['items']) == 1 ? 'item' : 'items'; ?>
+                                    <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
+                                        <i class="fa fa-chevron-down bundle-cat-chevron text-muted mr-1 collapsed" data-cat-key="<?= esc($catKey); ?>" style="font-size: 11px;"></i>
+                                        <i class="fa fa-folder bundle-cat-folder text-primary mr-1" data-cat-key="<?= esc($catKey); ?>" style="font-size: 15px;"></i>
+                                        <span class="font-weight-bold text-dark bundle-cat-title" style="font-size: 14px;"><?= esc($catGroup['name']); ?></span>
+                                        <span class="font-weight-bold text-primary ml-1 bundle-cat-price-wrapper" style="font-size: 13.5px;">
+                                            (<span class="category-subtotal-price" data-cat-key="<?= esc($catKey); ?>"><?= priceFormatted($catGroup['total_price'], $currencyCode, true); ?></span>)
+                                        </span>
+                                        <span class="badge badge-secondary ml-2 px-2 py-1" style="font-size: 11px; font-weight: 500;">
+                                            <span class="category-subtotal-units" data-cat-key="<?= esc($catKey); ?>"><?= $catGroup['total_units']; ?></span> units / <?= count($catGroup['items']); ?> items
                                         </span>
                                         <span class="text-muted small ml-2 d-none d-sm-inline" style="font-size: 11px; opacity: 0.65;">
                                             (Click to collapse/expand)
                                         </span>
-                                    </div>
-                                    <div class="text-muted small">
-                                        Category Value: <strong class="text-dark category-subtotal-price" data-cat-key="<?= esc($catKey); ?>"><?= priceFormatted($catGroup['total_price'], $currencyCode, true); ?></strong>
-                                        (<span class="category-subtotal-units font-weight-bold" data-cat-key="<?= esc($catKey); ?>"><?= $catGroup['total_units']; ?></span> units)
                                     </div>
                                 </div>
                             </td>
@@ -197,7 +194,7 @@ $totalCategoriesCount = count($groupedComponents);
                             }
 
                             $savedConfig = $editItemMap['c_' . $comp->id] ?? ($editItemMap['p_' . $comp->component_product_id] ?? null);
-                            $currentQty = $isOptional ? (int)$comp->required_quantity : $pkgMinQty;
+                            $currentQty = $isOptional ? 0 : $pkgMinQty;
                             $selectedVarId = !empty($comp->variant_id) ? (int)$comp->variant_id : (int)$firstVariantId;
 
                             if (!empty($savedConfig)) {
@@ -224,8 +221,9 @@ $totalCategoriesCount = count($groupedComponents);
                             }
 
                             $lineTotal = $unitPrice * $currentQty;
+                            $isItemChecked = !$isOptional || ($currentQty > 0);
                         ?>
-                            <tr class="storefront-bundle-row"
+                            <tr class="storefront-bundle-row <?= (!$isItemChecked) ? 'bundle-row-disabled' : ''; ?>"
                                 data-cat-key="<?= esc($catKey); ?>"
                                 data-cat-name="<?= esc(strtolower($catGroup['name'])); ?>"
                                 data-title="<?= esc(strtolower($comp->title)); ?>"
@@ -233,6 +231,16 @@ $totalCategoriesCount = count($groupedComponents);
                                 data-comp-id="<?= $comp->id; ?>"
                                 data-unit-price="<?= $unitPrice; ?>">
                                 <td class="text-muted text-center" style="vertical-align: middle; font-size: 12px;"><?= $globalCounter++; ?></td>
+                                
+                                <!-- Checkbox Column (Mandatory vs Optional) -->
+                                <td class="text-center" style="padding: 8px 6px; vertical-align: middle;">
+                                    <?php if (!$isOptional): ?>
+                                        <input type="checkbox" class="bundle-item-checkbox" id="chk_comp_<?= $comp->id; ?>" checked disabled data-mandatory="1" data-comp-id="<?= $comp->id; ?>" title="Mandatory item (included by default)">
+                                    <?php else: ?>
+                                        <input type="checkbox" class="bundle-item-checkbox" id="chk_comp_<?= $comp->id; ?>" <?= $isItemChecked ? 'checked' : ''; ?> data-mandatory="0" data-comp-id="<?= $comp->id; ?>" onchange="toggleBundleOptionalItem(this);" title="Toggle optional item (0 qty when unchecked, 1 qty when checked)">
+                                    <?php endif; ?>
+                                </td>
+
                                 <td style="vertical-align: middle;">
                                     <?php if (!empty($comp->image_small)):
                                         $compImgUrl = (str_starts_with($comp->image_small, 'http://') || str_starts_with($comp->image_small, 'https://')) ? $comp->image_small : (str_starts_with($comp->image_small, 'uploads/') ? base_url($comp->image_small) : base_url('uploads/images/' . $comp->image_small));
@@ -253,7 +261,7 @@ $totalCategoriesCount = count($groupedComponents);
                                             <i class="fa fa-folder-o mr-1"></i><?= esc($catGroup['name']); ?>
                                         </span>
                                         <?php if (!empty($comp->is_optional)): ?>
-                                            <span class="badge badge-warning text-dark border px-2 py-1" style="background:#fef3c7; color:#92400e !important; border-color:#fde68a !important; font-size: 10.5px;" title="Optional item (starts with 0 qty)">
+                                            <span class="badge badge-warning text-dark border px-2 py-1" style="background:#fef3c7; color:#92400e !important; border-color:#fde68a !important; font-size: 10.5px;" title="Optional item (0 qty by default, check to select)">
                                                 <i class="fa fa-plus-circle mr-1"></i>Optional
                                             </span>
                                         <?php endif; ?>
@@ -297,7 +305,7 @@ $totalCategoriesCount = count($groupedComponents);
                                 </td>
                                 <td class="text-center" style="vertical-align: middle;">
                                     <div class="bundle-qty-spinner" style="display:inline-flex; align-items:center; justify-content:center;">
-                                        <div class="input-group input-group-sm" style="width: 125px;">
+                                        <div class="input-group input-group-sm" style="width: 120px;">
                                             <div class="input-group-prepend">
                                                 <button type="button" class="btn btn-outline-secondary btn-bundle-minus" onclick="changeBundleStorefrontQty(this, -1);" style="border-top-right-radius:0; border-bottom-right-radius:0; padding: 2px 8px;" title="<?= !empty($comp->is_optional) ? 'Minimum: 0' : ('Cannot be lower than package minimum (' . $pkgMinQty . ')'); ?>">
                                                     <i class="fa fa-minus" style="font-size:10px;"></i>
@@ -329,9 +337,9 @@ $totalCategoriesCount = count($groupedComponents);
                                     <div class="mt-1">
                                         <small class="text-muted d-block" style="font-size: 11px;">
                                             <?php if (!empty($comp->is_optional)): ?>
-                                                <i class="fa fa-info-circle" style="font-size: 9px; color: #f59e0b;"></i> Optional (0 qty by default)
+                                                <i class="fa fa-info-circle" style="font-size: 9px; color: #f59e0b;"></i> Optional (0 qty default)
                                             <?php else: ?>
-                                                <i class="fa fa-lock" style="font-size: 9px;"></i> Min in pkg: <strong><?= $pkgMinQty; ?></strong>
+                                                <i class="fa fa-lock" style="font-size: 9px; color: #16a34a;"></i> Min in pkg: <strong><?= $pkgMinQty; ?></strong>
                                             <?php endif; ?>
                                         </small>
                                     </div>
@@ -344,11 +352,11 @@ $totalCategoriesCount = count($groupedComponents);
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="7" class="text-center p-4 text-muted">No component items found in this package.</td>
+                        <td colspan="8" class="text-center p-4 text-muted">No component items found in this package.</td>
                     </tr>
                 <?php endif; ?>
                 <tr id="bundle_storefront_no_match" style="display: none;">
-                    <td colspan="7" class="text-center p-4 text-muted">
+                    <td colspan="8" class="text-center p-4 text-muted">
                         <i class="fa fa-search fa-2x mb-2 text-muted"></i><br>
                         No package items matching your search.
                     </td>
@@ -357,7 +365,7 @@ $totalCategoriesCount = count($groupedComponents);
             <?php if (!empty($bundleComponents)): ?>
                 <tfoot style="background: #f8fafc; border-top: 2px solid #e2e8f0; position: sticky; bottom: 0; z-index: 2;">
                     <tr>
-                        <th colspan="4" class="text-right font-weight-bold">Package Total:</th>
+                        <th colspan="5" class="text-right font-weight-bold">Package Total:</th>
                         <th class="text-center font-weight-bold text-muted small">—</th>
                         <th class="text-center font-weight-bold">
                             <span id="storefront_footer_total_units" class="badge badge-info px-2 py-1" style="font-size:12px;"><?= $bundleMetrics['total_units']; ?> units</span>
@@ -375,6 +383,11 @@ $totalCategoriesCount = count($groupedComponents);
 <script>
 var activeBundleCategoryKey = 'all';
 var collapsedBundleCategories = {};
+<?php if (!empty($groupedComponents)): ?>
+    <?php foreach ($groupedComponents as $cK => $cG): ?>
+        collapsedBundleCategories['<?= escJs($cK); ?>'] = true;
+    <?php endforeach; ?>
+<?php endif; ?>
 
 function formatBundleCurrency(amount) {
     var formatted = parseFloat(amount).toFixed(2);
@@ -520,6 +533,26 @@ function applyBundleStorefrontFilters() {
     }
 }
 
+function toggleBundleOptionalItem(chk) {
+    var $chk = $(chk);
+    var $row = $chk.closest('tr.storefront-bundle-row');
+    var $input = $row.find('.bundle-storefront-qty-input');
+    var isChecked = $chk.is(':checked');
+
+    if (isChecked) {
+        var currentVal = parseInt($input.val()) || 0;
+        if (currentVal < 1) {
+            $input.val(1);
+        }
+        $row.removeClass('bundle-row-disabled');
+    } else {
+        $input.val(0);
+        $row.addClass('bundle-row-disabled');
+    }
+
+    validateBundleStorefrontQty($input[0]);
+}
+
 function changeBundleStorefrontQty(btn, delta) {
     var $input = $(btn).closest('.bundle-qty-spinner').find('.bundle-storefront-qty-input');
     var current = parseInt($input.val());
@@ -542,6 +575,7 @@ function changeBundleStorefrontQty(btn, delta) {
 
 function validateBundleStorefrontQty(input) {
     var $input = $(input);
+    var isOptional = $input.data('is-optional') == '1';
     var min = parseInt($input.data('min'));
     if (isNaN(min)) min = 0;
     var max = parseInt($input.attr('max')) || 9999;
@@ -555,6 +589,19 @@ function validateBundleStorefrontQty(input) {
         $input.val(max);
     }
 
+    // Sync checkbox state for optional items
+    var $row = $input.closest('tr.storefront-bundle-row');
+    var $chk = $row.find('.bundle-item-checkbox');
+    if (isOptional && $chk.length) {
+        if (val > 0) {
+            $chk.prop('checked', true);
+            $row.removeClass('bundle-row-disabled');
+        } else {
+            $chk.prop('checked', false);
+            $row.addClass('bundle-row-disabled');
+        }
+    }
+
     // Update minus button disabled state
     var $minusBtn = $input.closest('.bundle-qty-spinner').find('.btn-bundle-minus');
     if (val <= min) {
@@ -566,7 +613,6 @@ function validateBundleStorefrontQty(input) {
     // Update row total
     var unitPrice = parseFloat($input.data('unit-price')) || 0;
     var rowTotal = unitPrice * val;
-    var $row = $input.closest('tr.storefront-bundle-row');
     $row.find('.bundle-item-total').text(formatBundleCurrency(rowTotal));
 
     // Recalculate category subtotal & overall totals
@@ -664,6 +710,8 @@ function recalculateStorefrontBundleTotals() {
 }
 
 $(document).ready(function() {
+    applyBundleStorefrontFilters();
+
     $('.bundle-storefront-qty-input').each(function() {
         validateBundleStorefrontQty(this);
     });
@@ -683,13 +731,79 @@ $(document).ready(function() {
         }, 50);
     });
 
-    if (window.location.hash === '#tab_bundle_contents' || window.location.hash === '#tab_bundle_contents_content') {
-        $('#tab_bundle_contents').tab('show');
-        setTimeout(function() {
-            if ($('#tab_bundle_contents_content').length) {
-                $('html, body').animate({scrollTop: $('#tab_bundle_contents_content').offset().top - 120}, 400);
+    // Handle direct navigation to bundle customization tab and category
+    var urlParams = new URLSearchParams(window.location.search);
+    var targetBundleCat = urlParams.get('bundle_cat');
+    var isBundleTabHash = (window.location.hash === '#tab_bundle_contents' || window.location.hash === '#tab_bundle_contents_content' || targetBundleCat);
+
+    if (isBundleTabHash) {
+        if ($('#tab_bundle_contents').length) {
+            $('#tab_bundle_contents').tab('show');
+        }
+        if ($('#collapse_bundle_contents_content').length) {
+            $('#collapse_bundle_contents_content').addClass('show');
+        }
+
+        if (targetBundleCat && targetBundleCat !== 'all') {
+            // Robustly resolve matching category key (e.g. cat_15, 15, or by category name)
+            var resolvedCatKey = targetBundleCat;
+            if (!resolvedCatKey.startsWith('cat_') && $('#bundle_cat_row_cat_' + resolvedCatKey).length) {
+                resolvedCatKey = 'cat_' + resolvedCatKey;
+            } else if (!$('#bundle_cat_row_' + resolvedCatKey).length) {
+                var cleanParam = targetBundleCat.toLowerCase().replace(/^cat_/, '').trim();
+                $('.bundle-category-header-row').each(function() {
+                    var rowKey = $(this).attr('data-cat-key') || '';
+                    var rowName = ($(this).attr('data-cat-name') || '').toLowerCase().trim();
+                    if (rowKey.toLowerCase() === cleanParam || rowKey.toLowerCase() === ('cat_' + cleanParam) || rowName === cleanParam || rowName.indexOf(cleanParam) > -1) {
+                        resolvedCatKey = rowKey;
+                        return false;
+                    }
+                });
             }
-        }, 200);
+
+            // Collapse all categories except the resolved target category
+            $('.bundle-category-header-row').each(function() {
+                var ck = $(this).attr('data-cat-key');
+                if (ck) {
+                    if (ck === resolvedCatKey) {
+                        delete collapsedBundleCategories[ck];
+                        $('.bundle-cat-chevron[data-cat-key="' + ck + '"]').removeClass('collapsed');
+                        $('.bundle-cat-folder[data-cat-key="' + ck + '"]').removeClass('fa-folder').addClass('fa-folder-open');
+                    } else {
+                        collapsedBundleCategories[ck] = true;
+                        $('.bundle-cat-chevron[data-cat-key="' + ck + '"]').addClass('collapsed');
+                        $('.bundle-cat-folder[data-cat-key="' + ck + '"]').removeClass('fa-folder-open').addClass('fa-folder');
+                    }
+                }
+            });
+
+            activeBundleCategoryKey = 'all';
+            $('.bundle-cat-pill').removeClass('active btn-primary').addClass('btn-outline-secondary');
+            $('.bundle-cat-pill[data-cat-key="all"]').removeClass('btn-outline-secondary').addClass('active btn-primary');
+
+            applyBundleStorefrontFilters();
+
+            // Smooth scroll to the target category with visual highlight
+            setTimeout(function() {
+                var $targetHeader = $('#bundle_cat_row_' + resolvedCatKey);
+                if ($targetHeader.length) {
+                    var offsetTop = $targetHeader.offset().top - 110;
+                    $('html, body').animate({scrollTop: offsetTop}, 450);
+                    $targetHeader.css({ 'background-color': '#dbeafe', 'transition': 'background-color 0.4s ease' });
+                    setTimeout(function() {
+                        $targetHeader.css({ 'background-color': '#f1f5f9' });
+                    }, 1800);
+                } else if ($('#tab_bundle_contents_content').length) {
+                    $('html, body').animate({scrollTop: $('#tab_bundle_contents_content').offset().top - 110}, 400);
+                }
+            }, 300);
+        } else {
+            setTimeout(function() {
+                if ($('#tab_bundle_contents_content').length) {
+                    $('html, body').animate({scrollTop: $('#tab_bundle_contents_content').offset().top - 110}, 400);
+                }
+            }, 250);
+        }
     }
 });
 

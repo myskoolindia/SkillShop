@@ -83,6 +83,32 @@
         border-top: 1px dashed #e2e8f0;
     }
 }
+.cart-cat-header-toggle:hover {
+    background: #f1f5f9 !important;
+}
+.cart-cat-chevron.collapsed {
+    transform: rotate(-90deg) !important;
+}
+.cart-item-select-chk {
+    width: 17px !important;
+    height: 17px !important;
+    accent-color: #2563eb;
+    cursor: default;
+    display: inline-block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    vertical-align: middle;
+    margin: 0 auto;
+}
+.cart-item-select-chk:disabled {
+    cursor: not-allowed;
+    accent-color: #16a34a;
+    opacity: 0.95 !important;
+}
+.bundle-row-disabled {
+    background: #f8fafc !important;
+    opacity: 0.6;
+}
 </style>
                                     <?php 
                                     // echo '<pre>';
@@ -225,28 +251,38 @@
                                                                     <i class="fa fa-cubes text-primary m-r-1"></i> <?= esc($cartItem->product_title); ?> Contents (<?= count($cartItem->bundle_products ?? []); ?>)
                                                                 </strong>
                                                             </div>
-                                                            <a href="<?= esc($cartItem->product_url); ?>?cart_item_id=<?= $cartItem->id; ?>#tab_bundle_contents" class="btn btn-sm btn-outline-primary" style="font-size: 12px; padding: 3px 10px; border-radius: 4px; font-weight: 600;">
-                                                                <i class="fa fa-sliders m-r-1"></i> Customize
-                                                            </a>
+                                                            <div class="d-flex align-items-center" style="gap: 6px;">
+                                                                <span style="font-size: 12.5px; color: #64748b; font-weight: 600;">Total:</span>
+                                                                <strong style="font-size: 14.5px; color: #2563eb; font-weight: 800;">
+                                                                    <?= priceDecimal($cartItem->total_price, $cart->currency_code); ?>
+                                                                </strong>
+                                                            </div>
                                                         </div>
 
                                                         <?php if(!empty($cartItem->bundle_categories)): ?>
-                                                            <?php foreach($cartItem->bundle_categories as $bCategory): ?>
+                                                            <?php foreach($cartItem->bundle_categories as $bIdx => $bCategory): 
+                                                                $cartCatId = 'cart_cat_' . $cartItem->id . '_' . ($bCategory['id'] ?? $bIdx);
+                                                                $bCatKey = !empty($bCategory['id']) ? ('cat_' . (int)$bCategory['id']) : (!empty($bCategory['name']) ? $bCategory['name'] : 'all');
+                                                            ?>
                                                                 <div class="bundle-category-section m-b-12" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
-                                                                    <div class="d-flex justify-content-between align-items-center px-3 py-2" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                                                                        <div style="font-weight: 700; font-size: 13.5px; color: #1e293b; display: inline-flex; align-items: center; gap: 8px;">
+                                                                    <div class="d-flex justify-content-between align-items-center px-3 py-2 cart-cat-header-toggle" onclick="toggleCartCategory('<?= $cartCatId; ?>', this);" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; cursor: pointer; user-select: none; transition: background-color 0.15s ease;" title="Click to collapse / expand this category">
+                                                                        <div style="font-weight: 700; font-size: 13.5px; color: #1e293b; display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                                                            <i class="fa fa-chevron-down cart-cat-chevron text-muted collapsed" style="font-size: 11px; transition: transform 0.2s ease;"></i>
                                                                             <span><i class="fa fa-folder-open" style="color: #4f46e5;"></i> <?= esc($bCategory['name']); ?></span>
+                                                                            <strong class="cart-cat-price-parenthesis" style="color: #1d4ed8; font-weight: 800; font-size: 13.5px;">(<?= priceDecimal($bCategory['subtotal'], $cart->currency_code); ?>)</strong>
                                                                             <span class="badge badge-secondary" style="font-size: 11px; background: #e2e8f0; color: #475569; font-weight: 600; padding: 3px 8px; border-radius: 12px;"><?= count($bCategory['items']); ?> items / <?= $bCategory['total_units']; ?> units</span>
                                                                         </div>
-                                                                        <div class="category-subtotal-badge" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 3px 10px; display: inline-flex; align-items: center; gap: 6px;">
-                                                                            <span style="font-size: 11px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.3px;">Category Subtotal:</span>
-                                                                            <strong style="font-size: 14px; font-weight: 800; color: #1d4ed8;"><?= priceDecimal($bCategory['subtotal'], $cart->currency_code); ?></strong>
+                                                                        <div>
+                                                                            <a href="<?= esc($cartItem->product_url); ?>?cart_item_id=<?= $cartItem->id; ?>&bundle_cat=<?= esc($bCatKey); ?>#tab_bundle_contents" class="btn btn-sm btn-outline-primary" style="font-size: 12px; padding: 3px 10px; border-radius: 4px; font-weight: 600;" onclick="event.stopPropagation();" title="Customize <?= esc($bCategory['name']); ?>">
+                                                                                <i class="fa fa-sliders m-r-1"></i> Customize
+                                                                            </a>
                                                                         </div>
                                                                     </div>
-                                                                    <div class="table-responsive">
+                                                                    <div id="<?= $cartCatId; ?>" class="table-responsive cart-category-table-wrap" style="display: none;">
                                                                         <table class="table table-sm table-borderless m-b-0" style="font-size: 13px; width: 100%; margin-bottom: 0;">
                                                                             <thead>
                                                                                 <tr style="color: #64748b; border-bottom: 1px dashed #e2e8f0; font-size: 12px; background: #fafafa;">
+                                                                                    <th style="font-weight: 600; padding: 8px 6px; width: 50px;" class="text-center">Select</th>
                                                                                     <th style="font-weight: 600; padding: 8px 12px;">Item</th>
                                                                                     <th class="text-center" style="font-weight: 600; padding: 8px 12px; width: 130px;">Unit Price</th>
                                                                                     <th class="text-center" style="font-weight: 600; padding: 8px 12px; width: 70px;">Qty</th>
@@ -254,8 +290,19 @@
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody>
-                                                                                <?php foreach($bCategory['items'] as $bProd): ?>
-                                                                                    <tr style="border-bottom: 1px solid #f8fafc;">
+                                                                                <?php foreach($bCategory['items'] as $bProd): 
+                                                                                    $isOpt = !empty($bProd->is_optional);
+                                                                                    $isItemChecked = !$isOpt || ($bProd->quantity > 0);
+                                                                                ?>
+                                                                                    <tr style="border-bottom: 1px solid #f8fafc;" class="<?= (!$isItemChecked) ? 'bundle-row-disabled' : ''; ?>">
+                                                                                        <!-- Checkbox Column -->
+                                                                                        <td class="text-center" style="padding: 8px 6px; vertical-align: middle;">
+                                                                                            <?php if (!$isOpt): ?>
+                                                                                                <input type="checkbox" class="cart-item-select-chk" checked disabled title="Mandatory item (included by default)">
+                                                                                            <?php else: ?>
+                                                                                                <input type="checkbox" class="cart-item-select-chk" <?= ($bProd->quantity > 0) ? 'checked' : ''; ?> disabled title="Optional item">
+                                                                                            <?php endif; ?>
+                                                                                        </td>
                                                                                         <td style="padding: 8px 12px; vertical-align: middle;">
                                                                                             <div class="d-flex align-items-center" style="display: flex; align-items: center;">
                                                                                                 <img src="<?= getProductMainImage($bProd->product_id, 'image_small'); ?>" alt="<?= esc($bProd->title); ?>" style="width: 36px; height: 36px; object-fit: cover; border-radius: 4px; margin-right: 10px; border: 1px solid #e2e8f0; flex-shrink: 0;">
@@ -296,6 +343,7 @@
                                                                 <table class="table table-sm table-borderless m-b-0" style="font-size: 13px; width: 100%;">
                                                                     <thead>
                                                                         <tr style="color: #718096; border-bottom: 1px dashed #cbd5e0; font-size: 12px;">
+                                                                            <th style="font-weight: 600; padding: 6px 6px; width: 50px;" class="text-center">Select</th>
                                                                             <th style="font-weight: 600; padding: 6px 10px;">Item</th>
                                                                             <th class="text-center" style="font-weight: 600; padding: 6px 10px; width: 130px;">Unit Price</th>
                                                                             <th class="text-center" style="font-weight: 600; padding: 6px 10px; width: 70px;">Qty</th>
@@ -303,8 +351,18 @@
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
-                                                                        <?php foreach($cartItem->bundle_products as $bProd): ?>
-                                                                            <tr style="border-bottom: 1px solid #edf2f7;">
+                                                                        <?php foreach($cartItem->bundle_products as $bProd): 
+                                                                            $isOpt = !empty($bProd->is_optional);
+                                                                            $isItemChecked = !$isOpt || ($bProd->quantity > 0);
+                                                                        ?>
+                                                                            <tr style="border-bottom: 1px solid #edf2f7;" class="<?= (!$isItemChecked) ? 'bundle-row-disabled' : ''; ?>">
+                                                                                <td class="text-center" style="padding: 8px 6px; vertical-align: middle;">
+                                                                                    <?php if (!$isOpt): ?>
+                                                                                        <input type="checkbox" class="cart-item-select-chk" checked disabled title="Mandatory item (included by default)">
+                                                                                    <?php else: ?>
+                                                                                        <input type="checkbox" class="cart-item-select-chk" <?= ($bProd->quantity > 0) ? 'checked' : ''; ?> disabled title="Optional item">
+                                                                                    <?php endif; ?>
+                                                                                </td>
                                                                                 <td style="padding: 8px 10px; vertical-align: middle;">
                                                                                     <div class="d-flex align-items-center" style="display: flex; align-items: center;">
                                                                                         <img src="<?= getProductMainImage($bProd->product_id, 'image_small'); ?>" alt="<?= esc($bProd->title); ?>" style="width: 36px; height: 36px; object-fit: cover; border-radius: 4px; margin-right: 10px; border: 1px solid #e2e8f0; flex-shrink: 0;">
@@ -452,3 +510,19 @@
         </div>
     </div>
 </div>
+
+<script>
+function toggleCartCategory(catId, toggleEl) {
+    var $content = $('#' + catId);
+    var $chevron = $(toggleEl).find('.cart-cat-chevron');
+    if ($content.length) {
+        $content.slideToggle(200, function() {
+            if ($content.is(':visible')) {
+                $chevron.removeClass('collapsed');
+            } else {
+                $chevron.addClass('collapsed');
+            }
+        });
+    }
+}
+</script>
