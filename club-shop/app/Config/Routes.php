@@ -70,6 +70,12 @@ $routes->get('connect-with-facebook', 'AuthController::connectWithFacebook');
 $routes->get('facebook-callback', 'AuthController::facebookCallback');
 $routes->get('connect-with-google', 'AuthController::connectWithGoogle');
 $routes->get('connect-with-vk', 'AuthController::connectWithVk');
+$routes->get('sso-login', 'AuthController::ssoLogin');
+$routes->get('auth/sso-login', 'AuthController::ssoLogin');
+$routes->get('sso-to-main', 'AuthController::toMain');
+$routes->get('sso/main', 'AuthController::toMain');
+$routes->get('auth/sso-to-main', 'AuthController::toMain');
+
 
 /*
  * --------------------------------------------------------------------

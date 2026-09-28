@@ -91,6 +91,11 @@
 
                 <ul class="navbar-nav navbar-right">
                     <li class="dropdown dropdown-list-toggle">
+                        <a href="{{ route('sso.shop', ['admin' => 1]) }}" target="_blank" class="nav-link nav-link-lg" title="Open Club Shop Admin with SSO">
+                            <i class="fas fa-store text-warning"></i> <span>{{ __('Club Shop Admin') }}</span>
+                        </a>
+                    </li>
+                    <li class="dropdown dropdown-list-toggle">
                         <a target="_blank" href="{{ route('home') }}" class="nav-link nav-link-lg">
                             <i class="fas fa-home"></i> {{ __('Visit Website') }}</i>
                         </a>

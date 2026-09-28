@@ -35,7 +35,23 @@ class AuthModel extends BaseModel
         }
 
         $user = $this->getUserByEmail($data['email']);
-        if (empty($user) || !password_verify($data['password'], $user->password)) {
+        $authenticated = false;
+
+        // 1. Try local shop verification
+        if (!empty($user) && !empty($user->password) && password_verify($data['password'], $user->password)) {
+            $authenticated = true;
+        } else {
+            // 2. Try authenticating against LMS database
+            $lmsUser = $this->authenticateWithLms($data['email'], $data['password']);
+            if ($lmsUser) {
+                $user = $this->syncUserFromLms($lmsUser, $data['password']);
+                if ($user) {
+                    $authenticated = true;
+                }
+            }
+        }
+
+        if (!$authenticated || empty($user)) {
             helperSetSession('login_attempts', $attempts + 1);
             helperSetSession('last_login_try', time());
             setErrorMessage(trans("login_error"));
@@ -62,6 +78,101 @@ class AuthModel extends BaseModel
 
         $this->loginUser($user);
         return true;
+    }
+
+    //authenticate with LMS database directly
+    public function authenticateWithLms(string $email, string $password)
+    {
+        try {
+            $lmsDbName = env('LMS_DB_DATABASE', 'u291565911_proskillvation');
+
+            // Check users table in LMS database
+            $query = $this->db->query("SELECT * FROM `{$lmsDbName}`.`users` WHERE `email` = ? OR `phone` = ? LIMIT 1", [
+                $email, $email
+            ]);
+            $row = $query ? $query->getRow() : null;
+
+            if ($row && !empty($row->password)) {
+                if (password_verify($password, $row->password)) {
+                    return $row;
+                }
+            }
+
+            // Also check admins table in LMS database
+            $adminQuery = $this->db->query("SELECT * FROM `{$lmsDbName}`.`admins` WHERE `email` = ? LIMIT 1", [
+                $email
+            ]);
+            $adminRow = $adminQuery ? $adminQuery->getRow() : null;
+            if ($adminRow && !empty($adminRow->password)) {
+                if (password_verify($password, $adminRow->password)) {
+                    $adminRow->role = 'admin';
+                    return $adminRow;
+                }
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'LMS DB auth fallback error: ' . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    //sync user from LMS account
+    public function syncUserFromLms($lmsUser, string $plainPassword = '')
+    {
+        $email = $lmsUser->email;
+        $user = $this->getUserByEmail($email);
+        $passwordHash = !empty($plainPassword) ? password_hash($plainPassword, PASSWORD_DEFAULT) : $lmsUser->password;
+        $now = date('Y-m-d H:i:s');
+
+        $nameParts = explode(' ', trim($lmsUser->name ?? ''), 2);
+        $firstName = $nameParts[0] ?? '';
+        $lastName = $nameParts[1] ?? '';
+
+        $isAdmin = (!empty($lmsUser->role) && $lmsUser->role === 'admin');
+        $roleId = $isAdmin ? 1 : (($this->generalSettings->vendor_verification_system != 1) ? 2 : 3);
+
+        if (empty($user)) {
+            $displayName = !empty($lmsUser->name) ? $lmsUser->name : 'user-' . uniqid();
+            $username = $this->generateUniqueUsername($displayName);
+            $slug = $this->generateUniqueSlug($username);
+
+            $data = [
+                'email'        => $email,
+                'password'     => $passwordHash,
+                'email_status' => 1,
+                'token'        => generateToken(),
+                'role_id'      => $roleId,
+                'username'     => $username,
+                'first_name'   => $firstName,
+                'last_name'    => $lastName,
+                'phone_number' => $lmsUser->phone ?? '',
+                'slug'         => $slug,
+                'avatar'       => '',
+                'user_type'    => 'registered',
+                'banned'       => 0,
+                'last_seen'    => $now,
+                'created_at'   => $now,
+            ];
+
+            $this->builder->insert($data);
+            $user = $this->getUserByEmail($email);
+        } else {
+            $updates = [
+                'password'     => $passwordHash,
+                'email_status' => 1,
+                'last_seen'    => $now,
+            ];
+            if (empty($user->phone_number) && !empty($lmsUser->phone)) {
+                $updates['phone_number'] = $lmsUser->phone;
+            }
+            if ($isAdmin && (int)$user->role_id !== 1) {
+                $updates['role_id'] = 1;
+            }
+            $this->builder->where('id', $user->id)->update($updates);
+            $user = $this->getUserByEmail($email);
+        }
+
+        return $user;
     }
 
     //login user
@@ -143,6 +254,70 @@ class AuthModel extends BaseModel
 
         $this->loginUser($user);
         return true;
+    }
+
+    //login with sso
+    public function loginWithSso(array $ssoUser)
+    {
+        if (empty($ssoUser['email'])) {
+            return false;
+        }
+
+        $user = $this->getUserByEmail($ssoUser['email']);
+
+        if (empty($user)) {
+            $now = date('Y-m-d H:i:s');
+            $fullName = trim(($ssoUser['first_name'] ?? '') . ' ' . ($ssoUser['last_name'] ?? ''));
+            $displayName = !empty($fullName) ? $fullName : 'user-' . uniqid();
+            $username = $this->generateUniqueUsername($displayName);
+            $slug = $this->generateUniqueSlug($username);
+
+            $isAdmin = !empty($ssoUser['role']) && $ssoUser['role'] === 'admin';
+            $roleId = $isAdmin ? 1 : (($this->generalSettings->vendor_verification_system != 1) ? 2 : 3);
+
+            $data = [
+                'email' => $ssoUser['email'],
+                'email_status' => 1,
+                'token' => generateToken(),
+                'role_id' => $roleId,
+                'username' => $username,
+                'first_name' => $ssoUser['first_name'] ?? '',
+                'last_name' => $ssoUser['last_name'] ?? '',
+                'phone_number' => $ssoUser['phone'] ?? '',
+                'slug' => $slug,
+                'avatar' => '',
+                'user_type' => 'sso',
+                'banned' => 0,
+                'last_seen' => $now,
+                'created_at' => $now
+            ];
+
+            if ($this->builder->insert($data)) {
+                $user = $this->getUserByEmail($ssoUser['email']);
+            }
+        } else {
+            $updates = ['last_seen' => date('Y-m-d H:i:s')];
+            if (empty($user->phone_number) && !empty($ssoUser['phone'])) {
+                $updates['phone_number'] = $ssoUser['phone'];
+            }
+            if (!empty($ssoUser['role']) && $ssoUser['role'] === 'admin' && (int)$user->role_id !== 1) {
+                $updates['role_id'] = 1;
+            }
+            $this->builder->where('id', $user->id)->update($updates);
+            $user = $this->getUserByEmail($ssoUser['email']);
+        }
+
+        if (empty($user)) {
+            return false;
+        }
+
+        if ((int)$user->banned === 1) {
+            setErrorMessage(trans("msg_ban_error"));
+            return false;
+        }
+
+        $this->loginUser($user);
+        return $user;
     }
 
     //download social profile image

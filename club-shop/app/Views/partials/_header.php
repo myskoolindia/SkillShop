@@ -1,3 +1,52 @@
+<?php
+$nav_menu = getPortalMenuBySlug('nav-menu');
+if (empty($nav_menu)) {
+    // Fallback menu if DB table is empty
+    $nav_menu = [
+        ['label' => 'Home', 'link' => '/'],
+        ['label' => 'Skill 2 Skool', 'link' => '/skill2school'],
+        ['label' => 'TTT', 'link' => '/ttt'],
+        ['label' => 'Upskill 4 Teacher', 'link' => '/upskill4teacher'],
+        ['label' => 'Shop', 'link' => '/club-shop'],
+        [
+            'label' => 'Labs',
+            'link' => '/labs',
+            'child' => [
+                ['label' => 'AI & Robotics Lab',   'link' => '/labs/ai-robotics'],
+                ['label' => 'STEM Lab',            'link' => '/labs/stem'],
+                ['label' => 'ECEC Lab',            'link' => '/labs/ecec'],
+                ['label' => 'Composite Skill Lab', 'link' => '/labs/composite-skill'],
+            ]
+        ]
+    ];
+}
+
+$childImageMap = [
+    '/'                     => ['image' => mainPortalUrl('designs/img/logo.png'),              'desc' => 'Back to homepage'],
+    '/skill2school'         => ['image' => mainPortalUrl('designs/img/skill2school-2.jpeg'),   'desc' => 'School-wide skill curriculum'],
+    '/upskill4teacher'      => ['image' => mainPortalUrl('designs/img/TTT-1.png'),             'desc' => 'Professional educator development'],
+    '/ttt'                  => ['image' => mainPortalUrl('designs/img/TTT-1.png'),             'desc' => 'Master trainer & bootcamp'],
+    '/shop'                 => ['image' => mainPortalUrl('frontend/img/skillbox/skillbox_banner.png'), 'desc' => 'Interactive kits & learning boxes'],
+    '/club-shop'            => ['image' => mainPortalUrl('frontend/img/skillbox/skillbox_banner.png'), 'desc' => 'Interactive kits & learning boxes'],
+    '/labs'                 => ['image' => 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=600&q=80', 'desc' => 'Hands-on innovation labs'],
+    '/labs/ai-robotics'     => ['image' => 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=600&q=80', 'desc' => 'AI & Robotics Lab'],
+    '/labs/stem'            => ['image' => 'https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?auto=format&fit=crop&w=600&q=80', 'desc' => 'STEM Lab'],
+    '/labs/ecec'            => ['image' => 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=600&q=80', 'desc' => 'ECEC Lab'],
+    '/labs/composite-skill' => ['image' => 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=600&q=80', 'desc' => 'Composite Skill Lab'],
+    '/courses'              => ['image' => mainPortalUrl('designs/img/skill2school-3.png'),    'desc' => 'Browse all courses'],
+    '/blog'                 => ['image' => mainPortalUrl('designs/img/skill2school-4.jpeg'),   'desc' => 'Articles & insights'],
+    '/contact'              => ['image' => mainPortalUrl('designs/img/skill2school-5.jpeg'),   'desc' => 'Get in touch'],
+];
+
+$childLabelMap = [
+    'ai & robotics'       => 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=600&q=80',
+    'ai & robotics lab'   => 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=600&q=80',
+    'stem lab'            => 'https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?auto=format&fit=crop&w=600&q=80',
+    'ecec lab'            => 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=600&q=80',
+    'composite skill lab' => 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=600&q=80',
+    'composite lab'       => 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=600&q=80',
+];
+?>
 <!DOCTYPE html>
 <html lang="<?= esc($activeLang->short_form); ?>" <?= $baseVars->rtl ? 'dir="rtl"' : ''; ?>>
 <head>
@@ -62,9 +111,13 @@ if ($generalSettings->pwa_status == 1): ?>
 <?= seoHreflangTags($isTranslatable ?? false); ?>
 
 <?= view('partials/_fonts'); ?>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 <link rel="preload" href="<?= base_url("assets/css/icon-font/mds-icons.woff2"); ?>" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="<?= base_url('assets/css/plugins-2.6.css'); ?>"/>
 <link rel="stylesheet" href="<?= base_url('assets/css/style-2.6.min.css'); ?>"/>
+<link rel="stylesheet" href="<?= mainPortalUrl('frontend/css/flaticon-skillgro.css'); ?>"/>
 <?= view('partials/_css_js_header'); ?>
 <?php if (!empty($jsonLdScript)):
 echo $jsonLdScript;
@@ -74,98 +127,147 @@ endif; ?>
 <?= $generalSettings->custom_header_codes; ?>
 </head>
 <body>
-<header id="header">
-<?= view('nav/_top_bar'); ?>
-<div class="main-menu">
-<div class="container-fluid">
-<div class="row">
-<div class="nav-top">
-<div class="container">
-<div class="row align-items-center">
-<div class="col-md-7 nav-top-left">
-<div class="d-flex justify-content-start align-items-center">
-<div class="logo">
-<a href="<?= langBaseUrl(); ?>"><img src="<?= getLogo(); ?>" alt="logo" width="<?= $baseVars->logoWidth; ?>" height="<?= $baseVars->logoHeight; ?>"></a>
-</div>
-<div class="top-search-bar">
-<form action="<?= generateUrl('products'); ?>" method="get" id="form_validate_search" class="form_search_main">
-<input type="text" name="search" maxlength="300" pattern=".*\S+.*" id="input_search_main" class="form-control input-search ajax-search-input" data-device="desktop" placeholder="<?= trans("search_products_categories_brands"); ?>" required autocomplete="off">
-<button class="btn btn-default btn-search" aria-label="search"><i class="icon-search"></i></button>
-<div id="response_search_results" class="search-results-ajax"></div>
-</form>
-</div>
-</div>
-</div>
-<div class="col-md-5 nav-top-right">
-<ul class="nav align-items-center">
-<?php if (isSaleActive()): ?>
-<li class="nav-item nav-item-cart li-main-nav-right">
-<a href="<?= generateUrl('cart'); ?>">
-<i class="icon-cart"></i>
-<span class="label-nav-icon"><?= trans("cart"); ?></span>
-<span class="notification span_cart_product_count <?= $cartItemCount <= 0 ? 'visibility-hidden' : ''; ?>"><?= esc($cartItemCount); ?></span>
-</a>
-</li>
-<?php endif; ?>
-<li class="nav-item li-main-nav-right"><a href="<?= generateUrl('wishlist'); ?>"><i class="icon-heart-o"></i><span class="label-nav-icon"><?= trans("wishlist"); ?></span></a></li>
-<?php if (authCheck()): ?>
-<?php if ($generalSettings->multi_vendor_system == 1): ?>
-<!-- <li class="nav-item m-r-0">
-<a href="<?//= generateDashUrl("add_product"); ?>" class="btn btn-md btn-custom btn-sell-now m-r-0"><?//= trans("sell_now"); ?></a>
-</li> -->
-<?php endif;
-else: ?>
-<?php if ($generalSettings->multi_vendor_system == 1): ?>
-<!-- <li class="nav-item m-r-0">
-<button type="button" class="btn btn-md btn-custom btn-sell-now m-r-0" data-toggle="modal" data-target="#loginModal" aria-label="sell-now"><?//= trans("sell_now"); ?></button>
-</li> -->
-<?php endif;
-endif; ?>
-</ul>
-</div>
-</div>
-</div>
-</div>
-<div class="nav-main">
-<?= renderCategoryMenu($activeLang->id, $parentCategories); ?>
-</div>
-</div>
-</div>
-</div>
-<div class="mobile-nav-container">
-<div class="nav-mobile-header">
-<div class="container-fluid">
-<div class="row">
-<div class="nav-mobile-header-container">
-<div class="flex-item flex-item-left item-menu-icon justify-content-start align-items-center">
-<button type="button" class="btn-open-mobile-nav button-link" aria-label="open-mobile-menu"><i class="icon-menu"></i></button>
-</div>
-<div class="flex-item flex-item-mid justify-content-center">
-<div class="mobile-logo">
-<a href="<?= langBaseUrl(); ?>"><img src="<?= getLogo(); ?>" alt="logo" width="<?= esc($baseVars->logoWidth); ?>" height="<?= esc($baseVars->logoHeight); ?>"></a>
-</div>
-</div>
-<div class="flex-item flex-item-right justify-content-end">
-<button type="button" class="button-link a-search-icon" aria-label="button-mobile-search-icon"><i id="searchIconMobile" class="icon-search"></i></button>
-<?php if (isSaleActive()): ?>
-<a href="<?= generateUrl('cart'); ?>" class="a-mobile-cart"><i class="icon-cart"></i><span class="notification span_cart_product_count"><?= esc($cartItemCount); ?></span></a>
-<?php endif; ?>
-</div>
-</div>
-</div>
-<div class="row">
-<div class="top-search-bar mobile-search-form">
-<form action="<?= generateUrl('products'); ?>" method="get">
-<input type="text" id="input_search_mobile" name="search" maxlength="300" pattern=".*\S+.*" class="form-control input-search ajax-search-input" data-device="mobile" placeholder="<?= trans("search_products_categories_brands"); ?>" required autocomplete="off">
-<button class="btn btn-default btn-search"><i class="icon-search"></i></button>
-<div id="response_search_results_mobile" class="search-results-ajax"></div>
-</form>
-</div>
-</div>
-</div>
-</div>
-</div>
+<!-- header-area -->
+<header>
+    <div id="header-fixed-height"></div>
+    <div id="sticky-header" class="tg-header__area">
+        <div class="container custom-container xl_container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="tgmenu__wrap">
+                        <nav class="tgmenu__nav">
+                            <div class="logo">
+                                <a href="<?= mainPortalUrl('/'); ?>">
+                                    <img src="<?= mainPortalUrl('designs/img/logo.png'); ?>" alt="Skillvation" onerror="this.onerror=null;this.src='<?= getLogo(); ?>';" style="max-height: 48px; width: auto; display: block;">
+                                </a>
+                            </div>
+                            <div class="tgmenu__navbar-wrap tgmenu__main-menu d-none d-xl-flex">
+                                <ul class="navigation">
+                                    <?php foreach ($nav_menu as $menu):
+                                        $hasChild = !empty($menu['child']) && count($menu['child']) > 0;
+                                        $linkLower = strtolower(trim($menu['link'] ?? ''));
+                                        $labelLower = strtolower(trim($menu['label'] ?? ''));
+                                        $isShopLink = ($linkLower === 'shop' || $linkLower === '/shop' || $linkLower === 'club-shop' || $linkLower === '/club-shop' || $labelLower === 'shop');
+                                        $targetUrl = $isShopLink ? langBaseUrl() : mainPortalUrl($menu['link']);
+                                    ?>
+                                        <li class="<?= $hasChild ? 'menu-item-has-children mega-menu-parent' : ''; ?> <?= $isShopLink ? 'active' : ''; ?>">
+                                            <a href="<?= $hasChild ? 'javascript:;' : $targetUrl; ?>">
+                                                <span><?= esc($menu['label']); ?></span>
+                                            </a>
+                                            <?php if ($hasChild):
+                                                $childCount = count($menu['child']);
+                                                $panelW = $childCount <= 2 ? '460px' : ($childCount === 3 ? '680px' : '900px');
+                                                $colW = $childCount <= 2 ? 'calc(50% - 8px)' : ($childCount === 3 ? 'calc(33.333% - 11px)' : 'calc(25% - 12px)');
+                                            ?>
+                                                <div class="mega-dropdown-panel" style="width:<?= $panelW; ?>;">
+                                                    <div class="mega-dropdown-header">
+                                                        <span class="mega-dropdown-title"><?= esc($menu['label']); ?></span>
+                                                        <span class="mega-dropdown-count"><?= $childCount; ?></span>
+                                                    </div>
+                                                    <div class="mega-dropdown-grid">
+                                                        <?php foreach ($menu['child'] as $child):
+                                                            $childPath = '/' . ltrim($child['link'], '/');
+                                                            $labelKey = strtolower(trim($child['label']));
+                                                            $childMeta = $childImageMap[$childPath] ?? null;
+                                                            $childImg = $childMeta['image'] ?? ($childLabelMap[$labelKey] ?? 'https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?auto=format&fit=crop&w=600&q=80');
+                                                        ?>
+                                                            <a href="<?= mainPortalUrl($child['link']); ?>" class="mega-card" style="width:<?= $colW; ?>;">
+                                                                <p class="mega-card__title"><?= esc($child['label']); ?></p>
+                                                                <div class="mega-card__img">
+                                                                    <img src="<?= $childImg; ?>" alt="<?= esc($child['label']); ?>" onerror="this.onerror=null;this.style.opacity='.3';" />
+                                                                </div>
+                                                            </a>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                            <div class="tgmenu__action">
+                                <ul class="list-wrap">
+                                    <li class="mini-cart-icon">
+                                        <a href="<?= generateUrl('cart'); ?>" class="cart-count">
+                                            <img src="<?= mainPortalUrl('frontend/img/icons/cart.svg'); ?>" alt="cart">
+                                            <span class="mini-cart-count"><?= esc($cartItemCount); ?></span>
+                                        </a>
+                                    </li>
+                                    <li class="mini-cart-icon user_icon">
+                                        <a href="javascript:;" class="cart-count" <?= !authCheck() ? 'data-toggle="modal" data-target="#loginModal"' : ''; ?>>
+                                            <img src="<?= mainPortalUrl('frontend/img/icons/menu_user.svg'); ?>" alt="user">
+                                        </a>
+                                        <ul class="menu_user_list">
+                                            <?php if (!authCheck()): ?>
+                                                <li><a href="javascript:;" data-toggle="modal" data-target="#loginModal"><?= trans("login") ?? "Sign in"; ?></a></li>
+                                                <li><a href="<?= generateUrl('register'); ?>"><?= trans("register") ?? "Sign Up"; ?></a></li>
+                                            <?php else: ?>
+                                                <li><a href="<?= generateDashUrl('index'); ?>"><?= trans("dashboard") ?? "Dashboard"; ?></a></li>
+                                                <li><a href="<?= generateDashUrl('orders'); ?>"><?= trans("orders") ?? "My Orders"; ?></a></li>
+                                                <li><a href="<?= generateUrl('wishlist'); ?>"><?= trans("wishlist") ?? "Wishlist"; ?></a></li>
+                                                <li><a href="<?= generateUrl('profile_edit'); ?>"><?= trans("profile") ?? "Profile Settings"; ?></a></li>
+                                                <li><a href="<?= mainPortalUrl('student/dashboard'); ?>" target="_blank" style="color:#d97706; font-weight:600;"><i class="icon-book-open mr-1"></i> LMS Portal</a></li>
+                                                <li><a href="<?= base_url('logout'); ?>" class="text-danger"><?= trans("logout") ?? "Logout"; ?></a></li>
+                                            <?php endif; ?>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="mobile-nav-toggler"><i class="tg-flaticon-menu-1"></i></div>
+                        </nav>
+                    </div>
+
+                    <!-- Mobile Menu  -->
+                    <div class="tgmobile__menu">
+                        <nav class="tgmobile__menu-box">
+                            <div class="close-btn"><i class="tg-flaticon-close-1"></i></div>
+                            <div class="nav-logo mb-4">
+                                <a href="<?= mainPortalUrl('/'); ?>"><img src="<?= mainPortalUrl('designs/img/logo.png'); ?>" alt="Skillvation" style="max-height: 40px; width: auto;"></a>
+                            </div>
+
+                            <ul class="tgmobile__menu-nav list-unstyled">
+                                <?php foreach ($nav_menu as $menu):
+                                    $hasChild = !empty($menu['child']) && count($menu['child']) > 0;
+                                    $linkLower = strtolower(trim($menu['link'] ?? ''));
+                                    $labelLower = strtolower(trim($menu['label'] ?? ''));
+                                    $isShopLink = ($linkLower === 'shop' || $linkLower === '/shop' || $linkLower === 'club-shop' || $linkLower === '/club-shop' || $labelLower === 'shop');
+                                    $targetUrl = $isShopLink ? langBaseUrl() : mainPortalUrl($menu['link']);
+                                ?>
+                                    <li class="<?= $hasChild ? 'menu-item-has-children' : ''; ?>">
+                                        <a href="<?= $hasChild ? 'javascript:;' : $targetUrl; ?>" class="<?= $isShopLink ? 'text-primary font-weight-bold' : ''; ?>">
+                                            <?= esc($menu['label']); ?>
+                                            <?php if ($hasChild): ?><i class="icon-arrow-down float-right mt-1"></i><?php endif; ?>
+                                        </a>
+                                        <?php if ($hasChild): ?>
+                                            <ul class="sub-menu list-unstyled pl-3">
+                                                <?php foreach ($menu['child'] as $child): ?>
+                                                    <li><a href="<?= mainPortalUrl($child['link']); ?>"><?= esc($child['label']); ?></a></li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        <?php endif; ?>
+                                    </li>
+                                <?php endforeach; ?>
+                                <li><a href="<?= generateUrl('cart'); ?>">Cart (<?= esc($cartItemCount); ?>)</a></li>
+                                <li><a href="<?= generateUrl('wishlist'); ?>">Wishlist</a></li>
+                            </ul>
+
+                            <div class="mobile_menu_login mt-4">
+                                <?php if (!authCheck()): ?>
+                                    <a href="javascript:;" data-toggle="modal" data-target="#loginModal" class="btn btn-primary btn-sm mr-2"><?= trans("login"); ?></a>
+                                    <a href="<?= generateUrl('register'); ?>" class="btn btn-outline-primary btn-sm"><?= trans("register"); ?></a>
+                                <?php else: ?>
+                                    <a href="<?= generateDashUrl('index'); ?>" class="btn btn-primary btn-sm"><?= trans("dashboard"); ?></a>
+                                    <a href="<?= base_url('logout'); ?>" class="btn btn-danger btn-sm ml-2"><?= trans("logout"); ?></a>
+                                <?php endif; ?>
+                            </div>
+                        </nav>
+                    </div>
+                    <div class="tgmobile__menu-backdrop"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </header>
+<!-- header-area-end -->
 
 <div id="overlay_bg" class="overlay-bg"></div>
-<?= view("nav/_nav_mobile"); ?>

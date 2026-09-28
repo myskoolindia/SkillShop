@@ -78,3 +78,9 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });
+
+// Single Sign-On (SSO) Bridge Routes
+Route::get('sso/shop', [\App\Http\Controllers\Auth\SsoBridgeController::class, 'toShop'])->name('sso.shop');
+Route::get('sso/login', [\App\Http\Controllers\Auth\SsoBridgeController::class, 'fromShop'])->name('sso.login');
+Route::get('sso-login', [\App\Http\Controllers\Auth\SsoBridgeController::class, 'fromShop']);
+

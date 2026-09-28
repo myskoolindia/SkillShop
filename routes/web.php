@@ -44,6 +44,20 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
      */
 
     Route::get('set-language', [DashboardController::class, 'setLanguage'])->name('set-language');
+
+    Route::get('dashboard', function () {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+        $user = Auth::user();
+        return match ($user->role) {
+            'school'     => redirect()->route('school.dashboard'),
+            'teacher'    => redirect()->route('student.dashboard'),
+            'instructor' => redirect()->route('instructor.dashboard'),
+            'admin'      => redirect()->route('admin.dashboard'),
+            default      => redirect()->route('student.dashboard'),
+        };
+    })->middleware('auth')->name('dashboard');
     Route::get('set-currency', [HomePageController::class, 'setCurrency'])->name('set-currency');
 
     Route::get('/', function () {

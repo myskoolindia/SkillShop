@@ -13,12 +13,35 @@ if (strpos($_SERVER['REQUEST_URI'], '/index.php') !== false) {
     }
 }
 
+//load portal sync helper
+if (file_exists(APPPATH . 'Helpers/portal_sync_helper.php')) {
+    require_once APPPATH . 'Helpers/portal_sync_helper.php';
+}
+
 //get a specific value from AppContextService
 if (!function_exists('getContextValue')) {
     function getContextValue(string $key, $default = null)
     {
         $ctx = service('appContext');
         return $ctx->{$key} ?? $default;
+    }
+}
+
+//resolve main portal URL
+if (!function_exists('mainPortalUrl')) {
+    function mainPortalUrl(string $path = ''): string
+    {
+        $mainPortal = env('MAIN_PORTAL_URL');
+        if (empty($mainPortal)) {
+            $base = rtrim(base_url(), '/');
+            // Remove /club-shop from end of base_url if present
+            $mainPortal = preg_replace('#/club-shop/?$#i', '', $base);
+            if (empty($mainPortal) || $mainPortal === $base) {
+                $mainPortal = 'http://localhost/skillvation.comphp';
+            }
+        }
+        $mainPortal = rtrim($mainPortal, '/');
+        return !empty($path) ? $mainPortal . '/' . ltrim($path, '/') : $mainPortal;
     }
 }
 
@@ -132,6 +155,36 @@ if (!function_exists('dashboardUrl')) {
         }
 
         return $url . '/';
+    }
+}
+
+//main LMS app URL
+if (!function_exists('mainAppUrl')) {
+    function mainAppUrl(string $path = ''): string
+    {
+        $mainUrl = env('MAIN_APP_URL') ?: env('LMS_URL');
+        if (empty($mainUrl)) {
+            $baseUrl = rtrim(base_url(), '/');
+            if (str_ends_with($baseUrl, '/club-shop')) {
+                $mainUrl = substr($baseUrl, 0, -strlen('/club-shop'));
+            } else {
+                $mainUrl = dirname($baseUrl);
+            }
+        }
+        $mainUrl = rtrim($mainUrl, '/');
+        return !empty($path) ? $mainUrl . '/' . ltrim($path, '/') : $mainUrl;
+    }
+}
+
+//sso bridge URL to main LMS
+if (!function_exists('ssoMainUrl')) {
+    function ssoMainUrl(string $target = ''): string
+    {
+        $query = !empty($target) ? '?target=' . urlencode($target) : '';
+        if (authCheck()) {
+            return base_url('sso-to-main' . $query);
+        }
+        return mainAppUrl(!empty($target) ? $target : 'login');
     }
 }
 
