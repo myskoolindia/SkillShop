@@ -1153,17 +1153,18 @@ function buildRow(catName, comps, theme, productUrl, isOpenByDefault){
   var rowId = 'sks-r-'+Math.random().toString(36).slice(2,8);
   var totalQ=0, totalV=0;
   comps.forEach(function(c){
-    var q=c.is_optional?0:Number(c.required_quantity);
-    totalQ+=q; totalV+=Number(c.unit_price)*q;
+    var q = Number(c.required_quantity || 0);
+    totalQ += q;
+    totalV += Number(c.unit_price) * q;
   });
-  var subtitle = totalQ>0
-    ? rupee(totalV)+' · '+totalQ+' unit'+(totalQ!==1?'s':'')
-    : comps.length+' item'+(comps.length!==1?'s':'')+' (optional)';
+  var subtitle = totalQ > 0
+    ? rupee(totalV) + ' · ' + totalQ + ' unit' + (totalQ !== 1 ? 's' : '')
+    : comps.length + ' item' + (comps.length !== 1 ? 's' : '');
 
   var itemRows = comps.map(function(c){
-    var qty    = c.is_optional?0:Number(c.required_quantity);
-    var line   = Number(c.unit_price)*qty;
-    var opt    = c.is_optional
+    var qty    = Number(c.required_quantity || 0);
+    var line   = Number(c.unit_price) * qty;
+    var opt    = (c.is_optional && qty === 0)
       ? '<span style="margin-left:5px;padding:1px 5px;border-radius:3px;background:#fef3c7;color:#92400e;border:1px solid #fde68a;font-size:9px;font-weight:700;">optional</span>'
       : '';
     var rawImg = c.image_small || c.image || '';
@@ -1189,8 +1190,8 @@ function buildRow(catName, comps, theme, productUrl, isOpenByDefault){
         +(c.sku?'<div style="font-size:10.5px;color:#94a3b8;font-family:monospace;margin-top:2px;">'+esc(c.sku)+'</div>':'')
       +'</div>'
       +'<div style="text-align:right;flex-shrink:0;">'
-        +'<div style="font-size:12.5px;font-weight:700;color:'+(c.is_optional?'#94a3b8':theme.dotColor)+';">'+(c.is_optional?'—':rupee(line))+'</div>'
-        +'<div style="font-size:10.5px;color:#94a3b8;">'+(c.is_optional?'0 (opt)':qty+' × '+rupee(c.unit_price))+'</div>'
+        +'<div style="font-size:12.5px;font-weight:700;color:'+(qty===0?'#94a3b8':theme.dotColor)+';">'+(qty===0?'—':rupee(line))+'</div>'
+        +'<div style="font-size:10.5px;color:#94a3b8;">'+(qty===0?'0 (opt)':qty+' × '+rupee(c.unit_price))+'</div>'
       +'</div>'
     +'</div>';
   }).join('');
