@@ -96,6 +96,21 @@ if (!empty($bundleComponents)) {
     }
 }
 $totalCategoriesCount = count($groupedComponents);
+
+$targetBundleCat = inputGet('bundle_cat');
+$initialActiveCatKey = 'all';
+if (!empty($targetBundleCat) && $targetBundleCat !== 'all') {
+    $cleanParam = strtolower(trim(preg_replace('/^cat_/', '', $targetBundleCat)));
+    foreach ($groupedComponents as $cKey => $cGroup) {
+        $cNameClean = strtolower(trim($cGroup['name'] ?? ''));
+        $cSlug = preg_replace('/[^a-zA-Z0-9_]/', '_', $cNameClean);
+        $cId = (string)($cGroup['id'] ?? '');
+        if ($cKey === $targetBundleCat || $cSlug === $cleanParam || $cNameClean === $cleanParam || $cId === $cleanParam || str_contains($cNameClean, $cleanParam)) {
+            $initialActiveCatKey = $cKey;
+            break;
+        }
+    }
+}
 ?>
 
 <style>
@@ -159,12 +174,14 @@ $totalCategoriesCount = count($groupedComponents);
             <div class="col-lg-8 col-md-7 col-12">
                 <div class="d-flex align-items-center justify-content-md-end flex-wrap" style="gap: 6px;">
                     <?php if ($totalCategoriesCount > 1): ?>
-                        <button type="button" class="btn btn-sm btn-primary bundle-cat-pill active" data-cat-key="all" onclick="filterBundleCategory('all', this);" style="border-radius: 6px; font-weight: 600; padding: 5px 12px; font-size: 12.5px;">
-                            All <span class="badge badge-light ml-1" style="color: #2563eb; background: #ffffff;"><?= count($bundleComponents); ?></span>
+                        <button type="button" class="btn btn-sm <?= ($initialActiveCatKey === 'all') ? 'btn-primary active' : 'btn-outline-secondary'; ?> bundle-cat-pill" data-cat-key="all" onclick="filterBundleCategory('all', this);" style="border-radius: 6px; font-weight: 600; padding: 5px 12px; font-size: 12.5px;">
+                            All <span class="badge badge-light ml-1" style="<?= ($initialActiveCatKey === 'all') ? 'color: #2563eb; background: #ffffff;' : 'background: #e2e8f0; color: #475569;'; ?>"><?= count($bundleComponents); ?></span>
                         </button>
-                        <?php foreach ($groupedComponents as $catKey => $catGroup): ?>
-                            <button type="button" class="btn btn-sm btn-outline-secondary bundle-cat-pill" data-cat-key="<?= esc($catKey); ?>" onclick="filterBundleCategory('<?= esc($catKey); ?>', this);" style="border-radius: 6px; font-weight: 500; padding: 5px 12px; font-size: 12.5px; background: #ffffff; border-color: #cbd5e1; color: #334155;">
-                                <?= esc($catGroup['name']); ?> <span class="badge badge-secondary ml-1" style="background: #e2e8f0; color: #475569;"><?= count($catGroup['items']); ?></span>
+                        <?php foreach ($groupedComponents as $catKey => $catGroup): 
+                            $isThisPillActive = ($initialActiveCatKey === $catKey);
+                        ?>
+                            <button type="button" class="btn btn-sm <?= $isThisPillActive ? 'btn-primary active' : 'btn-outline-secondary'; ?> bundle-cat-pill" data-cat-key="<?= esc($catKey); ?>" onclick="filterBundleCategory('<?= esc($catKey); ?>', this);" style="border-radius: 6px; font-weight: <?= $isThisPillActive ? '600' : '500'; ?>; padding: 5px 12px; font-size: 12.5px; <?= $isThisPillActive ? '' : 'background: #ffffff; border-color: #cbd5e1; color: #334155;'; ?>">
+                                <?= esc($catGroup['name']); ?> <span class="badge <?= $isThisPillActive ? 'badge-light' : 'badge-secondary'; ?> ml-1" style="<?= $isThisPillActive ? 'color: #2563eb; background: #ffffff;' : 'background: #e2e8f0; color: #475569;'; ?>"><?= count($catGroup['items']); ?></span>
                             </button>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -191,14 +208,17 @@ $totalCategoriesCount = count($groupedComponents);
             <tbody>
                 <?php if (!empty($groupedComponents)): ?>
                     <?php $globalCounter = 1; ?>
-                    <?php foreach ($groupedComponents as $catKey => $catGroup): ?>
+                    <?php foreach ($groupedComponents as $catKey => $catGroup): 
+                        $isThisCategoryVisible = ($initialActiveCatKey === 'all' || $initialActiveCatKey === $catKey);
+                        $isThisCategoryExpanded = ($initialActiveCatKey === $catKey || $initialActiveCatKey === 'all');
+                    ?>
                         <!-- Category Header Row (Collapsible) -->
-                        <tr class="bundle-category-header-row" id="bundle_cat_row_<?= esc($catKey); ?>" data-cat-key="<?= esc($catKey); ?>" data-cat-id="<?= esc($catGroup['id'] ?? ''); ?>" data-cat-name="<?= esc(strtolower($catGroup['name'])); ?>" onclick="toggleBundleCategory('<?= esc($catKey); ?>');" style="background: #f1f5f9; border-top: 2px solid #e2e8f0; border-bottom: 1px solid #cbd5e0; cursor: pointer;" title="Click to collapse / expand this category">
+                        <tr class="bundle-category-header-row" id="bundle_cat_row_<?= esc($catKey); ?>" data-cat-key="<?= esc($catKey); ?>" data-cat-id="<?= esc($catGroup['id'] ?? ''); ?>" data-cat-name="<?= esc(strtolower($catGroup['name'])); ?>" onclick="toggleBundleCategory('<?= esc($catKey); ?>');" style="background: #f1f5f9; border-top: 2px solid #e2e8f0; border-bottom: 1px solid #cbd5e0; cursor: pointer; <?= !$isThisCategoryVisible ? 'display: none;' : ''; ?>" title="Click to collapse / expand this category">
                             <td colspan="8" class="py-2 px-3">
                                 <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: 10px;">
                                     <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
-                                        <i class="fa fa-chevron-down bundle-cat-chevron text-muted mr-1 collapsed" data-cat-key="<?= esc($catKey); ?>" style="font-size: 11px;"></i>
-                                        <i class="fa fa-folder bundle-cat-folder text-primary mr-1" data-cat-key="<?= esc($catKey); ?>" style="font-size: 15px;"></i>
+                                        <i class="fa fa-chevron-down bundle-cat-chevron text-muted mr-1 <?= !$isThisCategoryExpanded ? 'collapsed' : ''; ?>" data-cat-key="<?= esc($catKey); ?>" style="font-size: 11px;"></i>
+                                        <i class="fa <?= $isThisCategoryExpanded ? 'fa-folder-open' : 'fa-folder'; ?> bundle-cat-folder text-primary mr-1" data-cat-key="<?= esc($catKey); ?>" style="font-size: 15px;"></i>
                                         <span class="font-weight-bold text-dark bundle-cat-title" style="font-size: 14px;"><?= esc($catGroup['name']); ?></span>
                                         <span class="font-weight-bold text-primary ml-1 bundle-cat-price-wrapper" style="font-size: 13.5px;">
                                             (<span class="category-subtotal-price" data-cat-key="<?= esc($catKey); ?>"><?= priceFormatted($catGroup['total_price'], $currencyCode, true); ?></span>)
@@ -270,7 +290,8 @@ $totalCategoriesCount = count($groupedComponents);
                                 data-title="<?= esc(strtolower($comp->title)); ?>"
                                 data-sku="<?= esc(strtolower($comp->sku)); ?>"
                                 data-comp-id="<?= $comp->id; ?>"
-                                data-unit-price="<?= $unitPrice; ?>">
+                                data-unit-price="<?= $unitPrice; ?>"
+                                style="<?= (!$isThisCategoryVisible || !$isThisCategoryExpanded) ? 'display: none;' : ''; ?>">
                                 <td class="text-muted text-center" style="vertical-align: middle; font-size: 12px;"><?= $globalCounter++; ?></td>
                                 
                                 <!-- Checkbox Column (Mandatory vs Optional) -->
@@ -502,11 +523,13 @@ $totalCategoriesCount = count($groupedComponents);
 </div>
 
 <script>
-var activeBundleCategoryKey = 'all';
+var activeBundleCategoryKey = '<?= escJs($initialActiveCatKey); ?>';
 var collapsedBundleCategories = {};
 <?php if (!empty($groupedComponents)): ?>
-    <?php foreach ($groupedComponents as $cK => $cG): ?>
-        collapsedBundleCategories['<?= escJs($cK); ?>'] = true;
+    <?php foreach ($groupedComponents as $cK => $cG): 
+        $isInitCollapsed = ($initialActiveCatKey !== 'all' && $initialActiveCatKey !== $cK);
+    ?>
+        collapsedBundleCategories['<?= escJs($cK); ?>'] = <?= $isInitCollapsed ? 'true' : 'false'; ?>;
     <?php endforeach; ?>
 <?php endif; ?>
 
