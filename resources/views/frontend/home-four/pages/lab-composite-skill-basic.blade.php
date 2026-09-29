@@ -241,10 +241,10 @@
              class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-brand-orange hover:bg-brand-orangehover text-white text-sm font-bold shadow-lg shadow-brand-orange/25 transition-all hover:-translate-y-0.5">
             <i class="fa-solid fa-calendar-check"></i> Book a Skill Lab Visit
           </a>
-          <a href="#package-details"
+          <!-- <a href="#package-details"
              class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border-2 border-brand-navy text-brand-navy hover:bg-brand-navy hover:text-white text-sm font-bold transition-all hover:-translate-y-0.5">
             <i class="fa-solid fa-box-archive"></i> Request Detailed Package
-          </a>
+          </a> -->
         </div>
       </div>
 
