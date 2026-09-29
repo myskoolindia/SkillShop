@@ -14,6 +14,9 @@
     flex-direction: column;
     justify-content: flex-end;
     overflow: hidden;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   .s2s-hero__bg {
     position: absolute;
@@ -23,41 +26,46 @@
     object-fit: cover;
     object-position: top center;
   }
-  /* transparent → white → solid blue fade at bottom */
+  /* Crisp fade from transparent top to rich vibrant gradient at bottom for strong text readability */
   .s2s-hero__overlay {
     position: absolute;
     inset: 0;
     background: linear-gradient(
       to bottom,
-      rgba(255,255,255,0)   0%,
-      rgba(255,255,255,0)  30%,
-      rgba(25,118,210,.45) 58%,
-      rgba(25,118,210,1)   78%,
-      rgba(25,118,210,1)  100%
+      rgba(15, 23, 42, 0)     0%,
+      rgba(15, 23, 42, 0.08)  25%,
+      rgba(17, 82, 147, 0.72) 50%,
+      rgba(25, 118, 210, 0.95) 75%,
+      rgba(25, 118, 210, 1)   100%
     );
   }
   .s2s-hero__content {
     position: relative;
     z-index: 2;
-    padding: 0 1rem 4rem;
+    padding: 0 1.5rem 4.5rem;
     text-align: center;
-    color: #fff;
-    max-width: 900px;
+    color: #ffffff;
+    max-width: 960px;
     margin: 0 auto;
   }
   .s2s-hero__content h1 {
-    font-size: 35px;
-    font-weight: 500;
-    line-height: 1.2;
+    font-size: clamp(2.1rem, 3.8vw, 3.25rem);
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
     margin-bottom: 1.25rem;
-    color: white;
+    color: #ffffff;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
   }
   .s2s-hero__content p {
-    font-size: clamp(.95rem, 1.4vw, 1.15rem);
-    opacity: .92;
-    line-height: 1.75;
-    max-width: 780px;
+    font-size: clamp(1.05rem, 1.45vw, 1.25rem);
+    font-weight: 500;
+    opacity: 0.98;
+    line-height: 1.8;
+    max-width: 820px;
     margin: 0 auto;
+    color: #ffffff;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
   }
 
   /* ── Video card float ──────────────────────────────────── */
