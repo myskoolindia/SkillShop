@@ -1,13 +1,3 @@
-<li>
-<a href="<?= ssoMainUrl('dashboard'); ?>" style="color: #0284c7; font-weight: 600;">
-<div class="icon">
-<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-  <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-</svg>
-</div><?= 'Skillvation LMS Portal'; ?>
-</a>
-</li>
 <?php if (hasPermission('admin_panel') && !empty($profileMenuAdmin)): ?>
 <li>
 <a href="<?= adminUrl(); ?>">

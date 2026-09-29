@@ -206,7 +206,6 @@ endif; ?>
                                                 <li><a href="<?= dashboardUrl('orders'); ?>"><?= trans("orders") ?? "My Orders"; ?></a></li>
                                                 <li><a href="<?= generateUrl('wishlist'); ?>"><?= trans("wishlist") ?? "Wishlist"; ?></a></li>
                                                 <li><a href="<?= generateUrl('profile_edit'); ?>"><?= trans("profile") ?? "Profile Settings"; ?></a></li>
-                                                <li><a href="<?= mainPortalUrl('student/dashboard'); ?>" target="_blank" style="color:#d97706; font-weight:600;"><i class="icon-book-open mr-1"></i> LMS Portal</a></li>
                                                 <li><a href="<?= base_url('logout'); ?>" class="text-danger"><?= trans("logout") ?? "Logout"; ?></a></li>
                                             <?php endif; ?>
                                         </ul>
