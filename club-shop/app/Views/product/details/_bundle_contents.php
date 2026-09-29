@@ -86,7 +86,12 @@ if (!empty($bundleComponents)) {
             return strcasecmp($a->title ?? '', $b->title ?? '');
         });
     }
-    unset($catGroup);
+    $initialGrandTotalUnits = 0;
+    $initialGrandTotalPrice = 0.00;
+    foreach ($groupedComponents as $catGroup) {
+        $initialGrandTotalUnits += (int)($catGroup['total_units'] ?? 0);
+        $initialGrandTotalPrice += (float)($catGroup['total_price'] ?? 0.0);
+    }
 }
 $totalCategoriesCount = count($groupedComponents);
 ?>
@@ -407,10 +412,10 @@ $totalCategoriesCount = count($groupedComponents);
                         <th colspan="5" class="text-right font-weight-bold">Package Total:</th>
                         <th class="text-center font-weight-bold text-muted small">—</th>
                         <th class="text-center font-weight-bold">
-                            <span id="storefront_footer_total_units" class="badge badge-info px-2 py-1" style="font-size:12px;"><?= $bundleMetrics['total_units']; ?> units</span>
+                            <span id="storefront_footer_total_units" class="badge badge-info px-2 py-1" style="font-size:12px;"><?= $initialGrandTotalUnits ?? ($bundleMetrics['total_units'] ?? 0); ?> units</span>
                         </th>
                         <th class="text-right font-weight-bold text-primary" style="font-size:15px;" id="storefront_footer_total_price">
-                            <?= priceFormatted($bundleMetrics['sum_price'], $currencyCode, true); ?>
+                            <?= priceFormatted($initialGrandTotalPrice ?? ($bundleMetrics['sum_price'] ?? 0), $currencyCode, true); ?>
                         </th>
                     </tr>
                 </tfoot>
