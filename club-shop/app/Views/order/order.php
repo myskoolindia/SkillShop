@@ -310,10 +310,18 @@
                                                                         <div class="item">
                                                                             <strong class="info-left"><?= trans("sku"); ?>:</strong>&nbsp;<?= esc(getOrderSku($item)); ?>
                                                                         </div>
-                                                                        <?php if (!empty($item->product_vat) && $item->product_vat > 0): ?>
-                                                                            <div class="item">
-                                                                                <strong class="info-left"><?= trans("vat"); ?>:</strong>&nbsp;<?= $item->product_vat_rate; ?>%&nbsp;(<?= priceFormatted($item->product_vat, $item->product_currency); ?>)
-                                                                            </div>
+                                                                        <?php if (!empty($item->product_vat) && $item->product_vat > 0):
+                                                                            $delivState = !empty($shipping->sState) ? $shipping->sState : (!empty($shipping->bState) ? $shipping->bState : null);
+                                                                            $itemGst = calculateGstDetails($item->product_vat_rate, $item->product_vat, $item->seller_id, $delivState);
+                                                                            if ($itemGst['is_interstate']): ?>
+                                                                                <div class="item">
+                                                                                    <strong class="info-left"><?= trans("igst"); ?>:</strong>&nbsp;<?= $itemGst['igst_rate']; ?>%&nbsp;(<?= priceFormatted($itemGst['igst_amount'], $item->product_currency); ?>)
+                                                                                </div>
+                                                                            <?php else: ?>
+                                                                                <div class="item">
+                                                                                    <strong class="info-left"><?= trans("cgst"); ?>:</strong>&nbsp;<?= $itemGst['cgst_rate']; ?>%&nbsp;(<?= priceFormatted($itemGst['cgst_amount'], $item->product_currency); ?>)&nbsp;|&nbsp;<strong class="info-left"><?= trans("sgst"); ?>:</strong>&nbsp;<?= $itemGst['sgst_rate']; ?>%&nbsp;(<?= priceFormatted($itemGst['sgst_amount'], $item->product_currency); ?>)
+                                                                                </div>
+                                                                            <?php endif; ?>
                                                                         <?php endif; ?>
                                                                         <div class="item">
                                                                             <strong class="info-left"><?= trans("quantity"); ?>:</strong>&nbsp;<?= $item->product_quantity; ?>
@@ -428,10 +436,18 @@
                                                                             <!-- <div class="item">
                                                                                 <strong class="info-left"><?//= trans("sku"); ?>:</strong>&nbsp;<?//= $activeProduct->sku; ?>
                                                                             </div> -->
-                                                                            <?php if (!empty($activeProduct->product_vat) && $activeProduct->product_vat > 0): ?>
-                                                                                <div class="item">
-                                                                                    <strong class="info-left"><?= trans("vat"); ?>:</strong>&nbsp;<?= $activeProduct->product_vat_rate; ?>%&nbsp;(<?= priceFormatted($item->product_vat, $item->product_currency); ?>)
-                                                                                </div>
+                                                                            <?php if (!empty($activeProduct->product_vat) && $activeProduct->product_vat > 0):
+                                                                                $delivState = !empty($shipping->sState) ? $shipping->sState : (!empty($shipping->bState) ? $shipping->bState : null);
+                                                                                $itemGst = calculateGstDetails($activeProduct->product_vat_rate, $item->product_vat, $item->seller_id, $delivState);
+                                                                                if ($itemGst['is_interstate']): ?>
+                                                                                    <div class="item">
+                                                                                        <strong class="info-left"><?= trans("igst"); ?>:</strong>&nbsp;<?= $itemGst['igst_rate']; ?>%&nbsp;(<?= priceFormatted($itemGst['igst_amount'], $item->product_currency); ?>)
+                                                                                    </div>
+                                                                                <?php else: ?>
+                                                                                    <div class="item">
+                                                                                        <strong class="info-left"><?= trans("cgst"); ?>:</strong>&nbsp;<?= $itemGst['cgst_rate']; ?>%&nbsp;(<?= priceFormatted($itemGst['cgst_amount'], $item->product_currency); ?>)&nbsp;|&nbsp;<strong class="info-left"><?= trans("sgst"); ?>:</strong>&nbsp;<?= $itemGst['sgst_rate']; ?>%&nbsp;(<?= priceFormatted($itemGst['sgst_amount'], $item->product_currency); ?>)
+                                                                                    </div>
+                                                                                <?php endif; ?>
                                                                             <?php endif; ?>
                                                                             <div class="item">
                                                                                 <strong class="info-left"><?= trans("quantity"); ?>:</strong>&nbsp;<?= $qtyB; ?>
@@ -504,10 +520,40 @@
                                                 </div>
                                             </div>
                                         <?php endif; ?>
-                                        <?php if (!empty($order->price_vat) && $order->price_vat > 0): ?>
+                                        <?php if (!empty($order->price_vat) && $order->price_vat > 0):
+                                            $delivState = !empty($shipping->sState) ? $shipping->sState : (!empty($shipping->bState) ? $shipping->bState : null);
+                                            $firstSellerId = !empty($orderProducts[0]->seller_id) ? $orderProducts[0]->seller_id : null;
+                                            $orderGst = calculateGstDetails(0, $order->price_vat, $firstSellerId, $delivState);
+                                            if ($orderGst['is_interstate']): ?>
+                                                <div class="row">
+                                                    <div class="col-6 col-left">
+                                                        <?= trans("igst"); ?>
+                                                    </div>
+                                                    <div class="col-6 col-right">
+                                                        <strong><?= priceFormatted($orderGst['igst_amount'], $order->price_currency); ?></strong>
+                                                    </div>
+                                                </div>
+                                            <?php else: ?>
+                                                <div class="row">
+                                                    <div class="col-6 col-left">
+                                                        <?= trans("cgst"); ?>
+                                                    </div>
+                                                    <div class="col-6 col-right">
+                                                        <strong><?= priceFormatted($orderGst['cgst_amount'], $order->price_currency); ?></strong>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-6 col-left">
+                                                        <?= trans("sgst"); ?>
+                                                    </div>
+                                                    <div class="col-6 col-right">
+                                                        <strong><?= priceFormatted($orderGst['sgst_amount'], $order->price_currency); ?></strong>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
                                             <div class="row">
                                                 <div class="col-6 col-left">
-                                                    <?= trans("vat"); ?>
+                                                    <?= trans("total_gst"); ?>
                                                 </div>
                                                 <div class="col-6 col-right">
                                                     <strong><?= priceFormatted($order->price_vat, $order->price_currency); ?></strong>

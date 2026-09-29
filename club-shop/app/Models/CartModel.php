@@ -197,7 +197,7 @@ class CartModel extends BaseModel
     }
 
     //get cart
-    public function getCartBB(bool $includeTaxes = false, bool $includeTransactionFee = false)
+    public function getCartBB(bool $includeTaxes = true, bool $includeTransactionFee = false)
     {
         $cart = $this->fetchRawCartData();
 
@@ -237,7 +237,7 @@ class CartModel extends BaseModel
 
         return $cart;
     }
-    public function getCart(bool $includeTaxes = false, bool $includeTransactionFee = false)
+    public function getCart(bool $includeTaxes = true, bool $includeTransactionFee = false)
     {
         $cart = $this->fetchRawCartData();
 
@@ -1154,35 +1154,43 @@ class CartModel extends BaseModel
         $vat = 0;
         $vatRate = 0;
         if (!empty($price)) {
-            if (!empty($product->vat_rate)) {
-                $vatRate = $product->vat_rate;
+            if (!empty($product->vat_rate) && (float)$product->vat_rate > 0) {
+                $vatRate = (float)$product->vat_rate;
             } else {
-                $user = getUser($product->user_id);
-                if ($user->is_fixed_vat == 1) {
-                    $vatRate = $user->fixed_vat_rate;
-                } else {
-                    $stateVat = 0;
-                    $countryVat = 0;
-                    if (!empty($user->vat_rates_data_state)) {
-                        $vatArray = unserializeData($user->vat_rates_data_state);
-                        if (!empty($vatArray) && !empty($location->state_id) && !empty($vatArray[$location->state_id])) {
-                            $stateVat = $vatArray[$location->state_id];
-                        }
-                    }
-                    if (!empty($user->vat_rates_data)) {
-                        $vatArray = unserializeData($user->vat_rates_data);
-                        if (!empty($vatArray) && !empty($location->country_id) && !empty($vatArray[$location->country_id])) {
-                            $countryVat = $vatArray[$location->country_id];
-                        }
-                    }
-                    if (!empty($stateVat)) {
-                        $vatRate = $stateVat;
+                $sellerId = !empty($product->user_id) ? $product->user_id : 1;
+                $user = getUser($sellerId);
+                if (empty($user)) {
+                    $user = getUser(1);
+                }
+                if (!empty($user)) {
+                    if ($user->is_fixed_vat == 1 && !empty($user->fixed_vat_rate) && (float)$user->fixed_vat_rate > 0) {
+                        $vatRate = (float)$user->fixed_vat_rate;
+                    } elseif (!empty($user->fixed_vat_rate) && (float)$user->fixed_vat_rate > 0) {
+                        $vatRate = (float)$user->fixed_vat_rate;
                     } else {
-                        $vatRate = $countryVat;
+                        $stateVat = 0;
+                        $countryVat = 0;
+                        if (!empty($user->vat_rates_data_state)) {
+                            $vatArray = unserializeData($user->vat_rates_data_state);
+                            if (!empty($vatArray) && !empty($location->state_id) && !empty($vatArray[$location->state_id])) {
+                                $stateVat = $vatArray[$location->state_id];
+                            }
+                        }
+                        if (!empty($user->vat_rates_data)) {
+                            $vatArray = unserializeData($user->vat_rates_data);
+                            if (!empty($vatArray) && !empty($location->country_id) && !empty($vatArray[$location->country_id])) {
+                                $countryVat = $vatArray[$location->country_id];
+                            }
+                        }
+                        if (!empty($stateVat)) {
+                            $vatRate = (float)$stateVat;
+                        } elseif (!empty($countryVat)) {
+                            $vatRate = (float)$countryVat;
+                        }
                     }
                 }
             }
-            if (!empty($vatRate)) {
+            if (!empty($vatRate) && $vatRate > 0) {
                 $vat = (($price * $vatRate) / 100) * $quantity;
                 if (filter_var($vat, FILTER_VALIDATE_INT) === false) {
                     $vat = number_format($vat, 2, '.', '');

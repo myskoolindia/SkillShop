@@ -218,9 +218,15 @@
                                                             <td style="white-space: nowrap"><?= priceFormatted($orderProduct->product_unit_price, $orderProduct->product_currency); ?></td>
                                                             <?php if ($paymentSettings->vat_status): ?>
                                                                 <td style="white-space: nowrap">
-                                                                    <?php if (!empty($orderProduct->product_vat) && $orderProduct->product_vat > 0): ?>
-                                                                        <?= priceFormatted($orderProduct->product_vat, $orderProduct->product_currency); ?>&nbsp;(<?= $orderProduct->product_vat_rate; ?>%)
-                                                                    <?php endif; ?>
+                                                                    <?php if (!empty($orderProduct->product_vat) && $orderProduct->product_vat > 0):
+                                                                        $itemGst = calculateGstDetails($orderProduct->product_vat_rate, $orderProduct->product_vat, $orderProduct->seller_id, $invoice->client_state ?? null);
+                                                                        if ($itemGst['is_interstate']): ?>
+                                                                            <?= priceFormatted($itemGst['igst_amount'], $orderProduct->product_currency); ?>&nbsp;(<?= $itemGst['igst_rate']; ?>% <?= trans('igst'); ?>)
+                                                                        <?php else: ?>
+                                                                            <?= priceFormatted($itemGst['cgst_amount'], $orderProduct->product_currency); ?>&nbsp;(<?= $itemGst['cgst_rate']; ?>% <?= trans('cgst'); ?>)<br>
+                                                                            <?= priceFormatted($itemGst['sgst_amount'], $orderProduct->product_currency); ?>&nbsp;(<?= $itemGst['sgst_rate']; ?>% <?= trans('sgst'); ?>)
+                                                                        <?php endif;
+                                                                    endif; ?>
                                                                 </td>
                                                             <?php endif; ?>
                                                             <td style="white-space: nowrap"><?= priceFormatted($orderProduct->product_total_price, $orderProduct->product_currency); ?></td>
@@ -256,10 +262,39 @@
                                             </div>
                                         </div>
                                     <?php endif; ?>
-                                    <?php if (!empty($saleVat) && $saleVat > 0): ?>
+                                    <?php if (!empty($saleVat) && $saleVat > 0):
+                                        $firstSellerId = !empty($orderProducts[0]->seller_id) ? $orderProducts[0]->seller_id : null;
+                                        $orderGst = calculateGstDetails(0, $saleVat, $firstSellerId, $invoice->client_state ?? null);
+                                        if ($orderGst['is_interstate']): ?>
+                                            <div class="row mb-2">
+                                                <div class="col-7 col-left">
+                                                    <?= trans("igst"); ?>
+                                                </div>
+                                                <div class="col-5 col-right">
+                                                    <strong class="font-600"><?= priceFormatted($orderGst['igst_amount'], $order->price_currency); ?></strong>
+                                                </div>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="row mb-2">
+                                                <div class="col-7 col-left">
+                                                    <?= trans("cgst"); ?>
+                                                </div>
+                                                <div class="col-5 col-right">
+                                                    <strong class="font-600"><?= priceFormatted($orderGst['cgst_amount'], $order->price_currency); ?></strong>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-2">
+                                                <div class="col-7 col-left">
+                                                    <?= trans("sgst"); ?>
+                                                </div>
+                                                <div class="col-5 col-right">
+                                                    <strong class="font-600"><?= priceFormatted($orderGst['sgst_amount'], $order->price_currency); ?></strong>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
                                         <div class="row mb-2">
                                             <div class="col-7 col-left">
-                                                <?= trans("vat"); ?>
+                                                <?= trans("total_gst"); ?>
                                             </div>
                                             <div class="col-5 col-right">
                                                 <strong class="font-600"><?= priceFormatted($saleVat, $order->price_currency); ?></strong>

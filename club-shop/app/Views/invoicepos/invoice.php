@@ -105,10 +105,31 @@ if(is_array($bundleItems)):
     <td><?= trans("subtotal"); ?></td>
     <td class="right"><?= show(priceFormatted($order->price_subtotal ?? 0, $currency)); ?></td>
 </tr>
-<tr>
-    <td><?= trans("vat"); ?></td>
-    <td class="right"><?= show(priceFormatted($order->price_vat ?? 0, $currency)); ?></td>
-</tr>
+<?php if (!empty($order->price_vat) && $order->price_vat > 0):
+    $orderShipping = unserializeData($order->shipping ?? '');
+    $clientState = !empty($invoice->client_state) ? $invoice->client_state : (!empty($orderShipping->sState) ? $orderShipping->sState : (!empty($orderShipping->bState) ? $orderShipping->bState : null));
+    $firstSellerId = !empty($orderProducts[0]->seller_id) ? $orderProducts[0]->seller_id : null;
+    $orderGst = calculateGstDetails(0, $order->price_vat, $firstSellerId, $clientState);
+    if ($orderGst['is_interstate']): ?>
+        <tr>
+            <td><?= trans("igst"); ?></td>
+            <td class="right"><?= show(priceFormatted($orderGst['igst_amount'], $currency)); ?></td>
+        </tr>
+    <?php else: ?>
+        <tr>
+            <td><?= trans("cgst"); ?></td>
+            <td class="right"><?= show(priceFormatted($orderGst['cgst_amount'], $currency)); ?></td>
+        </tr>
+        <tr>
+            <td><?= trans("sgst"); ?></td>
+            <td class="right"><?= show(priceFormatted($orderGst['sgst_amount'], $currency)); ?></td>
+        </tr>
+    <?php endif; ?>
+    <tr>
+        <td><?= trans("total_gst"); ?></td>
+        <td class="right"><?= show(priceFormatted($order->price_vat, $currency)); ?></td>
+    </tr>
+<?php endif; ?>
 <tr class="total">
     <td><?= trans("total"); ?></td>
     <td class="right"><?= show(priceFormatted($order->price_total ?? 0, $currency)); ?></td>

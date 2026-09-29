@@ -45,9 +45,17 @@
                                                 <td style="padding: 12px 2px; border-bottom: 1px solid #ddd;"><?= $orderProduct->product_quantity; ?></td>
                                                 <?php if (!empty($order->price_vat)): ?>
                                                     <td style="padding: 12px 2px; border-bottom: 1px solid #ddd;">
-                                                        <?php if (!empty($orderProduct->product_vat)): ?>
-                                                            <?= priceFormatted($orderProduct->product_vat, $orderProduct->product_currency); ?>&nbsp;(<?= $orderProduct->product_vat_rate; ?>%)
-                                                        <?php endif; ?>
+                                                        <?php if (!empty($orderProduct->product_vat)): 
+                                                            $shipping = !empty($order->shipping) ? unserializeData($order->shipping) : null;
+                                                            $delivState = $shipping->sStateId ?? $shipping->sState ?? $shipping->bState ?? null;
+                                                            $itemGst = calculateGstDetails($orderProduct->product_vat_rate, $orderProduct->product_vat, $orderProduct->seller_id, $delivState);
+                                                            if ($itemGst['is_intra']): ?>
+                                                                <small><?= trans("cgst"); ?> (<?= $itemGst['cgst_rate']; ?>%): <?= priceFormatted($itemGst['cgst_amount'], $orderProduct->product_currency); ?></small><br>
+                                                                <small><?= trans("sgst"); ?> (<?= $itemGst['sgst_rate']; ?>%): <?= priceFormatted($itemGst['sgst_amount'], $orderProduct->product_currency); ?></small>
+                                                            <?php else: ?>
+                                                                <small><?= trans("igst"); ?> (<?= $itemGst['igst_rate']; ?>%): <?= priceFormatted($itemGst['igst_amount'], $orderProduct->product_currency); ?></small>
+                                                            <?php endif;
+                                                        endif; ?>
                                                     </td>
                                                 <?php else: ?>
                                                     <td style="padding: 12px 2px; border-bottom: 1px solid #ddd;">-</td>

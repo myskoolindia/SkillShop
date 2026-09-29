@@ -398,9 +398,20 @@
                                         <td><?= priceFormatted($item->product_unit_price, $item->product_currency); ?></td>
                                         <td><?= $item->product_quantity; ?></td>
                                         <td>
-                                            <?php if ($item->product_vat):
-                                                echo priceFormatted($item->product_vat, $item->product_currency); ?>&nbsp;(<?= $item->product_vat_rate; ?>%)
-                                            <?php endif; ?>
+                                            <?php if (!empty($item->product_vat) && $item->product_vat > 0):
+                                                $delivState = $shipping->sStateId ?? $shipping->sState ?? $shipping->bState ?? null;
+                                                $itemGst = calculateGstDetails($item->product_vat_rate, $item->product_vat, $item->seller_id, $delivState);
+                                                if ($itemGst['is_intra']): ?>
+                                                    <div style="font-size: 11px; line-height: 1.3;">
+                                                        <div><?= trans("cgst"); ?> (<?= $itemGst['cgst_rate']; ?>%): <?= priceFormatted($itemGst['cgst_amount'], $item->product_currency); ?></div>
+                                                        <div><?= trans("sgst"); ?> (<?= $itemGst['sgst_rate']; ?>%): <?= priceFormatted($itemGst['sgst_amount'], $item->product_currency); ?></div>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <div style="font-size: 11px; line-height: 1.3;">
+                                                        <div><?= trans("igst"); ?> (<?= $itemGst['igst_rate']; ?>%): <?= priceFormatted($itemGst['igst_amount'], $item->product_currency); ?></div>
+                                                    </div>
+                                                <?php endif;
+                                            endif; ?>
                                         </td>
                                         <td>
                                             <?php if ($item->product_type == 'physical'):

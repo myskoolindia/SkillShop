@@ -42,8 +42,17 @@
                                                     <td style="padding: 12px 2px; border-bottom: 1px solid #ddd;"><?= $item->product_quantity; ?></td>
                                                     <?php if (!empty($order->price_vat)): ?>
                                                         <td style="padding: 12px 2px; border-bottom: 1px solid #ddd;">
-                                                            <?php if (!empty($item->product_vat)): ?>
-                                                                <?= priceFormatted($item->product_vat, $item->product_currency); ?>&nbsp;(<?= $item->product_vat_rate; ?>%)
+                                                            <?php if (!empty($item->product_vat) && $item->product_vat > 0):
+                                                                $delivState = !empty($shipping->sState) ? $shipping->sState : (!empty($shipping->bState) ? $shipping->bState : null);
+                                                                $itemGst = calculateGstDetails($item->product_vat_rate, $item->product_vat, $item->seller_id, $delivState);
+                                                                if ($itemGst['is_interstate']): ?>
+                                                                    <?= priceFormatted($itemGst['igst_amount'], $item->product_currency); ?>&nbsp;(<?= $itemGst['igst_rate']; ?>% <?= trans('igst'); ?>)
+                                                                <?php else: ?>
+                                                                    <?= priceFormatted($itemGst['cgst_amount'], $item->product_currency); ?>&nbsp;(<?= $itemGst['cgst_rate']; ?>% <?= trans('cgst'); ?>)<br>
+                                                                    <?= priceFormatted($itemGst['sgst_amount'], $item->product_currency); ?>&nbsp;(<?= $itemGst['sgst_rate']; ?>% <?= trans('sgst'); ?>)
+                                                                <?php endif;
+                                                            else: ?>
+                                                                -
                                                             <?php endif; ?>
                                                         </td>
                                                     <?php else: ?>

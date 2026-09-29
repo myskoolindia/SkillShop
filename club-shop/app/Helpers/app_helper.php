@@ -1101,3 +1101,114 @@ if (!function_exists('formSwitch')) {
             '</div>';
     }
 }
+
+// Calculate GST Tax Breakdown (Intra-state: CGST + SGST vs Inter-state: IGST)
+if (!function_exists('calculateGstDetails')) {
+    /**
+     * @param float|int $vatRate Total tax/GST rate (e.g. 18)
+     * @param float|int $vatAmount Total tax/GST amount (e.g. 180.00)
+     * @param int|null $sellerId Seller/Vendor User ID
+     * @param int|string|null $deliveryState Destination state ID or state name
+     * @return array
+     */
+    function calculateGstDetails($vatRate, $vatAmount, $sellerId = null, $deliveryState = null)
+    {
+        $vatRate = (float)($vatRate ?? 0);
+        $vatAmount = (float)($vatAmount ?? 0);
+
+        // Determine Origin State (Seller State or default store origin Karnataka = 1233)
+        $originStateId = 1233; // Default Karnataka
+        $originStateName = 'Karnataka';
+
+        if (!empty($sellerId) && function_exists('getUser')) {
+            $seller = getUser($sellerId);
+            if (!empty($seller)) {
+                if ($vatRate <= 0 && !empty($seller->fixed_vat_rate) && (float)$seller->fixed_vat_rate > 0) {
+                    $vatRate = (float)$seller->fixed_vat_rate;
+                }
+                if (!empty($seller->state_id) && (int)$seller->state_id > 0) {
+                    $originStateId = (int)$seller->state_id;
+                    if (function_exists('getState')) {
+                        $st = getState($originStateId);
+                        if (!empty($st) && !empty($st->name)) {
+                            $originStateName = $st->name;
+                        }
+                    }
+                } elseif (!empty($seller->address) && stripos($seller->address, 'Karnataka') !== false) {
+                    $originStateId = 1233;
+                    $originStateName = 'Karnataka';
+                }
+            }
+        } elseif (function_exists('getUser')) {
+            $admin = getUser(1);
+            if (!empty($admin)) {
+                if ($vatRate <= 0 && !empty($admin->fixed_vat_rate) && (float)$admin->fixed_vat_rate > 0) {
+                    $vatRate = (float)$admin->fixed_vat_rate;
+                }
+                if (!empty($admin->state_id) && (int)$admin->state_id > 0) {
+                    $originStateId = (int)$admin->state_id;
+                    if (function_exists('getState')) {
+                        $st = getState($originStateId);
+                        if (!empty($st) && !empty($st->name)) {
+                            $originStateName = $st->name;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Determine Destination/Delivery State
+        $isInterState = false;
+
+        if (!empty($deliveryState)) {
+            if (is_numeric($deliveryState)) {
+                $deliveryStateId = (int)$deliveryState;
+                if ($deliveryStateId > 0 && $deliveryStateId !== $originStateId) {
+                    $isInterState = true;
+                }
+            } else {
+                $delivName = trim((string)$deliveryState);
+                if (!empty($delivName)) {
+                    if (strcasecmp($delivName, $originStateName) !== 0) {
+                        $isInterState = true;
+                    }
+                }
+            }
+        }
+
+        if ($isInterState) {
+            // Inter-state supply: IGST only
+            return [
+                'is_interstate' => true,
+                'type' => 'IGST',
+                'label' => 'IGST',
+                'total_rate' => $vatRate,
+                'total_amount' => $vatAmount,
+                'cgst_rate' => 0,
+                'cgst_amount' => 0,
+                'sgst_rate' => 0,
+                'sgst_amount' => 0,
+                'igst_rate' => $vatRate,
+                'igst_amount' => $vatAmount
+            ];
+        } else {
+            // Intra-state supply: CGST + SGST (split equally 50/50)
+            $halfRate = round($vatRate / 2, 2);
+            $halfAmount = round($vatAmount / 2, 2);
+            return [
+                'is_interstate' => false,
+                'type' => 'CGST_SGST',
+                'label' => 'CGST + SGST',
+                'total_rate' => $vatRate,
+                'total_amount' => $vatAmount,
+                'cgst_rate' => $halfRate,
+                'cgst_amount' => $halfAmount,
+                'sgst_rate' => $halfRate,
+                'sgst_amount' => $halfAmount,
+                'igst_rate' => 0,
+                'igst_amount' => 0
+            ];
+        }
+    }
+}
+

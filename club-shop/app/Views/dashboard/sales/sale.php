@@ -237,8 +237,15 @@
                                                     <?php endif; ?>
                                                     <p><span class="span-product-dtl-table"><?= trans("unit_price"); ?>:</span><b><?= priceFormatted($item->product_unit_price, $item->product_currency); ?></b></p>
                                                     <p><span class="span-product-dtl-table"><?= trans("quantity"); ?>:</span><b><?= $item->product_quantity; ?></b></p>
-                                                    <?php if (!empty($item->product_vat)): ?>
-                                                        <p><span class="span-product-dtl-table"><?= trans("vat"); ?>&nbsp;(<?= $item->product_vat_rate; ?>%):</span><b><?= priceFormatted($item->product_vat, $item->product_currency); ?></b></p>
+                                                    <?php if (!empty($item->product_vat) && $item->product_vat > 0):
+                                                        $delivState = !empty($shipping->sState) ? $shipping->sState : (!empty($shipping->bState) ? $shipping->bState : null);
+                                                        $itemGst = calculateGstDetails($item->product_vat_rate, $item->product_vat, $item->seller_id, $delivState);
+                                                        if ($itemGst['is_interstate']): ?>
+                                                            <p><span class="span-product-dtl-table"><?= trans("igst"); ?>&nbsp;(<?= $itemGst['igst_rate']; ?>%):</span><b><?= priceFormatted($itemGst['igst_amount'], $item->product_currency); ?></b></p>
+                                                        <?php else: ?>
+                                                            <p><span class="span-product-dtl-table"><?= trans("cgst"); ?>&nbsp;(<?= $itemGst['cgst_rate']; ?>%):</span><b><?= priceFormatted($itemGst['cgst_amount'], $item->product_currency); ?></b></p>
+                                                            <p><span class="span-product-dtl-table"><?= trans("sgst"); ?>&nbsp;(<?= $itemGst['sgst_rate']; ?>%):</span><b><?= priceFormatted($itemGst['sgst_amount'], $item->product_currency); ?></b></p>
+                                                        <?php endif; ?>
                                                         <p><span class="span-product-dtl-table"><?= trans("total"); ?>:</span><b><?= priceFormatted($item->product_total_price, $item->product_currency); ?></b></p>
                                                     <?php else: ?>
                                                         <p><span class="span-product-dtl-table"><?= trans("total"); ?>:</span><b><?= priceFormatted($item->product_total_price, $item->product_currency); ?></b></p>
