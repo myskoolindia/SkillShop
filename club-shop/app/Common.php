@@ -347,7 +347,15 @@ if (!function_exists('getLogo')) {
             return base_url($logoPath);
         }
 
-        return base_url('assets/img/logo.svg');
+        if (file_exists(FCPATH . 'assets/img/logo.png')) {
+            return base_url('assets/img/logo.png');
+        }
+
+        if (file_exists(FCPATH . 'assets/img/logo1.png')) {
+            return base_url('assets/img/logo1.png');
+        }
+
+        return base_url('assets/img/logo.png');
     }
 }
 
@@ -967,8 +975,11 @@ if (!function_exists('generatePostUrl')) {
 
 //generate dash url
 if (!function_exists('generateDashUrl')) {
-    function generateDashUrl($route1, $route2 = null)
+    function generateDashUrl($route1 = null, $route2 = null)
     {
+        if (empty($route1) || $route1 === 'index') {
+            return dashboardUrl();
+        }
         if (!empty($route2)) {
             return dashboardUrl(getRoute($route1, true) . getRoute($route2));
         } else {

@@ -12,11 +12,14 @@
         '/ttt'              => ['image' => asset('designs/img/TTT-1.png'),             'desc' => 'Master trainer & bootcamp program'],
         '/shop'             => ['image' => asset('frontend/img/skillbox/skillbox_banner.png'), 'desc' => 'Interactive kits & learning boxes'],
         '/SkillBox'         => ['image' => asset('frontend/img/skillbox/skillbox_banner.png'), 'desc' => 'Interactive kits & learning boxes'],
-        '/skillbox'         => ['image' => asset('frontend/img/skillbox/skillbox_banner.png'), 'desc' => 'Interactive kits & learning boxes'],
-        '/labs'             => ['image' => 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=400&q=80', 'desc' => 'Hands-on innovation labs'],
-        '/courses'          => ['image' => asset('designs/img/skill2school-3.png'),    'desc' => 'Browse all available courses'],
-        '/blog'             => ['image' => asset('designs/img/skill2school-4.jpeg'),   'desc' => 'Articles & insights'],
-        '/contact'          => ['image' => asset('designs/img/skill2school-5.jpeg'),   'desc' => 'Get in touch with us'],
+        '/labs'                 => ['image' => 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=400&q=80', 'desc' => 'Hands-on innovation labs'],
+        '/labs/composite-skill' => ['image' => 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=400&q=80', 'desc' => '3D design, making & future-ready skills'],
+        '/labs/stem'            => ['image' => 'https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?auto=format&fit=crop&w=400&q=80', 'desc' => 'Electronics, IoT & project-based learning'],
+        '/labs/ai-robotics'     => ['image' => 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=400&q=80', 'desc' => 'Hands-on robotics, coding & AI experiments'],
+        '/labs/ecec'            => ['image' => 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=400&q=80', 'desc' => 'Early childhood exploration & creativity'],
+        '/courses'              => ['image' => asset('designs/img/skill2school-3.png'),    'desc' => 'Browse all available courses'],
+        '/blog'                 => ['image' => asset('designs/img/skill2school-4.jpeg'),   'desc' => 'Articles & insights'],
+        '/contact'              => ['image' => asset('designs/img/skill2school-5.jpeg'),   'desc' => 'Get in touch with us'],
     ];
 
     $labLinks = [
@@ -152,47 +155,6 @@
         <a class="nav-link px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary" href="{{ route('labs') }}">LABS</a>
         <a class="nav-link px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary" href="{{ route('courses') }}">Courses</a>
       @endif
-
-      <!-- Labs Dropdown -->
-        @php $labsActive = request()->is('labs*'); @endphp
-        <div class="relative group">
-          <button type="button"
-                  class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors duration-200
-                        {{ $labsActive ? 'text-primary bg-blue-50 font-bold' : 'text-slate-600 hover:text-primary hover:bg-slate-50' }}">
-            Labs
-            <i class="fa-solid fa-chevron-down text-[10px] opacity-60 group-hover:rotate-180 transition-transform duration-200"></i>
-          </button>
-
-          <!-- Dropdown Panel -->
-          <div class="absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[880px] opacity-0 invisible
-                      group-hover:opacity-100 group-hover:visible transition-all duration-200
-                      translate-y-1 group-hover:translate-y-0 z-50">
-            <div class="bg-white rounded-2xl shadow-2xl border border-slate-100 p-6">
-
-              <div class="flex items-center gap-2.5 mb-5">
-                <span class="text-lg font-extrabold text-slate-900">Labs</span>
-                <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full bg-purple-100 text-indigo-600 text-xs font-bold">4</span>
-              </div>
-
-              <div class="grid grid-cols-4 gap-4">
-                @foreach ($labLinks as $lab)
-                  <a href="{{ $lab['route'] }}"
-                    class="group/item flex flex-col p-3.5 rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-lg bg-white transition-all duration-200">
-                    <p class="text-sm font-bold text-slate-900 group-hover/item:text-primary transition-colors mb-3 leading-tight truncate">
-                      {{ $lab['label'] }}
-                    </p>
-                    <div class="w-full aspect-[1/0.95] rounded-xl overflow-hidden bg-slate-100">
-                      <img src="{{ $lab['image'] }}"
-                          alt="{{ $lab['label'] }}"
-                          class="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-300" />
-                    </div>
-                  </a>
-                @endforeach
-              </div>
-
-            </div>
-          </div>
-        </div>
     </nav>
 
     <!-- Auth Buttons & Action Area -->
@@ -305,41 +267,6 @@
           </a>
         @endforeach
       @endif
-
-      {{-- Labs accordion (always shown) --}}
-      @php $labsActive = request()->is('labs*'); @endphp
-      <details class="group/labs" {{ $labsActive ? 'open' : '' }}>
-        <summary class="flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer select-none list-none text-sm font-semibold transition-colors {{ $labsActive ? 'text-primary bg-blue-50' : 'text-slate-700 hover:text-primary hover:bg-slate-50' }}">
-          <span class="flex items-center gap-2">
-            <i class="fa-solid fa-flask-vial text-xs text-brand-orange"></i>
-            Labs
-          </span>
-          <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 group-open/labs:rotate-180 transition-transform duration-200"></i>
-        </summary>
-
-        <div class="mt-1.5 mb-1 space-y-1.5 px-1">
-          {{-- View all --}}
-          <a href="{{ route('labs') }}"
-             class="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-50 hover:bg-blue-50/60 text-xs font-bold text-slate-500 hover:text-primary transition-colors">
-            <span>View All Labs</span>
-            <i class="fa-solid fa-arrow-right text-[10px]"></i>
-          </a>
-          {{-- Individual lab links --}}
-          @foreach ($labLinks as $lab)
-            <a href="{{ $lab['route'] }}"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-slate-100 hover:border-primary hover:bg-blue-50/40 bg-white transition-all {{ request()->fullUrlIs($lab['route']) ? 'border-primary bg-blue-50' : '' }}">
-              <div class="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
-                <img src="{{ $lab['image'] }}" alt="{{ $lab['label'] }}" class="w-full h-full object-cover" loading="lazy" />
-              </div>
-              <div class="min-w-0">
-                <p class="text-sm font-bold text-slate-800 truncate">{{ $lab['label'] }}</p>
-                <p class="text-xs text-slate-400 truncate">{{ $lab['desc'] }}</p>
-              </div>
-            </a>
-          @endforeach
-        </div>
-      </details>
-
     </div>
 
     {{-- Auth actions --}}

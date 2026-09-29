@@ -30,5 +30,5 @@ return [
     | The base URL where Club Shop is hosted.
     |
     */
-    'shop_url' => env('CLUB_SHOP_URL', url('/club-shop')),
+    'shop_url' => env('CLUB_SHOP_URL', rtrim(env('APP_URL', 'http://localhost'), '/') . '/club-shop'),
 ];

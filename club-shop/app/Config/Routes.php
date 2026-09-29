@@ -759,6 +759,7 @@ if (!empty($languages)) {
         $routes->get($key . $csrt->terms_conditions, 'HomeController::termsConditions');
         //dashboard
         $routes->get($key . $csrt->dashboard, 'DashboardController::index');
+        $routes->get($key . $csrt->dashboard . '/index', 'DashboardController::index');
         $routes->get($key . $csrt->dashboard . '/' . $csrt->add_product, 'DashboardController::addProduct');
         $routes->get($key . $csrt->dashboard . '/' . $csrt->product . '/' . $csrt->product_details . '/(:num)', 'DashboardController::editProductDetails/$1');
         $routes->get($key . $csrt->dashboard . '/' . $csrt->edit_product . '/(:num)', 'DashboardController::editProduct/$1');

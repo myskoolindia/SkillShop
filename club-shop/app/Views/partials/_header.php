@@ -202,8 +202,8 @@ endif; ?>
                                                 <li><a href="javascript:;" data-toggle="modal" data-target="#loginModal"><?= trans("login") ?? "Sign in"; ?></a></li>
                                                 <li><a href="<?= generateUrl('register'); ?>"><?= trans("register") ?? "Sign Up"; ?></a></li>
                                             <?php else: ?>
-                                                <li><a href="<?= generateDashUrl('index'); ?>"><?= trans("dashboard") ?? "Dashboard"; ?></a></li>
-                                                <li><a href="<?= generateDashUrl('orders'); ?>"><?= trans("orders") ?? "My Orders"; ?></a></li>
+                                                <li><a href="<?= dashboardUrl(); ?>"><?= trans("dashboard") ?? "Dashboard"; ?></a></li>
+                                                <li><a href="<?= dashboardUrl('orders'); ?>"><?= trans("orders") ?? "My Orders"; ?></a></li>
                                                 <li><a href="<?= generateUrl('wishlist'); ?>"><?= trans("wishlist") ?? "Wishlist"; ?></a></li>
                                                 <li><a href="<?= generateUrl('profile_edit'); ?>"><?= trans("profile") ?? "Profile Settings"; ?></a></li>
                                                 <li><a href="<?= mainPortalUrl('student/dashboard'); ?>" target="_blank" style="color:#d97706; font-weight:600;"><i class="icon-book-open mr-1"></i> LMS Portal</a></li>
@@ -256,7 +256,7 @@ endif; ?>
                                     <a href="javascript:;" data-toggle="modal" data-target="#loginModal" class="btn btn-primary btn-sm mr-2"><?= trans("login"); ?></a>
                                     <a href="<?= generateUrl('register'); ?>" class="btn btn-outline-primary btn-sm"><?= trans("register"); ?></a>
                                 <?php else: ?>
-                                    <a href="<?= generateDashUrl('index'); ?>" class="btn btn-primary btn-sm"><?= trans("dashboard"); ?></a>
+                                    <a href="<?= dashboardUrl(); ?>" class="btn btn-primary btn-sm"><?= trans("dashboard"); ?></a>
                                     <a href="<?= base_url('logout'); ?>" class="btn btn-danger btn-sm ml-2"><?= trans("logout"); ?></a>
                                 <?php endif; ?>
                             </div>

@@ -48,6 +48,7 @@ Homestead.json
 auth.json
 /composer.lock
 /prodesign/
+/designs/
 /public/uploads/custom-images/
 
 # CodeIgniter 4 (club-shop)
