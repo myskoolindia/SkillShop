@@ -226,7 +226,15 @@
                                         <div class="row-custom">
                                             <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
                                                 <div class="flex-item">
-                                                    <?= view('product/details/_price', ['product' => $product, 'price' => $product->price, 'priceDiscounted' => $product->price_discounted, 'discountRate' => $product->discount_rate]); ?>
+                                                    <?= view('product/details/_price', [
+                                                        'product'              => $product,
+                                                        'price'                => $product->price,
+                                                        'priceDiscounted'      => $product->price_discounted,
+                                                        'discountRate'         => $product->discount_rate,
+                                                        'productPrice'         => $productPrice         ?? null,
+                                                        'productPriceDiscounted' => $productPriceDiscounted ?? null,
+                                                        'productDiscountRate'  => $productDiscountRate  ?? null,
+                                                    ]); ?>
                                                 </div>
 
                                                 <div class="flex-item">
@@ -255,32 +263,12 @@
                                         if (!$bundleCheck && $bMetrics['total_components'] > 0) {
                                             $bundleCheck = true;
                                         }
-                                        $totalDisplayComponents = $bMetrics['total_components'];
-                                        $totalDisplayUnits = $bMetrics['total_units'];
-                                        if (!empty($editingCartItem) && !empty($editingCartItem->bundle_items)) {
-                                            $parsedEb = is_string($editingCartItem->bundle_items) ? safeJsonDecode($editingCartItem->bundle_items, true) : $editingCartItem->bundle_items;
-                                            if (is_array($parsedEb)) {
-                                                $eUnits = 0;
-                                                $eComps = 0;
-                                                foreach ($parsedEb as $eb) {
-                                                    $q = (int)($eb['qty'] ?? 0);
-                                                    if ($q > 0) {
-                                                        $eUnits += $q;
-                                                        $eComps++;
-                                                    }
-                                                }
-                                                if ($eUnits > 0) {
-                                                    $totalDisplayUnits = $eUnits;
-                                                    $totalDisplayComponents = $eComps;
-                                                }
-                                            }
-                                        }
                                         ?>
                                         <?php if ($bundleCheck && $bMetrics['total_components'] > 0): ?>
                                             <div class="alert alert-info py-2 px-3 m-b-15 d-flex align-items-center justify-content-between" style="background:#ebf8ff; border:1px solid #bee3f8; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
                                                 <div>
                                                     <strong class="text-primary"><i class="fa fa-cubes"></i> Bundle Package Deal</strong><br>
-                                                    <small class="text-muted">Includes <strong><?= $totalDisplayComponents; ?></strong> products & variations (Total <strong><?= $totalDisplayUnits; ?></strong> units) in one complete set.</small>
+                                                    <small class="text-muted">Includes <strong><?= $bMetrics['total_components']; ?></strong> products & variations (Total <strong><?= $bMetrics['total_units']; ?></strong> units) in one complete set.</small>
                                                 </div>
                                                 <a href="#tab_bundle_contents" onclick="$('#tab_bundle_contents').tab('show'); if($('#product_description_content').length){$('html, body').animate({scrollTop: $('#product_description_content').offset().top - 80}, 300);}" class="btn btn-sm btn-primary font-weight-bold" style="white-space:nowrap; margin-left:10px;">
                                                     View Package Contents &darr;
@@ -432,6 +420,122 @@
                 </div>
                 <div class="row">
                     <div class="col-12">
+                        <!-- BUNDLE BUILDER -->
+                        <div id="wrapper">
+                            <div class="container">
+                            <div class="row">
+
+                            <!-- LEFT PRODUCTS -->
+                            <div class="col-lg-8">
+                                <div class="shopping-cart mt-0">
+                                    <h1 class="cart-section-title">Build Your Bundle</h1>
+                                                <?php
+                                                // echo '<pre>';
+                                                // print_r($relatedProducts);
+                                                // exit();
+                                                ?>
+                                    <?php foreach($relatedProducts as $item): ?>
+                                        <?php
+                                        $cnvtcry = $item->listing_type == 'ordinary_listing' ? false : true;
+                                        $effectivePrice = !empty($item->price_discounted) && (float)$item->price_discounted > 0 ? (float)$item->price_discounted : (float)$item->price;
+                                        $prdtPrice = !empty($item->price) && $item->price > 0 ? priceFormatted($item->price, $item->currency, $cnvtcry) : '';
+                                        $prdtPriceDiscounted = priceFormatted($effectivePrice, $item->currency, $cnvtcry);
+                                        $prdtDiscountRate = calculateDiscount($item->price, $effectivePrice);
+                                        ?>
+                                    <div class="item bundle-item" data-id="<?= $item->id ?>" data-price="<?= $effectivePrice; ?>">
+
+                                        <div class="cart-item-image">
+                                            <div class="product-image-box product-image-box-md">
+                                                <img src="<?= getProductItemImage($item); ?>" class="img-fluid">
+                                            </div>
+                                        </div>
+
+                                        <div class="cart-item-details">
+                                            <h5 class="product-title"><?= esc($item->title); ?></h5>
+                                                <!-- <div><strong>₹<?//= $item->price ?></strong></div> -->
+                                                 
+                                            <div class="item-details<?= $item->listing_type == 'ordinary_listing' || $item->product_type == 'digital' ? ' hidden' : ''; ?>">
+                                                <div class="">
+                                                    <label><?= trans("status"); ?></label>
+                                                    <span id="span-product-stock-status" class="status-in-stock <?= $item->stock > 0 ? 'text-success' : 'text-danger'; ?>"><?= $item->stock > 0 ? trans("in_stock") : trans("out_of_stock"); ?></span>
+                                                </div>
+                                            </div>
+                                    
+                                            <div class="product-price-container">
+                                                <?php if ($item->is_free_product): ?>
+                                                    <div id="div-product-price" class="text-product-discounted">
+                                                        <span class="final-price final-price-free"><?= trans("free"); ?></span>
+                                                    </div>
+                                                <?php elseif ($item->listing_type == 'ordinary_listing' && $item->is_sold): ?>
+                                                    <div id="div-product-price">
+                                                        <span class="final-price text-muted"><?= trans("sold"); ?></span>
+                                                    </div>
+                                                <?php else:
+                                                    if (!empty($prdtPrice)):?>
+                                                        <div id="div-product-discounted-price" class="<?= $prdtDiscountRate > 0 ? 'text-product-discounted' : ''; ?>">
+                                                            <span class="final-price"><?= $prdtPriceDiscounted; ?></span>
+                                                        </div>
+                                                        <div id="div-product-price">
+                                                            <?php if ($prdtDiscountRate > 0): ?>
+                                                                <span class="original-price"><?= $prdtPrice; ?></span>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                        <div id="div-product-discount-rate">
+                                                            <?php if ($prdtDiscountRate > 0): ?>
+                                                                <span class="discount-rate">-<?= discountRateFormat($prdtDiscountRate); ?></span>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    <?php endif;
+                                                endif; ?>
+                                            </div>
+                                        </div>
+                                    
+                                        <div class="cart-item-quantity">
+                                            <div class="number-spinner">
+                                                <div class="input-group">
+                                                    <span class="input-group-btn">
+                                                        <button class="btn btn-default minus">-</button>
+                                                    </span>
+                                                    <input type="text" class="form-control qty text-center" value="0">
+                                                    <span class="input-group-btn">
+                                                        <button class="btn btn-default plus">+</button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+
+                            <!-- RIGHT TOTAL PANEL -->
+                            <div class="col-lg-4">
+                                <div class="right">
+                                    <div class="row-custom m-b-15">
+                                        <strong>Total Bundle
+                                            <?php
+                                            // Use controller-computed bundle price if available, else fall back to raw product price
+                                            if (!empty($productPriceDiscounted)) {
+                                                echo '<span class="float-right"><span id="bundleTotal">' . $productPriceDiscounted . '</span></span>';
+                                            } else {
+                                                $rawTotal = (float)(!empty($product->price_discounted) && (float)$product->price_discounted > 0 ? $product->price_discounted : $product->price);
+                                                echo '<span class="float-right">₹<span id="bundleTotal">' . number_format($rawTotal, 2, '.', ',') . '</span></span>';
+                                            }
+                                            ?>
+                                        </strong>
+                                    </div>
+
+                                    <div class="row-custom m-t-30">
+                                        <button id="btnAddBundle" class="btn btn-block btn-custom btn-lg">
+                                            PROCEED TO CART
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            </div>
+                            </div>
+                        </div>
 
                         <div id="product_description_content" class="product-description post-text-responsive">
                             <?php $session = session();
@@ -894,8 +998,164 @@ endif; ?>
 <style>.product-location-map .embed-responsive {
         overflow: visible;
     }</style>
+    <style>
+        .bundle-card{
+            border:1px solid #ddd;
+            padding:10px;
+            cursor:pointer;
+            border-radius:8px;
+            transition:0.2s;
+            text-align:center;
+        }
+        .bundle-card.selected{
+            border:3px solid #000;
+        }
+        .bundle-card.selected h6,
+        .bundle-card.selected p{
+            font-weight:700;
+            color:#000;
+        }
+    </style>
 
+<script>
+function calculateBundleTotal() {
+    <?php
+    // Use the controller-computed numeric price for JS if available, fall back to raw product price
+    $jsBasePrice = 0;
+    if (!empty($productPriceDiscounted)) {
+        // Strip currency symbols/commas to get a pure number for JS
+        $jsBasePrice = (float) preg_replace('/[^\d.]/', '', $productPriceDiscounted);
+    }
+    if ($jsBasePrice <= 0) {
+        $jsBasePrice = !empty($product->price_discounted) && (float)$product->price_discounted > 0
+            ? (float)$product->price_discounted
+            : (float)$product->price;
+    }
+    ?>
+    var mainBasePrice = parseFloat(<?= $jsBasePrice; ?>) || 0;
+    var mainQtyInput = document.getElementById('input_product_quantity');
+    var mainQty = mainQtyInput ? (parseInt(mainQtyInput.value, 10) || 1) : 1;
+    if (mainQty < 1) mainQty = 1;
 
+    var total = mainBasePrice * mainQty;
 
+    document.querySelectorAll('.bundle-item').forEach(function(item) {
+        var price = parseFloat(item.dataset.price) || 0;
+        var qtyInput = item.querySelector('.qty');
+        var q = qtyInput ? (parseInt(qtyInput.value, 10) || 0) : 0;
+        if (q > 0) {
+            total += (price * q);
+        }
+    });
+
+    var bundleTotalEl = document.getElementById('bundleTotal');
+    if (bundleTotalEl) {
+        bundleTotalEl.innerText = total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    return { total: total, mainQty: mainQty };
+}
+
+document.querySelectorAll('.bundle-item').forEach(function(item) {
+    var qtyInput = item.querySelector('.qty');
+    var btnPlus = item.querySelector('.plus');
+    var btnMinus = item.querySelector('.minus');
+
+    if (btnPlus && qtyInput) {
+        btnPlus.onclick = function(e) {
+            e.preventDefault();
+            var q = (parseInt(qtyInput.value, 10) || 0) + 1;
+            qtyInput.value = q;
+            calculateBundleTotal();
+        };
+    }
+
+    if (btnMinus && qtyInput) {
+        btnMinus.onclick = function(e) {
+            e.preventDefault();
+            var q = parseInt(qtyInput.value, 10) || 0;
+            if (q > 0) {
+                qtyInput.value = q - 1;
+                calculateBundleTotal();
+            }
+        };
+    }
+
+    if (qtyInput) {
+        qtyInput.oninput = qtyInput.onchange = qtyInput.onkeyup = function() {
+            var q = parseInt(this.value, 10);
+            if (isNaN(q) || q < 0) q = 0;
+            this.value = q;
+            calculateBundleTotal();
+        };
+    }
+});
+
+var mainQtyEl = document.getElementById('input_product_quantity');
+if (mainQtyEl) {
+    mainQtyEl.addEventListener('input', calculateBundleTotal);
+    mainQtyEl.addEventListener('change', calculateBundleTotal);
+    mainQtyEl.addEventListener('keyup', calculateBundleTotal);
+}
+
+var btnAddBundle = document.getElementById('btnAddBundle');
+if (btnAddBundle) {
+    btnAddBundle.onclick = function(e) {
+        e.preventDefault();
+        var items = [];
+        var mainQtyInput = document.getElementById('input_product_quantity');
+        var mainQty = mainQtyInput ? (parseInt(mainQtyInput.value, 10) || 1) : 1;
+        if (mainQty < 1) mainQty = 1;
+
+        items.push({
+            main_product_id: <?= (int)$product->id ?>,
+            product_id: <?= (int)$product->id ?>,
+            qty: mainQty
+        });
+
+        document.querySelectorAll('.bundle-item').forEach(function(i) {
+            var q = parseInt(i.querySelector('.qty').value, 10) || 0;
+            if (q > 0) {
+                items.push({
+                    product_id: parseInt(i.dataset.id, 10),
+                    qty: q
+                });
+            }
+        });
+
+        var btn = this;
+        btn.disabled = true;
+        btn.innerText = 'Adding to cart...';
+
+        var data = {
+            'cart_items': JSON.stringify({ items: items })
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: generateUrl('cart/add-to-cart-bundle'),
+            data: data,
+            dataType: 'json',
+            success: function (response) {
+                if (response && response.result == 1) {
+                    location.href = generateUrl('cart');
+                } else {
+                    btn.disabled = false;
+                    btn.innerText = 'PROCEED TO CART';
+                    alert("Failed to add bundle to cart");
+                }
+            },
+            error: function() {
+                btn.disabled = false;
+                btn.innerText = 'PROCEED TO CART';
+                alert("Network error while adding bundle to cart.");
+            }
+        });
+    };
+}
+
+$(document).ready(function() {
+    calculateBundleTotal();
+});
+</script>
 
 

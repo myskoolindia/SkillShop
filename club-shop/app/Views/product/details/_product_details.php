@@ -49,7 +49,15 @@
         <div class="row-custom">
             <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
                 <div class="flex-item">
-                    <?= view('product/details/_price', ['product' => $product, 'price' => $product->price, 'priceDiscounted' => $product->price_discounted, 'discountRate' => $product->discount_rate]); ?>
+                    <?= view('product/details/_price', [
+                        'product'              => $product,
+                        'price'                => $product->price,
+                        'priceDiscounted'      => $product->price_discounted,
+                        'discountRate'         => $product->discount_rate,
+                        'productPrice'         => $productPrice         ?? null,
+                        'productPriceDiscounted' => $productPriceDiscounted ?? null,
+                        'productDiscountRate'  => $productDiscountRate  ?? null,
+                    ]); ?>
                 </div>
 
                 <div class="flex-item">

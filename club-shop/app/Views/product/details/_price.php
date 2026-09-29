@@ -1,4 +1,12 @@
 <div class="product-price-container">
+    <?php
+    // Accept both naming conventions:
+    // - controller-prepared: $productPrice / $productPriceDiscounted / $productDiscountRate
+    // - direct inline calls:  $price / $priceDiscounted / $discountRate
+    $productPrice          = $productPrice          ?? $price          ?? '';
+    $productPriceDiscounted = $productPriceDiscounted ?? $priceDiscounted ?? $productPrice;
+    $productDiscountRate   = $productDiscountRate   ?? $discountRate   ?? 0;
+    ?>
     <?php if ($product->is_free_product): ?>
         <div id="div-product-price" class="text-product-discounted">
             <span class="final-price final-price-free"><?= trans("free"); ?></span>

@@ -122,6 +122,7 @@ class CartController extends BaseController
         $data['userSession'] = getUserSession();
         $data['planKey'] = 'basic';
         $data['planLabel'] = 'Basic';
+        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 1;
 
         helperDeleteSession('mds_service_payment');
 
@@ -170,6 +171,7 @@ class CartController extends BaseController
         $data['userSession'] = getUserSession();
         $data['planKey'] = 'advance';
         $data['planLabel'] = 'Advance';
+        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 2;
         helperDeleteSession('mds_service_payment');
         echo view('partials/_header', $data);
         echo view('cart/advance-cart', $data);
@@ -216,6 +218,7 @@ class CartController extends BaseController
         $data['userSession'] = getUserSession();
         $data['planKey'] = 'premium';
         $data['planLabel'] = 'Premium';
+        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 3;
         helperDeleteSession('mds_service_payment');
         echo view('partials/_header', $data);
         echo view('cart/premium-cart', $data);
