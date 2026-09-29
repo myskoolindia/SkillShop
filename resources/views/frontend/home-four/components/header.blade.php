@@ -159,8 +159,12 @@
 
     <!-- Auth Buttons & Action Area -->
     <div class="flex items-center gap-3 sm:gap-4">
-      @auth
-        @if (auth()->user()->role === 'school')
+        @if (auth()->user()->role === 'vendor')
+          <a href="{{ url('/club-shop/dashboard') }}" class="bg-primary hover:bg-primary-dark text-white px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm hover:shadow inline-flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-store text-xs"></i>
+            <span>Vendor Dashboard</span>
+          </a>
+        @elseif (auth()->user()->role === 'school')
           <a href="{{ route('school.dashboard') }}" class="bg-primary hover:bg-primary-dark text-white px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm hover:shadow inline-flex items-center justify-center gap-1.5">
             <i class="fa-solid fa-graduation-cap text-xs"></i>
             <span>School Portal</span>
@@ -272,11 +276,13 @@
     {{-- Auth actions --}}
     <div class="mt-3 pt-3 border-t border-slate-100 space-y-2">
       @auth
-        <a href="{{ auth()->user()->role === 'school'
-              ? route('school.dashboard')
-              : (auth()->user()->role === 'instructor'
-                  ? route('instructor.dashboard')
-                  : route('student.dashboard')) }}"
+        <a href="{{ auth()->user()->role === 'vendor'
+              ? url('/club-shop/dashboard')
+              : (auth()->user()->role === 'school'
+                  ? route('school.dashboard')
+                  : (auth()->user()->role === 'instructor'
+                      ? route('instructor.dashboard')
+                      : route('student.dashboard'))) }}"
            class="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-bold hover:bg-primary/20 transition-colors">
           <i class="fa-solid fa-gauge text-xs"></i> Go to Dashboard
         </a>

@@ -96,11 +96,16 @@ class AuthenticatedSessionController extends Controller
         }
 
         $defaultRoute = match ($user->role) {
+            'vendor'     => url('/club-shop/dashboard'),
             'school'     => route('school.dashboard'),
             'teacher'    => route('student.dashboard'),
             'instructor' => route('instructor.dashboard'),
             default      => route('student.dashboard'),
         };
+
+        if ($user->role === 'vendor') {
+            return redirect()->away($defaultRoute)->with($notification);
+        }
 
         return redirect()->intended($defaultRoute)->with($notification);
     }

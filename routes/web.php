@@ -51,6 +51,7 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
         }
         $user = Auth::user();
         return match ($user->role) {
+            'vendor'     => redirect(url('/club-shop/dashboard')),
             'school'     => redirect()->route('school.dashboard'),
             'teacher'    => redirect()->route('student.dashboard'),
             'instructor' => redirect()->route('instructor.dashboard'),
