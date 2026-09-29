@@ -291,7 +291,7 @@
 {{-- =====================================================================
      2. CBSE COMPOSITE SKILL LAB REQUIREMENT
      ===================================================================== --}}
-<section class="py-16 lg:py-20 bg-slate-50 border-t border-b border-slate-200">
+<!-- <section class="py-16 lg:py-20 bg-slate-50 border-t border-b border-slate-200">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
 
@@ -362,7 +362,7 @@
 
     </div>
   </div>
-</section>
+</section> -->
 
 {{-- =====================================================================
      3. SKILLVATION BASIC PACKAGE: What is Included
@@ -472,7 +472,7 @@
 {{-- =====================================================================
      4. CBSE COMPLIANCE, SIMPLIFIED (Flow & Coordination)
      ===================================================================== --}}
-<section class="py-16 lg:py-24 bg-gradient-to-br from-brand-navy via-brand-darknavy to-slate-900 text-white relative overflow-hidden">
+<!-- <section class="py-16 lg:py-24 bg-gradient-to-br from-brand-navy via-brand-darknavy to-slate-900 text-white relative overflow-hidden">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
     <div class="text-center max-w-3xl mx-auto mb-14 space-y-3">
@@ -548,12 +548,12 @@
     </div>
 
   </div>
-</section>
+</section> -->
 
 {{-- =====================================================================
      5. WHAT STUDENTS EXPERIENCE
      ===================================================================== --}}
-<section class="py-16 lg:py-24 bg-white">
+<!-- <section class="py-16 lg:py-24 bg-white">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
     <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
@@ -627,7 +627,7 @@
 
     </div>
   </div>
-</section>
+</section> -->
 
 {{-- =====================================================================
      6. MULTI-DOMAIN SKILL LEARNING (3 Forms of Work)
@@ -737,7 +737,7 @@
 
     <div class="text-center max-w-2xl mx-auto mb-12">
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-navy/10 text-brand-navy text-xs font-bold uppercase tracking-wider mb-3">
-        Interactive Kit Contents
+        Basic package
       </div>
       <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
         Explore Components in the Basic Skill Lab Kit
@@ -895,7 +895,7 @@
 {{-- =====================================================================
      9. LAB CONFIGURATION OPTIONS (600 sq ft vs 2x400 sq ft)
      ===================================================================== --}}
-<section class="py-16 lg:py-20 bg-white border-t border-slate-100">
+<!-- <section class="py-16 lg:py-20 bg-white border-t border-slate-100">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
     <div class="text-center max-w-3xl mx-auto mb-14 space-y-3">
@@ -945,7 +945,7 @@
     </div>
 
   </div>
-</section>
+</section> -->
 
 {{-- =====================================================================
      10. CTA / CONSULTATION & BOOKING FORM
@@ -1198,9 +1198,10 @@
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
       @foreach([
-        [route('labs.ai-robotics'), 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=500&q=80', 'AI & Robotics Lab', 'Hands-on robotics, coding & AI experiments'],
+        
         [route('labs.stem'),        'https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?auto=format&fit=crop&w=500&q=80', 'STEM Lab', 'Electronics, IoT & project-based learning'],
         [route('labs.ecec'),        'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=500&q=80', 'ECEC Lab', 'Early childhood exploration & creativity'],
+        [route('labs.ai-robotics'), 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=500&q=80', 'AI & Robotics Lab', 'Hands-on robotics, coding & AI experiments'],
       ] as [$url, $img, $name, $desc])
       <a href="{{ $url }}" class="group flex flex-col gap-3 p-4 rounded-2xl border border-slate-200 hover:border-brand-orange hover:shadow-lg transition-all bg-white">
         <div class="aspect-[4/3] rounded-xl overflow-hidden bg-slate-100">

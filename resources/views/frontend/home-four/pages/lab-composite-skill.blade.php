@@ -1851,7 +1851,7 @@
       </div>
       
       <p style="margin-top:22px; font-size:1rem; color:#fef08a; font-weight:700;">
-        ✨ Direct callback within 1 working day &nbsp;·&nbsp; 🌸 Free on-campus spatial assessment
+        ✨ Direct callback within 1 working day
       </p>
     </div>
   </section>

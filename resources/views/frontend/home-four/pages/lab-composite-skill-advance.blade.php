@@ -291,7 +291,7 @@
 {{-- =====================================================================
      2. CBSE COMPOSITE SKILL LAB REQUIREMENT
      ===================================================================== --}}
-<section class="py-16 lg:py-20 bg-slate-50 border-t border-b border-slate-200">
+<!-- <section class="py-16 lg:py-20 bg-slate-50 border-t border-b border-slate-200">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
 
@@ -362,7 +362,7 @@
 
     </div>
   </div>
-</section>
+</section> -->
 
 {{-- =====================================================================
      3. SKILLVATION ADVANCE PACKAGE: What is Included
@@ -472,7 +472,7 @@
 {{-- =====================================================================
      4. CBSE COMPLIANCE, SIMPLIFIED (Flow & Coordination)
      ===================================================================== --}}
-<section class="py-16 lg:py-24 bg-gradient-to-br from-brand-navy via-brand-darknavy to-slate-900 text-white relative overflow-hidden">
+<!-- <section class="py-16 lg:py-24 bg-gradient-to-br from-brand-navy via-brand-darknavy to-slate-900 text-white relative overflow-hidden">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
     <div class="text-center max-w-3xl mx-auto mb-14 space-y-3">
@@ -548,12 +548,12 @@
     </div>
 
   </div>
-</section>
+</section> -->
 
 {{-- =====================================================================
      5. WHAT STUDENTS EXPERIENCE
      ===================================================================== --}}
-<section class="py-16 lg:py-24 bg-white">
+<!-- <section class="py-16 lg:py-24 bg-white">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
     <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
@@ -627,7 +627,7 @@
 
     </div>
   </div>
-</section>
+</section> -->
 
 {{-- =====================================================================
      6. MULTI-DOMAIN SKILL LEARNING (3 Forms of Work)
@@ -737,7 +737,7 @@
 
     <div class="text-center max-w-2xl mx-auto mb-12">
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-navy/10 text-brand-navy text-xs font-bold uppercase tracking-wider mb-3">
-        Interactive Kit Contents
+        Advance package
       </div>
       <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
         Explore Components in the Advance Skill Lab Kit
@@ -895,7 +895,7 @@
 {{-- =====================================================================
      9. LAB CONFIGURATION OPTIONS (600 sq ft vs 2x400 sq ft)
      ===================================================================== --}}
-<section class="py-16 lg:py-20 bg-white border-t border-slate-100">
+<!-- <section class="py-16 lg:py-20 bg-white border-t border-slate-100">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
     <div class="text-center max-w-3xl mx-auto mb-14 space-y-3">
@@ -945,7 +945,7 @@
     </div>
 
   </div>
-</section>
+</section> -->
 
 {{-- =====================================================================
      10. CTA / CONSULTATION & BOOKING FORM
