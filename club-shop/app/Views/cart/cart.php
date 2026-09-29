@@ -430,63 +430,102 @@
                                 <a href="<?= langBaseUrl(); ?>" class="btn btn-md btn-custom m-t-30"><i class="icon-arrow-left m-r-2"></i><?= trans("keep_shopping") ?></a>
                             </div>
                             <div class="col-sm-12 col-lg-4">
-                                <div class="right">
-                                    <div class="row-custom m-b-15">
-                                        <strong><?= trans("subtotal"); ?><span class="float-right"><?= priceDecimal($cart->totals->subtotal, $cart->currency_code); ?></span></strong>
+                                <div class="right" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); width: 100%; box-sizing: border-box; float: none; overflow: hidden;">
+                                    <!-- Subtotal -->
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px; color: #334155;">
+                                        <span style="font-weight: 600;"><?= trans("subtotal"); ?></span>
+                                        <strong style="font-size: 15px; color: #1e293b; text-align: right; min-width: 100px;"><?= priceDecimal($cart->totals->subtotal, $cart->currency_code); ?></strong>
                                     </div>
+
+                                    <!-- Referral / Affiliate Discount -->
+                                    <?php if ($cart->totals->affiliate_discount > 0): ?>
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 13.5px; color: #15803d;">
+                                            <span><?= trans("referral_discount"); ?> (<?= $cart->totals->affiliate_discount_rate; ?>%)</span>
+                                            <strong style="text-align: right; min-width: 100px;">- <?= priceDecimal($cart->totals->affiliate_discount, $cart->currency_code); ?></strong>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <!-- GST Breakdown Section -->
+                                    <?php if (!empty($cart->totals->vat) && $cart->totals->vat > 0): 
+                                        $cartSellerId = !empty($cart->items[0]->seller_id) ? $cart->items[0]->seller_id : null;
+                                        $gstRate = !empty($cart->items[0]->product_vat_rate) ? $cart->items[0]->product_vat_rate : 18;
+                                        $cartGst = calculateGstDetails($gstRate, $cart->totals->vat, $cartSellerId, $cart->location_state_id ?? null);
+                                    ?>
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 14px; color: #334155;">
+                                            <span style="font-weight: 600;">
+                                                <?= trans("total_gst"); ?> <span style="font-size: 12px; font-weight: normal; color: #64748b;">(<?= $cartGst['is_interstate'] ? $cartGst['igst_rate'] . '%' : ($cartGst['cgst_rate'] + $cartGst['sgst_rate']) . '%'; ?>)</span>
+                                            </span>
+                                            <strong style="font-size: 14.5px; color: #1e293b; text-align: right; min-width: 100px;"><?= priceDecimal($cart->totals->vat, $cart->currency_code); ?></strong>
+                                        </div>
+                                        <?php if ($cartGst['is_interstate']): ?>
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12.5px; color: #64748b; padding-left: 12px;">
+                                                <span>&bull; <?= trans("igst"); ?> (<?= $cartGst['igst_rate']; ?>%)</span>
+                                                <span style="text-align: right; min-width: 100px;"><?= priceDecimal($cartGst['igst_amount'], $cart->currency_code); ?></span>
+                                            </div>
+                                        <?php else: ?>
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 12.5px; color: #64748b; padding-left: 12px;">
+                                                <span>&bull; <?= trans("cgst"); ?> (<?= $cartGst['cgst_rate']; ?>%)</span>
+                                                <span style="text-align: right; min-width: 100px;"><?= priceDecimal($cartGst['cgst_amount'], $cart->currency_code); ?></span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12.5px; color: #64748b; padding-left: 12px;">
+                                                <span>&bull; <?= trans("sgst"); ?> (<?= $cartGst['sgst_rate']; ?>%)</span>
+                                                <span style="text-align: right; min-width: 100px;"><?= priceDecimal($cartGst['sgst_amount'], $cart->currency_code); ?></span>
+                                            </div>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+
+                                    <!-- Coupon Code Discount -->
+                                    <?php if (!empty($cart->coupon_code)): ?>
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 13.5px; color: #15803d;">
+                                            <span><?= trans("coupon"); ?>&nbsp;&nbsp;[<?= esc($cart->coupon_code); ?>]&nbsp;&nbsp;<a href="javascript:void(0)" class="font-weight-normal text-danger" onclick="removeCartDiscountCoupon();">[<?= trans("remove"); ?>]</a></span>
+                                            <strong style="text-align: right; min-width: 100px;">- <?= priceDecimal($cart->totals->coupon_discount, $cart->currency_code); ?></strong>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <!-- Global Taxes -->
+                                    <?php if (!empty($cart->totals->global_taxes_array)):
+                                        foreach ($cart->totals->global_taxes_array as $taxItem):?>
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 13.5px; color: #64748b;">
+                                                <span><?= esc(getTaxName($taxItem['taxNameArray'], selectedLangId())); ?>&nbsp;(<?= $taxItem['taxRate']; ?>%)</span>
+                                                <strong style="text-align: right; min-width: 100px;"><?= priceDecimal($taxItem['taxTotal'], $cart->currency_code); ?></strong>
+                                            </div>
+                                        <?php endforeach;
+                                    endif; ?>
+
+                                    <hr style="margin: 14px 0 12px 0; border: 0; border-top: 1.5px solid #e2e8f0;">
+
+                                    <!-- Grand Total Row -->
+                                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 16px;">
+                                        <strong style="font-size: 16px; color: #0f172a; font-weight: 700;"><?= trans("total"); ?></strong>
+                                        <strong style="font-size: 20px; font-weight: 800; color: #1d4ed8; text-align: right; min-width: 100px;"><?= priceDecimal($cart->totals->total_before_shipping, $cart->currency_code); ?></strong>
+                                    </div>
+                                    <div style="text-align: right; font-size: 11px; color: #94a3b8; margin-top: 2px;">
+                                        (Inclusive of all taxes & charges)
+                                    </div>
+
+                                    <!-- Savings Banner at Bottom -->
                                     <?php if (!empty($cart->totals->total_savings) && $cart->totals->total_savings > 0): ?>
-                                        <div class="row-custom m-b-15" style="background: #f0fdf4; border: 1px dashed #86efac; border-radius: 8px; padding: 10px 12px;">
-                                            <div class="d-flex justify-content-between align-items-center" style="display: flex; justify-content: space-between; align-items: center;">
-                                                <strong style="color: #166534; font-size: 14px;">
+                                        <div style="margin-top: 16px; background: #f0fdf4; border: 1px dashed #86efac; border-radius: 8px; padding: 10px 14px;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                <strong style="color: #166534; font-size: 13px;">
                                                     <i class="fa fa-tag text-success m-r-1"></i> Total Savings
                                                 </strong>
-                                                <strong class="text-success" style="font-size: 15px; font-weight: 800; color: #15803d !important;">
-                                                    - <?= priceDecimal($cart->totals->total_savings, $cart->currency_code); ?>
+                                                <strong class="text-success" style="font-size: 14px; font-weight: 800; color: #15803d !important; text-align: right; min-width: 100px;">
+                                                    <?= priceDecimal($cart->totals->total_savings, $cart->currency_code); ?>
                                                 </strong>
                                             </div>
                                             <?php if (!empty($cart->totals->savings_percentage) && $cart->totals->savings_percentage > 0): ?>
-                                                <div style="font-size: 11px; color: #16a34a; font-weight: 600; margin-top: 3px;">
-                                                    You are saving <?= $cart->totals->savings_percentage; ?>% on this order!
+                                                <div style="font-size: 11px; color: #16a34a; font-weight: 600; margin-top: 4px;">
+                                                    🎉 You are saving <?= $cart->totals->savings_percentage; ?>% on this order!
                                                 </div>
                                             <?php endif; ?>
                                         </div>
                                     <?php endif; ?>
-                                    <?php if ($cart->totals->affiliate_discount > 0): ?>
-                                        <div class="row-custom m-b-10">
-                                            <strong><?= trans("referral_discount"); ?>&nbsp;(<?= $cart->totals->affiliate_discount_rate; ?>%)<span class="float-right">-&nbsp;<?= priceDecimal($cart->totals->affiliate_discount, $cart->currency_code); ?></span></strong>
-                                        </div>
-                                    <?php endif; ?>
-                                    <?php if (!empty($cart->coupon_code)): ?>
-                                        <div class="row-custom">
-                                            <strong><?= trans("coupon"); ?>&nbsp;&nbsp;[<?= esc($cart->coupon_code); ?>]&nbsp;&nbsp;<a href="javascript:void(0)" class="font-weight-normal" onclick="removeCartDiscountCoupon();">[<?= trans("remove"); ?>]</a><span class="float-right">-&nbsp;<?= priceDecimal($cart->totals->coupon_discount, $cart->currency_code); ?></span></strong>
-                                        </div>
-                                    <?php endif; ?>
-                                    <?php if (!empty($cart->totals->vat) && $cart->totals->vat > 0): 
-                                        $totalVatAmount = $cart->totals->vat;
-                                        $halfAmount = $totalVatAmount / 2;
-                                    ?>
-                                        <div class="row-custom m-b-10">
-                                            <strong><?= trans("cgst"); ?><span class="float-right"><?= priceDecimal($halfAmount, $cart->currency_code); ?></span></strong>
-                                        </div>
-                                        <div class="row-custom m-b-10">
-                                            <strong><?= trans("sgst"); ?><span class="float-right"><?= priceDecimal($halfAmount, $cart->currency_code); ?></span></strong>
-                                        </div>
-                                        <div class="row-custom">
-                                            <p class="line-seperator"></p>
-                                        </div>
-                                        <div class="row-custom m-b-10">
-                                            <strong><?= trans("total"); ?> <?= trans("vat"); ?><span class="float-right"><?= priceDecimal($cart->totals->vat, $cart->currency_code); ?></span></strong>
-                                        </div>
-                                    <?php endif; ?>
-                                    <div class="row-custom">
-                                        <p class="line-seperator"></p>
-                                    </div>
-                                    <div class="row-custom m-b-10">
-                                        <strong><?= trans("total"); ?><span class="float-right"><?= priceDecimal($cart->totals->total_before_shipping, $cart->currency_code); ?></span></strong>
-                                    </div>
-                                    <div class="row-custom m-t-30 m-b-15">
+
+                                    <!-- Checkout Button -->
+                                    <div class="row-custom m-t-24 m-b-15">
                                         <?php if (empty($cart->is_valid)): ?>
-                                            <a href="javascript:void(0)" class="btn btn-block"><?= trans("continue_to_checkout"); ?></a>
+                                            <a href="javascript:void(0)" class="btn btn-block btn-custom"><?= trans("continue_to_checkout"); ?></a>
                                         <?php else:
                                             $showCheckoutBtn = false;
                                             if (authCheck()) {
@@ -501,20 +540,22 @@
                                             }
                                             if ($showCheckoutBtn):
                                                 if ($cart->has_physical_product == true && $productSettings->marketplace_shipping == 1): ?>
-                                                    <a href="<?= generateUrl('cart', 'shipping'); ?>" class="btn btn-block"><?= trans("continue_to_checkout"); ?></a>
+                                                    <a href="<?= generateUrl('cart', 'shipping'); ?>" class="btn btn-block btn-custom"><?= trans("continue_to_checkout"); ?></a>
                                                 <?php else: ?>
-                                                    <a href="<?= generateUrl('cart', 'payment_method'); ?>" class="btn btn-block"><?= trans("continue_to_checkout"); ?></a>
+                                                    <a href="<?= generateUrl('cart', 'payment_method'); ?>" class="btn btn-block btn-custom"><?= trans("continue_to_checkout"); ?></a>
                                                 <?php endif;
                                             else:?>
-                                                <a href="#" class="btn btn-block" data-toggle="modal" data-target="#loginModal"><?= trans("continue_to_checkout"); ?></a>
+                                                <a href="#" class="btn btn-block btn-custom" data-toggle="modal" data-target="#loginModal"><?= trans("continue_to_checkout"); ?></a>
                                             <?php endif;
                                         endif; ?>
                                     </div>
+
                                     <div class="clearfix"></div>
-                                    <hr class="m-t-30 m-b-30">
+                                    <hr class="m-t-24 m-b-20" style="border: 0; border-top: 1px solid #e2e8f0;">
+
                                     <form action="<?= base_url('cart/coupon-code-post'); ?>" method="post" id="form_validate" class="m-0">
                                         <?= csrf_field(); ?>
-                                        <label class="font-600"><?= trans("discount_coupon") ?></label>
+                                        <label class="font-600" style="font-size: 13px; color: #475569;"><?= trans("discount_coupon") ?></label>
                                         <div class="cart-discount-coupon">
                                             <input type="text" name="coupon_code" class="form-control form-input" value="<?= esc(old('coupon_code')); ?>" maxlength="254" placeholder="<?= trans("coupon_code") ?>" required>
                                             <button type="submit" class="btn btn-custom m-l-5"><?= trans("apply") ?></button>
