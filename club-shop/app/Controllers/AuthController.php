@@ -582,10 +582,10 @@ class AuthController extends BaseController
         // Determine target redirect
         $target = trim($payload['target'] ?? '');
         if (!empty($target)) {
-            if (str_starts_with($target, '/')) {
-                return redirect()->to(base_url(ltrim($target, '/')));
+            if (str_starts_with($target, 'http://') || str_starts_with($target, 'https://')) {
+                return redirect()->to($target);
             }
-            return redirect()->to($target);
+            return redirect()->to(base_url(ltrim($target, '/')));
         }
 
         // If user is admin in shop and role is admin, redirect to admin panel

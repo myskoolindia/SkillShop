@@ -74,10 +74,11 @@ Route::middleware('auth')->group(function () {
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
 
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
-
-    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
-        ->name('logout');
 });
+
+// Logout route (supports both GET and POST)
+Route::match(['get', 'post'], 'logout', [AuthenticatedSessionController::class, 'destroy'])
+    ->name('logout');
 
 // Single Sign-On (SSO) Bridge Routes
 Route::get('sso/shop', [\App\Http\Controllers\Auth\SsoBridgeController::class, 'toShop'])->name('sso.shop');

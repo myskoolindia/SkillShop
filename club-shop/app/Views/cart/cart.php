@@ -461,6 +461,23 @@
                                             <strong><?= trans("coupon"); ?>&nbsp;&nbsp;[<?= esc($cart->coupon_code); ?>]&nbsp;&nbsp;<a href="javascript:void(0)" class="font-weight-normal" onclick="removeCartDiscountCoupon();">[<?= trans("remove"); ?>]</a><span class="float-right">-&nbsp;<?= priceDecimal($cart->totals->coupon_discount, $cart->currency_code); ?></span></strong>
                                         </div>
                                     <?php endif; ?>
+                                    <?php if (!empty($cart->totals->vat) && $cart->totals->vat > 0): 
+                                        $totalVatAmount = $cart->totals->vat;
+                                        $halfAmount = $totalVatAmount / 2;
+                                    ?>
+                                        <div class="row-custom m-b-10">
+                                            <strong><?= trans("cgst"); ?><span class="float-right"><?= priceDecimal($halfAmount, $cart->currency_code); ?></span></strong>
+                                        </div>
+                                        <div class="row-custom m-b-10">
+                                            <strong><?= trans("sgst"); ?><span class="float-right"><?= priceDecimal($halfAmount, $cart->currency_code); ?></span></strong>
+                                        </div>
+                                        <div class="row-custom">
+                                            <p class="line-seperator"></p>
+                                        </div>
+                                        <div class="row-custom m-b-10">
+                                            <strong><?= trans("total"); ?> <?= trans("vat"); ?><span class="float-right"><?= priceDecimal($cart->totals->vat, $cart->currency_code); ?></span></strong>
+                                        </div>
+                                    <?php endif; ?>
                                     <div class="row-custom">
                                         <p class="line-seperator"></p>
                                     </div>

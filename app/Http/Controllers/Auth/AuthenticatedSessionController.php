@@ -95,17 +95,18 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('student.dashboard');
         }
 
+        if ($user->role === 'vendor') {
+            session()->forget('url.intended');
+            $ssoUrl = \App\Services\SsoTokenService::generateShopSsoUrl($user, 'dashboard');
+            return redirect()->away($ssoUrl)->with($notification);
+        }
+
         $defaultRoute = match ($user->role) {
-            'vendor'     => url('/club-shop/dashboard'),
             'school'     => route('school.dashboard'),
             'teacher'    => route('student.dashboard'),
             'instructor' => route('instructor.dashboard'),
             default      => route('student.dashboard'),
         };
-
-        if ($user->role === 'vendor') {
-            return redirect()->away($defaultRoute)->with($notification);
-        }
 
         return redirect()->intended($defaultRoute)->with($notification);
     }
@@ -116,6 +117,12 @@ class AuthenticatedSessionController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
+        if (Auth::guard('admin')->check()) {
+            Auth::guard('admin')->logout();
+        }
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         $notification = __('Logged out successfully.');
         $notification = ['messege' => $notification, 'alert-type' => 'success'];

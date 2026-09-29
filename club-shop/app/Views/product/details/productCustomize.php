@@ -429,12 +429,12 @@
                                     <?php foreach($relatedProducts as $item): ?>
                                         <?php
                                         $cnvtcry = $item->listing_type == 'ordinary_listing' ? false : true;
+                                        $effectivePrice = !empty($item->price_discounted) && (float)$item->price_discounted > 0 ? (float)$item->price_discounted : (float)$item->price;
                                         $prdtPrice = !empty($item->price) && $item->price > 0 ? priceFormatted($item->price, $item->currency, $cnvtcry) : '';
-                                        $prdtPriceDiscounted = priceFormatted($item->price_discounted, $item->currency, $cnvtcry);
-                                        $prdtDiscountRate = calculateDiscount($item->price, $item->price_discounted);
-
+                                        $prdtPriceDiscounted = priceFormatted($effectivePrice, $item->currency, $cnvtcry);
+                                        $prdtDiscountRate = calculateDiscount($item->price, $effectivePrice);
                                         ?>
-                                    <div class="item bundle-item" data-id="<?= $item->id ?>" data-price="<?= $item->price_discounted ?>">
+                                    <div class="item bundle-item" data-id="<?= $item->id ?>" data-price="<?= $effectivePrice; ?>">
 
                                         <div class="cart-item-image">
                                             <div class="product-image-box product-image-box-md">
@@ -505,7 +505,7 @@
                                 <div class="right">
                                     <div class="row-custom m-b-15">
                                         <strong>Total Bundle
-                                            <span class="float-right">₹<span id="bundleTotal"><?= $product->price_discounted > 0 ? $product->price_discounted : $product->price ?></span></span>
+                                            <span class="float-right">₹<span id="bundleTotal"><?= number_format((float)(!empty($product->price_discounted) && (float)$product->price_discounted > 0 ? $product->price_discounted : $product->price), 2, '.', ','); ?></span></span>
                                         </strong>
                                     </div>
 
@@ -1002,163 +1002,131 @@ endif; ?>
     </style>
 
 <script>
-// let basePrice = <?//= $product->price ?>;
-// let total = basePrice;
+function calculateBundleTotal() {
+    var mainBasePrice = parseFloat(<?= !empty($product->price_discounted) && (float)$product->price_discounted > 0 ? (float)$product->price_discounted : (float)$product->price; ?>) || 0;
+    var mainQtyInput = document.getElementById('input_product_quantity');
+    var mainQty = mainQtyInput ? (parseInt(mainQtyInput.value, 10) || 1) : 1;
+    if (mainQty < 1) mainQty = 1;
 
-// document.querySelectorAll('.bundle-card').forEach(card=>{
-//     card.addEventListener('click',function(){
-//         let price = parseFloat(this.dataset.price);
-//         if(this.classList.contains('selected')){
-//             this.classList.remove('selected');
-//             total -= price;
-//         }else{
-//             this.classList.add('selected');
-//             total += price;
-//         }
-//         document.getElementById('bundleTotal').innerText = total;
-//     });
-// });
+    var total = mainBasePrice * mainQty;
 
-// document.getElementById('btnAddBundle').addEventListener('click',function(){
-
-//     let items = [];
-//     items.push({product_id: <?= $product->id ?>, qty:1, variant_id:null, extra_options:null});
-
-//     document.querySelectorAll('.bundle-card.selected').forEach(card=>{
-//         items.push({product_id:card.dataset.id, qty:1, variant_id:null, extra_options:null});
-//     });
-
-//     var data = {
-//         'cart_items': JSON.stringify({items:items})
-//     };
-//     $.ajax({
-//         type: 'POST',
-//         url: generateUrl('cart/add-to-cart-bundle'),
-//         data: data,
-//         success: function (response) {
-//         console.log(response);
-//             // location.reload();
-//         }
-//     });
-// });
-</script>
-<script>
-// let basePrice = <?//= $basePrice ?>;
-// let total = basePrice;
-
-// document.querySelectorAll('.bundle-item').forEach(item=>{
-
-//     let qtyInput = item.querySelector('.qty');
-//     let price = parseFloat(item.dataset.price);
-
-//     item.querySelector('.plus').onclick = ()=>{
-//         let q = parseInt(qtyInput.value) + 1;
-//         qtyInput.value = q;
-//         total += price;
-//         updateTotal();
-//     };
-
-//     item.querySelector('.minus').onclick = ()=>{
-//         let q = parseInt(qtyInput.value);
-//         if(q>0){
-//             qtyInput.value = q-1;
-//             total -= price;
-//             updateTotal();
-//         }
-//     };
-// });
-
-// function updateTotal(){
-//     document.getElementById('bundleTotal').innerText = total;
-// }
-
-// document.getElementById('btnAddBundle').onclick = ()=>{
-// alert('dsfds');
-//     let items = [];
-//     items.push({product_id:<?= $product->id ?>, qty:1, variant_id:null, extra_options:null});
-
-//     document.querySelectorAll('.bundle-item').forEach(i=>{
-//         let q = parseInt(i.querySelector('.qty').value);
-//         if(q>0){
-//             items.push({
-//                 product_id:i.dataset.id,
-//                 qty:q,
-//                 variant_id:null,
-//                 extra_options:null
-//             });
-//         }
-//     });
-
-    
-//     var data = {
-//         'cart_items': JSON.stringify({items:items})
-//     };
-//     $.ajax({
-//         type: 'POST',
-//         url: generateUrl('cart/add-to-cart-bundle'),
-//         data: data,
-//         success: function (response) {
-//         console.log(response);
-//             // location.reload();
-//         }
-//     });
-
-// };
-</script>
-<script>
-let mainPrice = parseFloat(<?= $product->price_discounted ?>);
-let mainQtyInput = document.getElementById('input_product_quantity');
-
-let total = mainPrice * parseInt(mainQtyInput.value);
-// let total = <?//= $product->price_discounted ?>;
-
-document.querySelectorAll('.bundle-item').forEach(item=>{
-    let price = parseFloat(item.dataset.price);
-    let qtyInput = item.querySelector('.qty');
-
-    item.querySelector('.plus').onclick=()=>{
-        qtyInput.value = parseInt(qtyInput.value)+1;
-        total += price;
-        document.getElementById('bundleTotal').innerText = total;
-    };
-
-    item.querySelector('.minus').onclick=()=>{
-        let q=parseInt(qtyInput.value);
-        if(q>0){
-            qtyInput.value = q-1;
-            total -= price;
-            document.getElementById('bundleTotal').innerText = total;
+    document.querySelectorAll('.bundle-item').forEach(function(item) {
+        var price = parseFloat(item.dataset.price) || 0;
+        var qtyInput = item.querySelector('.qty');
+        var q = qtyInput ? (parseInt(qtyInput.value, 10) || 0) : 0;
+        if (q > 0) {
+            total += (price * q);
         }
-    };
+    });
+
+    var bundleTotalEl = document.getElementById('bundleTotal');
+    if (bundleTotalEl) {
+        bundleTotalEl.innerText = total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    return { total: total, mainQty: mainQty };
+}
+
+document.querySelectorAll('.bundle-item').forEach(function(item) {
+    var qtyInput = item.querySelector('.qty');
+    var btnPlus = item.querySelector('.plus');
+    var btnMinus = item.querySelector('.minus');
+
+    if (btnPlus && qtyInput) {
+        btnPlus.onclick = function(e) {
+            e.preventDefault();
+            var q = (parseInt(qtyInput.value, 10) || 0) + 1;
+            qtyInput.value = q;
+            calculateBundleTotal();
+        };
+    }
+
+    if (btnMinus && qtyInput) {
+        btnMinus.onclick = function(e) {
+            e.preventDefault();
+            var q = parseInt(qtyInput.value, 10) || 0;
+            if (q > 0) {
+                qtyInput.value = q - 1;
+                calculateBundleTotal();
+            }
+        };
+    }
+
+    if (qtyInput) {
+        qtyInput.oninput = qtyInput.onchange = qtyInput.onkeyup = function() {
+            var q = parseInt(this.value, 10);
+            if (isNaN(q) || q < 0) q = 0;
+            this.value = q;
+            calculateBundleTotal();
+        };
+    }
 });
 
-document.getElementById('btnAddBundle').onclick=()=>{
+var mainQtyEl = document.getElementById('input_product_quantity');
+if (mainQtyEl) {
+    mainQtyEl.addEventListener('input', calculateBundleTotal);
+    mainQtyEl.addEventListener('change', calculateBundleTotal);
+    mainQtyEl.addEventListener('keyup', calculateBundleTotal);
+}
 
-    let items=[];
-    let mainQty = parseInt(document.getElementById('input_product_quantity').value) || 1;
-    items.push({main_product_id:<?= $product->id ?>,product_id:<?= $product->id ?>, qty:mainQty});
+var btnAddBundle = document.getElementById('btnAddBundle');
+if (btnAddBundle) {
+    btnAddBundle.onclick = function(e) {
+        e.preventDefault();
+        var items = [];
+        var mainQtyInput = document.getElementById('input_product_quantity');
+        var mainQty = mainQtyInput ? (parseInt(mainQtyInput.value, 10) || 1) : 1;
+        if (mainQty < 1) mainQty = 1;
 
-    document.querySelectorAll('.bundle-item').forEach(i=>{
-        let q=parseInt(i.querySelector('.qty').value);
-        if(q>0) items.push({product_id:i.dataset.id, qty:q});
-    });
+        items.push({
+            main_product_id: <?= (int)$product->id ?>,
+            product_id: <?= (int)$product->id ?>,
+            qty: mainQty
+        });
 
-    var data = {
-        'cart_items': JSON.stringify({items:items})
-    };
-    $.ajax({
-        type: 'POST',
-        url: generateUrl('cart/add-to-cart-bundle'),
-        data: data,
-        success: function (response) {
-            if (response.result == 1) {
-                location.href = generateUrl('cart');
-            } else {
-                alert("Failed to add bundle to cart");
+        document.querySelectorAll('.bundle-item').forEach(function(i) {
+            var q = parseInt(i.querySelector('.qty').value, 10) || 0;
+            if (q > 0) {
+                items.push({
+                    product_id: parseInt(i.dataset.id, 10),
+                    qty: q
+                });
             }
-        }
-    });
-};
+        });
+
+        var btn = this;
+        btn.disabled = true;
+        btn.innerText = 'Adding to cart...';
+
+        var data = {
+            'cart_items': JSON.stringify({ items: items })
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: generateUrl('cart/add-to-cart-bundle'),
+            data: data,
+            dataType: 'json',
+            success: function (response) {
+                if (response && response.result == 1) {
+                    location.href = generateUrl('cart');
+                } else {
+                    btn.disabled = false;
+                    btn.innerText = 'PROCEED TO CART';
+                    alert("Failed to add bundle to cart");
+                }
+            },
+            error: function() {
+                btn.disabled = false;
+                btn.innerText = 'PROCEED TO CART';
+                alert("Network error while adding bundle to cart.");
+            }
+        });
+    };
+}
+
+$(document).ready(function() {
+    calculateBundleTotal();
+});
 </script>
 
 

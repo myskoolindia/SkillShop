@@ -267,8 +267,8 @@
                                                     <li><a
                                                             href="{{ userAuth()->role == 'instructor' ? route('instructor.courses.index') : (userAuth()->role == 'school' ? route('school.courses.index') : route('student.enrolled-courses')) }}">{{ __('Courses') }}</a>
                                                     </li>
-                                                    <li><a href=""
-                                                            class="text-danger logout-btn">{{ __('Logout') }}</a>
+                                                    <li><a href="javascript:void(0)"
+                                                            class="text-danger logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">{{ __('Logout') }}</a>
                                                     </li>
                                                 @endif
                                             @endguest
@@ -337,23 +337,28 @@
                                 </ul>
                             @endguest
                             @auth
-                                @if (Auth::guard('web')->user()->role == 'instructor')
+                                @if (Auth::guard('web')->user()->role == 'vendor')
+                                    <ul class="mobile_menu_login d-flex flex-wrap">
+                                        <li><a href="{{ route('sso.shop') }}?target=dashboard">{{ __('Vendor Dashboard') }}</a></li>
+                                        <li><a href="javascript:void(0)" class="text-danger logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">{{ __('Logout') }}</a></li>
+                                    </ul>
+                                @elseif (Auth::guard('web')->user()->role == 'instructor')
                                     <ul class="mobile_menu_login d-flex flex-wrap">
                                         <li><a href="{{ route('instructor.dashboard') }}">{{ __('Dashboard') }}</a></li>
-                                        <li><a href="{{ route('instructor.courses.index') }}">{{ __('Courses') }}</a>
-                                        </li>
+                                        <li><a href="{{ route('instructor.courses.index') }}">{{ __('Courses') }}</a></li>
+                                        <li><a href="javascript:void(0)" class="text-danger logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">{{ __('Logout') }}</a></li>
                                     </ul>
                                 @elseif (Auth::guard('web')->user()->role == 'school')
                                     <ul class="mobile_menu_login d-flex flex-wrap">
                                         <li><a href="{{ route('school.dashboard') }}">{{ __('Dashboard') }}</a></li>
-                                        <li><a href="{{ route('school.courses.index') }}">{{ __('Courses') }}</a>
-                                        </li>
+                                        <li><a href="{{ route('school.courses.index') }}">{{ __('Courses') }}</a></li>
+                                        <li><a href="javascript:void(0)" class="text-danger logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">{{ __('Logout') }}</a></li>
                                     </ul>
                                 @else
                                     <ul class="mobile_menu_login d-flex flex-wrap">
                                         <li><a href="{{ route('student.dashboard') }}">{{ __('Dashboard') }}</a></li>
-                                        <li><a href="{{ route('student.enrolled-courses') }}">{{ __('Courses') }}</a>
-                                        </li>
+                                        <li><a href="{{ route('student.enrolled-courses') }}">{{ __('Courses') }}</a></li>
+                                        <li><a href="javascript:void(0)" class="text-danger logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">{{ __('Logout') }}</a></li>
                                     </ul>
                                 @endif
                             @endauth

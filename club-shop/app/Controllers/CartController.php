@@ -464,47 +464,57 @@ class CartController extends BaseController
         $raw = json_decode($this->request->getPost('cart_items'), true);
         if (empty($raw['items'])) return jsonResponse(['result' => 0]);
 
-        $mainProductId = $raw['items'][0]['main_product_id'] ?? $raw['items'][0]['product_id'];
-        $mainProductqty = $raw['items'][0]['qty'] ?? 1;
+        $mainItem = null;
+        foreach ($raw['items'] as $item) {
+            if (isset($item['main_product_id'])) {
+                $mainItem = $item;
+                break;
+            }
+        }
+        if (!$mainItem) {
+            $mainItem = $raw['items'][0];
+        }
+
+        $mainProductId = (int)($mainItem['main_product_id'] ?? $mainItem['product_id']);
+        $mainProductqty = max(1, (int)($mainItem['qty'] ?? 1));
         $pMain = $this->productModel->getActiveProduct($mainProductId);
         if (!$pMain) return jsonResponse(['result' => 0]);
 
-
-        $bundleChildren = [];
-        $bundleTotal = 0;
+        $bundleItems = [];
+        $bundleTotal = 0.0;
 
         foreach ($raw['items'] as $i) {
-
             $pid = (int)$i['product_id'];
             $qty = (int)$i['qty'];
+            if ($qty <= 0) continue;
 
             $p = $this->productModel->getActiveProduct($pid);
             if (!$p) continue;
 
-            $price = $p->price_discounted > 0 ? $p->price_discounted : $p->price;
-            $bundleTotal += $price * $qty;
+            $price = (float)(!empty($p->price_discounted) && $p->price_discounted > 0 ? $p->price_discounted : $p->price);
+            $bundleTotal += ($price * $qty);
 
-            if (!isset($i['main_product_id'])) {
-                $bundleChildren[] = [
-                    'product_id' => $pid,
-                    'qty' => $qty
-                ];
-            }
+            $bundleItems[] = [
+                'product_id' => $pid,
+                'qty'        => $qty,
+                'unit_price' => $price,
+                'is_main'    => isset($i['main_product_id']) ? 1 : 0
+            ];
         }
 
         $cart = $this->cartModel->fetchRawCartData();
         $cartId = $cart->id ?? $this->cartModel->createCart();
 
-        $hash = md5('bundle-' . md5(json_encode($bundleChildren)));
+        $hash = md5('bundle-' . md5(json_encode($bundleItems)));
 
         $existing = $this->cartModel->getItemByHash($hash, $cartId);
         if ($existing) {
             $newQty = $existing->quantity + 1;
             $this->cartModel->updateItem($existing->id, [
-                'quantity' => $newQty,
+                'quantity'    => $newQty,
                 'total_price' => $existing->unit_price * $newQty
             ]);
-            return jsonResponse(['result'=>1,'bundle_id'=>$existing->id]);
+            return jsonResponse(['result' => 1, 'bundle_id' => $existing->id]);
         }
 
         $fileModel = new FileModel();
@@ -520,28 +530,28 @@ class CartController extends BaseController
         }
 
         $bundleRow = [
-            'cart_id'       => $cartId,
-            'item_hash'     => $hash,
-            'product_id'    => $pMain->id,
-            'product_title' => $pMain->title,
-            'product_type'  => $pMain->product_type,
-            'listing_type'  => $pMain->listing_type,
-            'product_sku'   => $pMain->sku . '-BUNDLE',
-            'quantity'      => $mainProductqty,
-            'purchase_type' => 'product',
-            'quote_request_id' => 0,
-            'unit_price'    => $pMain->price_discounted ?? $pMain->price,
-            'unit_price_base' => $bundleTotal,
-            'total_price'   => $bundleTotal,
-            'is_bundle'     => 1,
-            'bundle_items'  => json_encode($bundleChildren),
-            'seller_id'     => $pMain->user_id,
-            'product_image_id' => $imageId,
+            'cart_id'            => $cartId,
+            'item_hash'          => $hash,
+            'product_id'         => $pMain->id,
+            'product_title'      => $pMain->title,
+            'product_type'       => $pMain->product_type,
+            'listing_type'       => $pMain->listing_type,
+            'product_sku'        => $pMain->sku . '-BUNDLE',
+            'quantity'           => $mainProductqty,
+            'purchase_type'      => 'product',
+            'quote_request_id'   => 0,
+            'unit_price'         => $bundleTotal,
+            'unit_price_base'    => $bundleTotal,
+            'total_price'        => $bundleTotal * $mainProductqty,
+            'is_bundle'          => 1,
+            'bundle_items'       => json_encode($bundleItems),
+            'seller_id'          => $pMain->user_id,
+            'product_image_id'   => $imageId,
             'product_image_data' => $imageData,
-            'product_vat'   => 0,
-            'product_vat_rate' => 0,
+            'product_vat'        => 0,
+            'product_vat_rate'   => 0,
             'is_stock_available' => 1,
-            'created_at'    => date('Y-m-d H:i:s')
+            'created_at'         => date('Y-m-d H:i:s')
         ];
 
         $insertId = $this->cartModel->insertBundleRow($bundleRow);

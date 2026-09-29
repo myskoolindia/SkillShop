@@ -260,12 +260,16 @@ class OtpAuthController extends Controller
             $user->save();
         }
 
-        $redirectUrl = match ($user->role) {
-            'school'     => route('school.dashboard'),
-            'teacher'    => route('student.dashboard'),
-            'instructor' => route('instructor.dashboard'),
-            default      => route('student.dashboard'),
-        };
+        if ($user->role === 'vendor') {
+            $redirectUrl = \App\Services\SsoTokenService::generateShopSsoUrl($user, 'dashboard');
+        } else {
+            $redirectUrl = match ($user->role) {
+                'school'     => route('school.dashboard'),
+                'teacher'    => route('student.dashboard'),
+                'instructor' => route('instructor.dashboard'),
+                default      => route('student.dashboard'),
+            };
+        }
 
         return response()->json([
             'status'       => 'success',
