@@ -11,6 +11,81 @@
   }
   details summary::-webkit-details-marker { display: none; }
   details[open] .faq-chevron { transform: rotate(180deg); }
+
+  /* ==================== FAQ CAROUSEL ==================== */
+  .vl-faq-carousel { position: relative; }
+  .vl-faq-slide { display: none; animation: vl-fade-in 0.35s ease; }
+  .vl-faq-slide.active { display: block; }
+  @keyframes vl-fade-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .vl-faq-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 26px;
+  }
+  @media (max-width: 920px) { .vl-faq-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .vl-faq-grid { grid-template-columns: 1fr; } }
+  .vl-faq-card {
+    background: #ffffff;
+    border: 2px solid #ede9fe;
+    border-radius: 20px;
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 16px rgba(99,102,241,0.07);
+    transition: all 0.25s ease;
+  }
+  .vl-faq-card:hover {
+    border-color: #c084fc;
+    box-shadow: 0 12px 32px rgba(99,102,241,0.14);
+    transform: translateY(-5px);
+  }
+  .vl-faq-card__q {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #1e1b4b;
+    line-height: 1.35;
+    margin-bottom: 14px;
+  }
+  .vl-faq-card__divider {
+    width: 40px; height: 4px;
+    background: linear-gradient(90deg, #f97316 0%, #ec4899 100%);
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+  .vl-faq-card__a { font-size: 0.96rem; color: #475569; line-height: 1.68; flex: 1; }
+  .vl-faq-card__a ul { padding-left: 18px; margin: 8px 0 0; }
+  .vl-faq-card__a li { margin-bottom: 6px; }
+  .vl-faq-nav {
+    display: flex; align-items: center; justify-content: center;
+    gap: 20px; margin-top: 40px; padding-top: 26px;
+    border-top: 2px solid #ede9fe;
+  }
+  .vl-faq-btn {
+    width: 48px; height: 48px; border-radius: 14px;
+    border: 2px solid #ddd6fe; background: #ffffff; color: #6d28d9;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(99,102,241,0.08);
+  }
+  .vl-faq-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    border-color: #6366f1; color: #ffffff;
+    transform: translateY(-2px); box-shadow: 0 8px 20px rgba(99,102,241,0.35);
+  }
+  .vl-faq-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .vl-faq-dots { display: flex; gap: 8px; align-items: center; }
+  .vl-faq-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #ddd6fe; cursor: pointer; transition: all 0.25s ease;
+    border: none; padding: 0;
+  }
+  .vl-faq-dot.active {
+    background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+    width: 28px; border-radius: 12px;
+  }
+  .vl-faq-counter { font-size: 0.95rem; color: #6d28d9; font-weight: 800; min-width: 50px; text-align: center; }
   .feature-card { transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
   .feature-card:hover { transform: translateY(-4px); box-shadow: 0 16px 36px rgba(40, 36, 111, 0.08); }
   
@@ -290,7 +365,7 @@
 </section>
 
 {{-- =====================================================================
-     3. SKILLVATION BASIC PACKAGE: What is Included
+     3. SKILLVATION ADVANCE PACKAGE: What is Included
      ===================================================================== --}}
 <section class="py-16 lg:py-24 bg-white" id="package-details">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -300,7 +375,7 @@
         Complete Solution
       </div>
       <h2 class="text-3xl sm:text-4xl font-extrabold text-brand-navy">
-        SKILLVATION BASIC PACKAGE
+        SKILLVATION ADVANCE PACKAGE
       </h2>
       <p class="text-base sm:text-lg text-brand-orange font-bold">
         Designed to Meet the CBSE Composite Skill Lab Requirement
@@ -986,47 +1061,129 @@
 {{-- =====================================================================
      11. FREQUENTLY ASKED QUESTIONS
      ===================================================================== --}}
-<section class="py-16 lg:py-20 bg-white">
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+<section class="py-16 lg:py-20 bg-white" id="faq">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
     <div class="text-center mb-12 space-y-3">
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-navy/10 text-brand-navy text-xs font-bold uppercase tracking-wider">
-        FAQs
+        <span>★</span> Frequently Asked Questions
       </div>
       <h2 class="text-3xl sm:text-4xl font-extrabold text-brand-navy">
-        Composite Skill Lab FAQs
+        Questions school management usually ask
       </h2>
+      <p class="text-slate-500 text-sm max-w-2xl mx-auto">Everything you need to know about setup, CBSE affiliation guidelines, and the Advance package.</p>
     </div>
 
-    @php
-    $faqs = [
-      ['What is the CBSE mandate for the Composite Skill Lab?',
-       'Under Circular No. Skill-75/2024 (and reiterated in Skill-01/2025), CBSE has mandated all affiliated schools to establish a Composite Skill Lab. Schools seeking fresh affiliation must have the lab ready, while existing schools are granted a 3-year transition window.'],
-      ['What is included in the Skillvation Advance Package?',
-       'The Advance Package includes core lab infrastructure & furniture, essential multi-domain tools & equipment, student activity kits and materials, teacher demonstration resources, project-based learning guides, and organized storage.'],
-      ['What are the lab space options allowed by CBSE?',
-       'CBSE allows two configurations: (1) One single Composite Skill Lab of 600 sq. ft. for Classes VI–XII, or (2) Two separate labs of 400 sq. ft. each — one for Classes VI–X and one for Classes XI–XII.'],
-      ['How does the Advance Package support different skill domains?',
-       'The setup supports all three core forms of work defined by CBSE/NCF-SE: Life Forms (food, health, herbal skills), Materials & Machines (coding, robotics, pottery, crafts, media), and Human Services (finance, retail, tourism, communications).'],
-      ['Can we upgrade or customize the Advance Package later?',
-       'Yes, the Advance Package is modular and scalable. Schools can start with this comprehensive setup and seamlessly add advanced equipment, AI/Robotics modules, or specialized vocation kits over time.'],
-    ];
-    @endphp
+    <div class="vl-faq-carousel" id="faqCarousel">
 
-    <div class="space-y-3">
-      @foreach($faqs as [$q, $a])
-      <details class="group bg-slate-50/70 border border-slate-200 rounded-2xl overflow-hidden transition-all">
-        <summary class="flex items-center justify-between gap-4 px-6 py-4 cursor-pointer select-none list-none">
-          <span class="text-sm sm:text-base font-bold text-brand-navy">{{ $q }}</span>
-          <i class="fa-solid fa-chevron-down faq-chevron text-slate-400 text-xs flex-shrink-0 transition-transform duration-200"></i>
-        </summary>
-        <div class="px-6 pb-5 text-sm text-slate-600 leading-relaxed border-t border-slate-200/60 pt-4">
-          {{ $a }}
+      {{-- Slide 1 --}}
+      <div class="vl-faq-slide active">
+        <div class="vl-faq-grid">
+          <div class="vl-faq-card">
+            <div class="vl-faq-card__q">What is a Composite Skill Lab?</div>
+            <div class="vl-faq-card__divider"></div>
+            <div class="vl-faq-card__a">A Composite Skill Lab is an experiential multidisciplinary learning space where students gain hands-on proficiency in Robotics, Coding, AI, Electronics, and Design Thinking through structured curriculum projects.</div>
+          </div>
+          <div class="vl-faq-card">
+            <div class="vl-faq-card__q">Is it mandatory for CBSE affiliated schools?</div>
+            <div class="vl-faq-card__divider"></div>
+            <div class="vl-faq-card__a">CBSE and NEP 2020 guidelines strongly emphasize setting up Composite Skill Labs for 21st-century skill education. Skillvation ensures your lab satisfies all affiliation inspection norms.</div>
+          </div>
+          <div class="vl-faq-card">
+            <div class="vl-faq-card__q">What lab tiers does Skillvation offer?</div>
+            <div class="vl-faq-card__divider"></div>
+            <div class="vl-faq-card__a">
+              <ul>
+                <li><strong>Basic:</strong> Core infrastructure, robotics &amp; coding tools.</li>
+                <li><strong>Advance:</strong> Expanded composite layout with AI &amp; IoT stations.</li>
+                <li><strong>Premium:</strong> Dual labs with advanced robotics, 3D printing &amp; dedicated support.</li>
+              </ul>
+            </div>
+          </div>
         </div>
-      </details>
-      @endforeach
-    </div>
+      </div>
 
+      {{-- Slide 2 --}}
+      <div class="vl-faq-slide">
+        <div class="vl-faq-grid">
+          <div class="vl-faq-card">
+            <div class="vl-faq-card__q">What is included in the Skillvation Advance Package?</div>
+            <div class="vl-faq-card__divider"></div>
+            <div class="vl-faq-card__a">The Advance Package includes an expanded lab infrastructure, AI &amp; IoT stations, multi-domain tools &amp; equipment, student activity kits, teacher demonstration resources, project-based learning guides, and organized storage.</div>
+          </div>
+          <div class="vl-faq-card">
+            <div class="vl-faq-card__q">What are the lab space options allowed by CBSE?</div>
+            <div class="vl-faq-card__divider"></div>
+            <div class="vl-faq-card__a">CBSE allows two configurations: (1) One single Composite Skill Lab of 600 sq. ft. for Classes VI–XII, or (2) Two separate labs of 400 sq. ft. each — one for Classes VI–X and one for Classes XI–XII.</div>
+          </div>
+          <div class="vl-faq-card">
+            <div class="vl-faq-card__q">How does the Advance Package support skill domains?</div>
+            <div class="vl-faq-card__divider"></div>
+            <div class="vl-faq-card__a">The setup supports all three core forms of work defined by CBSE/NCF-SE: Life Forms (food, health, herbal skills), Materials &amp; Machines (coding, robotics, pottery, crafts, media), and Human Services (finance, retail, tourism, communications).</div>
+          </div>
+        </div>
+      </div>
+
+      {{-- Slide 3 --}}
+      <div class="vl-faq-slide">
+        <div class="vl-faq-grid">
+          <div class="vl-faq-card">
+            <div class="vl-faq-card__q">How do we select the right package for our campus?</div>
+            <div class="vl-faq-card__divider"></div>
+            <div class="vl-faq-card__a">The package depends on your student strength, room dimensions, budget, and timetable structure. Our academic advisors offer a free on-site spatial survey to guide your selection.</div>
+          </div>
+          <div class="vl-faq-card">
+            <div class="vl-faq-card__q">Can the lab layout and equipment be customized?</div>
+            <div class="vl-faq-card__divider"></div>
+            <div class="vl-faq-card__a">Yes, absolutely. We customize furniture layout, computer stations, safety provisions, and project kit quantities according to your exact room size and student batch counts.</div>
+          </div>
+          <div class="vl-faq-card">
+            <div class="vl-faq-card__q">Can we upgrade or customize the Advance Package later?</div>
+            <div class="vl-faq-card__divider"></div>
+            <div class="vl-faq-card__a">Yes, the Advance Package is modular and scalable. Schools can start with this comprehensive setup and seamlessly add advanced equipment, AI/Robotics modules, or specialized vocation kits over time.</div>
+          </div>
+        </div>
+      </div>
+
+      {{-- Slide 4 --}}
+      <div class="vl-faq-slide">
+        <div class="vl-faq-grid">
+          <div class="vl-faq-card">
+            <div class="vl-faq-card__q">Are student DIY project kits provided?</div>
+            <div class="vl-faq-card__divider"></div>
+            <div class="vl-faq-card__a">Yes. We supply modular, reusable STEM &amp; robotics kits with step-by-step guides so students can build tangible working models across physics, computing, and mechanics.</div>
+          </div>
+          <div class="vl-faq-card">
+            <div class="vl-faq-card__q">How is teacher training conducted?</div>
+            <div class="vl-faq-card__divider"></div>
+            <div class="vl-faq-card__a">We conduct an intensive 3 to 5-day on-site training certification for your science and computer faculty, backed by video tutorials, lesson plans, and scheduled term refreshers.</div>
+          </div>
+          <div class="vl-faq-card">
+            <div class="vl-faq-card__q">What happens after installation — are we supported?</div>
+            <div class="vl-faq-card__divider"></div>
+            <div class="vl-faq-card__a">No school is left on their own. Annual preventive maintenance, software patches, fast spare parts replacement, and ongoing pedagogy support are bundled for the full agreement period.</div>
+          </div>
+        </div>
+      </div>
+
+      {{-- Navigation Controls --}}
+      <div class="vl-faq-nav">
+        <button class="vl-faq-btn" id="faqPrev" aria-label="Previous questions" disabled>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <div class="vl-faq-dots" id="faqDots">
+          <button class="vl-faq-dot active" data-slide="0" aria-label="Slide 1"></button>
+          <button class="vl-faq-dot" data-slide="1" aria-label="Slide 2"></button>
+          <button class="vl-faq-dot" data-slide="2" aria-label="Slide 3"></button>
+          <button class="vl-faq-dot" data-slide="3" aria-label="Slide 4"></button>
+        </div>
+        <span class="vl-faq-counter" id="faqCounter">1 / 4</span>
+        <button class="vl-faq-btn" id="faqNext" aria-label="Next questions">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      </div>
+
+    </div>
   </div>
 </section>
 
@@ -1062,6 +1219,34 @@
 @endsection
 
 @push('scripts')
+<script>
+// ── FAQ Card Carousel ─────────────────────────────────────
+(function () {
+  var slides  = document.querySelectorAll('#faqCarousel .vl-faq-slide');
+  var dots    = document.querySelectorAll('#faqDots .vl-faq-dot');
+  var prevBtn = document.getElementById('faqPrev');
+  var nextBtn = document.getElementById('faqNext');
+  var counter = document.getElementById('faqCounter');
+  var total   = slides.length;
+  var current = 0;
+
+  function goTo(idx) {
+    if (idx < 0 || idx >= total) return;
+    slides[current].classList.remove('active');
+    dots[current].classList.remove('active');
+    current = idx;
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
+    if (counter) counter.textContent = (current + 1) + ' / ' + total;
+    if (prevBtn) prevBtn.disabled = current === 0;
+    if (nextBtn) nextBtn.disabled = current === total - 1;
+  }
+
+  if (prevBtn) { prevBtn.disabled = true; prevBtn.addEventListener('click', function () { goTo(current - 1); }); }
+  if (nextBtn) { nextBtn.disabled = total <= 1; nextBtn.addEventListener('click', function () { goTo(current + 1); }); }
+  dots.forEach(function (dot, i) { dot.addEventListener('click', function () { goTo(i); }); });
+}());
+</script>
 <script>
 (function(){
 'use strict';
