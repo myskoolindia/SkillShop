@@ -334,13 +334,12 @@ class BundleModel extends BaseModel
         $totalUnits = 0;
 
         foreach ($components as $component) {
-            $totalUnits += $component->required_quantity;
-            $sumPrice += $component->total_price;
-
-            // Optional items with 0 required quantity do not limit bundle availability
-            if ($component->is_optional && $component->required_quantity == 0) {
+            if (!empty($component->is_optional)) {
                 continue;
             }
+
+            $totalUnits += $component->required_quantity;
+            $sumPrice += $component->total_price;
 
             $maxBundlesFromComponent = $component->max_possible_bundles;
             if ($minStock === null || $maxBundlesFromComponent < $minStock) {

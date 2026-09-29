@@ -44,7 +44,7 @@ if (!empty($bundleComponents)) {
         }
         $groupedComponents[$catKey]['items'][] = $comp;
         $isOpt = !empty($comp->is_optional);
-        $pkgQty = $isOpt ? max(0, (int)$comp->required_quantity) : max(1, (int)$comp->required_quantity);
+        $pkgQty = $isOpt ? 0 : max(1, (int)$comp->required_quantity);
         $savedConfig = $editItemMap['c_' . $comp->id] ?? ($editItemMap['p_' . $comp->component_product_id] ?? null);
         if (!empty($savedConfig) && isset($savedConfig['qty']) && (int)$savedConfig['qty'] >= ($isOpt ? 0 : 1)) {
             $pkgQty = (int)$savedConfig['qty'];
@@ -65,14 +65,14 @@ if (!empty($bundleComponents)) {
             $aOpt = !empty($a->is_optional);
             $bOpt = !empty($b->is_optional);
 
-            $aQty = $aOpt ? max(0, (int)$a->required_quantity) : max(1, (int)$a->required_quantity);
+            $aQty = $aOpt ? 0 : max(1, (int)$a->required_quantity);
             $aSaved = $editItemMap['c_' . $a->id] ?? ($editItemMap['p_' . $a->component_product_id] ?? null);
             if (!empty($aSaved) && isset($aSaved['qty'])) {
                 $aQty = (int)$aSaved['qty'];
             }
             $aChecked = (!$aOpt || $aQty > 0) ? 1 : 0;
 
-            $bQty = $bOpt ? max(0, (int)$b->required_quantity) : max(1, (int)$b->required_quantity);
+            $bQty = $bOpt ? 0 : max(1, (int)$b->required_quantity);
             $bSaved = $editItemMap['c_' . $b->id] ?? ($editItemMap['p_' . $b->component_product_id] ?? null);
             if (!empty($bSaved) && isset($bSaved['qty'])) {
                 $bQty = (int)$bSaved['qty'];
