@@ -32,7 +32,8 @@ if (!empty($bundleComponents)) {
     foreach ($bundleComponents as $comp) {
         $catId = !empty($comp->category_id) ? (int)$comp->category_id : 0;
         $catName = !empty($comp->category_name) ? trim($comp->category_name) : 'General';
-        $catKey = 'cat_' . $catId;
+        $normalizedName = preg_replace('/[^a-zA-Z0-9_]/', '_', strtolower($catName));
+        $catKey = 'cat_' . $normalizedName;
         if (!isset($groupedComponents[$catKey])) {
             $groupedComponents[$catKey] = [
                 'id' => $catId,
@@ -86,6 +87,7 @@ if (!empty($bundleComponents)) {
             return strcasecmp($a->title ?? '', $b->title ?? '');
         });
     }
+    unset($catGroup);
     $initialGrandTotalUnits = 0;
     $initialGrandTotalPrice = 0.00;
     foreach ($groupedComponents as $catGroup) {
@@ -408,8 +410,24 @@ $totalCategoriesCount = count($groupedComponents);
             </tbody>
             <?php if (!empty($bundleComponents)): ?>
                 <tfoot style="background: #f8fafc; border-top: 2px solid #e2e8f0; position: sticky; bottom: 0; z-index: 2;">
+                    <!-- Active Category Subtotal row (shown when filtering by category) -->
+                    <tr id="storefront_footer_cat_row" style="display: none; background: #f0f9ff; border-bottom: 1px dashed #cbd5e1;">
+                        <th colspan="5" class="text-right font-weight-bold text-primary" style="font-size: 13px;">
+                            <i class="fa fa-folder-open-o mr-1"></i><span id="storefront_footer_cat_name">Category</span> Subtotal:
+                        </th>
+                        <th class="text-center font-weight-bold text-muted small">—</th>
+                        <th class="text-center font-weight-bold">
+                            <span id="storefront_footer_cat_units" class="badge badge-primary px-2 py-1" style="font-size:11.5px;">0 units</span>
+                        </th>
+                        <th class="text-right font-weight-bold text-primary" style="font-size:14px;" id="storefront_footer_cat_price">
+                            <?= priceFormatted(0, $currencyCode, true); ?>
+                        </th>
+                    </tr>
+                    <!-- Package Grand Total row -->
                     <tr>
-                        <th colspan="5" class="text-right font-weight-bold">Package Total:</th>
+                        <th colspan="5" class="text-right font-weight-bold" style="font-size: 13.5px;">
+                            <span id="storefront_footer_pkg_label">Package Total<?= $totalCategoriesCount > 1 ? ' (' . $totalCategoriesCount . ' Categories)' : ''; ?>:</span>
+                        </th>
                         <th class="text-center font-weight-bold text-muted small">—</th>
                         <th class="text-center font-weight-bold">
                             <span id="storefront_footer_total_units" class="badge badge-info px-2 py-1" style="font-size:12px;"><?= $initialGrandTotalUnits ?? ($bundleMetrics['total_units'] ?? 0); ?> units</span>
@@ -492,6 +510,14 @@ var collapsedBundleCategories = {};
     <?php endforeach; ?>
 <?php endif; ?>
 
+var bundleCategoryNames = {
+<?php if (!empty($groupedComponents)): ?>
+    <?php foreach ($groupedComponents as $cK => $cG): ?>
+        '<?= escJs($cK); ?>': <?= json_encode($cG['name']); ?>,
+    <?php endforeach; ?>
+<?php endif; ?>
+};
+
 var bundleProductsMap = {};
 <?php if (!empty($bundleComponents)): ?>
     <?php foreach ($bundleComponents as $comp): 
@@ -554,6 +580,27 @@ function formatBundleCurrency(amount) {
     var space = '<?= $spaceSymbol ? " " : ""; ?>';
 
     return dir === 'left' ? (symbol + space + formatted) : (formatted + space + symbol);
+}
+
+function updateStorefrontFooterSummary() {
+    var catTotals = window._latestCategoryTotals || {};
+    var numCats = <?= (int)$totalCategoriesCount; ?>;
+
+    if (activeBundleCategoryKey !== 'all' && catTotals[activeBundleCategoryKey]) {
+        var catName = (typeof bundleCategoryNames !== 'undefined' && bundleCategoryNames[activeBundleCategoryKey]) ? bundleCategoryNames[activeBundleCategoryKey] : 'Category';
+        $('#storefront_footer_cat_name').text(catName);
+        $('#storefront_footer_cat_units').text((catTotals[activeBundleCategoryKey].units || 0) + ' units');
+        $('#storefront_footer_cat_price').text(formatBundleCurrency(catTotals[activeBundleCategoryKey].price || 0));
+        $('#storefront_footer_cat_row').show();
+        $('#storefront_footer_pkg_label').text('Package Grand Total (All Categories):');
+    } else {
+        $('#storefront_footer_cat_row').hide();
+        if (numCats > 1) {
+            $('#storefront_footer_pkg_label').text('Package Total (' + numCats + ' Categories):');
+        } else {
+            $('#storefront_footer_pkg_label').text('Package Total:');
+        }
+    }
 }
 
 function toggleBundleCategory(catKey) {
@@ -681,6 +728,11 @@ function applyBundleStorefrontFilters() {
         $('#bundle_storefront_no_match').show();
     } else {
         $('#bundle_storefront_no_match').hide();
+    }
+
+    // Sync footer category subtotal row with current filter state
+    if (typeof updateStorefrontFooterSummary === 'function') {
+        updateStorefrontFooterSummary();
     }
 }
 
@@ -814,6 +866,13 @@ function recalculateStorefrontBundleTotals() {
         $('.category-subtotal-units[data-cat-key="' + key + '"]').text(categoryTotals[key].units);
     }
 
+    window._latestCategoryTotals = categoryTotals;
+    window._latestTotalUnits = totalUnits;
+    window._latestTotalPrice = totalPrice;
+
+    // Update active category subtotal in table footer (if a specific category is filtered/selected)
+    updateStorefrontFooterSummary();
+
     // Update overall package details totals
     $('#storefront_bundle_total_units').text(totalUnits);
     $('#storefront_footer_total_units').text(totalUnits + ' units');
@@ -825,24 +884,40 @@ function recalculateStorefrontBundleTotals() {
     // Update main product price container on the page
     var mainQty = parseInt($('#input_product_quantity').val()) || 1;
     var totalActualPrice = totalPrice * mainQty;
-    var bundleDiscountRate = <?= !empty($product->bundle_discount_rate) ? (float)$product->bundle_discount_rate : (!empty($product->discount_rate) ? (float)$product->discount_rate : 0); ?>;
+    var bundleDiscountRate = <?= !empty($product->bundle_discount_rate) ? (float)$product->bundle_discount_rate : 0; ?>;
 
     if (bundleDiscountRate > 0) {
         var discountedActualPrice = totalActualPrice * (1 - (bundleDiscountRate / 100));
         var formattedDiscountedPrice = formatBundleCurrency(discountedActualPrice);
         var formattedOrigPrice = formatBundleCurrency(totalActualPrice);
 
-        $('#div-product-discounted-price .final-price, .product-price-container .final-price').text(formattedDiscountedPrice);
+        if ($('#div-product-discounted-price .final-price').length) {
+            $('#div-product-discounted-price .final-price, .product-price-container .final-price').text(formattedDiscountedPrice);
+        } else if ($('#div-product-discounted-price').length) {
+            $('#div-product-discounted-price').html('<span class="final-price">' + formattedDiscountedPrice + '</span>');
+        }
         $('#div-product-discounted-price').addClass('text-product-discounted').show();
 
-        $('#div-product-price .original-price').text(formattedOrigPrice);
+        if ($('#div-product-price .original-price').length) {
+            $('#div-product-price .original-price').text(formattedOrigPrice);
+        } else if ($('#div-product-price').length) {
+            $('#div-product-price').html('<span class="original-price">' + formattedOrigPrice + '</span>');
+        }
         $('#div-product-price').show();
 
-        $('#div-product-discount-rate .discount-rate').text('-' + Math.round(bundleDiscountRate) + '%');
+        if ($('#div-product-discount-rate .discount-rate').length) {
+            $('#div-product-discount-rate .discount-rate').text('-' + Math.round(bundleDiscountRate) + '%');
+        } else if ($('#div-product-discount-rate').length) {
+            $('#div-product-discount-rate').html('<span class="discount-rate">-' + Math.round(bundleDiscountRate) + '%</span>');
+        }
         $('#div-product-discount-rate').show();
     } else {
         var formattedMainPrice = formatBundleCurrency(totalActualPrice);
-        $('#div-product-discounted-price .final-price, .product-price-container .final-price').text(formattedMainPrice);
+        if ($('#div-product-discounted-price .final-price').length) {
+            $('#div-product-discounted-price .final-price, .product-price-container .final-price').text(formattedMainPrice);
+        } else if ($('#div-product-discounted-price').length) {
+            $('#div-product-discounted-price').html('<span class="final-price">' + formattedMainPrice + '</span>');
+        }
         $('#div-product-discounted-price').removeClass('text-product-discounted').show();
         $('#div-product-price').hide();
         $('#div-product-discount-rate').hide();
@@ -860,6 +935,8 @@ function recalculateStorefrontBundleTotals() {
     $('#hidden_bundle_total_price').val(totalPrice.toFixed(2));
 }
 
+window.recalculateStorefrontBundleTotals = recalculateStorefrontBundleTotals;
+
 $(document).ready(function() {
     applyBundleStorefrontFilters();
 
@@ -869,7 +946,8 @@ $(document).ready(function() {
 
     recalculateStorefrontBundleTotals();
     setTimeout(recalculateStorefrontBundleTotals, 100);
-    setTimeout(recalculateStorefrontBundleTotals, 500);
+    setTimeout(recalculateStorefrontBundleTotals, 300);
+    setTimeout(recalculateStorefrontBundleTotals, 800);
 
     // Also update main price when main quantity spinner changes
     $(document).on('input keyup paste change', '#input_product_quantity', function() {
@@ -928,9 +1006,13 @@ $(document).ready(function() {
                 }
             });
 
-            activeBundleCategoryKey = 'all';
+            activeBundleCategoryKey = resolvedCatKey;
             $('.bundle-cat-pill').removeClass('active btn-primary').addClass('btn-outline-secondary');
-            $('.bundle-cat-pill[data-cat-key="all"]').removeClass('btn-outline-secondary').addClass('active btn-primary');
+            if ($('.bundle-cat-pill[data-cat-key="' + resolvedCatKey + '"]').length) {
+                $('.bundle-cat-pill[data-cat-key="' + resolvedCatKey + '"]').removeClass('btn-outline-secondary').addClass('active btn-primary');
+            } else {
+                $('.bundle-cat-pill[data-cat-key="all"]').removeClass('btn-outline-secondary').addClass('active btn-primary');
+            }
 
             applyBundleStorefrontFilters();
 

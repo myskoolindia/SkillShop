@@ -203,22 +203,26 @@
 
                     updateUrlWithSku(variant.sku);
                     if (elements.priceDiscounted) {
-                        elements.priceDiscounted.innerHTML = `<span class="final-price">${variant.final_variant_price}</span>`;
-
-                        if (variant.discount_rate > 0) {
-                            if (elements.price) {
-                                elements.price.innerHTML = `<span class="original-price">${variant.price}</span>`;
-                                elements.price.style.display = '';
-                            }
-                            if (elements.priceDiscountRate) {
-                                elements.priceDiscountRate.innerHTML = `<span class="discount-rate">-${variant.discount_rate}%</span>`;
-                                elements.priceDiscountRate.style.display = '';
-                            }
-                            elements.priceDiscounted.classList.add('text-product-discounted');
+                        if (typeof window.recalculateStorefrontBundleTotals === 'function' && document.getElementById('table_storefront_bundle')) {
+                            window.recalculateStorefrontBundleTotals();
                         } else {
-                            elements.priceDiscounted.classList.remove('text-product-discounted');
-                            if (elements.price) elements.price.style.display = 'none';
-                            if (elements.priceDiscountRate) elements.priceDiscountRate.style.display = 'none';
+                            elements.priceDiscounted.innerHTML = `<span class="final-price">${variant.final_variant_price}</span>`;
+
+                            if (variant.discount_rate > 0) {
+                                if (elements.price) {
+                                    elements.price.innerHTML = `<span class="original-price">${variant.price}</span>`;
+                                    elements.price.style.display = '';
+                                }
+                                if (elements.priceDiscountRate) {
+                                    elements.priceDiscountRate.innerHTML = `<span class="discount-rate">-${variant.discount_rate}%</span>`;
+                                    elements.priceDiscountRate.style.display = '';
+                                }
+                                elements.priceDiscounted.classList.add('text-product-discounted');
+                            } else {
+                                elements.priceDiscounted.classList.remove('text-product-discounted');
+                                if (elements.price) elements.price.style.display = 'none';
+                                if (elements.priceDiscountRate) elements.priceDiscountRate.style.display = 'none';
+                            }
                         }
                     }
 

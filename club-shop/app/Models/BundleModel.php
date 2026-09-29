@@ -72,6 +72,14 @@ class BundleModel extends BaseModel
                 if (!in_array('is_optional', $bundleCols)) {
                     $this->db->query("ALTER TABLE product_bundles ADD COLUMN is_optional TINYINT(1) NOT NULL DEFAULT 0");
                 }
+
+                // Automatically clean up any duplicate rows in product_bundles
+                $this->db->query("DELETE b1 FROM product_bundles b1
+                    INNER JOIN product_bundles b2 
+                    WHERE b1.id > b2.id 
+                    AND b1.bundle_product_id = b2.bundle_product_id 
+                    AND b1.component_product_id = b2.component_product_id 
+                    AND (b1.variant_id = b2.variant_id OR (b1.variant_id IS NULL AND b2.variant_id IS NULL))");
             }
 
             // 3. Table order_bundle_items
@@ -377,12 +385,19 @@ class BundleModel extends BaseModel
         $sort = 1;
         $now = date('Y-m-d H:i:s');
 
+        $seen = [];
         foreach ($componentsArray as $comp) {
             $productId = (int)($comp['component_product_id'] ?? 0);
             $isOptional = !empty($comp['is_optional']) ? 1 : 0;
             $qty = $isOptional ? max(0, (int)($comp['quantity'] ?? 0)) : max(1, (int)($comp['quantity'] ?? 1));
             $variantId = !empty($comp['variant_id']) ? (int)$comp['variant_id'] : null;
             $priceOverride = isset($comp['price_override']) && is_numeric($comp['price_override']) ? (float)$comp['price_override'] : null;
+
+            $dedupKey = $productId . '_' . ($variantId ?? '0');
+            if (isset($seen[$dedupKey])) {
+                continue;
+            }
+            $seen[$dedupKey] = true;
 
             if ($productId > 0) {
                 $batch[] = [

@@ -78,12 +78,32 @@
         if (!$bundleCheck && $bMetrics['total_components'] > 0) {
             $bundleCheck = true;
         }
+        $totalDisplayComponents = $bMetrics['total_components'];
+        $totalDisplayUnits = $bMetrics['total_units'];
+        if (!empty($editingCartItem) && !empty($editingCartItem->bundle_items)) {
+            $parsedEb = is_string($editingCartItem->bundle_items) ? safeJsonDecode($editingCartItem->bundle_items, true) : $editingCartItem->bundle_items;
+            if (is_array($parsedEb)) {
+                $eUnits = 0;
+                $eComps = 0;
+                foreach ($parsedEb as $eb) {
+                    $q = (int)($eb['qty'] ?? 0);
+                    if ($q > 0) {
+                        $eUnits += $q;
+                        $eComps++;
+                    }
+                }
+                if ($eUnits > 0) {
+                    $totalDisplayUnits = $eUnits;
+                    $totalDisplayComponents = $eComps;
+                }
+            }
+        }
         ?>
         <?php if ($bundleCheck && $bMetrics['total_components'] > 0): ?>
             <div class="alert alert-info py-2 px-3 m-b-15 d-flex align-items-center justify-content-between" style="background:#ebf8ff; border:1px solid #bee3f8; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
                 <div>
                     <strong class="text-primary"><i class="fa fa-cubes"></i> Bundle Package Deal</strong><br>
-                    <small class="text-muted">Includes <strong><?= $bMetrics['total_components']; ?></strong> products & variations (Total <strong><?= $bMetrics['total_units']; ?></strong> units) in one complete set.</small>
+                    <small class="text-muted">Includes <strong><?= $totalDisplayComponents; ?></strong> products & variations (Total <strong><?= $totalDisplayUnits; ?></strong> units) in one complete set.</small>
                 </div>
                 <a href="#tab_bundle_contents" onclick="$('#tab_bundle_contents').tab('show'); if($('#product_description_content').length){$('html, body').animate({scrollTop: $('#product_description_content').offset().top - 80}, 300);}" class="btn btn-sm btn-primary font-weight-bold" style="white-space:nowrap; margin-left:10px;">
                     View Package Contents &darr;

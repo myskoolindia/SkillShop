@@ -470,6 +470,28 @@ class HomeController extends BaseController
             }
             $data['editingCartItem'] = $editingCartItem;
 
+            if (!empty($editingCartItem)) {
+                $itemUnitPrice = (float)$editingCartItem->unit_price;
+                $data['productPrice'] = priceFormatted($itemUnitPrice, $product->currency, $convertCurrency);
+                $data['productPriceDiscounted'] = priceFormatted($itemUnitPrice, $product->currency, $convertCurrency);
+                $data['productDiscountRate'] = 0;
+            } elseif (!empty($product->is_bundle)) {
+                $bundleModel = new \App\Models\BundleModel();
+                $bMetrics = $bundleModel->calculateBundleMetrics($product->id);
+                $bSum = (float)($bMetrics['sum_price'] ?? $product->price);
+                $bDiscount = !empty($product->bundle_discount_rate) ? (float)$product->bundle_discount_rate : 0;
+                if ($bDiscount > 0) {
+                    $bDiscounted = $bSum * (1 - ($bDiscount / 100));
+                    $data['productPrice'] = priceFormatted($bSum, $product->currency, $convertCurrency);
+                    $data['productPriceDiscounted'] = priceFormatted($bDiscounted, $product->currency, $convertCurrency);
+                    $data['productDiscountRate'] = $bDiscount;
+                } else {
+                    $data['productPrice'] = priceFormatted($bSum, $product->currency, $convertCurrency);
+                    $data['productPriceDiscounted'] = priceFormatted($bSum, $product->currency, $convertCurrency);
+                    $data['productDiscountRate'] = 0;
+                }
+            }
+
             echo view('partials/_header', $data);
             echo view('product/details/product', $data);
             echo view('partials/_footer');
@@ -703,6 +725,28 @@ class HomeController extends BaseController
                 }
             }
             $data['editingCartItem'] = $editingCartItem;
+
+            if (!empty($editingCartItem)) {
+                $itemUnitPrice = (float)$editingCartItem->unit_price;
+                $data['productPrice'] = priceFormatted($itemUnitPrice, $product->currency, $convertCurrency);
+                $data['productPriceDiscounted'] = priceFormatted($itemUnitPrice, $product->currency, $convertCurrency);
+                $data['productDiscountRate'] = 0;
+            } elseif (!empty($product->is_bundle)) {
+                $bundleModel = new \App\Models\BundleModel();
+                $bMetrics = $bundleModel->calculateBundleMetrics($product->id);
+                $bSum = (float)($bMetrics['sum_price'] ?? $product->price);
+                $bDiscount = !empty($product->bundle_discount_rate) ? (float)$product->bundle_discount_rate : 0;
+                if ($bDiscount > 0) {
+                    $bDiscounted = $bSum * (1 - ($bDiscount / 100));
+                    $data['productPrice'] = priceFormatted($bSum, $product->currency, $convertCurrency);
+                    $data['productPriceDiscounted'] = priceFormatted($bDiscounted, $product->currency, $convertCurrency);
+                    $data['productDiscountRate'] = $bDiscount;
+                } else {
+                    $data['productPrice'] = priceFormatted($bSum, $product->currency, $convertCurrency);
+                    $data['productPriceDiscounted'] = priceFormatted($bSum, $product->currency, $convertCurrency);
+                    $data['productDiscountRate'] = 0;
+                }
+            }
 
             echo view('partials/_header', $data);
             echo view('product/details/productCustomize', $data);

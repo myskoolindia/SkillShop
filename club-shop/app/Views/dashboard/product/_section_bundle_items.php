@@ -428,9 +428,26 @@ function selectProductForBundleByIndex(idx) {
 
 function confirmAddBundleItem() {
     if (!selectedProductForBundle) return;
-    $('#empty_bundle_row').remove();
     
     var variantId = $('#bundle_item_variant_id').val() || null;
+
+    // Check if this product/variant is already in the bundle table
+    var isDuplicate = false;
+    $('#table_bundle_components tbody tr.bundle-row').each(function() {
+        var existingProdId = $(this).find('input[name*="[component_product_id]"]').val();
+        var existingVarId = $(this).find('input[name*="[variant_id]"]').val() || '';
+        if (existingProdId == selectedProductForBundle.id && existingVarId == (variantId || '')) {
+            isDuplicate = true;
+            return false;
+        }
+    });
+    if (isDuplicate) {
+        alert('This product / variant has already been added to this bundle.');
+        return;
+    }
+
+    $('#empty_bundle_row').remove();
+    
     var variantName = '';
     var sku = selectedProductForBundle.sku || '';
     var price = selectedProductForBundle.price || 0;

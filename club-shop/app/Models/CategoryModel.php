@@ -368,6 +368,24 @@ class CategoryModel extends BaseModel
     public function addCategory()
     {
         $data = $this->setInputData();
+
+        // Check if a category with the same name already exists to prevent duplicate categories
+        $mainName = trim(inputPost('name_' . $this->generalSettings->site_lang) ?? '');
+        if (empty($mainName)) {
+            $mainName = trim(inputPost('name_1') ?? '');
+        }
+        if (!empty($mainName)) {
+            $existing = $this->db->table('category_lang cl')
+                ->join('categories c', 'c.id = cl.category_id')
+                ->where('cl.name', $mainName)
+                ->where('c.parent_id', $data['parent_id'])
+                ->countAllResults();
+            if ($existing > 0) {
+                setErrorMessage("A category with the name '" . esc($mainName) . "' already exists.");
+                return false;
+            }
+        }
+
         $uploadModel = new UploadModel();
         $tempFile = $uploadModel->uploadTempFile('file');
 
