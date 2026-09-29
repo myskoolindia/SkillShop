@@ -193,7 +193,7 @@ $totalCategoriesCount = count($groupedComponents);
                     <?php $globalCounter = 1; ?>
                     <?php foreach ($groupedComponents as $catKey => $catGroup): ?>
                         <!-- Category Header Row (Collapsible) -->
-                        <tr class="bundle-category-header-row" id="bundle_cat_row_<?= esc($catKey); ?>" data-cat-key="<?= esc($catKey); ?>" data-cat-name="<?= esc(strtolower($catGroup['name'])); ?>" onclick="toggleBundleCategory('<?= esc($catKey); ?>');" style="background: #f1f5f9; border-top: 2px solid #e2e8f0; border-bottom: 1px solid #cbd5e0; cursor: pointer;" title="Click to collapse / expand this category">
+                        <tr class="bundle-category-header-row" id="bundle_cat_row_<?= esc($catKey); ?>" data-cat-key="<?= esc($catKey); ?>" data-cat-id="<?= esc($catGroup['id'] ?? ''); ?>" data-cat-name="<?= esc(strtolower($catGroup['name'])); ?>" onclick="toggleBundleCategory('<?= esc($catKey); ?>');" style="background: #f1f5f9; border-top: 2px solid #e2e8f0; border-bottom: 1px solid #cbd5e0; cursor: pointer;" title="Click to collapse / expand this category">
                             <td colspan="8" class="py-2 px-3">
                                 <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: 10px;">
                                     <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
@@ -974,7 +974,7 @@ $(document).ready(function() {
         }
 
         if (targetBundleCat && targetBundleCat !== 'all') {
-            // Robustly resolve matching category key (e.g. cat_15, 15, or by category name)
+            // 1. Specific Category Customize Clicked: Open ONLY this category, hide other categories
             var resolvedCatKey = targetBundleCat;
             if (!resolvedCatKey.startsWith('cat_') && $('#bundle_cat_row_cat_' + resolvedCatKey).length) {
                 resolvedCatKey = 'cat_' + resolvedCatKey;
@@ -983,19 +983,23 @@ $(document).ready(function() {
                 $('.bundle-category-header-row').each(function() {
                     var rowKey = $(this).attr('data-cat-key') || '';
                     var rowName = ($(this).attr('data-cat-name') || '').toLowerCase().trim();
-                    if (rowKey.toLowerCase() === cleanParam || rowKey.toLowerCase() === ('cat_' + cleanParam) || rowName === cleanParam || rowName.indexOf(cleanParam) > -1) {
+                    var rowId = ($(this).attr('data-cat-id') || '').toString();
+                    if (rowKey.toLowerCase() === cleanParam || rowKey.toLowerCase() === ('cat_' + cleanParam) || rowName === cleanParam || rowName.indexOf(cleanParam) > -1 || rowId === cleanParam) {
                         resolvedCatKey = rowKey;
                         return false;
                     }
                 });
             }
 
-            // Collapse all categories except the resolved target category
+            // Set active category filter to ONLY this category
+            activeBundleCategoryKey = resolvedCatKey;
+
+            // Expand this category and collapse all others
+            collapsedBundleCategories = {};
             $('.bundle-category-header-row').each(function() {
                 var ck = $(this).attr('data-cat-key');
                 if (ck) {
                     if (ck === resolvedCatKey) {
-                        delete collapsedBundleCategories[ck];
                         $('.bundle-cat-chevron[data-cat-key="' + ck + '"]').removeClass('collapsed');
                         $('.bundle-cat-folder[data-cat-key="' + ck + '"]').removeClass('fa-folder').addClass('fa-folder-open');
                     } else {
@@ -1006,14 +1010,13 @@ $(document).ready(function() {
                 }
             });
 
-            activeBundleCategoryKey = resolvedCatKey;
+            // Update category pills styling
             $('.bundle-cat-pill').removeClass('active btn-primary').addClass('btn-outline-secondary');
             if ($('.bundle-cat-pill[data-cat-key="' + resolvedCatKey + '"]').length) {
                 $('.bundle-cat-pill[data-cat-key="' + resolvedCatKey + '"]').removeClass('btn-outline-secondary').addClass('active btn-primary');
-            } else {
-                $('.bundle-cat-pill[data-cat-key="all"]').removeClass('btn-outline-secondary').addClass('active btn-primary');
             }
 
+            // Apply filters to display ONLY this category's items and header
             applyBundleStorefrontFilters();
 
             // Smooth scroll to the target category with visual highlight
@@ -1031,6 +1034,23 @@ $(document).ready(function() {
                 }
             }, 300);
         } else {
+            // 2. Main Item Customize Clicked (bundle_cat=all or not set): Show ALL categories expanded
+            activeBundleCategoryKey = 'all';
+            $('.bundle-cat-pill').removeClass('active btn-primary').addClass('btn-outline-secondary');
+            $('.bundle-cat-pill[data-cat-key="all"]').removeClass('btn-outline-secondary').addClass('active btn-primary');
+
+            // Un-collapse / expand all categories so all are open and visible
+            collapsedBundleCategories = {};
+            $('.bundle-category-header-row').each(function() {
+                var ck = $(this).attr('data-cat-key');
+                if (ck) {
+                    $('.bundle-cat-chevron[data-cat-key="' + ck + '"]').removeClass('collapsed');
+                    $('.bundle-cat-folder[data-cat-key="' + ck + '"]').removeClass('fa-folder').addClass('fa-folder-open');
+                }
+            });
+
+            applyBundleStorefrontFilters();
+
             setTimeout(function() {
                 if ($('#tab_bundle_contents_content').length) {
                     $('html, body').animate({scrollTop: $('#tab_bundle_contents_content').offset().top - 110}, 400);

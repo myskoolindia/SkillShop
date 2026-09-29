@@ -242,9 +242,10 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                                     <?php endif; ?>
 
                                                     <?php if (!empty($cartItem->is_bundle)): ?>
-                                                        <a href="<?= esc($cartItem->product_url); ?>?cart_item_id=<?= $cartItem->id; ?>&return=<?= esc(base_url($planKey . '-cart')); ?>#tab_bundle_contents"
+                                                        <a href="<?= esc($cartItem->product_url); ?>?cart_item_id=<?= $cartItem->id; ?>&bundle_cat=all&return=<?= esc(base_url($planKey . '-cart')); ?>#tab_bundle_contents"
                                                            class="btn btn-sm btn-outline-primary"
-                                                           style="border-radius:6px; padding:7px 12px; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
+                                                           style="border-radius:6px; padding:7px 12px; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:4px;"
+                                                           title="Customize all categories">
                                                             <i class="fa fa-sliders"></i><span class="d-none d-sm-inline">&nbsp;Customize</span>
                                                         </a>
                                                     <?php endif; ?>
@@ -283,7 +284,7 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                                                 return strcasecmp($a->title ?? '', $b->title ?? '');
                                                             });
                                                             $planCartCatId = 'plan_cart_cat_' . $cartItem->id . '_' . ($bCategory['id'] ?? $bIdx);
-                                                            $bCatKey = !empty($bCategory['id']) ? ('cat_' . (int)$bCategory['id']) : (!empty($bCategory['name']) ? $bCategory['name'] : 'all');
+                                                            $bCatKey = !empty($bCategory['name']) ? ('cat_' . preg_replace('/[^a-zA-Z0-9_]/', '_', strtolower(trim($bCategory['name'])))) : (!empty($bCategory['id']) ? ('cat_' . (int)$bCategory['id']) : 'all');
                                                         ?>
                                                             <div class="bundle-category-section m-b-12" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden; box-shadow:0 1px 2px rgba(0,0,0,0.03);">
                                                                 <div class="d-flex justify-content-between align-items-center px-3 py-2 cart-cat-header-toggle" onclick="togglePlanCartCategory('<?= $planCartCatId; ?>', this);" style="background:#f8fafc; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; cursor:pointer; user-select:none; transition: background-color 0.15s ease;" title="Click to collapse / expand this category">
@@ -404,7 +405,7 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                                 <div class="bundle-breakdown m-t-10 m-b-10">
                                                     <div class="d-flex justify-content-between align-items-center m-b-5">
                                                         <strong style="font-size:12px; color:#4a5568;"><i class="fa fa-cubes text-primary"></i> <?= esc($cartItem->product_title); ?> Items:</strong>
-                                                        <a href="<?= esc($cartItem->product_url); ?>?cart_item_id=<?= $cartItem->id; ?>#tab_bundle_contents" class="btn btn-xs btn-outline-primary" style="font-size:11px; padding:2px 8px;">Customize</a>
+                                                        <a href="<?= esc($cartItem->product_url); ?>?cart_item_id=<?= $cartItem->id; ?>&bundle_cat=all#tab_bundle_contents" class="btn btn-xs btn-outline-primary" style="font-size:11px; padding:2px 8px;">Customize</a>
                                                     </div>
                                                     <?php foreach ($cartItem->bundle_summary as $b): ?>
                                                         <small class="text-muted"><i class="icon-arrow-right"></i> <?= esc($b) ?></small><br>

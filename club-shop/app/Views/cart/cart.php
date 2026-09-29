@@ -235,7 +235,7 @@
                                                         </a>
                                                         
                                                         <?php if(!empty($cartItem->is_bundle)): ?>
-                                                            <a href="<?= esc($cartItem->product_url); ?>?cart_item_id=<?= $cartItem->id; ?>#tab_bundle_contents" class="btn btn-sm btn-outline-primary" style="border-radius: 6px; padding: 7px 12px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                                                            <a href="<?= esc($cartItem->product_url); ?>?cart_item_id=<?= $cartItem->id; ?>&bundle_cat=all#tab_bundle_contents" class="btn btn-sm btn-outline-primary" style="border-radius: 6px; padding: 7px 12px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;" title="Customize all categories">
                                                                 <i class="fa fa-sliders"></i><span class="d-none d-sm-inline">&nbsp;Customize</span>
                                                             </a>
                                                         <?php endif; ?>
@@ -276,7 +276,7 @@
                                                                     return strcasecmp($a->title ?? '', $b->title ?? '');
                                                                 });
                                                                 $cartCatId = 'cart_cat_' . $cartItem->id . '_' . ($bCategory['id'] ?? $bIdx);
-                                                                $bCatKey = !empty($bCategory['id']) ? ('cat_' . (int)$bCategory['id']) : (!empty($bCategory['name']) ? $bCategory['name'] : 'all');
+                                                                $bCatKey = !empty($bCategory['name']) ? ('cat_' . preg_replace('/[^a-zA-Z0-9_]/', '_', strtolower(trim($bCategory['name'])))) : (!empty($bCategory['id']) ? ('cat_' . (int)$bCategory['id']) : 'all');
                                                             ?>
                                                                 <div class="bundle-category-section m-b-12" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
                                                                     <div class="d-flex justify-content-between align-items-center px-3 py-2 cart-cat-header-toggle" onclick="toggleCartCategory('<?= $cartCatId; ?>', this);" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; cursor: pointer; user-select: none; transition: background-color 0.15s ease;" title="Click to collapse / expand this category">
