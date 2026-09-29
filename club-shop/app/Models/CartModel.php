@@ -341,7 +341,7 @@ class CartModel extends BaseModel
                     $comps = $bundleComps;
                     if (!empty($comps)) {
                         foreach ($comps as $c) {
-                            if (!empty($c->is_optional) && (int)$c->required_quantity == 0) {
+                            if (!empty($c->is_optional)) {
                                 continue;
                             }
                             $qty = max(1, (int)$c->required_quantity);
@@ -513,11 +513,11 @@ class CartModel extends BaseModel
             $bundleModel = new \App\Models\BundleModel();
             $comps = $bundleModel->getBundleComponents($product->id, true);
             foreach ($comps as $c) {
-                // Skip optional items that have 0 default quantity
-                if (!empty($c->is_optional) && (int)$c->required_quantity == 0) {
+                // By default optional items are unchecked (excluded from default bundle selection)
+                if (!empty($c->is_optional)) {
                     continue;
                 }
-                $cQty = !empty($c->is_optional) ? (int)$c->required_quantity : max(1, (int)$c->required_quantity);
+                $cQty = max(1, (int)$c->required_quantity);
                 $cPrice = (float)$c->unit_price;
                 $bundleTotal += ($cPrice * $cQty);
                 $bundleItems[] = [

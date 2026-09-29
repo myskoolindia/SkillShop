@@ -1153,18 +1153,18 @@ function buildRow(catName, comps, theme, productUrl, isOpenByDefault){
   var rowId = 'sks-r-'+Math.random().toString(36).slice(2,8);
   var totalQ=0, totalV=0;
   comps.forEach(function(c){
-    var q = Number(c.required_quantity || 0);
+    var q = c.is_optional ? 0 : Number(c.required_quantity || 0);
     totalQ += q;
     totalV += Number(c.unit_price) * q;
   });
   var subtitle = totalQ > 0
     ? rupee(totalV) + ' · ' + totalQ + ' unit' + (totalQ !== 1 ? 's' : '')
-    : comps.length + ' item' + (comps.length !== 1 ? 's' : '');
+    : comps.length + ' item' + (comps.length !== 1 ? 's' : '') + ' (optional)';
 
   var itemRows = comps.map(function(c){
-    var qty    = Number(c.required_quantity || 0);
+    var qty    = c.is_optional ? 0 : Number(c.required_quantity || 0);
     var line   = Number(c.unit_price) * qty;
-    var opt    = (c.is_optional && qty === 0)
+    var opt    = c.is_optional
       ? '<span style="margin-left:5px;padding:1px 5px;border-radius:3px;background:#fef3c7;color:#92400e;border:1px solid #fde68a;font-size:9px;font-weight:700;">optional</span>'
       : '';
     var rawImg = c.image_small || c.image || '';
@@ -1191,7 +1191,7 @@ function buildRow(catName, comps, theme, productUrl, isOpenByDefault){
       +'</div>'
       +'<div style="text-align:right;flex-shrink:0;">'
         +'<div style="font-size:12.5px;font-weight:700;color:'+(qty===0?'#94a3b8':theme.dotColor)+';">'+(qty===0?'—':rupee(line))+'</div>'
-        +'<div style="font-size:10.5px;color:#94a3b8;">'+(qty===0?'0 (opt)':qty+' × '+rupee(c.unit_price))+'</div>'
+        +'<div style="font-size:10.5px;color:#94a3b8;">'+(qty===0?'0 (optional)':qty+' × '+rupee(c.unit_price))+'</div>'
       +'</div>'
     +'</div>';
   }).join('');
