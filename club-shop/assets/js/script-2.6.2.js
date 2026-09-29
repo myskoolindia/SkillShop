@@ -568,7 +568,11 @@ $(document).ready(function () {
                 data: serializedData,
                 success: function (response) {
                     if (response.result == 1) {
-                        location.reload();
+                        if (response.redirect) {
+                            location.href = response.redirect;
+                        } else {
+                            location.reload();
+                        }
                     } else if (response.result == 0) {
                         document.getElementById("result-login").innerHTML = response.response;
                     }

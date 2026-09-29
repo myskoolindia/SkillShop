@@ -24,6 +24,10 @@ class AuthController extends BaseController
         //user already authenticated
         if (authCheck()) {
             $response['result'] = 1;
+            $user = user();
+            if ($user && isVendor($user)) {
+                $response['redirect'] = dashboardUrl();
+            }
             return jsonResponse($response);
         }
 
@@ -40,6 +44,10 @@ class AuthController extends BaseController
 
         if ($this->authModel->login()) {
             $response['result'] = 1;
+            $user = user();
+            if ($user && isVendor($user)) {
+                $response['redirect'] = dashboardUrl();
+            }
         } else {
             $response['response'] = view('partials/_messages');
         }
@@ -54,7 +62,13 @@ class AuthController extends BaseController
     public function adminLogin()
     {
         if (authCheck()) {
-            return redirect()->to(adminUrl());
+            $user = user();
+            if ($user && hasPermission('admin_panel', $user)) {
+                return redirect()->to(adminUrl());
+            } elseif ($user && isVendor($user)) {
+                return redirect()->to(dashboardUrl());
+            }
+            return redirect()->to(langBaseUrl());
         }
         $data = setPageMeta(trans("login"));
 
@@ -83,7 +97,13 @@ class AuthController extends BaseController
                 return redirect()->to(adminUrl('login'));
             }
             if ($authModel->login()) {
-                return redirect()->to(adminUrl());
+                $loggedUser = user();
+                if ($loggedUser && hasPermission('admin_panel', $loggedUser)) {
+                    return redirect()->to(adminUrl());
+                } elseif ($loggedUser && isVendor($loggedUser)) {
+                    return redirect()->to(dashboardUrl());
+                }
+                return redirect()->to(langBaseUrl());
             } else {
                 return redirect()->to(adminUrl('login'));
             }
