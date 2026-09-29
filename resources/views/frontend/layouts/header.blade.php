@@ -54,6 +54,15 @@
         'composite skill lab' => 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=600&q=80',
         'composite lab'       => 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=600&q=80',
     ];
+
+    $headerLogo = null;
+    if (!empty($setting?->logo) && file_exists(public_path($setting->logo))) {
+        $headerLogo = asset($setting->logo);
+    } elseif (!empty(Cache::get('setting')?->logo) && file_exists(public_path(Cache::get('setting')->logo))) {
+        $headerLogo = asset(Cache::get('setting')->logo);
+    } else {
+        $headerLogo = asset('designs/img/logo.png');
+    }
 @endphp
 <!-- header-area -->
 <header>
@@ -144,8 +153,8 @@
                     <div class="tgmenu__wrap">
                         <nav class="tgmenu__nav">
                             <div class="logo">
-                                <a href="{{ route('home') }}"><img src="{{ asset($setting?->logo) }}"
-                                        alt="Logo"></a>
+                                <a href="{{ route('home') }}"><img src="{{ $headerLogo }}"
+                                        alt="{{ config('app.name', 'Skillvation') }}" onerror="this.onerror=null;this.src='{{ asset('designs/img/logo.png') }}';" style="max-height: 48px; width: auto; display: block;"></a>
                             </div>
                             <div class="tgmenu__navbar-wrap tgmenu__main-menu d-none d-xl-flex">
                                 @if ($nav_menu)
@@ -285,8 +294,8 @@
                         <nav class="tgmobile__menu-box">
                             <div class="close-btn"><i class="tg-flaticon-close-1"></i></div>
                             <div class="nav-logo">
-                                <a href="{{ route('home') }}"><img src="{{ asset(Cache::get('setting')?->logo ?? $setting?->logo ?? 'frontend/img/logo/logo.svg') }}"
-                                        alt="Logo"></a>
+                                <a href="{{ route('home') }}"><img src="{{ $headerLogo }}"
+                                        alt="{{ config('app.name', 'Skillvation') }}" onerror="this.onerror=null;this.src='{{ asset('designs/img/logo.png') }}';" style="max-height: 40px; width: auto; display: block;"></a>
                             </div>
 
                             <div class="header_language_area d-flex flex-wrap">

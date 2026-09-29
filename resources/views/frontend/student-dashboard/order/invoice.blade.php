@@ -167,7 +167,7 @@
                         <tr>
                             <td class="left">
                                 <a href="javascript:;">
-                                    <img src="{{ asset($setting->logo) }}" alt="">
+                                    <img src="{{ !empty($setting->logo) && file_exists(public_path($setting->logo)) ? asset($setting->logo) : asset('designs/img/logo.png') }}" alt="{{ config('app.name', 'Skillvation') }}" style="max-height: 45px; width: auto;">
                                 </a>
                             </td>
                             <td class="right">
