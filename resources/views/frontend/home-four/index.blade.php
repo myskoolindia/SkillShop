@@ -720,51 +720,12 @@
             embed skill development into the school’s learning environment.
           </p>
 
-          <h3 class="mt-4 mb-3">
-            What Skillvation Brings to Your School
-          </h3>
-
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item px-0">
-              Structured Skill Education Programmes aligned with the school’s learning
-              objectives
-            </li>
-
-            <li class="list-group-item px-0">
-              Experiential and hands-on learning that encourages students to learn by
-              doing
-            </li>
-
-            <li class="list-group-item px-0">
-              Future-ready skills including creativity, problem-solving, critical
-              thinking, communication, collaboration and innovation
-            </li>
-
-            <li class="list-group-item px-0">
-              Practical exposure that connects academic concepts with real-world
-              applications
-            </li>
-
-            <li class="list-group-item px-0">
-              Age-appropriate skill pathways that allow students to progressively build
-              competencies
-            </li>
-
-            <li class="list-group-item px-0">
-              Teacher support and implementation guidance to enable effective
-              integration within the school
-            </li>
-
-            <li class="list-group-item px-0">
-              Engaging learning experiences that encourage curiosity, exploration and
-              independent thinking
-            </li>
-
-            <li class="list-group-item px-0">
-              A scalable framework that can evolve with the school’s requirements and
-              student needs
-            </li>
-          </ul>
+          <h2 class="mt-4 mb-4">AI EmpowerED: Equipping teachers and learners for an AI-driven future</h2>
+          <p>An AI Learning Management System (AI LMS) uses Artificial Intelligence to enhance teaching and learning by transforming traditional curriculum into skill-based, application-oriented content. Instead of limiting learning to textbooks and memorisation, an AI LMS supports lesson planning, assessments, and content delivery through smart recommendations, real-world examples, and competency-focused activities. Skillvation’s AI LMS, LATAA ( LEARNING AND TEACHING AI ASSISTANT) , is purpose-built for CBSE and NEP-aligned education, helping schools shift from rote learning to skill development and experiential learning—without disrupting their existing syllabus.
+          </p>
+          <p class="mt-4 mb-6">
+            Discover how AI-empowered skills are creating new pathways to inclusion and innovation.
+          </p>
         </div>
         
         <div>
@@ -852,69 +813,47 @@
   </section>
 
   <!-- 4. AI EmpowerED Section -->
-  <section class="skillvation-section sv-section-ai" data-reveal="slide-left">
+  <!-- <section class="skillvation-section sv-section-ai" data-reveal="slide-left">
     <div class="skillvation-container">
       <div class="skillvation-grid-2col">
         <div>
           <h2 class="text-3xl font-bold mb-4">AI EmpowerED: Equipping teachers and learners for an AI-driven future</h2>
-          <!-- <p>
-            Through UNESCO’s Global Skills Academy, in partnership with Microsoft Elevate, KPMG International and Tablet Academy, AI EmpowerED supports TVET systems to equip educators and learners with practical and responsible AI skills for the future of work. By combining together global partnerships, national training networks and certification pathways, the programme expands access to AI learning at scale – empowering teachers to drive change in the classroom and enabling learners to develop the digital competencies needed to succeed in tomorrow’s economies.
-          </p> -->
           <p>An AI Learning Management System (AI LMS) uses Artificial Intelligence to enhance teaching and learning by transforming traditional curriculum into skill-based, application-oriented content. Instead of limiting learning to textbooks and memorisation, an AI LMS supports lesson planning, assessments, and content delivery through smart recommendations, real-world examples, and competency-focused activities. Skillvation’s AI LMS, LATAA ( LEARNING AND TEACHING AI ASSISTANT) , is purpose-built for CBSE and NEP-aligned education, helping schools shift from rote learning to skill development and experiential learning—without disrupting their existing syllabus.
           </p>
           <p class="font-bold text-gray-900 mt-4 mb-6">
             Discover how AI-empowered skills are creating new pathways to inclusion and innovation.
           </p>
-          <!-- <a href="https://www.unesco.org/en/global-education-coalition/skills-academy/ai-empowered-ed?hub=182955" target="_blank" rel="noopener" class="skillvation-pill-btn">
-            <span>Learn more</span>
-            <i class="fa-solid fa-arrow-right"></i>
-          </a> -->
         </div>
 
         <div>
           <div class="skillvation-media-card">
             <img src="{{ asset('/frontend/img/skillbox/ai_empowered.jpg') }}" alt="AI EmpowerED Learning Session">
           </div>
-          <!-- <div class="skillvation-media-caption">© Skillvation LATAA AI LMS</div> -->
         </div>
       </div>
-
-      <!-- Quote -->
-      <!-- <div class="skillvation-quote-box">
-        <p>“I need to train in entrepreneurship and digital marketing. This way, I will be able to compete in the job market or start my own business.”</p>
-        <cite>Jules Beugré Djoman, GSA student, Côte d'Ivoire</cite>
-      </div> -->
     </div>
-  </section>
+  </section> -->
 
   <!-- 5. Our Training Opportunities (Split Banner + 4 Tracks) -->
-  <section class="skillvation-section bg-light sv-section-upskill" id="training-opportunities" data-reveal="zoom-in">
-    <div class="skillvation-container">
+  <!-- <section class="skillvation-section bg-light sv-section-upskill" id="training-opportunities" data-reveal="zoom-in">
+    <div class="skillvation-container"> -->
       
       <!-- Split Blue Hero Block -->
-      <div class="skillvation-split-banner">
+      <!-- <div class="skillvation-split-banner">
         <div class="skillvation-split-banner-left">
           <h2>Our Upskilling opportunities</h2>
-          <!-- <p>Explore our courses, certifiable training opportunities in Life Science, Machines & Materials, Human Services skills and other training programs.</p> -->
-        <!-- <a href="/upskill4teacher" target="_blank" rel="noopener" class="skillvation-pill-btn">
-            <span>Explore Courses</span>
-            <i class="fa-solid fa-arrow-right"></i>
-          </a> -->
           <p>Building the capability to deliver experiential and skill-based education Skillvation's Upskilling for Teachers program is designed to equip educators with the practical knowledge, tools and facilitation skills required to implement experiential Skill Education effectively. Our program enables them to extend their existing subject expertise into practical, interdisciplinary and work-oriented learning experiences.</p>
         </div>
         <div class="skillvation-split-banner-right">
           <img src="{{ asset('/frontend/img/skillbox/teacher_upskilling.jpg') }}" alt="Our Upskilling Opportunities - Teacher Training">
         </div>
-      </div>
+      </div> -->
 
       <!-- Track 1: Digital Skills -->
-      <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200 mb-8" data-stagger="1">
+      <!-- <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200 mb-8" data-stagger="1">
         <div class="skillvation-grid-2col">
           <div>
             <h2 class="text-2xl font-bold mb-3 text-blue-900">Work on Life Forms</h2>
-            <!-- <p class="text-gray-700 mb-4">
-              Digital competence receives a growing demand, with more than 75% of companies looking to adopt digital technologies such as big data, cloud computing and artificial intelligence, and 86% of companies incorporating digital platforms in their digital marketing strategies in the next five years (<a href="https://www.weforum.org/publications/the-future-of-jobs-report-2023/digest/" target="_blank" rel="noopener" class="text-blue-600 underline">The Future of Jobs Report 2023</a>).
-            </p> -->
             <p class="text-gray-700 mb-4">
             Connecting academic knowledge with life, nature and living systems
             This training area focuses on developing teachers ability to facilitate practical learning around living systems
@@ -929,42 +868,21 @@
             Outcome: Teachers gain the confidence to transform life-science concepts into practical, contextual and
             experiential learning experiences.
             </p>
-            <!-- <p class="font-semibold text-gray-800 mb-2">Access free, certifiable digital literacy and skills training with our partners:</p>
-            <ul class="skillvation-partner-pills">
-              <li><a href="https://www.unesco.org/en/global-education-coalition/skills-academy/aleph" target="_blank">Aleph Inc.</a></li>
-              <li><a href="https://www.unesco.org/en/global-education-coalition/skills-academy/anthology" target="_blank">Anthology</a></li>
-              <li><a href="https://www.unesco.org/en/global-education-coalition/skills-academy/china-pocy" target="_blank">China POCY Group</a></li>
-              <li><span>Cisco</span></li>
-              <li><span>Coursera</span></li>
-              <li><span>Fundación Telefónica</span></li>
-              <li><a href="https://www.unesco.org/en/global-education-coalition/skills-academy/giz-atingi" target="_blank">GIZ-atingi</a></li>
-              <li><a href="https://www.unesco.org/en/global-education-coalition/skills-academy/huawei" target="_blank">Huawei</a></li>
-              <li><a href="https://www.unesco.org/en/global-education-coalition/skills-academy/ibm" target="_blank">IBM</a></li>
-              <li><span>ITU</span></li>
-              <li><a href="https://www.unesco.org/en/global-education-coalition/skills-academy/ai-empowered-ed" target="_blank">Microsoft</a></li>
-              <li><span>Orange</span></li>
-              <li><a href="https://www.unesco.org/en/global-education-coalition/skills-academy/outsystems" target="_blank">Outsystems</a></li>
-              <li><a href="https://www.unesco.org/en/global-education-coalition/skills-academy/pix" target="_blank">Pix</a></li>
-              <li><a href="https://www.unesco.org/en/global-education-coalition/skills-academy/technovation" target="_blank">Technovation</a></li>
-            </ul> -->
+            
           </div>
           <div>
             <div class="skillvation-media-card">
               <img src="{{ asset('/frontend/img/skillbox/Workonlifeforms.jpeg') }}" alt="Work on Life Forms">
             </div>
-            <!-- <div class="skillvation-media-caption">© Skillvation Life Forms Lab</div> -->
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- Track 2: Green Skills -->
-      <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200 mb-8" data-stagger="2">
+      <!-- <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200 mb-8" data-stagger="2">
         <div class="skillvation-grid-2col">
           <div>
             <h2 class="text-2xl font-bold mb-3 text-green-900">Work on Materials & Machines</h2>
-            <!-- <p class="text-gray-700 mb-4">
-              Green expertise is hired 1.19x more, and demand for green and sustainability skills has grown by more than 60% since 2016 in economies like sustainable fashion, environmental services and renewable energy. Projection shows demand will outstrip supply in 5 years' time, emphasizing the critical need for green skills development (<a href="https://economicgraph.linkedin.com/research/global-green-skills-report" target="_blank" rel="noopener" class="text-blue-600 underline">Global Green Skills Report 2023</a>).
-            </p> -->
             <p class="text-gray-700 mb-4">
             Building capability in making, designing, technology and innovation
             This area focuses on developing teachers&#39; practical understanding of materials, tools, machines, technology
@@ -979,33 +897,21 @@
             Outcome: Teachers develop the ability to guide students from idea → design → making → testing →
             improvement, creating a stronger culture of innovation and practical problem-solving.
             </p>
-            <!-- <p class="font-semibold text-gray-800 mb-2">Access free, certifiable green and sustainability skills training with our partners:</p>
-            <ul class="skillvation-partner-pills">
-              <li><a href="https://www.unesco.org/en/global-education-coalition/skills-academy/festo" target="_blank">FESTO</a></li>
-              <li><a href="https://www.unesco.org/en/global-education-coalition/skills-academy/giz-atingi" target="_blank">GIZ-atingi</a></li>
-              <li><a href="https://www.unesco.org/en/global-education-coalition/skills-academy/ibm" target="_blank">IBM</a></li>
-              <li><a href="https://www.unesco.org/en/global-education-coalition/skills-academy/siemens-stiftung" target="_blank">Siemens Stiftung</a></li>
-              <li><a href="https://www.unesco.org/en/global-education-coalition/skills-academy/skilled" target="_blank">SkillEd</a></li>
-              <li><span>WHO Academy</span></li>
-            </ul> -->
           </div>
           <div>
             <div class="skillvation-media-card">
               <img src="{{ asset('/frontend/img/skillbox/Workonmaterialsandmachines.jpeg') }}" alt="Work on Materials and Machines">
             </div>
-            <!-- <div class="skillvation-media-caption">© Skillvation Materials & Machines Lab</div> -->
+            
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- Track 3: Entrepreneurial Skills -->
-      <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200 mb-8" data-stagger="3">
+      <!-- <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200 mb-8" data-stagger="3">
         <div class="skillvation-grid-2col">
           <div>
             <h2 class="text-2xl font-bold mb-3 text-red-900">Work on Human Services</h2>
-            <!-- <p class="text-gray-700 mb-4">
-              Entrepreneurial and transversal skills can boost careers by developing empathy, agility and readiness to learn, improving communication and project management, identifying opportunities and building leadership.
-            </p> -->
             <p class="text-gray-700 mb-4">
             Developing capability in people, services and real-world applications
             This area focuses on the human, social and service dimensions of work. Teachers learn how to facilitate
@@ -1018,53 +924,18 @@
             Outcome: Teachers become better equipped to facilitate real-world, people-centred learning and help students understand how
             knowledge translates into services, careers and community impact.
             </p>
-            <!-- <p class="font-semibold text-gray-800 mb-2">Access free, certifiable entrepreneurial and transversal skills training with our partners:</p>
-            <ul class="skillvation-partner-pills">
-              <li><a href="https://www.unesco.org/en/global-education-coalition/skills-academy/generation-global" target="_blank">Generation Global</a></li>
-              <li><a href="https://www.unesco.org/en/global-education-coalition/skills-academy/giz-atingi" target="_blank">GIZ-atingi</a></li>
-              <li><a href="https://www.unesco.org/en/global-education-coalition/skills-academy/hp" target="_blank">HP LIFE</a></li>
-            </ul> -->
           </div>
           <div>
             <div class="skillvation-media-card">
               <img src="{{ asset('/frontend/img/skillbox/workonhumanservices.jpeg') }}" alt="Work on Human Services">
             </div>
-            <!-- <div class="skillvation-media-caption">© Skillvation Human Services Lab</div> -->
+            
           </div>
         </div>
-      </div>
+      </div> -->
 
-      <!-- Track 4: Mentorship Programmes -->
-      <!-- <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200 mb-8"> -->
-        <!-- <div class="skillvation-grid-2col">
-          <div>
-            <h2 class="text-2xl font-bold mb-3 text-amber-900">Mentorship programmes</h2>
-            <p class="text-gray-700 mb-4">
-              Mentorship programs provide each mentee a unique experience through a dedicated mentor from industry, providing insights and experience about study and personal development, giving guidance in career planning and advancement, opening doors for potential job opportunities.
-            </p>
-            <p class="font-semibold text-gray-800 mb-2">Enroll in free mentorship programs with our partners:</p>
-            <ul class="skillvation-partner-pills">
-              <li><span>DIOR</span></li>
-              <li><a href="https://www.unesco.org/en/global-education-coalition/skills-academy/kpmg" target="_blank">KPMG</a></li>
-              <li><a href="https://www.unesco.org/en/global-education-coalition/skills-academy/ja-americas" target="_blank">Junior Achievement Americas</a></li>
-            </ul>
-          </div>
-          <div>
-            <div class="skillvation-media-card">
-              <img src="https://www.unesco.org/sites/default/files/styles/paragraph_medium_tablet/public/2024-04/global-skills-academy-mentorship.jpg.webp?itok=1JonceNt" alt="Mentorship Programmes">
-            </div>
-            <div class="skillvation-media-caption">© UNESCO</div>
-          </div>
-        </div> -->
-
-        <!-- <div class="skillvation-quote-box mt-6">
-          <p>“I'd say that UNESCO is doing a great job in bridging the gap between students and quality education in developing countries. The Global Skills Academy Initiative has also exposed students like me to experience a new way, the digital way, of enjoying quality education.”</p>
-          <cite>Tolulope Omoyeni, Women@DIOR Nigeria</cite>
-        </div> -->
-      <!-- </div> -->
-
-    </div>
-  </section>
+    <!-- </div>
+  </section> -->
 
   <!-- 6. Our Working Model -->
   <!-- <section class="skillvation-section sv-section-model" data-reveal="slide-left">
