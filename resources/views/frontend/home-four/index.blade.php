@@ -690,26 +690,81 @@
     <div class="skillvation-container">
       <div class="skillvation-grid-2col">
         <div>
-          <!-- <p>
-            The Global Skills Academy (GSA) is an initiative dedicated to addressing the pressing labour skills gaps and empowering individuals for a future-ready workforce. Under the umbrella of <a href="https://www.unesco.org/en/global-education-coalition" target="_blank" rel="noopener" class="text-blue-600 underline font-semibold">UNESCO Global Education Coalition</a> and in line with <a href="https://unesdoc.unesco.org/ark:/48223/pf0000383360" target="_blank" rel="noopener" class="text-blue-600 underline font-semibold">UNESCO Strategy for Technical and Vocational Education and Training (TVET)</a>, the GSA is committed to supporting ten million youth and adults globally in building essential skills for improved employability by 2029.
-          </p>
-          <p class="mt-4">
-            The GSA focuses on empowering learners with key skills, including digital literacy, entrepreneurial skills, and green technologies. These skills are crucial for navigating the rapidly evolving job market driven by technological, economic, and societal transformations.
-          </p> -->
-          <!-- <p>
-            At Skillvation, we believe that passionate teachers deserve opportunities that reward their talent, dedication, and expertise. Education is evolving, and so are the ways teachers can build meaningful careers. Our platform empowers educators to teach online, share their knowledge with students across the world, and earn a stable income from the comfort of their homesAt Skillvation, we believe that passionate teachers deserve opportunities that reward their talent, dedication, and expertise. Education is evolving, and so are the ways teachers can build meaningful careers. Our platform empowers educators to teach online, share their knowledge with students across the world, and earn a stable income from the comfort of their homes
-          </p> -->
+          <h2 class="mb-4">
+            Empowering Schools for the Future of Education
+          </h2>
+
           <p>
-          Education is evolving from knowing to doing.
-          With the growing emphasis on skill education, competency-based learning and experiential learning,
-          schools are increasingly expected to give students opportunities to develop skills through practical experiences
-          rather than learning concepts only from textbooks.
-          At Skillvation, we believe that this transformation needs more than a curriculum.
-          It needs a place where skills can actually be practised.
-          That is where our Skill Education Labs come in.
-          We envision the school lab as an extension of the classroom — a dedicated environment where students can
-          learn a concept, experience it, work with it and apply it.
+            Education is evolving from knowledge acquisition to the development of
+            skills, competencies and real-world capabilities. As schools increasingly
+            embrace experiential and competency-based learning, there is a growing need
+            for structured skill education that complements the academic curriculum.
           </p>
+
+          <p>
+            Skillvation partners with schools to make this transition meaningful,
+            structured and sustainable.
+          </p>
+
+          <p>
+            We work alongside schools to create a comprehensive skill education
+            ecosystem that enables students to explore their interests, develop
+            practical competencies and connect classroom learning with real-world
+            applications.
+          </p>
+
+          <p>
+            Our approach goes beyond introducing individual activities or programmes.
+            We work as an integral skill education partner, supporting schools with the
+            expertise, programmes, resources and implementation framework required to
+            embed skill development into the school’s learning environment.
+          </p>
+
+          <h3 class="mt-4 mb-3">
+            What Skillvation Brings to Your School
+          </h3>
+
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item px-0">
+              Structured Skill Education Programmes aligned with the school’s learning
+              objectives
+            </li>
+
+            <li class="list-group-item px-0">
+              Experiential and hands-on learning that encourages students to learn by
+              doing
+            </li>
+
+            <li class="list-group-item px-0">
+              Future-ready skills including creativity, problem-solving, critical
+              thinking, communication, collaboration and innovation
+            </li>
+
+            <li class="list-group-item px-0">
+              Practical exposure that connects academic concepts with real-world
+              applications
+            </li>
+
+            <li class="list-group-item px-0">
+              Age-appropriate skill pathways that allow students to progressively build
+              competencies
+            </li>
+
+            <li class="list-group-item px-0">
+              Teacher support and implementation guidance to enable effective
+              integration within the school
+            </li>
+
+            <li class="list-group-item px-0">
+              Engaging learning experiences that encourage curiosity, exploration and
+              independent thinking
+            </li>
+
+            <li class="list-group-item px-0">
+              A scalable framework that can evolve with the school’s requirements and
+              student needs
+            </li>
+          </ul>
         </div>
         
         <div>
@@ -723,32 +778,10 @@
               allowfullscreen>
             </iframe>
           </div>
-          <!-- <div class="skillvation-media-caption">© UNESCO</div> -->
         </div>
       </div>
 
       <div class="mt-8">
-        <!-- <p>
-          To achieve this goal, the GSA leverages strategic partnerships and mobilizes 230 TVET institutions across 150 countries through the UNESCO and <a href="https://unevoc.unesco.org/home/fwd2About+the+UNEVOC+Network" target="_blank" rel="noopener" class="text-blue-600 underline font-semibold">UNEVOC networks</a>. By analyzing the evolving labour market’s skills supply and demand, the GSA offers free training and mentorship programs. These programs empower learners with in-demand skills, including digital literacy and skills, green technologies, and entrepreneurial capabilities.
-        </p>
-        <p class="mt-3">
-          The GSA is dedicated to bridging this skills gap and empowering individuals to thrive in our 21st-century economy.
-        </p> -->
-        <!-- <p>We help teachers grow with practical, easy-to-learn skills designed for today’s classrooms. Our platform offers structured lessons, expert guidance, and real-world teaching strategies to support continuous improvement. We believe every teacher deserves the tools and confidence to inspire stronger learning outcomes.</p> -->
-        <p>
-        A Lab Designed Around Skill Education
-        A Skillvation Lab brings together multiple dimensions of skill development within a structured learning
-        environment.
-        Students can explore Life Forms, Materials &amp; Machines, Human Services and interdisciplinary areas
-        through practical activities, projects, experiments, making and problem-solving.
-        Instead of simply asking students to learn about a skill, the lab gives them the opportunity to experience the
-        skill first-hand.
-        From a Lab to a Learning Ecosystem
-        For Skillvation, a skill lab is not simply a room filled with equipment.
-        It is a purpose-built learning ecosystem designed to answer a fundamental question:
-        Our focus is therefore not only on setting up labs, but on making those labs active, accessible and relevant
-        learning spaces where students continuously learn through experience.
-        </p>
       </div>
     </div>
   </section>
@@ -1093,6 +1126,309 @@
       </div>
     </div>
   </section>
+
+  <!-- 10. Building Future-Ready Schools — Ecosystem Overview -->
+  <section class="skillvation-section" id="sv-ecosystem" style="background:#f8faff; padding-top:80px; padding-bottom:80px; overflow:hidden;">
+
+    <style>
+      .sv-eco-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#6d28d9;background:#f3e8ff;border:1px solid #e9d5ff;padding:5px 14px;border-radius:999px;margin-bottom:18px;}
+      .sv-eco-intro{text-align:center;max-width:840px;margin:0 auto 72px;}
+      .sv-eco-intro h2{font-size:clamp(28px,3.8vw,44px);font-weight:800;color:#1e1b4b;line-height:1.2;margin-bottom:22px;}
+      .sv-eco-intro p{font-size:17px;color:#475569;line-height:1.8;margin-bottom:14px;}
+      .sv-eco-stripe{display:flex;align-items:center;gap:20px;margin:0 auto 52px;}
+      .sv-eco-stripe-line{flex:1;height:2px;background:linear-gradient(90deg,transparent,#c7d2fe);}
+      .sv-eco-stripe-line.rev{background:linear-gradient(90deg,#c7d2fe,transparent);}
+      .sv-eco-stripe h2{font-size:clamp(20px,2.5vw,30px);font-weight:800;color:#1e1b4b;white-space:nowrap;margin:0;}
+
+      /* Row */
+      .sv-eco-row{display:grid;grid-template-columns:1fr 1fr;border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(30,27,75,.09);margin-bottom:6px;}
+      .sv-eco-row.rev-layout{direction:rtl;}
+      .sv-eco-row.rev-layout>*{direction:ltr;}
+
+      /* Image pane */
+      .sv-eco-img-pane{position:relative;overflow:hidden;min-height:380px;}
+      .sv-eco-img-pane img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s cubic-bezier(.22,1,.36,1);}
+      .sv-eco-row:hover .sv-eco-img-pane img{transform:scale(1.06);}
+      .sv-eco-img-overlay{position:absolute;inset:0;}
+      .sv-eco-badge{position:absolute;bottom:20px;left:20px;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.93);backdrop-filter:blur(8px);border-radius:40px;padding:8px 18px 8px 10px;box-shadow:0 4px 16px rgba(0,0,0,.15);}
+      .sv-eco-badge-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+      .sv-eco-badge span{font-size:13px;font-weight:700;color:#1e1b4b;}
+
+      /* Number accent on image */
+      .sv-eco-num{position:absolute;top:20px;right:20px;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.4);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;}
+
+      /* Content pane */
+      .sv-eco-content{background:#ffffff;padding:44px 48px;display:flex;flex-direction:column;justify-content:center;}
+      .sv-eco-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:999px;margin-bottom:16px;width:fit-content;}
+      .sv-eco-content h3{font-size:26px;font-weight:800;color:#1e1b4b;margin-bottom:6px;line-height:1.25;}
+      .sv-eco-sub-label{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:18px;}
+      .sv-eco-content p.body{font-size:15px;color:#475569;line-height:1.75;margin-bottom:20px;}
+      .sv-eco-bullets{list-style:none;padding:0;margin:0 0 22px;display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;}
+      .sv-eco-bullets li{display:flex;align-items:flex-start;gap:8px;font-size:13.5px;color:#334155;}
+      .sv-eco-bullets li i{margin-top:3px;flex-shrink:0;font-size:12px;}
+      .sv-eco-quote{font-size:13.5px;font-style:italic;font-weight:700;padding-top:16px;border-top:1px solid #e2e8f0;margin:0;display:flex;align-items:flex-start;gap:8px;}
+      .sv-eco-quote i{opacity:.45;margin-top:2px;flex-shrink:0;}
+
+      /* Entrance animations */
+      .sv-eco-row{opacity:0;transform:translateY(50px);transition:opacity .8s cubic-bezier(.22,1,.36,1),transform .8s cubic-bezier(.22,1,.36,1);}
+      .sv-eco-row.sv-visible{opacity:1;transform:translateY(0);}
+      .sv-eco-img-pane{opacity:0;transform:translateX(-44px);transition:opacity .9s .2s cubic-bezier(.22,1,.36,1),transform .9s .2s cubic-bezier(.22,1,.36,1);}
+      .sv-eco-row.rev-layout .sv-eco-img-pane{transform:translateX(44px);}
+      .sv-eco-row.sv-visible .sv-eco-img-pane{opacity:1;transform:translateX(0);}
+      .sv-eco-content{opacity:0;transform:translateX(44px);transition:opacity .9s .35s cubic-bezier(.22,1,.36,1),transform .9s .35s cubic-bezier(.22,1,.36,1);}
+      .sv-eco-row.rev-layout .sv-eco-content{transform:translateX(-44px);}
+      .sv-eco-row.sv-visible .sv-eco-content{opacity:1;transform:translateX(0);}
+
+      /* Pipeline block */
+      .sv-eco-pipeline{margin-top:72px;border-radius:20px;overflow:hidden;background:linear-gradient(135deg,#1e3a5f 0%,#0b2545 55%,#12003d 100%);padding:60px 52px;position:relative;}
+      .sv-eco-pipeline::before{content:'';position:absolute;top:-80px;right:-80px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(99,102,241,.22) 0%,transparent 70%);pointer-events:none;}
+      .sv-eco-pipeline::after{content:'';position:absolute;bottom:-70px;left:-70px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(168,85,247,.18) 0%,transparent 70%);pointer-events:none;}
+      .sv-eco-pipeline h2{font-size:clamp(22px,3vw,36px);font-weight:800;color:#fff;margin-bottom:10px;text-align:center;}
+      .sv-pipe-sub{text-align:center;color:#93c5fd;font-size:13px;font-weight:700;margin-bottom:48px;letter-spacing:.08em;text-transform:uppercase;}
+      .sv-journey-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:52px;}
+      .sv-journey-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.11);border-radius:16px;padding:28px 22px;text-align:center;transition:background .3s,transform .3s;}
+      .sv-journey-card:hover{background:rgba(255,255,255,.11);transform:translateY(-4px);}
+      .sv-journey-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:22px;}
+      .sv-journey-card h4{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;}
+      .sv-steps{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;}
+      .sv-step{font-size:12px;font-weight:600;color:#e2e8f0;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:999px;padding:3px 10px;}
+      .sv-commit{display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center;padding-top:40px;border-top:1px solid rgba(255,255,255,.1);}
+      .sv-commit p{font-size:15px;color:#cbd5e0;line-height:1.8;margin-bottom:12px;}
+      .sv-commit p:last-child{margin:0;}
+      .sv-tagline{text-align:center;padding:30px 36px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;min-width:260px;}
+      .sv-tagline p{font-size:26px;font-weight:800;color:#fff;margin-bottom:8px;}
+      .sv-tagline em{font-size:14px;font-style:italic;color:#a5b4fc;font-weight:600;}
+
+      @media(max-width:860px){
+        .sv-eco-row,.sv-eco-row.rev-layout{grid-template-columns:1fr;direction:ltr;}
+        .sv-eco-img-pane{min-height:240px;}
+        .sv-eco-content{padding:32px 28px;}
+        .sv-eco-bullets{grid-template-columns:1fr;}
+        .sv-journey-grid{grid-template-columns:1fr;}
+        .sv-commit{grid-template-columns:1fr;}
+        .sv-tagline{min-width:0;}
+        .sv-eco-pipeline{padding:40px 24px;}
+      }
+    </style>
+
+    <div class="skillvation-container">
+
+      {{-- Intro --}}
+      <div class="sv-eco-intro" data-reveal="fade-up">
+        <div class="sv-eco-eyebrow"><i class="fa-solid fa-star" style="font-size:10px;"></i> Our Approach</div>
+        <h2>Building Future-Ready Schools<br>Through Skill Education</h2>
+        <p>Education is evolving beyond the traditional boundaries of knowledge acquisition. Schools today are increasingly focused on developing <strong>competencies, practical skills, creativity, critical thinking and real-world readiness</strong> alongside academic learning.</p>
+        <p><strong>Skillvation partners with schools to make skill education a structured and sustainable part of the learning ecosystem.</strong></p>
+        <p>We bring together <strong>curriculum-aligned content, digital learning, AI, teacher development, practical infrastructure and project-based learning</strong> — supporting the entire journey from <strong>learning and understanding to practising, creating and applying</strong>.</p>
+      </div>
+
+      {{-- Sub-heading stripe --}}
+      <div class="sv-eco-stripe">
+        <div class="sv-eco-stripe-line"></div>
+        <h2>Our Skill Education Ecosystem</h2>
+        <div class="sv-eco-stripe-line rev"></div>
+      </div>
+
+      {{-- 5 alternating image + content rows --}}
+      @php
+      $ecoCards = [
+        [
+          'rev'   => false,
+          'num'   => '01',
+          'img'   => asset('frontend/img/skillbox/homeimg01.jpeg'),
+          'alt'   => 'Skill2aKool — Digital Learning',
+          'grad'  => 'linear-gradient(135deg,rgba(79,70,229,.6),rgba(139,92,246,.35))',
+          'bBg'   => '#4f46e5','bIcon'=>'fa-laptop-code','bLabel'=>'Skill2aKool',
+          'tagBg' => '#eef2ff','tagClr'=>'#4f46e5','tagIcon'=>'fa-laptop-code','tagLabel'=>'Digital Learning',
+          'clr'   => '#4f46e5','title'=>'Skill2aKool',
+          'sub'   => 'Structured Self-Learning for Skill Education',
+          'body'  => 'Our digital self-learning platform covering <strong>33 Skill Education courses</strong> — giving students structured theoretical learning and opportunities to explore diverse skill areas at their own pace.',
+          'pts'   => ['33 structured skill education courses','Self-paced & independent learning','Consistent theory delivery','Broader skill learning range','Complements classroom learning'],
+          'qt'    => 'Enabling students to build knowledge before they apply it.',
+        ],
+        [
+          'rev'   => true,
+          'num'   => '02',
+          'img'   => asset('frontend/img/skillbox/ai_empowered.jpg'),
+          'alt'   => 'AI Lataa — AI-Powered Education',
+          'grad'  => 'linear-gradient(135deg,rgba(3,105,161,.6),rgba(14,165,233,.35))',
+          'bBg'   => '#0369a1','bIcon'=>'fa-robot','bLabel'=>'AI Lataa',
+          'tagBg' => '#e0f2fe','tagClr'=>'#0369a1','tagIcon'=>'fa-robot','tagLabel'=>'Artificial Intelligence',
+          'clr'   => '#0369a1','title'=>'AI Lataa',
+          'sub'   => 'AI-Powered Support for Learning & Teaching',
+          'body'  => 'Brings artificial intelligence into the educational ecosystem — an intelligent support layer for <strong>teachers and students</strong> to explore, interact with and learn through AI-enabled experiences.',
+          'pts'   => ['AI assistance for teachers','Enhanced student engagement','Practical AI exposure','Digital readiness building','Adapts to emerging tech'],
+          'qt'    => 'Enabling schools to embrace AI as part of modern education.',
+        ],
+        [
+          'rev'   => false,
+          'num'   => '03',
+          'img'   => asset('frontend/img/skillbox/teacher_upskilling.jpg'),
+          'alt'   => 'Train the Teacher Programme',
+          'grad'  => 'linear-gradient(135deg,rgba(4,120,87,.6),rgba(16,185,129,.35))',
+          'bBg'   => '#047857','bIcon'=>'fa-chalkboard-user','bLabel'=>'TTT Programme',
+          'tagBg' => '#ecfdf5','tagClr'=>'#047857','tagIcon'=>'fa-chalkboard-user','tagLabel'=>'Teacher Development',
+          'clr'   => '#047857','title'=>'TTT | Train the Teacher',
+          'sub'   => 'Empowering Educators to Deliver Skill-Based Learning',
+          'body'  => 'Helps educators develop the knowledge, methodologies and confidence to facilitate <strong>experiential, competency-based and skill-oriented learning</strong> — shifting from content delivery to facilitation.',
+          'pts'   => ['Teacher skill education capability','Experiential methodology support','Continuous professional development','Internal capacity building','Practical facilitation skills'],
+          'qt'    => 'Building the teacher capability required for future-ready education.',
+        ],
+        [
+          'rev'   => true,
+          'num'   => '04',
+          'img'   => asset('frontend/img/skillbox/Workonmaterialsandmachines.jpeg'),
+          'alt'   => 'Skill Education Infrastructure — Labs',
+          'grad'  => 'linear-gradient(135deg,rgba(180,83,9,.6),rgba(245,158,11,.35))',
+          'bBg'   => '#b45309','bIcon'=>'fa-building-columns','bLabel'=>'Skill Labs',
+          'tagBg' => '#fffbeb','tagClr'=>'#b45309','tagIcon'=>'fa-building-columns','tagLabel'=>'Learning Environments',
+          'clr'   => '#b45309','title'=>'Skill Education Infrastructure',
+          'sub'   => 'Creating Environments for Experiential Learning',
+          'body'  => 'Supports schools in designing <strong>purpose-driven skill education environments and lab setups</strong> aligned with chosen skill areas — bridging theory and application.',
+          'pts'   => ['Purpose-built skill infrastructure','Theory–application bridge','Dedicated experiential spaces','Hands-on exploration support','Strengthens skill ecosystem'],
+          'qt'    => 'Creating the environment where learning becomes experience.',
+        ],
+        [
+          'rev'   => false,
+          'num'   => '05',
+          'img'   => asset('frontend/img/skillbox/Workonlifeforms.jpeg'),
+          'alt'   => 'Project-Based Learning Kits',
+          'grad'  => 'linear-gradient(135deg,rgba(190,24,93,.6),rgba(236,72,153,.35))',
+          'bBg'   => '#be185d','bIcon'=>'fa-screwdriver-wrench','bLabel'=>'PBL Kits',
+          'tagBg' => '#fdf2f8','tagClr'=>'#be185d','tagIcon'=>'fa-screwdriver-wrench','tagLabel'=>'Project-Based Learning',
+          'clr'   => '#be185d','title'=>'Project-Based Learning Kits',
+          'sub'   => 'Turning Concepts into Creation',
+          'body'  => 'Structured kits enabling students to <strong>design, build, experiment, test, collaborate and solve problems</strong> — developing competencies well beyond academic knowledge.',
+          'pts'   => ['Practical & engaging learning','Creativity & critical thinking','Collaboration & innovation','Tangible student outcomes','Ready-to-use resources'],
+          'qt'    => 'Turning knowledge into skills through purposeful creation.',
+        ],
+      ];
+      @endphp
+
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        @foreach($ecoCards as $c)
+        <div class="sv-eco-row {{ $c['rev'] ? 'rev-layout' : '' }}" data-eco-row>
+
+          {{-- Image pane --}}
+          <div class="sv-eco-img-pane">
+            <img src="{{ $c['img'] }}" alt="{{ $c['alt'] }}">
+            <div class="sv-eco-img-overlay" style="background:{{ $c['grad'] }};"></div>
+            <div class="sv-eco-num">{{ $c['num'] }}</div>
+            <div class="sv-eco-badge">
+              <div class="sv-eco-badge-icon" style="background:{{ $c['bBg'] }};">
+                <i class="fa-solid {{ $c['bIcon'] }}" style="color:#fff;font-size:15px;"></i>
+              </div>
+              <span>{{ $c['bLabel'] }}</span>
+            </div>
+          </div>
+
+          {{-- Content pane --}}
+          <div class="sv-eco-content">
+            <div class="sv-eco-tag" style="background:{{ $c['tagBg'] }};color:{{ $c['tagClr'] }};">
+              <i class="fa-solid {{ $c['tagIcon'] }}" style="font-size:11px;"></i>
+              {{ $c['tagLabel'] }}
+            </div>
+            <h3>{{ $c['title'] }}</h3>
+            <p class="sv-eco-sub-label" style="color:{{ $c['clr'] }};">{{ $c['sub'] }}</p>
+            <p class="body">{!! $c['body'] !!}</p>
+            <ul class="sv-eco-bullets">
+              @foreach($c['pts'] as $pt)
+              <li><i class="fa-solid fa-circle-check" style="color:{{ $c['clr'] }};"></i>{{ $pt }}</li>
+              @endforeach
+            </ul>
+            <p class="sv-eco-quote" style="color:{{ $c['clr'] }};">
+              <i class="fa-solid fa-quote-left" style="font-size:12px;"></i>
+              {{ $c['qt'] }}
+            </p>
+          </div>
+
+        </div>
+        @endforeach
+      </div>
+
+      {{-- One Partner. One Integrated Ecosystem. --}}
+      <div class="sv-eco-pipeline" data-eco-pipeline>
+        <p class="sv-pipe-sub"><i class="fa-solid fa-infinity" style="margin-right:8px;"></i>The Complete Picture</p>
+        <h2>One Partner. One Integrated Ecosystem.</h2>
+        <p style="text-align:center;color:#cbd5e0;font-size:16px;max-width:640px;margin:0 auto 48px;line-height:1.7;">
+          Skillvation brings these capabilities together to support schools across the complete skill education journey.
+        </p>
+
+        <div class="sv-journey-grid">
+          @php
+          $journeys = [
+            ['fa-user-graduate','#60a5fa','rgba(96,165,250,.15)','For Students', ['Learn','Explore','Practise','Create','Apply']],
+            ['fa-person-chalkboard','#34d399','rgba(52,211,153,.15)','For Teachers',['Train','Adapt','Facilitate','Innovate']],
+            ['fa-school','#f472b6','rgba(244,114,182,.15)','For Schools',  ['Plan','Implement','Develop','Scale']],
+          ];
+          @endphp
+          @foreach($journeys as $j)
+          <div class="sv-journey-card" data-eco-jcard>
+            <div class="sv-journey-icon" style="background:{{ $j[2] }};"><i class="fa-solid {{ $j[0] }}" style="color:{{ $j[1] }};"></i></div>
+            <h4 style="color:{{ $j[1] }};">{{ $j[3] }}</h4>
+            <div class="sv-steps">
+              @foreach($j[4] as $s)<span class="sv-step">{{ $s }}</span>@endforeach
+            </div>
+          </div>
+          @endforeach
+        </div>
+
+        <div class="sv-commit">
+          <div>
+            <h3 style="font-size:20px;font-weight:800;color:#fff;margin-bottom:16px;">Our Commitment to Schools</h3>
+            <p>We work alongside schools as a <strong style="color:#fff;">long-term Skill Education Partner</strong>, adapting our solutions to the school's academic environment, student needs and implementation goals.</p>
+            <p>Our objective is to help schools build skill education as an <strong style="color:#fff;">integral part of the student learning journey</strong> — not just an additional programme.</p>
+          </div>
+          <div class="sv-tagline">
+            <p>Skillvation</p>
+            <em>Enabling Schools to Move<br>from Learning to Capability.</em>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  @push('scripts')
+  <script>
+  (function(){
+    'use strict';
+    /* Eco rows slide in */
+    var rows = document.querySelectorAll('[data-eco-row]');
+    if(rows.length){
+      var ro = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if(e.isIntersecting){ e.target.classList.add('sv-visible'); ro.unobserve(e.target); }
+        });
+      },{threshold:0.12,rootMargin:'0px 0px -40px 0px'});
+      rows.forEach(function(r){ ro.observe(r); });
+    }
+    /* Pipeline fade up */
+    var pipe = document.querySelector('[data-eco-pipeline]');
+    if(pipe){
+      pipe.style.cssText += 'opacity:0;transform:translateY(40px);transition:opacity .9s .1s cubic-bezier(.22,1,.36,1),transform .9s .1s cubic-bezier(.22,1,.36,1);';
+      var po = new IntersectionObserver(function(entries){
+        if(entries[0].isIntersecting){ pipe.style.opacity='1'; pipe.style.transform='translateY(0)'; po.disconnect(); }
+      },{threshold:0.12});
+      po.observe(pipe);
+    }
+    /* Journey cards stagger */
+    var jCards = document.querySelectorAll('[data-eco-jcard]');
+    jCards.forEach(function(c,i){
+      c.style.cssText += 'opacity:0;transform:translateY(28px);transition:opacity .6s '+(0.3+i*.13)+'s ease,transform .6s '+(0.3+i*.13)+'s ease;';
+    });
+    if(pipe){
+      var jo = new IntersectionObserver(function(entries){
+        if(entries[0].isIntersecting){
+          jCards.forEach(function(c){ c.style.opacity='1'; c.style.transform='translateY(0)'; });
+          jo.disconnect();
+        }
+      },{threshold:0.2});
+      jo.observe(pipe);
+    }
+  })();
+  </script>
+  @endpush
 
   <!-- 10. News Section -->
   <!-- <section class="skillvation-section">

@@ -192,11 +192,11 @@
       {{-- Left Content --}}
       <div class="lg:col-span-7 space-y-6">
         <div class="flex items-center gap-2 text-xs text-slate-400 font-semibold">
-          <a href="{{ route('home') }}" class="hover:text-brand-orange transition-colors">Home</a>
+          <!-- <a href="{{ route('home') }}" class="hover:text-brand-orange transition-colors">Home</a>
           <i class="fa-solid fa-chevron-right text-[9px]"></i>
           <a href="{{ route('labs') }}" class="hover:text-brand-orange transition-colors">Labs</a>
           <i class="fa-solid fa-chevron-right text-[9px]"></i>
-          <span class="text-brand-navy font-bold">Basic Composite Skill Lab</span>
+          <span class="text-brand-navy font-bold">Basic Composite Skill Lab</span> -->
         </div>
 
         <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-orange/10 text-brand-orange border border-brand-orange/20 text-xs font-bold uppercase tracking-wider">
@@ -1198,10 +1198,9 @@
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
       @foreach([
-        
-        [route('labs.stem'),        'https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?auto=format&fit=crop&w=500&q=80', 'STEM Lab', 'Electronics, IoT & project-based learning'],
-        [route('labs.ecec'),        'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=500&q=80', 'ECEC Lab', 'Early childhood exploration & creativity'],
-        [route('labs.ai-robotics'), 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=500&q=80', 'AI & Robotics Lab', 'Hands-on robotics, coding & AI experiments'],
+        [route('labs.composite-skill-advance'),        'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=500&q=80', 'Advance Package', 'Early childhood exploration & creativity'],
+        [route('labs.composite-skill-premium'), 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=500&q=80', 'Premium Package', 'Hands-on robotics, coding & AI experiments'],
+        [route('labs.stem'),        'https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?auto=format&fit=crop&w=500&q=80', 'Skillvation Lab', 'Electronics, IoT & project-based learning'],
       ] as [$url, $img, $name, $desc])
       <a href="{{ $url }}" class="group flex flex-col gap-3 p-4 rounded-2xl border border-slate-200 hover:border-brand-orange hover:shadow-lg transition-all bg-white">
         <div class="aspect-[4/3] rounded-xl overflow-hidden bg-slate-100">
