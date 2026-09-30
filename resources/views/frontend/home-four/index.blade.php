@@ -720,12 +720,7 @@
             embed skill development into the school’s learning environment.
           </p>
 
-          <h2 class="mt-4 mb-4">AI EmpowerED: Equipping teachers and learners for an AI-driven future</h2>
-          <p>An AI Learning Management System (AI LMS) uses Artificial Intelligence to enhance teaching and learning by transforming traditional curriculum into skill-based, application-oriented content. Instead of limiting learning to textbooks and memorisation, an AI LMS supports lesson planning, assessments, and content delivery through smart recommendations, real-world examples, and competency-focused activities. Skillvation’s AI LMS, LATAA ( LEARNING AND TEACHING AI ASSISTANT) , is purpose-built for CBSE and NEP-aligned education, helping schools shift from rote learning to skill development and experiential learning—without disrupting their existing syllabus.
-          </p>
-          <p class="mt-4 mb-6">
-            Discover how AI-empowered skills are creating new pathways to inclusion and innovation.
-          </p>
+          
         </div>
         
         <div>
@@ -813,16 +808,107 @@
   </section>
 
   <!-- 4. AI EmpowerED Section -->
-  <!-- <section class="skillvation-section sv-section-ai" data-reveal="slide-left">
+  <section class="skillvation-section sv-section-ai" data-reveal="slide-left">
     <div class="skillvation-container">
       <div class="skillvation-grid-2col">
         <div>
-          <h2 class="text-3xl font-bold mb-4">AI EmpowerED: Equipping teachers and learners for an AI-driven future</h2>
-          <p>An AI Learning Management System (AI LMS) uses Artificial Intelligence to enhance teaching and learning by transforming traditional curriculum into skill-based, application-oriented content. Instead of limiting learning to textbooks and memorisation, an AI LMS supports lesson planning, assessments, and content delivery through smart recommendations, real-world examples, and competency-focused activities. Skillvation’s AI LMS, LATAA ( LEARNING AND TEACHING AI ASSISTANT) , is purpose-built for CBSE and NEP-aligned education, helping schools shift from rote learning to skill development and experiential learning—without disrupting their existing syllabus.
-          </p>
-          <p class="font-bold text-gray-900 mt-4 mb-6">
-            Discover how AI-empowered skills are creating new pathways to inclusion and innovation.
-          </p>
+          <h3 style="color:#1e1b4b; font-size:clamp(20px,2.5vw,28px); font-weight:800; margin-bottom:24px; line-height:1.3;">
+            What Skillvation Brings to Your School
+          </h3>
+
+          <style>
+            .sv-brings-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+            .sv-brings-item { display:flex; align-items:flex-start; gap:12px; padding:14px 16px; background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.04); transition:box-shadow .25s ease, transform .25s ease; }
+            .sv-brings-item:hover { box-shadow:0 6px 22px rgba(0,0,0,.09); transform:translateY(-2px); }
+            .sv-brings-icon { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px; }
+            .sv-brings-item strong { font-size:13.5px; font-weight:700; color:#1e1b4b; display:block; margin-bottom:3px; line-height:1.3; }
+            .sv-brings-item span { font-size:12.5px; color:#64748b; line-height:1.5; }
+            @media(max-width:600px){ .sv-brings-grid { grid-template-columns:1fr; } }
+          </style>
+
+          <div class="sv-brings-grid">
+
+            <div class="sv-brings-item">
+              <div class="sv-brings-icon" style="background:#eef2ff;">
+                <i class="fa-solid fa-layer-group" style="font-size:15px;color:#4f46e5;"></i>
+              </div>
+              <div>
+                <strong>Structured Skill Education Programmes</strong>
+                <span>Aligned with the school’s learning objectives</span>
+              </div>
+            </div>
+
+            <div class="sv-brings-item">
+              <div class="sv-brings-icon" style="background:#e0f2fe;">
+                <i class="fa-solid fa-flask" style="font-size:15px;color:#0369a1;"></i>
+              </div>
+              <div>
+                <strong>Experiential &amp; Hands-On Learning</strong>
+                <span>Encourages students to learn by doing</span>
+              </div>
+            </div>
+
+            <div class="sv-brings-item">
+              <div class="sv-brings-icon" style="background:#fffbeb;">
+                <i class="fa-solid fa-lightbulb" style="font-size:15px;color:#b45309;"></i>
+              </div>
+              <div>
+                <strong>Future-Ready Skills</strong>
+                <span>Creativity, problem-solving, critical thinking, communication &amp; collaboration</span>
+              </div>
+            </div>
+
+            <div class="sv-brings-item">
+              <div class="sv-brings-icon" style="background:#ecfdf5;">
+                <i class="fa-solid fa-link" style="font-size:15px;color:#047857;"></i>
+              </div>
+              <div>
+                <strong>Real-World Connections</strong>
+                <span>Connects academic concepts with practical applications</span>
+              </div>
+            </div>
+
+            <div class="sv-brings-item">
+              <div class="sv-brings-icon" style="background:#fdf2f8;">
+                <i class="fa-solid fa-arrow-trend-up" style="font-size:15px;color:#be185d;"></i>
+              </div>
+              <div>
+                <strong>Age-Appropriate Skill Pathways</strong>
+                <span>Students progressively build competencies at every stage</span>
+              </div>
+            </div>
+
+            <div class="sv-brings-item">
+              <div class="sv-brings-icon" style="background:#f3e8ff;">
+                <i class="fa-solid fa-person-chalkboard" style="font-size:15px;color:#6d28d9;"></i>
+              </div>
+              <div>
+                <strong>Teacher Support &amp; Guidance</strong>
+                <span>Implementation support to embed skill education effectively</span>
+              </div>
+            </div>
+
+            <div class="sv-brings-item">
+              <div class="sv-brings-icon" style="background:#ecfeff;">
+                <i class="fa-solid fa-compass" style="font-size:15px;color:#0891b2;"></i>
+              </div>
+              <div>
+                <strong>Engaging Learning Experiences</strong>
+                <span>Encourage curiosity, exploration and independent thinking</span>
+              </div>
+            </div>
+
+            <div class="sv-brings-item">
+              <div class="sv-brings-icon" style="background:#f0fdf4;">
+                <i class="fa-solid fa-arrows-up-to-line" style="font-size:15px;color:#15803d;"></i>
+              </div>
+              <div>
+                <strong>Scalable Framework</strong>
+                <span>Evolves with the school’s requirements and student needs</span>
+              </div>
+            </div>
+
+          </div>
         </div>
 
         <div>
@@ -832,7 +918,7 @@
         </div>
       </div>
     </div>
-  </section> -->
+  </section>
 
   <!-- 5. Our Training Opportunities (Split Banner + 4 Tracks) -->
   <!-- <section class="skillvation-section bg-light sv-section-upskill" id="training-opportunities" data-reveal="zoom-in">
@@ -842,6 +928,7 @@
       <!-- <div class="skillvation-split-banner">
         <div class="skillvation-split-banner-left">
           <h2>Our Upskilling opportunities</h2>
+
           <p>Building the capability to deliver experiential and skill-based education Skillvation's Upskilling for Teachers program is designed to equip educators with the practical knowledge, tools and facilitation skills required to implement experiential Skill Education effectively. Our program enables them to extend their existing subject expertise into practical, interdisciplinary and work-oriented learning experiences.</p>
         </div>
         <div class="skillvation-split-banner-right">
@@ -854,6 +941,7 @@
         <div class="skillvation-grid-2col">
           <div>
             <h2 class="text-2xl font-bold mb-3 text-blue-900">Work on Life Forms</h2>
+            
             <p class="text-gray-700 mb-4">
             Connecting academic knowledge with life, nature and living systems
             This training area focuses on developing teachers ability to facilitate practical learning around living systems
@@ -874,6 +962,7 @@
             <div class="skillvation-media-card">
               <img src="{{ asset('/frontend/img/skillbox/Workonlifeforms.jpeg') }}" alt="Work on Life Forms">
             </div>
+            
           </div>
         </div>
       </div> -->
@@ -883,6 +972,7 @@
         <div class="skillvation-grid-2col">
           <div>
             <h2 class="text-2xl font-bold mb-3 text-green-900">Work on Materials & Machines</h2>
+            
             <p class="text-gray-700 mb-4">
             Building capability in making, designing, technology and innovation
             This area focuses on developing teachers&#39; practical understanding of materials, tools, machines, technology
@@ -897,12 +987,12 @@
             Outcome: Teachers develop the ability to guide students from idea → design → making → testing →
             improvement, creating a stronger culture of innovation and practical problem-solving.
             </p>
+            
           </div>
           <div>
             <div class="skillvation-media-card">
               <img src="{{ asset('/frontend/img/skillbox/Workonmaterialsandmachines.jpeg') }}" alt="Work on Materials and Machines">
             </div>
-            
           </div>
         </div>
       </div> -->
@@ -912,6 +1002,7 @@
         <div class="skillvation-grid-2col">
           <div>
             <h2 class="text-2xl font-bold mb-3 text-red-900">Work on Human Services</h2>
+            
             <p class="text-gray-700 mb-4">
             Developing capability in people, services and real-world applications
             This area focuses on the human, social and service dimensions of work. Teachers learn how to facilitate
@@ -924,6 +1015,7 @@
             Outcome: Teachers become better equipped to facilitate real-world, people-centred learning and help students understand how
             knowledge translates into services, careers and community impact.
             </p>
+            
           </div>
           <div>
             <div class="skillvation-media-card">
@@ -932,9 +1024,9 @@
             
           </div>
         </div>
-      </div> -->
+      </div>
 
-    <!-- </div>
+    </div>
   </section> -->
 
   <!-- 6. Our Working Model -->
