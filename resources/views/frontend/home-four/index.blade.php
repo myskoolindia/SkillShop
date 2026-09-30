@@ -1067,7 +1067,7 @@
   </section>
 
   <!-- 6. Our Working Model -->
-  <section class="skillvation-section sv-section-model" data-reveal="slide-left">
+  <!-- <section class="skillvation-section sv-section-model" data-reveal="slide-left">
     <div class="skillvation-container">
       <div class="skillvation-grid-2col">
         <div>
@@ -1090,11 +1090,10 @@
           <div class="skillvation-media-card bg-white p-4 border border-gray-200">
             <img src="{{ asset('/frontend/img/skillbox/our_working_model.jpg') }}" alt="Our Working Model" style="object-fit: contain;">
           </div>
-          <!-- <div class="skillvation-media-caption">© UNESCO</div> -->
         </div>
       </div>
     </div>
-  </section>
+  </section> -->
 
   <!-- 7. GSA Mission in Figures -->
   
@@ -1103,7 +1102,7 @@
   
 
   <!-- 9. Ready to make a positive impact? CTA -->
-  <section class="skillvation-section bg-light sv-section-cta" data-reveal="fade-up">
+  <!-- <section class="skillvation-section bg-light sv-section-cta" data-reveal="fade-up">
     <div class="skillvation-container">
       <div class="skillvation-grid-2col">
         <div>
@@ -1121,11 +1120,10 @@
           <div class="skillvation-media-card">
             <img src="{{ asset('/frontend/img/skillbox/leaders_of_learning.jpg') }}" alt="Leaders of Learning - School with Children">
           </div>
-          <!-- <div class="skillvation-media-caption">© Skillvation Leaders of Learning</div> -->
         </div>
       </div>
     </div>
-  </section>
+  </section> -->
 
   <!-- 10. Building Future-Ready Schools — Ecosystem Overview -->
   <section class="skillvation-section" id="sv-ecosystem" style="background:#f8faff; padding-top:80px; padding-bottom:80px; overflow:hidden;">
@@ -1236,11 +1234,11 @@
           'rev'   => false,
           'num'   => '01',
           'img'   => asset('frontend/img/skillbox/homeimg01.jpeg'),
-          'alt'   => 'Skill2aKool — Digital Learning',
+          'alt'   => 'Skill2SKool — Digital Learning',
           'grad'  => 'linear-gradient(135deg,rgba(79,70,229,.6),rgba(139,92,246,.35))',
-          'bBg'   => '#4f46e5','bIcon'=>'fa-laptop-code','bLabel'=>'Skill2aKool',
+          'bBg'   => '#4f46e5','bIcon'=>'fa-laptop-code','bLabel'=>'Skill2SKool',
           'tagBg' => '#eef2ff','tagClr'=>'#4f46e5','tagIcon'=>'fa-laptop-code','tagLabel'=>'Digital Learning',
-          'clr'   => '#4f46e5','title'=>'Skill2aKool',
+          'clr'   => '#4f46e5','title'=>'Skill2SKool',
           'sub'   => 'Structured Self-Learning for Skill Education',
           'body'  => 'Our digital self-learning platform covering <strong>33 Skill Education courses</strong> — giving students structured theoretical learning and opportunities to explore diverse skill areas at their own pace.',
           'pts'   => ['33 structured skill education courses','Self-paced & independent learning','Consistent theory delivery','Broader skill learning range','Complements classroom learning'],
