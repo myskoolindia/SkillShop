@@ -445,34 +445,7 @@
                                         </div>
                                     <?php endif; ?>
 
-                                    <!-- GST Breakdown Section -->
-                                    <?php if (!empty($cart->totals->vat) && $cart->totals->vat > 0): 
-                                        $cartSellerId = !empty($cart->items[0]->seller_id) ? $cart->items[0]->seller_id : null;
-                                        $gstRate = !empty($cart->items[0]->product_vat_rate) ? $cart->items[0]->product_vat_rate : 18;
-                                        $cartGst = calculateGstDetails($gstRate, $cart->totals->vat, $cartSellerId, $cart->location_state_id ?? null);
-                                    ?>
-                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 14px; color: #334155;">
-                                            <span style="font-weight: 600;">
-                                                <?= trans("total_gst"); ?> <span style="font-size: 12px; font-weight: normal; color: #64748b;">(<?= $cartGst['is_interstate'] ? $cartGst['igst_rate'] . '%' : ($cartGst['cgst_rate'] + $cartGst['sgst_rate']) . '%'; ?>)</span>
-                                            </span>
-                                            <strong style="font-size: 14.5px; color: #1e293b; text-align: right; min-width: 100px;"><?= priceDecimal($cart->totals->vat, $cart->currency_code); ?></strong>
-                                        </div>
-                                        <?php if ($cartGst['is_interstate']): ?>
-                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12.5px; color: #64748b; padding-left: 12px;">
-                                                <span>&bull; <?= trans("igst"); ?> (<?= $cartGst['igst_rate']; ?>%)</span>
-                                                <span style="text-align: right; min-width: 100px;"><?= priceDecimal($cartGst['igst_amount'], $cart->currency_code); ?></span>
-                                            </div>
-                                        <?php else: ?>
-                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 12.5px; color: #64748b; padding-left: 12px;">
-                                                <span>&bull; <?= trans("cgst"); ?> (<?= $cartGst['cgst_rate']; ?>%)</span>
-                                                <span style="text-align: right; min-width: 100px;"><?= priceDecimal($cartGst['cgst_amount'], $cart->currency_code); ?></span>
-                                            </div>
-                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12.5px; color: #64748b; padding-left: 12px;">
-                                                <span>&bull; <?= trans("sgst"); ?> (<?= $cartGst['sgst_rate']; ?>%)</span>
-                                                <span style="text-align: right; min-width: 100px;"><?= priceDecimal($cartGst['sgst_amount'], $cart->currency_code); ?></span>
-                                            </div>
-                                        <?php endif; ?>
-                                    <?php endif; ?>
+                                    
 
                                     <!-- Coupon Code Discount -->
                                     <?php if (!empty($cart->coupon_code)): ?>

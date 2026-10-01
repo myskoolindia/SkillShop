@@ -138,6 +138,13 @@
                 @if (Module::isEnabled('ContactMessage') && checkAdminHasPermission('contect.message.view'))
                     @include('contactmessage::sidebar')
                 @endif
+
+                <li class="{{ isRoute('admin.course-enquiries') || isRoute('admin.course-enquiry.show') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.course-enquiries') }}">
+                        <i class="fas fa-inbox"></i>
+                        <span>{{ __('Course Enquiries') }}</span>
+                    </a>
+                </li>
             @endif
         </ul>
     </aside>

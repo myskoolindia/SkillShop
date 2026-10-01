@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\RolesController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\CourseEnquiryController as AdminCourseEnquiryController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Global\CloudStorageController;
 use App\Http\Controllers\Admin\Auth\NewPasswordController;
@@ -38,6 +39,12 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin'], function () {
         Route::put('role/assign', [RolesController::class, 'assignRoleUpdate'])->name('role.assign.update');
         Route::resource('/role', RolesController::class);
         Route::resource('/role', RolesController::class);
+
+        /** Course Enquiries */
+        Route::get('course-enquiries',              [AdminCourseEnquiryController::class, 'index'])->name('course-enquiries');
+        Route::get('course-enquiry/{id}',           [AdminCourseEnquiryController::class, 'show'])->name('course-enquiry.show');
+        Route::post('course-enquiry/{id}/status',   [AdminCourseEnquiryController::class, 'updateStatus'])->name('course-enquiry.status');
+        Route::delete('course-enquiry/{id}',        [AdminCourseEnquiryController::class, 'destroy'])->name('course-enquiry.destroy');
     });
     Route::resource('admin', AdminController::class)->except('show');
     Route::put('admin-status/{id}', [AdminController::class, 'changeStatus'])->name('admin.status');

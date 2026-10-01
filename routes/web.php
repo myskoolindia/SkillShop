@@ -8,6 +8,7 @@ use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\CheckOutController;
 use App\Http\Controllers\Frontend\ContactController;
 use App\Http\Controllers\Frontend\CourseEnquiryController;
+use App\Http\Controllers\Frontend\PhoneOtpController;
 use App\Http\Controllers\Frontend\CourseContentController;
 use App\Http\Controllers\Frontend\CoursePageController;
 use App\Http\Controllers\Frontend\HomePageController;
@@ -495,6 +496,10 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
     Route::get('contact', [ContactController::class, 'index'])->name('contact.index');
     Route::post('contact/send-mail', [ContactController::class, 'sendMail'])->name('contact.send-mail');
     Route::post('course-enquiry', [CourseEnquiryController::class, 'store'])->name('course.enquiry.store');
+
+    /** Phone OTP (WhatsApp) */
+    Route::post('phone-otp/send',   [PhoneOtpController::class, 'send'])->name('phone.otp.send');
+    Route::post('phone-otp/verify', [PhoneOtpController::class, 'verify'])->name('phone.otp.verify');
 
     /** Custom pages */
     Route::get('page/{slug}', [HomePageController::class, 'customPage'])->name('custom-page');

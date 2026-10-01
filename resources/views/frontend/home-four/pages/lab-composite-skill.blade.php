@@ -1686,9 +1686,13 @@
           </div>
 
           <div class="vl-form-grid-2">
-            <div class="vl-field">
-              <label for="lead_phone">Phone number</label>
-              <input id="lead_phone" name="phone" type="tel" placeholder="e.g. +91 98765 43210" required>
+            <div class="vl-field" style="grid-column:1/-1;">
+              @include('frontend.home-four.partials._phone_otp', [
+                'formId'       => 'leadForm',
+                'phoneInputId' => 'lead_phone',
+                'submitBtnId'  => 'leadSubmitBtn',
+                'inputClass'   => 'vl-form-input',
+              ])
             </div>
             <div class="vl-field">
               <label for="lead_email">Email address</label>
@@ -1993,9 +1997,13 @@
       </div>
 
       <div class="vl-form-grid-2">
-        <div class="vl-field">
-          <label for="cb_phone">Phone number</label>
-          <input id="cb_phone" name="phone" type="tel" placeholder="e.g. +91 98765 43210" required>
+        <div class="vl-field" style="grid-column:1/-1;">
+          @include('frontend.home-four.partials._phone_otp', [
+            'formId'       => 'cbForm',
+            'phoneInputId' => 'cb_phone',
+            'submitBtnId'  => 'cbSubmitBtn',
+            'inputClass'   => 'vl-form-input',
+          ])
         </div>
         <div class="vl-field">
           <label for="cb_email">Email address</label>
