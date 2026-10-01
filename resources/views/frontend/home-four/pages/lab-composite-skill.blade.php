@@ -219,7 +219,7 @@
     display: grid;
     grid-template-columns: 1.15fr 0.85fr;
     gap: 52px;
-    align-items: center;
+    /* align-items: center; */
   }
 
   @media (max-width: 980px) {
@@ -257,7 +257,8 @@
   .vl-hero-stats {
     margin-top: 48px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    /* grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); */
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
     border-top: 1px solid rgba(255, 255, 255, 0.25);
     padding-top: 30px;
@@ -815,7 +816,7 @@
     display: grid;
     grid-template-columns: 1fr 1.15fr;
     gap: 52px;
-    align-items: center;
+    /* align-items: center; */
   }
 
   @media (max-width: 900px) {
@@ -1228,6 +1229,70 @@
     max-width: 56ch;
     font-weight: 500;
   }
+
+  /* ==================== CALLBACK MODAL ==================== */
+  .cb-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: cbFadeIn .25s ease;
+  }
+  @keyframes cbFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  .cb-modal-box {
+    position: relative;
+    background: #ffffff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 680px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 40px 44px;
+    box-shadow: 0 24px 64px rgba(0,0,0,.25);
+    animation: cbSlideUp .3s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes cbSlideUp {
+    from { opacity: 0; transform: translateY(30px) scale(.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .cb-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid #e2e8f0;
+    background: #f8fafc;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s, color .2s;
+  }
+  .cb-modal-close:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #dc2626;
+  }
+  .cb-modal-header {
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  @media (max-width: 600px) {
+    .cb-modal-box { padding: 28px 20px; }
+    .cb-modal-box .vl-form-grid-2 { grid-template-columns: 1fr !important; }
+  }
 </style>
 @endpush
 
@@ -1247,19 +1312,25 @@
         <p class="lead">A complete, CBSE-aligned skill lab solution—from lab setup and curriculum mapping to certified faculty—everything ready before your academic session begins.</p>
         
         <div class="vl-hero-ctas">
-          <a href="{{ url('/register')}}" class="vl-btn-vibrant-cta">
-            To Visit Our Experience Center
+          <a href="#" class="vl-btn-vibrant-cta" id="cbOpenBtn1" onclick="cbOpenModal(); return false;">
+            Request for callback
             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
           </a>
-          <a href="#checklist" class="vl-btn-glass-cta">
+          <a href="{{asset('frontend/img/skillbox/Myskool_Brochure_Print_File.pdf')}}" download class="vl-btn-glass-cta">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             Download Brochure
           </a>
         </div>
         
-        <div class="vl-hero-stats">
+        
+      </div>
+
+      <!-- Floor Plan Schematic Card -->
+       <div class="">
+      <img src="{{ asset('/frontend/img/skillbox/workonhumanservices.jpeg') }}" alt="Leaders of Learning - School with Children">
+      <div class="vl-hero-stats">
           <div class="vl-stat-box">
-            <span class="num">212+</span>
+            <span class="num">200+</span>
             <span class="label">CBSE Schools Fitted</span>
           </div>
           <div class="vl-stat-box">
@@ -1274,12 +1345,8 @@
             <span class="num">100%</span>
             <span class="label">Syllabus Mapped</span>
           </div>
-        </div>
-      </div>
-
-      <!-- Floor Plan Schematic Card -->
-      <img src="{{ asset('/frontend/img/skillbox/workonhumanservices.jpeg') }}" alt="Leaders of Learning - School with Children">
-     
+        </div> 
+    </div>
     </div>
   </section>
 
@@ -1439,24 +1506,32 @@
           <div class="vl-plan-tier">Basic Package</div>
           <div class="vl-plan-price">₹3 <span>Lakh</span></div>
           <div class="vl-plan-desc">One-time turnkey setup</div>
-          <div class="vl-plan-summary">For schools up to 500 students — single classroom lab, core CBSE compliance ready.</div>
+          <div class="vl-plan-summary">Essential setup for CBSE-aligned skill education.</div>
           
           <ul class="vl-plan-list">
             <li>
               <div class="vl-plan-check-icon">✓</div>
-              <span>Lab hardware for one 400 sq ft room</span>
+              <span>CBSE-Aligned Infrastructure – Essential lab space, furniture, workstations and storage.</span>
             </li>
             <li>
               <div class="vl-plan-check-icon">✓</div>
-              <span>Robotics &amp; coding kits (Grades VI–X)</span>
+              <span>Core Tools & Equipment – Required tools and equipment for conducting practical skill activities.</span>
             </li>
             <li>
               <div class="vl-plan-check-icon">✓</div>
-              <span>Teacher training for 2 faculty members</span>
+              <span>Essential Skill Activities – Core hands-on activities aligned to the school's skill education requirements.</span>
             </li>
             <li>
               <div class="vl-plan-check-icon">✓</div>
-              <span>CBSE inspection readiness dossier</span>
+              <span>Basic Project & Activity Kits – Student materials for practical projects and skill-based activities.</span>
+            </li>
+            <li>
+              <div class="vl-plan-check-icon">✓</div>
+              <span>Teacher Orientation – Basic orientation for teachers on lab usage, activities and implementation.</span>
+            </li>
+            <li>
+              <div class="vl-plan-check-icon">✓</div>
+              <span>Compliance-Focused Setup – Ideal for schools looking to establish a functional Composite Skill Lab while fulfilling the required CBSE provisions.</span>
             </li>
           </ul>
           
@@ -1468,31 +1543,35 @@
         <!-- Advance Plan (Featured) -->
         <div class="vl-plan-card featured">
           <div class="vl-plan-badge-top">★ Most Popular Choice</div>
-          <div class="vl-plan-tier">Advance Package</div>
+          <div class="vl-plan-tier">Advanced Package</div>
           <div class="vl-plan-price">₹6 <span>Lakh</span></div>
           <div class="vl-plan-desc">One-time turnkey setup</div>
-          <div class="vl-plan-summary">For schools up to 1,000 students — full composite lab with AI modules &amp; ongoing curriculum refresh.</div>
+          <div class="vl-plan-summary">More resources for deeper practical learning.</div>
           
           <ul class="vl-plan-list">
             <li>
               <div class="vl-plan-check-icon">✓</div>
-              <span>Everything included in Basic</span>
+              <span>Enhanced Infrastructure – Additional workstations, storage and improved lab facilities.</span>
             </li>
             <li>
               <div class="vl-plan-check-icon">✓</div>
-              <span>600 sq ft expanded composite layout</span>
+              <span>Expanded Tools & Equipment – Wider selection of tools and equipment for diverse practical activities.</span>
             </li>
             <li>
               <div class="vl-plan-check-icon">✓</div>
-              <span>Dedicated AI, IoT &amp; Electronics stations</span>
+              <span>Wider Skill Activities – Greater variety of hands-on activities across multiple skill areas.</span>
             </li>
             <li>
               <div class="vl-plan-check-icon">✓</div>
-              <span>Full certification for up to 5 teachers</span>
+              <span>Expanded Project Kits – More project materials and activity kits for student learning.</span>
             </li>
             <li>
               <div class="vl-plan-check-icon">✓</div>
-              <span>Quarterly on-site faculty refresher sessions</span>
+              <span>Structured Teacher Training – Training and implementation support for effective lab utilisation.</span>
+            </li>
+            <li>
+              <div class="vl-plan-check-icon">✓</div>
+              <span>Beyond Compliance – Designed for schools that want to provide students with greater practical exposure and project-based learning.</span>
             </li>
           </ul>
           
@@ -1506,24 +1585,32 @@
           <div class="vl-plan-tier">Premium Package</div>
           <div class="vl-plan-price">₹10 <span>Lakh</span></div>
           <div class="vl-plan-desc">One-time turnkey setup</div>
-          <div class="vl-plan-summary">For large institutions &amp; group schools — dual lab setup, digital infrastructure &amp; priority support.</div>
+          <div class="vl-plan-summary">Advanced learning for future-ready skills.</div>
           
           <ul class="vl-plan-list">
             <li>
               <div class="vl-plan-check-icon">✓</div>
-              <span>Everything included in Advance</span>
+              <span>Premium Lab Infrastructure – Comprehensive workstations, specialised zones and enhanced facilities.</span>
             </li>
             <li>
               <div class="vl-plan-check-icon">✓</div>
-              <span>Two separate labs (400 sq ft each)</span>
+              <span>Advanced Equipment & Technology – Advanced tools and technology resources for specialised learning.</span>
             </li>
             <li>
               <div class="vl-plan-check-icon">✓</div>
-              <span>High-grade 3D printers, drones &amp; robotics</span>
+              <span>Comprehensive Skill Exposure – A wider range of interdisciplinary, technology-enabled and future-ready activities.</span>
             </li>
             <li>
               <div class="vl-plan-check-icon">✓</div>
-              <span>Dedicated relationship manager &amp; quick spares</span>
+              <span>Advanced Project & DIY Kits – Specialised kits supporting innovation, design and complex student projects.</span>
+            </li>
+            <li>
+              <div class="vl-plan-check-icon">✓</div>
+              <span>Advanced Teacher Upskilling – Comprehensive training with ongoing academic and implementation support.</span>
+            </li>
+            <li>
+              <div class="vl-plan-check-icon">✓</div>
+              <span>Complete Skill Ecosystem – Designed for schools that want to build a strong culture of practical learning, innovation and future-ready skills.</span>
             </li>
           </ul>
           
@@ -1670,7 +1757,7 @@
                 <td class="no">✕ 1 brief handover demo</td>
                 <td class="yes">✓ Multi-day certification + term refreshers</td>
               </tr>
-              <tr>
+              <!-- <tr>
                 <td>Maintenance &amp; Spares</td>
                 <td class="no">✕ High cost per visit, slow spares</td>
                 <td class="yes">✓ Included AMC + express replacement parts</td>
@@ -1679,7 +1766,7 @@
                 <td>Compliance Dossier</td>
                 <td class="no">✕ Not provided</td>
                 <td class="yes">✓ Full NEP 2020 inspection documentation</td>
-              </tr>
+              </tr> -->
               <tr>
                 <td>Price Transparency</td>
                 <td class="no">✕ Hidden hardware &amp; software surcharges</td>
@@ -1728,7 +1815,7 @@
               <div class="vl-faq-card__a">
                 <ul>
                   <li><strong>Basic:</strong> Core infrastructure, robotics &amp; coding tools.</li>
-                  <li><strong>Advance:</strong> Expanded composite layout with AI &amp; IoT stations.</li>
+                  <li><strong>Advanced:</strong> Expanded composite layout with AI &amp; IoT stations.</li>
                   <li><strong>Premium:</strong> Dual labs with advanced robotics, 3D printing &amp; dedicated support.</li>
                 </ul>
               </div>
@@ -1844,8 +1931,8 @@
       <p>Schedule a friendly 15-minute consultation with our academic specialists — transparent advice on room setup, curriculum mapping, and turnkey costs.</p>
       
       <div class="vl-hero-ctas" style="margin-top:34px;">
-        <a href="#checklist" class="vl-btn-vibrant-cta">
-          Schedule School Consultation
+        <a href="#" class="vl-btn-vibrant-cta" id="cbOpenBtn2" onclick="cbOpenModal(); return false;">
+          Request for callback
           <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
         </a>
       </div>
@@ -1857,6 +1944,91 @@
   </section>
 
 </div>
+
+{{-- ==================== REQUEST FOR CALLBACK MODAL ==================== --}}
+<div id="cbModal" class="cb-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="cbModalTitle" style="display:none;">
+  <div class="cb-modal-box">
+
+    {{-- Close --}}
+    <button class="cb-modal-close" id="cbModalClose" aria-label="Close modal">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+
+    {{-- Header --}}
+    <div class="cb-modal-header">
+      <div class="vl-eyebrow teal" style="margin-bottom:10px;"><span>★</span> Request for Callback</div>
+      <h2 id="cbModalTitle" style="font-size:1.55rem; font-weight:800; color:#1e1b4b; margin:0 0 6px;">
+        Let's talk about your <span class="vl-grad-sunset">Skill Lab</span>
+      </h2>
+      <p style="font-size:0.95rem; color:#64748b; margin:0;">
+        Share your details — our academic coordinator will call back within 1 working day.
+      </p>
+    </div>
+
+    {{-- Form --}}
+    <form class="vl-form" id="cbForm" style="margin-top:0;">
+      <input type="hidden" name="course_title" value="CBSE Composite Skill Lab – Callback Request">
+      <input type="hidden" name="source"       value="composite-skill-lab-callback">
+
+      <div class="vl-form-grid-2">
+        <div class="vl-field">
+          <label for="cb_name">Your full name</label>
+          <input id="cb_name" name="name" type="text" placeholder="e.g. Dr. Sunita Rao" required>
+        </div>
+        <div class="vl-field">
+          <label for="cb_designation">Designation</label>
+          <input id="cb_designation" name="designation" type="text" placeholder="e.g. Principal / Academic Director" required>
+        </div>
+      </div>
+
+      <div class="vl-form-grid-2">
+        <div class="vl-field">
+          <label for="cb_school">School name</label>
+          <input id="cb_school" name="school" type="text" placeholder="e.g. Blossom International School" required>
+        </div>
+        <div class="vl-field">
+          <label for="cb_city">City</label>
+          <input id="cb_city" name="city" type="text" placeholder="e.g. Bengaluru / Pune" required>
+        </div>
+      </div>
+
+      <div class="vl-form-grid-2">
+        <div class="vl-field">
+          <label for="cb_phone">Phone number</label>
+          <input id="cb_phone" name="phone" type="tel" placeholder="e.g. +91 98765 43210" required>
+        </div>
+        <div class="vl-field">
+          <label for="cb_email">Email address</label>
+          <input id="cb_email" name="email" type="email" placeholder="e.g. principal@school.edu.in" required>
+        </div>
+      </div>
+
+      <div class="vl-field">
+        <label for="cb_address">School campus address (Optional)</label>
+        <textarea id="cb_address" name="address" placeholder="Campus location, road or landmark"></textarea>
+      </div>
+
+      <button type="submit" id="cbSubmitBtn" class="vl-form-submit-vibrant" style="width:100%;">
+        Request a Callback
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" style="margin-left:8px;"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+      </button>
+
+      <div class="vl-form-note" style="margin-top:14px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" style="display:inline;vertical-align:-2px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        Your information is confidential. No unsolicited spam.
+      </div>
+    </form>
+
+    {{-- Success state --}}
+    <div class="vl-confirm" id="cbConfirmMsg" style="display:none;">
+      <span class="vl-confirm-icon">🎉</span>
+      <h3 style="font-size:1.4rem; margin-bottom:8px; color:#db2777;">Details received successfully!</h3>
+      <p style="margin:0; font-size:0.98rem; color:var(--vl-body);">Our academic coordinator will call you back within 1 working day.</p>
+    </div>
+
+  </div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -1946,5 +2118,78 @@
       });
     }
   });
+
+    // ── Callback Modal ────────────────────────────────────────
+    (function () {
+      const modal     = document.getElementById('cbModal');
+      const closeBtn  = document.getElementById('cbModalClose');
+      const cbForm    = document.getElementById('cbForm');
+      const cbSubmit  = document.getElementById('cbSubmitBtn');
+      const cbConfirm = document.getElementById('cbConfirmMsg');
+
+      function openModal() {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        // reset to form view every time modal opens
+        cbForm.style.display    = '';
+        cbConfirm.style.display = 'none';
+        cbForm.reset();
+      }
+
+      function closeModal() {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+
+      // close button
+      if (closeBtn) closeBtn.addEventListener('click', closeModal);
+
+      // click backdrop to close
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+      });
+
+      // Esc key to close
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal.style.display === 'flex') closeModal();
+      });
+
+      // AJAX submit — same route as leadForm
+      if (cbForm) {
+        cbForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+
+          const originalText = cbSubmit.textContent;
+          cbSubmit.disabled    = true;
+          cbSubmit.textContent = 'Submitting…';
+
+          fetch('{{ route("course.enquiry.store") }}', {
+            method: 'POST',
+            headers: {
+              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+              'Accept': 'application/json',
+            },
+            body: new FormData(cbForm),
+          })
+          .then(res => res.json())
+          .then(() => {
+            cbForm.style.display    = 'none';
+            cbConfirm.style.display = 'block';
+          })
+          .catch(() => {
+            cbForm.style.display    = 'none';
+            cbConfirm.style.display = 'block';
+          })
+          .finally(() => {
+            cbSubmit.disabled    = false;
+            cbSubmit.textContent = originalText;
+          });
+        });
+      }
+
+      // expose openModal so the inline onclick on buttons can also call it
+      window.cbOpenModal = openModal;
+    }());
+
 </script>
 @endpush

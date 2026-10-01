@@ -821,7 +821,7 @@
             .sv-brings-item { display:flex; align-items:flex-start; gap:12px; padding:14px 16px; background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.04); transition:box-shadow .25s ease, transform .25s ease; }
             .sv-brings-item:hover { box-shadow:0 6px 22px rgba(0,0,0,.09); transform:translateY(-2px); }
             .sv-brings-icon { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px; }
-            .sv-brings-item strong { font-size:13.5px; font-weight:700; color:#1e1b4b; display:block; margin-bottom:3px; line-height:1.3; }
+            .sv-brings-item strong { font-size:16px; font-weight:700; color:#1e1b4b; display:block; margin-bottom:3px; line-height:1.3; }
             .sv-brings-item span { font-size:12.5px; color:#64748b; line-height:1.5; }
             @media(max-width:600px){ .sv-brings-grid { grid-template-columns:1fr; } }
           </style>
@@ -1194,8 +1194,22 @@
       @php
       $ecoCards = [
         [
-          'rev'   => false,
+          'rev'   => true,
           'num'   => '01',
+          'img'   => asset('frontend/img/skillbox/Workonmaterialsandmachines.jpeg'),
+          'alt'   => 'Skill Education Infrastructure — Labs',
+          'grad'  => 'linear-gradient(135deg,rgba(180,83,9,.6),rgba(245,158,11,.35))',
+          'bBg'   => '#b45309','bIcon'=>'fa-building-columns','bLabel'=>'Skill Labs',
+          'tagBg' => '#fffbeb','tagClr'=>'#b45309','tagIcon'=>'fa-building-columns','tagLabel'=>'Learning Environments',
+          'clr'   => '#b45309','title'=>'Skill Education Infrastructure',
+          'sub'   => 'Creating Environments for Experiential Learning',
+          'body'  => 'Supports schools in designing <strong>purpose-driven skill education environments and lab setups</strong> aligned with chosen skill areas — bridging theory and application.',
+          'pts'   => ['CBSE aligned composite skill lab','Purpose-built skill infrastructure','Theory–application bridge','Dedicated experiential spaces','Hands-on exploration support','Strengthens skill ecosystem'],
+          'qt'    => 'Creating the environment where learning becomes experience.',
+        ],
+        [
+          'rev'   => false,
+          'num'   => '06',
           'img'   => asset('frontend/img/skillbox/homeimg01.jpeg'),
           'alt'   => 'Skill2SKool — Digital Learning',
           'grad'  => 'linear-gradient(135deg,rgba(79,70,229,.6),rgba(139,92,246,.35))',
@@ -1215,7 +1229,7 @@
           'grad'  => 'linear-gradient(135deg,rgba(3,105,161,.6),rgba(14,165,233,.35))',
           'bBg'   => '#0369a1','bIcon'=>'fa-robot','bLabel'=>'AI Lataa',
           'tagBg' => '#e0f2fe','tagClr'=>'#0369a1','tagIcon'=>'fa-robot','tagLabel'=>'Artificial Intelligence',
-          'clr'   => '#0369a1','title'=>'AI Lataa',
+          'clr'   => '#0369a1','title'=>'AI Lataa (Learning & teaching assist)',
           'sub'   => 'AI-Powered Support for Learning & Teaching',
           'body'  => 'Brings artificial intelligence into the educational ecosystem — an intelligent support layer for <strong>teachers and students</strong> to explore, interact with and learn through AI-enabled experiences.',
           'pts'   => ['AI assistance for teachers','Enhanced student engagement','Practical AI exposure','Digital readiness building','Adapts to emerging tech'],
@@ -1238,16 +1252,16 @@
         [
           'rev'   => true,
           'num'   => '04',
-          'img'   => asset('frontend/img/skillbox/Workonmaterialsandmachines.jpeg'),
-          'alt'   => 'Skill Education Infrastructure — Labs',
-          'grad'  => 'linear-gradient(135deg,rgba(180,83,9,.6),rgba(245,158,11,.35))',
-          'bBg'   => '#b45309','bIcon'=>'fa-building-columns','bLabel'=>'Skill Labs',
-          'tagBg' => '#fffbeb','tagClr'=>'#b45309','tagIcon'=>'fa-building-columns','tagLabel'=>'Learning Environments',
-          'clr'   => '#b45309','title'=>'Skill Education Infrastructure',
-          'sub'   => 'Creating Environments for Experiential Learning',
-          'body'  => 'Supports schools in designing <strong>purpose-driven skill education environments and lab setups</strong> aligned with chosen skill areas — bridging theory and application.',
-          'pts'   => ['Purpose-built skill infrastructure','Theory–application bridge','Dedicated experiential spaces','Hands-on exploration support','Strengthens skill ecosystem'],
-          'qt'    => 'Creating the environment where learning becomes experience.',
+          'img'   => asset('frontend/img/skillbox/teacher_upskilling.jpg'),
+          'alt'   => 'Upskill For Teacher Programme',
+          'grad'  => 'linear-gradient(135deg,rgba(223, 63, 63, 0.6),rgba(226, 127, 88, 0.35))',
+          'bBg'   => '#882b00','bIcon'=>'fa-chalkboard-user','bLabel'=>'U4T Programme',
+          'tagBg' => '#ecfdf5','tagClr'=>'#882b00','tagIcon'=>'fa-chalkboard-user','tagLabel'=>'Teacher Development',
+          'clr'   => '#882b00','title'=>'U4T | Upskill For Teacher',
+          'sub'   => 'Empowering Educators to Deliver Skill-Based Learning',
+          'body'  => 'Helps educators develop the knowledge, methodologies and confidence to facilitate <strong>experiential, competency-based and skill-oriented learning</strong> — shifting from content delivery to facilitation.',
+          'pts'   => ['Teacher skill education capability','Experiential methodology support','Continuous professional development','Internal capacity building','Practical facilitation skills'],
+          'qt'    => 'Building the teacher capability required for future-ready education.',
         ],
         [
           'rev'   => false,
@@ -1318,9 +1332,9 @@
         <div class="sv-journey-grid">
           @php
           $journeys = [
-            ['fa-user-graduate','#60a5fa','rgba(96,165,250,.15)','For Students', ['Learn','Explore','Practise','Create','Apply']],
-            ['fa-person-chalkboard','#34d399','rgba(52,211,153,.15)','For Teachers',['Train','Adapt','Facilitate','Innovate']],
             ['fa-school','#f472b6','rgba(244,114,182,.15)','For Schools',  ['Plan','Implement','Develop','Scale']],
+            ['fa-person-chalkboard','#34d399','rgba(52,211,153,.15)','For Teachers',['Train','Adapt','Facilitate','Innovate']],
+            ['fa-user-graduate','#60a5fa','rgba(96,165,250,.15)','For Students', ['Learn','Explore','Practise','Create','Apply']],
           ];
           @endphp
           @foreach($journeys as $j)

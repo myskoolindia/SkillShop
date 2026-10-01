@@ -204,12 +204,12 @@
         </div>
 
         <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-brand-navy leading-[1.15] tracking-tight">
-          ADVANCE COMPOSITE<br>
+          ADVANCED COMPOSITE<br>
           <span class="text-brand-orange">SKILL LAB</span>
         </h1>
 
         <p class="text-base sm:text-lg text-slate-700 leading-relaxed font-medium">
-          Create a dedicated space for hands-on skill education with the <strong class="text-brand-navy font-bold">Skillvation Advance Composite Skill Lab</strong> — an expanded, school-ready solution designed around the Composite Skill Lab requirement issued by CBSE.
+          Create a dedicated space for hands-on skill education with the <strong class="text-brand-navy font-bold">Skillvation Advanced Composite Skill Lab</strong> — an expanded, school-ready solution designed around the Composite Skill Lab requirement issued by CBSE.
         </p>
 
         <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
@@ -375,13 +375,15 @@
         Complete Solution
       </div>
       <h2 class="text-3xl sm:text-4xl font-extrabold text-brand-navy">
-        SKILLVATION ADVANCE PACKAGE
+        SKILLVATION ADVANCED PACKAGE
       </h2>
       <p class="text-base sm:text-lg text-brand-orange font-bold">
-        Designed to Meet the CBSE Composite Skill Lab Requirement
+        <!-- Designed to Meet the CBSE Composite Skill Lab Requirement -->
+         More resources. More activities. More hands-on learning.
       </p>
       <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
-        The Skillvation Advance Composite Skill Lab is structured as an expanded, comprehensive lab solution for schools looking to establish an advanced Composite Skill Lab in line with CBSE's requirement.
+        <!-- The Skillvation Advanced Composite Skill Lab is structured as an expanded, comprehensive lab solution for schools looking to establish an advanced Composite Skill Lab in line with CBSE's requirement. -->
+         An expanded skill lab for schools that want to go beyond basic compliance and provide students with a wider range of practical experiences across multiple skill areas.
       </p>
     </div>
 
@@ -737,13 +739,13 @@
 
     <div class="text-center max-w-2xl mx-auto mb-12">
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-navy/10 text-brand-navy text-xs font-bold uppercase tracking-wider mb-3">
-        Advance package
+        Advanced package
       </div>
       <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
-        Explore Components in the Advance Skill Lab Kit
+        Explore Components in the Advanced Skill Lab Kit
       </h2>
       <p class="mt-3 text-slate-500 text-sm sm:text-base">
-        Browse the curated equipment, activity items, and consumable resources included in the Skillvation Advance Package.
+        Browse the curated equipment, activity items, and consumable resources included in the Skillvation Advanced Package.
       </p>
     </div>
 
@@ -883,7 +885,7 @@
         </div>
         <h3 class="text-base font-extrabold text-brand-navy">SCALABLE</h3>
         <p class="text-sm text-slate-600 leading-relaxed">
-          Schools can begin with the Advance Package and enhance the lab with additional resources, equipment and specialized skill areas as their requirements evolve.
+          Schools can begin with the Advanced Package and enhance the lab with additional resources, equipment and specialized skill areas as their requirements evolve.
         </p>
       </div>
 
@@ -965,7 +967,7 @@
         </h2>
 
         <p class="text-base sm:text-lg text-slate-700 leading-relaxed font-medium">
-          The <strong class="text-brand-navy">Skillvation Advance Composite Skill Lab</strong> provides schools with a structured foundation for implementing hands-on skill education while addressing the infrastructure and equipment expectations associated with the CBSE Composite Skill Lab requirement.
+          The <strong class="text-brand-navy">Skillvation Advanced Composite Skill Lab</strong> provides schools with a structured foundation for implementing hands-on skill education while addressing the infrastructure and equipment expectations associated with the CBSE Composite Skill Lab requirement.
         </p>
 
         <div class="p-5 rounded-2xl bg-brand-navy text-white space-y-2 shadow-lg">
@@ -1005,52 +1007,72 @@
             <p class="text-xs text-slate-500 mt-1">Fill out the form below to receive detailed equipment lists and layout plans.</p>
           </div>
 
-          <form class="space-y-4" onsubmit="event.preventDefault(); alert('Thank you for reaching out! Our Skill Lab Specialists will contact you within 24 hours with the detailed Advance Composite Skill Lab package.');">
+          <form class="space-y-4" id="planEnquiryForm" data-source="composite-skill-lab-advance" data-title="Skillvation Advance Composite Skill Lab – Enquiry">
+            <input type="hidden" name="source"       id="planSource">
+            <input type="hidden" name="course_title" id="planTitle">
+
             <div>
               <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">School Name *</label>
-              <input type="text" required placeholder="e.g. Delhi Public School" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
+              <input type="text" name="school" required placeholder="e.g. Delhi Public School" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Contact Person *</label>
-                <input type="text" required placeholder="Your full name" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
+                <input type="text" name="name" required placeholder="Your full name" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
               </div>
               <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Phone Number *</label>
-                <input type="tel" required placeholder="+91 98765 43210" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Designation</label>
+                <input type="text" name="designation" placeholder="e.g. Principal / Academic Director" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
               </div>
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Email Address *</label>
-              <input type="email" required placeholder="principal@school.edu.in" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">City / State *</label>
-                <input type="text" required placeholder="e.g. Mumbai, Maharashtra" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Phone Number *</label>
+                <input type="tel" name="phone" required placeholder="+91 98765 43210" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Email Address *</label>
+                <input type="email" name="email" required placeholder="principal@school.edu.in" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">City *</label>
+                <input type="text" name="city" required placeholder="e.g. Mumbai, Maharashtra" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
               </div>
               <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Request Type *</label>
-                <select required class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all">
-                  <option value="package">Request a Detailed Package</option>
-                  <option value="visit">Book a Skill Lab Visit</option>
-                  <option value="demo">Schedule a Demo with Academic Team</option>
+                <select name="message" required class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all">
+                  <option value="Request a Detailed Package">Request a Detailed Package</option>
+                  <option value="Book a Skill Lab Visit">Book a Skill Lab Visit</option>
+                  <option value="Schedule a Demo with Academic Team">Schedule a Demo with Academic Team</option>
                 </select>
               </div>
             </div>
 
             <div>
               <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Message / Space Available</label>
-              <textarea rows="3" placeholder="Tell us about your space dimensions (e.g. 600 sq ft) or specific skill areas of interest..." class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all"></textarea>
+              <textarea name="address" rows="3" placeholder="Tell us about your space dimensions (e.g. 600 sq ft) or specific skill areas of interest..." class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all"></textarea>
             </div>
 
-            <button type="submit" class="w-full py-4 rounded-xl bg-brand-orange hover:bg-brand-orangehover text-white text-sm font-bold shadow-lg shadow-brand-orange/20 transition-all duration-200">
-              Submit Request &amp; Get Detailed Brochure
+            <button type="submit" id="planEnquiryBtn" class="w-full py-4 rounded-xl bg-brand-orange hover:bg-brand-orangehover text-white text-sm font-bold shadow-lg shadow-brand-orange/20 transition-all duration-200">
+              Request Callback
             </button>
+
+            <p class="text-xs text-center text-slate-400 mt-2">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:-1px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Your information is confidential. No spam.
+            </p>
           </form>
+
+          <div id="planEnquirySuccess" style="display:none;" class="text-center py-8">
+            <div class="text-5xl mb-4">🎉</div>
+            <h3 class="text-xl font-black text-brand-navy mb-2">Thank you!</h3>
+            <p class="text-sm text-slate-600">Our Skill Lab specialist will contact you within 1 working day with your detailed Advance Package proposal.</p>
+          </div>
         </div>
       </div>
 
@@ -1219,6 +1241,33 @@
 @endsection
 
 @push('scripts')
+<script>
+// ── Plan Enquiry Form AJAX ────────────────────────────────
+(function () {
+  var form    = document.getElementById('planEnquiryForm');
+  var btn     = document.getElementById('planEnquiryBtn');
+  var success = document.getElementById('planEnquirySuccess');
+  var srcEl   = document.getElementById('planSource');
+  var ttlEl   = document.getElementById('planTitle');
+  if (!form) return;
+  if (srcEl) srcEl.value = form.dataset.source || '';
+  if (ttlEl) ttlEl.value = form.dataset.title  || '';
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var orig = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Submitting…';
+    fetch('{{ route("course.enquiry.store") }}', {
+      method: 'POST',
+      headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '', 'Accept': 'application/json' },
+      body: new FormData(form),
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(){ form.style.display='none'; success.style.display='block'; })
+    .catch(function(){ form.style.display='none'; success.style.display='block'; })
+    .finally(function(){ btn.disabled=false; btn.textContent=orig; });
+  });
+}());
+</script>
 <script>
 // ── FAQ Card Carousel ─────────────────────────────────────
 (function () {
