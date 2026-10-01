@@ -1,7 +1,7 @@
 @extends('frontend.home-four.layouts.master')
 
 @section('meta_title', 'Basic Composite Skill Lab | CBSE-Aligned & School-Ready | Skillvation')
-@section('meta_description', 'CBSE-aligned Basic Composite Skill Lab for schools. Complete setup with lab infrastructure, tools, equipment, and experiential learning resources aligned with NEP 2020 and CBSE Circular Skill-75/2024.')
+@section('meta_description', 'CBSE-aligned Basic Composite Skill Lab for schools. Complete setup with lab infrastructure, tools, equipment, and PROJECTS AND DIY KITS  resources aligned with NEP 2020 and CBSE Circular Skill-75/2024.')
 
 @push('styles')
 <style>
@@ -346,7 +346,7 @@
             <li class="flex items-start gap-3 text-sm text-slate-700">
               <span class="w-6 h-6 rounded-full bg-brand-orange/10 text-brand-orange flex items-center justify-center text-xs font-bold mt-0.5 flex-shrink-0">4</span>
               <div>
-                <strong class="text-brand-navy font-bold">Hands-on Experiential Learning:</strong> The lab is intended to provide students with opportunities for practical, real-world tasks and project-based skill learning.
+                <strong class="text-brand-navy font-bold">Hands-on PROJECTS AND DIY KITS :</strong> The lab is intended to provide students with opportunities for practical, real-world tasks and project-based skill learning.
               </div>
             </li>
           </ul>
@@ -856,14 +856,14 @@
         </p>
       </div>
 
-      {{-- 3. EXPERIENTIAL LEARNING --}}
+      {{-- 3. PROJECTS AND DIY KITS  --}}
       <div class="feature-card bg-white rounded-2xl border border-slate-200 p-6 space-y-3">
         <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl">
           <i class="fa-solid fa-hands-holding-circle"></i>
         </div>
-        <h3 class="text-base font-extrabold text-brand-navy">EXPERIENTIAL LEARNING</h3>
+        <h3 class="text-base font-extrabold text-brand-navy">PROJECTS AND DIY KITS </h3>
         <p class="text-sm text-slate-600 leading-relaxed">
-          A learning environment focused on doing, creating, experimenting and applying.
+          Support students by providing project based and DIY kits for projects submission.
         </p>
       </div>
 
@@ -879,13 +879,24 @@
       </div>
 
       {{-- 5. SCALABLE --}}
-      <div class="feature-card bg-white rounded-2xl border border-slate-200 p-6 space-y-3 md:col-span-2 lg:col-span-2">
+      <div class="feature-card bg-white rounded-2xl border border-slate-200 p-6 space-y-3">
         <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-xl">
-          <i class="fa-solid fa-chart-line-up"></i>
+          <i class="fa-solid fa-chart-line"></i>
         </div>
         <h3 class="text-base font-extrabold text-brand-navy">SCALABLE</h3>
         <p class="text-sm text-slate-600 leading-relaxed">
           Schools can begin with the Basic Package and enhance the lab with additional resources, equipment and advanced skill areas as their requirements evolve.
+        </p>
+      </div>
+
+      {{-- 6. END TO END SUPPORT --}}
+      <div class="feature-card bg-white rounded-2xl border border-slate-200 p-6 space-y-3">
+        <div class="w-12 h-12 rounded-xl bg-blue-100 text-purple-600 flex items-center justify-center text-xl">
+          <i class="fa-solid fa-cubes-stacked"></i>
+        </div>
+        <h3 class="text-base font-extrabold text-brand-navy">END TO END SUPPORT</h3>
+        <p class="text-sm text-slate-600 leading-relaxed">
+          From understanding your requirements to selecting the right solution and implementing it, our team works along side the school.
         </p>
       </div>
 
