@@ -60,7 +60,7 @@
                             <p>{{ $footerSetting?->footer_text }}</p>
                             <ul class="list-wrap">
                                 <li>{{ $footerSetting?->address }}</li>
-                                <li>Experience Center: 3rd Floor, above Reliance Smart, near DLF New Town, Bhagyalakshmi Avenue, Rukmaiah Layout, Akshayanagar, Bengaluru - 560068</li>
+                                <li>Experience Center: 3rd Floor, above Reliance Smart, Akshayanagar, Bengaluru - 560068</li>
                                 <li>{{ $footerSetting?->phone }}</li>
                             </ul>
                         </div>
