@@ -161,14 +161,14 @@
 
           {{-- Buy Now (shown for type=10 courses) --}}
           <button id="buy-now-btn" onclick="buyNow()"
-            class="hidden bg-primary hover:bg-primary-dark text-white px-6 py-3.5 rounded-full text-sm font-bold w-full transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
+            class="bg-primary hover:bg-primary-dark text-white px-6 py-3.5 rounded-full text-sm font-bold w-full transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
             <i class="fa-solid fa-cart-shopping text-xs"></i>
             <span>Buy Now</span>
           </button>
 
           <!-- Request a Quote Button (default — shown for non-type-10) -->
           <button id="quote-btn" onclick="toggleQuoteForm()"
-            class="bg-primary hover:bg-primary-dark text-white px-6 py-3.5 rounded-full text-sm font-bold w-full transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
+            class="d-none bg-primary hover:bg-primary-dark text-white px-6 py-3.5 rounded-full text-sm font-bold w-full transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
             <i class="fa-solid fa-file-lines text-xs"></i>
             <span>Request a Quote</span>
           </button>
@@ -265,7 +265,7 @@
       }
 
       // Fallback: hit devapi directly to find by api_course_id
-      const devResponse = await fetch('http://devapi.local/api/collab-courses');
+      const devResponse = await fetch(APP_API);
       if (!devResponse.ok) return;
       const devResult = await devResponse.json();
       const devCourses = devResult.courses?.data || [];
@@ -340,10 +340,10 @@
     const quoteBtn = document.getElementById('quote-btn');
 
     if (String(course.type) === '10') {
-      if (buyBtn)   buyBtn.classList.remove('hidden');
+      // if (buyBtn)   buyBtn.classList.remove('hidden');
       if (quoteBtn) quoteBtn.classList.add('hidden');
     } else {
-      if (buyBtn)   buyBtn.classList.add('hidden');
+      // if (buyBtn)   buyBtn.classList.add('hidden');
       if (quoteBtn) quoteBtn.classList.remove('hidden');
     }
 
@@ -384,12 +384,13 @@
    */
   function buyNow() {
     const btn = document.getElementById('buy-now-btn');
-    btn.disabled = true;
+    // btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i><span>Loading...</span>';
 
     // Use the api_course_id stored by updateCourse()
     const apiId = window._apiCourseId || '{{ $course ? $course->api_course_id : "" }}';
-    const shopBase = 'http://pro.local/club-shop';
+    const shopUrl = '{{ env("APP_URL") }}';
+    const shopBase = shopUrl + '/club-shop';
 
     // Map api_course_id to club-shop product slug/URL
     // For TTT courses (type=10) redirect to the club-shop product page
