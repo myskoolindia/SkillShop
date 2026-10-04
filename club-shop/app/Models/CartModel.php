@@ -490,12 +490,13 @@ class CartModel extends BaseModel
                 foreach ($parsedBundle as $bItem) {
                     $bPid = (int)($bItem['product_id'] ?? 0);
                     $bVarId = !empty($bItem['variant_id']) ? (int)$bItem['variant_id'] : null;
-                    $bQty = max(0, (int)($bItem['qty'] ?? 0));
-                    $bUnitPrice = isset($bItem['unit_price']) ? (float)$bItem['unit_price'] : 0.0;
+                    $bQty = max(0, min(99999, (int)($bItem['qty'] ?? 0)));
+                    $bUnitPrice = 0.0;
 
-                    if ($bUnitPrice <= 0 && $bPid > 0) {
+                    // FINANCIAL SECURITY: Always fetch authoritative price from DB catalog, NEVER trust client input
+                    if ($bPid > 0) {
                         $bP = getActiveProduct($bPid);
-                        if ($bP) {
+                        if ($bP && $bP->status == 1) {
                             $bUnitPrice = (float)($bP->price_discounted > 0 ? $bP->price_discounted : $bP->price);
                         }
                     }
@@ -715,14 +716,12 @@ class CartModel extends BaseModel
                         continue; // Optional item with 0 quantity
                     }
                     $childPid = (int)($bChild['product_id'] ?? 0);
-                    $childPrice = isset($bChild['unit_price']) ? (float)$bChild['unit_price'] : 0.0;
-                    $childOriginalPrice = $childPrice;
+                    $childPrice = 0.0;
+                    $childOriginalPrice = 0.0;
                     if ($childPid > 0) {
                         $cP = getActiveProduct($childPid);
-                        if ($cP) {
-                            if ($childPrice <= 0) {
-                                $childPrice = (float)($cP->price_discounted > 0 ? $cP->price_discounted : $cP->price);
-                            }
+                        if ($cP && $cP->status == 1) {
+                            $childPrice = (float)($cP->price_discounted > 0 ? $cP->price_discounted : $cP->price);
                             $childOriginalPrice = (float)($cP->price > 0 ? $cP->price : $childPrice);
                         }
                     }

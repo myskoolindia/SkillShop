@@ -233,13 +233,7 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                                         endif; ?>
                                                     </div>
 
-                                                    <?php if ((int)$cartItem->product_id !== (int)($planDefaultProductId ?? 0)): ?>
-                                                    <a href="javascript:void(0)" class="btn btn-sm btn-outline-danger"
-                                                       style="border-radius:6px; padding:7px 12px; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:4px;"
-                                                       onclick="removeFromCart('<?= $cartItem->id; ?>');" title="<?= trans("remove"); ?>">
-                                                        <i class="icon-close"></i><span class="d-none d-sm-inline">&nbsp;<?= trans("remove"); ?></span>
-                                                    </a>
-                                                    <?php endif; ?>
+
 
                                                     <?php if (!empty($cartItem->is_bundle)): ?>
                                                         <a href="<?= esc($cartItem->product_url); ?>?cart_item_id=<?= $cartItem->id; ?>&bundle_cat=all&return=<?= esc(base_url($planKey . '-cart')); ?>#tab_bundle_contents"

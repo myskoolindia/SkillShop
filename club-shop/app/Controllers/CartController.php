@@ -90,28 +90,26 @@ class CartController extends BaseController
      */
     public function basicCart()
     {
-        $product = $this->productModel->getActiveProduct(1);
+        $product = $this->productModel->getProductBySlug('basic-skill-1');
+        if (empty($product)) {
+            $product = $this->productModel->getActiveProduct(1);
+        }
 
-        if (!empty($product)) {
+        if (!empty($product) && $product->status == 1) {
             $existingCart = $this->cartModel->getCart();
             $alreadyInCart = false;
 
             if (!empty($existingCart) && !empty($existingCart->items)) {
                 foreach ($existingCart->items as $item) {
-                    if ((int) $item->product_id === 1) {
+                    if ((int)$item->product_id === (int)$product->id) {
                         $alreadyInCart = true;
                         break;
                     }
                 }
             }
 
-            $isRemoved = helperGetSession('plan_removed_basic');
-            if (inputGet('add') == '1' || inputGet('reset') == '1') {
-                $isRemoved = false;
-                helperDeleteSession('plan_removed_basic');
-            }
-
-            if (!$alreadyInCart && !$isRemoved) {
+            // Fixed product: always guarantee presence in basic-cart
+            if (!$alreadyInCart) {
                 $this->cartModel->addToCart($product, 1);
             }
         }
@@ -141,7 +139,7 @@ class CartController extends BaseController
             $product = $this->productModel->getActiveProduct(2);
         }
 
-        if (!empty($product)) {
+        if (!empty($product) && $product->status == 1) {
             $existingCart = $this->cartModel->getCart();
             $alreadyInCart = false;
 
@@ -154,13 +152,8 @@ class CartController extends BaseController
                 }
             }
 
-            $isRemoved = helperGetSession('plan_removed_advance');
-            if (inputGet('add') == '1' || inputGet('reset') == '1') {
-                $isRemoved = false;
-                helperDeleteSession('plan_removed_advance');
-            }
-
-            if (!$alreadyInCart && !$isRemoved) {
+            // Fixed product: always guarantee presence in advance-cart
+            if (!$alreadyInCart) {
                 $this->cartModel->addToCart($product, 1);
             }
         }
@@ -188,7 +181,7 @@ class CartController extends BaseController
             $product = $this->productModel->getActiveProduct(3);
         }
 
-        if (!empty($product)) {
+        if (!empty($product) && $product->status == 1) {
             $existingCart = $this->cartModel->getCart();
             $alreadyInCart = false;
 
@@ -201,13 +194,8 @@ class CartController extends BaseController
                 }
             }
 
-            $isRemoved = helperGetSession('plan_removed_premium');
-            if (inputGet('add') == '1' || inputGet('reset') == '1') {
-                $isRemoved = false;
-                helperDeleteSession('plan_removed_premium');
-            }
-
-            if (!$alreadyInCart && !$isRemoved) {
+            // Fixed product: always guarantee presence in premium-cart
+            if (!$alreadyInCart) {
                 $this->cartModel->addToCart($product, 1);
             }
         }
@@ -681,8 +669,8 @@ class CartController extends BaseController
      */
     public function updateCartItemQuantity()
     {
-        $cartItemId = inputPost('cart_item_id');
-        $quantity = clrNum(inputPost('quantity'));
+        $cartItemId = (int)inputPost('cart_item_id');
+        $quantity = max(1, min(99999, (int)clrNum(inputPost('quantity'))));
         $this->cartModel->updateItemQuantity($cartItemId, $quantity);
         return jsonResponse();
     }
