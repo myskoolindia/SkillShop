@@ -17,11 +17,24 @@ class App extends BaseConfig
      * E.g., http://example.com/
      */
 
-   public string $baseURL = '';
+    public string $baseURL = '';
     public function __construct()
     {
         parent::__construct();
-        $this->baseURL = env('app.baseURL');
+        $envBase = env('app.baseURL');
+        if (!empty($envBase) && (!isset($_SERVER['HTTP_HOST']) || str_contains($envBase, $_SERVER['HTTP_HOST']))) {
+            $this->baseURL = rtrim($envBase, '/') . '/';
+        } elseif (isset($_SERVER['HTTP_HOST'])) {
+            $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+                || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443)
+                || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+            $scheme = $isHttps ? 'https://' : 'http://';
+            $script = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+            $basePath = trim($script, '/');
+            $this->baseURL = $scheme . $_SERVER['HTTP_HOST'] . ($basePath ? '/' . $basePath : '') . '/';
+        } else {
+            $this->baseURL = !empty($envBase) ? rtrim($envBase, '/') . '/' : 'https://skillvation.com/club-shop/';
+        }
     }
     /**
      * Allowed Hostnames in the Site URL other than the hostname in the baseURL.
