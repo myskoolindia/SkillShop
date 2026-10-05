@@ -418,6 +418,7 @@
                         </div>
                     </div>
                 </div>
+                <?php if (empty($product->is_bundle) && !empty($relatedProducts) && countItems($relatedProducts) > 0 && ($product->listing_type ?? '') == 'custom'): ?>
                 <div class="row">
                     <div class="col-12">
                         <!-- BUNDLE BUILDER -->
@@ -536,6 +537,9 @@
                             </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+                <?php endif; ?>
 
                         <div id="product_description_content" class="product-description post-text-responsive">
                             <?php $session = session();

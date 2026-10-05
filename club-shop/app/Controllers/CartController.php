@@ -51,38 +51,74 @@ class CartController extends BaseController
     }
 
     /**
-     * Basic Cart BB
+     * Get all LAB plan product IDs
      */
-    public function basicCartBB()
+    private function getLabPlanProductIds(): array
     {
-        // Auto-add the Basic Skill product (id=1, slug=basic-skill-1) only if not already in cart
-        $basicProduct = $this->productModel->getActiveProduct(1);
-        if (!empty($basicProduct)) {
-            $existingCart = $this->cartModel->getCart();
-            $alreadyInCart = false;
-            if (!empty($existingCart) && !empty($existingCart->items)) {
-                foreach ($existingCart->items as $item) {
-                    if ((int)$item->product_id === 1) {
-                        $alreadyInCart = true;
-                        break;
-                    }
+        $labSlugs = [
+            'basic-skill-1', 'advance-skill-1', 'premium-skill-1',
+            'test-skill-1', 'basic-plan', 'advance-plan', 'premium-plan'
+        ];
+
+        $ids = [1, 2, 3];
+
+        try {
+            $this->productModel->setBaseQuery(true);
+            $products = $this->productModel->builder
+                ->select('products.id')
+                ->groupStart()
+                    ->whereIn('products.slug', $labSlugs)
+                    ->orWhereIn('products.id', [1, 2, 3])
+                ->groupEnd()
+                ->where('products.is_deleted', 0)
+                ->get()->getResult();
+
+            if (!empty($products)) {
+                foreach ($products as $p) {
+                    $ids[] = (int)$p->id;
                 }
             }
-            if (!$alreadyInCart) {
-                $this->cartModel->addToCart($basicProduct, 1);
+        } catch (\Throwable $e) {
+            // Fallback to default IDs
+        }
+
+        return array_values(array_unique($ids));
+    }
+
+    /**
+     * Ensure only the selected LAB product is in cart as the lab bundle,
+     * removing any other conflicting LAB plans, but retaining all individual/other products.
+     */
+    private function syncSelectedLabCart($selectedProduct)
+    {
+        if (empty($selectedProduct) || $selectedProduct->status != 1) {
+            return;
+        }
+
+        $selectedId = (int)$selectedProduct->id;
+        $allLabIds = $this->getLabPlanProductIds();
+        $otherLabIds = array_diff($allLabIds, [$selectedId]);
+
+        $existingCart = $this->cartModel->getCart();
+        $isSelectedInCart = false;
+
+        if (!empty($existingCart) && !empty($existingCart->items)) {
+            foreach ($existingCart->items as $item) {
+                $itemPid = (int)$item->product_id;
+                // If it's another LAB plan, remove it so user only has the selected LAB
+                if (in_array($itemPid, $otherLabIds, true)) {
+                    $this->cartModel->removeCartItem($item->id);
+                } elseif ($itemPid === $selectedId) {
+                    $isSelectedInCart = true;
+                }
+                // Note: non-LAB products (accessories, extra items, consumables) are left intact!
             }
         }
 
-        $data = setPageMeta('Basic Plan — Cart');
-        $data['isTranslatable'] = true;
-        $data['cart'] = $this->cartModel->getCart();
-        $data['userSession'] = getUserSession();
-        $data['planKey'] = 'basic';
-        $data['planLabel'] = 'Basic';
-        helperDeleteSession('mds_service_payment');
-        echo view('partials/_header', $data);
-        echo view('cart/basic-cart', $data);
-        echo view('partials/_footer');
+        // Guarantee presence of selected LAB product in cart
+        if (!$isSelectedInCart) {
+            $this->cartModel->addToCart($selectedProduct, 1);
+        }
     }
 
     /**
@@ -95,24 +131,7 @@ class CartController extends BaseController
             $product = $this->productModel->getActiveProduct(1);
         }
 
-        if (!empty($product) && $product->status == 1) {
-            $existingCart = $this->cartModel->getCart();
-            $alreadyInCart = false;
-
-            if (!empty($existingCart) && !empty($existingCart->items)) {
-                foreach ($existingCart->items as $item) {
-                    if ((int)$item->product_id === (int)$product->id) {
-                        $alreadyInCart = true;
-                        break;
-                    }
-                }
-            }
-
-            // Fixed product: always guarantee presence in basic-cart
-            if (!$alreadyInCart) {
-                $this->cartModel->addToCart($product, 1);
-            }
-        }
+        $this->syncSelectedLabCart($product);
 
         $data = setPageMeta('Basic Plan — Cart');
         $data['isTranslatable'] = true;
@@ -139,24 +158,7 @@ class CartController extends BaseController
             $product = $this->productModel->getActiveProduct(2);
         }
 
-        if (!empty($product) && $product->status == 1) {
-            $existingCart = $this->cartModel->getCart();
-            $alreadyInCart = false;
-
-            if (!empty($existingCart) && !empty($existingCart->items)) {
-                foreach ($existingCart->items as $item) {
-                    if ((int)$item->product_id === (int)$product->id) {
-                        $alreadyInCart = true;
-                        break;
-                    }
-                }
-            }
-
-            // Fixed product: always guarantee presence in advance-cart
-            if (!$alreadyInCart) {
-                $this->cartModel->addToCart($product, 1);
-            }
-        }
+        $this->syncSelectedLabCart($product);
 
         $data = setPageMeta('Advance Plan — Cart');
         $data['isTranslatable'] = true;
@@ -165,7 +167,9 @@ class CartController extends BaseController
         $data['planKey'] = 'advance';
         $data['planLabel'] = 'Advance';
         $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 2;
+
         helperDeleteSession('mds_service_payment');
+
         echo view('partials/_header', $data);
         echo view('cart/advance-cart', $data);
         echo view('partials/_footer');
@@ -181,24 +185,7 @@ class CartController extends BaseController
             $product = $this->productModel->getActiveProduct(3);
         }
 
-        if (!empty($product) && $product->status == 1) {
-            $existingCart = $this->cartModel->getCart();
-            $alreadyInCart = false;
-
-            if (!empty($existingCart) && !empty($existingCart->items)) {
-                foreach ($existingCart->items as $item) {
-                    if ((int)$item->product_id === (int)$product->id) {
-                        $alreadyInCart = true;
-                        break;
-                    }
-                }
-            }
-
-            // Fixed product: always guarantee presence in premium-cart
-            if (!$alreadyInCart) {
-                $this->cartModel->addToCart($product, 1);
-            }
-        }
+        $this->syncSelectedLabCart($product);
 
         $data = setPageMeta('Premium Plan — Cart');
         $data['isTranslatable'] = true;
@@ -207,7 +194,9 @@ class CartController extends BaseController
         $data['planKey'] = 'premium';
         $data['planLabel'] = 'Premium';
         $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 3;
+
         helperDeleteSession('mds_service_payment');
+
         echo view('partials/_header', $data);
         echo view('cart/premium-cart', $data);
         echo view('partials/_footer');
@@ -605,6 +594,20 @@ class CartController extends BaseController
         $data = ['result' => 0];
 
         if (!empty($product) && $product->status == 1) {
+            $labPlanIds = $this->getLabPlanProductIds();
+            if (empty($cartItemId) && in_array((int)$product->id, $labPlanIds, true)) {
+                // When adding a new LAB plan, remove other conflicting LAB plans from the cart
+                $existingCart = $this->cartModel->getCart();
+                if (!empty($existingCart) && !empty($existingCart->items)) {
+                    foreach ($existingCart->items as $item) {
+                        $itemPid = (int)$item->product_id;
+                        if ($itemPid !== (int)$product->id && in_array($itemPid, $labPlanIds, true)) {
+                            $this->cartModel->removeCartItem($item->id);
+                        }
+                    }
+                }
+            }
+
             $cartItemId = $this->cartModel->addToCart($product, $quantity, $variantId, $extraOptions, $bundleComponentsJson, $cartItemId);
             if (!empty($cartItemId)) {
                 $cart = $this->cartModel->getCart();

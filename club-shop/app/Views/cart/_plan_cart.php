@@ -242,6 +242,14 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                                            title="Customize all categories">
                                                             <i class="fa fa-sliders"></i><span class="d-none d-sm-inline">&nbsp;Customize</span>
                                                         </a>
+                                                    <?php else: ?>
+                                                        <a href="javascript:void(0)"
+                                                           class="btn btn-sm btn-outline-danger"
+                                                           style="border-radius:6px; padding:7px 12px; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:4px;"
+                                                           onclick="removeFromCart('<?= $cartItem->id; ?>');"
+                                                           title="<?= trans("remove"); ?>">
+                                                            <i class="fa fa-trash-o"></i><span class="d-none d-sm-inline">&nbsp;<?= trans("remove"); ?></span>
+                                                        </a>
                                                     <?php endif; ?>
                                                 </div>
                                             </div>
