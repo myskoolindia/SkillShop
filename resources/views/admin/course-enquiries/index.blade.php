@@ -89,10 +89,9 @@
                                             <th>{{ __('Email') }}</th>
                                             <th>{{ __('City') }}</th>
                                             <th>{{ __('Source') }}</th>
-                                            <th style="min-width: 165px;">{{ __('Action') }}</th>
                                             <th>{{ __('Status') }}</th>
                                             <th>{{ __('Date') }}</th>
-                                            <th class="text-center">{{ __('Manage') }}</th>
+                                            <th class="text-center" style="min-width: 220px;">{{ __('Action') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -129,120 +128,6 @@
                                                     @endif
                                                 </td>
 
-                                                {{-- Action (2x2 Grid: Quote, PI, Inv, Pay) --}}
-                                                <td>
-                                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; min-width: 175px; max-width: 195px;">
-                                                        {{-- Cell 1: Quote --}}
-                                                        @if(!empty($qData['items']))
-                                                            <a href="{{ route('admin.course-enquiry.quotation.view', $enq->id) }}"
-                                                               target="_blank"
-                                                               class="btn btn-sm btn-primary p-1 text-truncate text-left d-flex align-items-center"
-                                                               style="font-size: 11px; line-height: 1.2; height: 26px;"
-                                                               title="{{ __('Quotation') }}: {{ $qData['quotation_number'] ?? '' }} (₹{{ number_format($qData['grand_total'] ?? 0) }})">
-                                                                <i class="fas fa-file-invoice mr-1 flex-shrink-0"></i>
-                                                                <span class="text-truncate">Quote</span>
-                                                                @if(!empty($qData['grand_total']))
-                                                                    <span class="ml-auto font-weight-bold" style="font-size: 10px;">₹{{ $qData['grand_total'] >= 1000 ? round($qData['grand_total']/1000, 1).'k' : number_format($qData['grand_total']) }}</span>
-                                                                @endif
-                                                            </a>
-                                                        @else
-                                                            <a href="{{ route('admin.course-enquiry.quotation', $enq->id) }}"
-                                                               class="btn btn-sm btn-outline-secondary p-1 text-truncate text-left d-flex align-items-center text-muted"
-                                                               style="font-size: 11px; line-height: 1.2; height: 26px; border-style: dashed;"
-                                                               title="{{ __('Create Quotation') }}">
-                                                                <i class="fas fa-plus mr-1 flex-shrink-0"></i>
-                                                                <span>Quote</span>
-                                                            </a>
-                                                        @endif
-
-                                                        {{-- Cell 2: Proforma (PI) --}}
-                                                        @if(!empty($pData['items']) && $enq->hasProformaInvoice())
-                                                            <a href="{{ route('admin.course-enquiry.proforma.view', $enq->id) }}"
-                                                               target="_blank"
-                                                               class="btn btn-sm btn-success p-1 text-truncate text-left d-flex align-items-center"
-                                                               style="font-size: 11px; line-height: 1.2; height: 26px;"
-                                                               title="{{ __('Proforma Invoice') }}: {{ $pData['invoice_number'] ?? '' }} (Rev {{ $enq->proforma_version }}) (₹{{ number_format($pData['grand_total'] ?? 0) }})">
-                                                                <i class="fas fa-file-invoice-dollar mr-1 flex-shrink-0"></i>
-                                                                <span class="text-truncate">PI</span>
-                                                                @if(!empty($pData['grand_total']))
-                                                                    <span class="ml-auto font-weight-bold" style="font-size: 10px;">₹{{ $pData['grand_total'] >= 1000 ? round($pData['grand_total']/1000, 1).'k' : number_format($pData['grand_total']) }}</span>
-                                                                @endif
-                                                            </a>
-                                                        @else
-                                                            <a href="{{ route('admin.course-enquiry.proforma', $enq->id) }}"
-                                                               class="btn btn-sm btn-outline-secondary p-1 text-truncate text-left d-flex align-items-center text-muted"
-                                                               style="font-size: 11px; line-height: 1.2; height: 26px; border-style: dashed;"
-                                                               title="{{ __('Create Proforma Invoice') }}">
-                                                                <i class="fas fa-plus mr-1 flex-shrink-0"></i>
-                                                                <span>PI</span>
-                                                            </a>
-                                                        @endif
-
-                                                        {{-- Cell 3: Tax Invoice (Inv) --}}
-                                                        @if(!empty($iData['items']) && $enq->hasInvoice())
-                                                            <a href="{{ route('admin.course-enquiry.invoice.view', $enq->id) }}"
-                                                               target="_blank"
-                                                               class="btn btn-sm btn-info p-1 text-truncate text-left d-flex align-items-center text-white"
-                                                               style="font-size: 11px; line-height: 1.2; height: 26px;"
-                                                               title="{{ __('Tax Invoice') }}: {{ $iData['invoice_number'] ?? '' }} (₹{{ number_format($iData['grand_total'] ?? 0) }})">
-                                                                <i class="fas fa-receipt mr-1 flex-shrink-0"></i>
-                                                                <span class="text-truncate">Inv</span>
-                                                                @if(!empty($iData['grand_total']))
-                                                                    <span class="ml-auto font-weight-bold" style="font-size: 10px;">₹{{ $iData['grand_total'] >= 1000 ? round($iData['grand_total']/1000, 1).'k' : number_format($iData['grand_total']) }}</span>
-                                                                @endif
-                                                            </a>
-                                                        @else
-                                                            <a href="{{ route('admin.course-enquiry.invoice', $enq->id) }}"
-                                                               class="btn btn-sm btn-outline-secondary p-1 text-truncate text-left d-flex align-items-center text-muted"
-                                                               style="font-size: 11px; line-height: 1.2; height: 26px; border-style: dashed;"
-                                                               title="{{ __('Create Tax Invoice') }}">
-                                                                <i class="fas fa-plus mr-1 flex-shrink-0"></i>
-                                                                <span>Inv</span>
-                                                            </a>
-                                                        @endif
-
-                                                        {{-- Cell 4: Payment (Pay) --}}
-                                                        @if($enq->hasInvoice() && ($paySummary['total_paid'] ?? 0) > 0)
-                                                            @if(($paySummary['payment_status'] ?? '') === 'paid')
-                                                                <a href="{{ route('admin.course-enquiry.show', $enq->id) }}#payment-card"
-                                                                   class="btn btn-sm btn-success p-1 text-truncate text-left d-flex align-items-center"
-                                                                   style="font-size: 11px; line-height: 1.2; height: 26px;"
-                                                                   title="{{ __('Paid in Full: ₹') }}{{ number_format($paySummary['total_paid'], 2) }}">
-                                                                    <i class="fas fa-check-circle mr-1 flex-shrink-0"></i>
-                                                                    <span class="text-truncate">Paid</span>
-                                                                    <span class="ml-auto font-weight-bold" style="font-size: 10px;">₹{{ $paySummary['total_paid'] >= 1000 ? round($paySummary['total_paid']/1000, 1).'k' : number_format($paySummary['total_paid']) }}</span>
-                                                                </a>
-                                                            @else
-                                                                <a href="{{ route('admin.course-enquiry.show', $enq->id) }}#payment-card"
-                                                                   class="btn btn-sm btn-warning p-1 text-truncate text-left d-flex align-items-center text-dark font-weight-bold"
-                                                                   style="font-size: 11px; line-height: 1.2; height: 26px;"
-                                                                   title="{{ __('Advance: ₹') }}{{ number_format($paySummary['advance_paid'] > 0 ? $paySummary['advance_paid'] : $paySummary['total_paid']) }} | Due: ₹{{ number_format($paySummary['balance_due']) }}">
-                                                                    <i class="fas fa-adjust mr-1 flex-shrink-0"></i>
-                                                                    <span class="text-truncate">Adv</span>
-                                                                    @php $advAmt = $paySummary['advance_paid'] > 0 ? $paySummary['advance_paid'] : $paySummary['total_paid']; @endphp
-                                                                    <span class="ml-auto font-weight-bold" style="font-size: 10px;">₹{{ $advAmt >= 1000 ? round($advAmt/1000, 1).'k' : number_format($advAmt) }}</span>
-                                                                </a>
-                                                            @endif
-                                                        @elseif($enq->hasInvoice())
-                                                            <a href="{{ route('admin.course-enquiry.show', $enq->id) }}#payment-card"
-                                                               class="btn btn-sm btn-danger p-1 text-truncate text-left d-flex align-items-center"
-                                                               style="font-size: 11px; line-height: 1.2; height: 26px;"
-                                                               title="{{ __('Payment Pending - Due: ₹') }}{{ number_format($paySummary['grand_total'], 2) }}">
-                                                                <i class="fas fa-clock mr-1 flex-shrink-0"></i>
-                                                                <span class="text-truncate">Unpaid</span>
-                                                            </a>
-                                                        @else
-                                                            <a href="{{ route('admin.course-enquiry.show', $enq->id) }}#payment-card"
-                                                               class="btn btn-sm btn-outline-secondary p-1 text-truncate text-left d-flex align-items-center text-muted"
-                                                               style="font-size: 11px; line-height: 1.2; height: 26px; border-style: dashed;"
-                                                               title="{{ __('Collect Payment (Tax Invoice needed first)') }}">
-                                                                <i class="fas fa-credit-card mr-1 flex-shrink-0"></i>
-                                                                <span>Pay</span>
-                                                            </a>
-                                                        @endif
-                                                    </div>
-                                                </td>
-
                                                 <td>
                                                     @if(!$enq->status || $enq->status === 'new')
                                                         <span class="badge badge-primary">{{ __('New') }}</span>
@@ -257,25 +142,147 @@
 
                                                 <td>{{ $enq->created_at?->format('d M Y') ?? '—' }}</td>
 
+                                                {{-- Action (Workflow 2x2 Grid + Manage View/Delete) --}}
                                                 <td class="text-center" style="white-space: nowrap;">
-                                                    {{-- View Details --}}
-                                                    <a href="{{ route('admin.course-enquiry.show', $enq->id) }}"
-                                                       class="btn btn-sm btn-info text-white" title="{{ __('View Details') }}">
-                                                        <i class="fa fa-eye"></i>
-                                                    </a>
+                                                    <div class="d-inline-flex align-items-center" style="gap: 5px;">
+                                                        {{-- 2x2 Grid: Quote, PI, Inv, Pay --}}
+                                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; min-width: 175px; max-width: 195px;">
+                                                            {{-- Cell 1: Quote --}}
+                                                            @if(!empty($qData['items']))
+                                                                <a href="{{ route('admin.course-enquiry.quotation.view', $enq->id) }}"
+                                                                   target="_blank"
+                                                                   class="btn btn-sm btn-primary p-1 text-truncate text-left d-flex align-items-center"
+                                                                   style="font-size: 11px; line-height: 1.2; height: 26px;"
+                                                                   title="{{ __('Quotation') }}: {{ $qData['quotation_number'] ?? '' }} (₹{{ number_format($qData['grand_total'] ?? 0) }})">
+                                                                    <i class="fas fa-file-invoice mr-1 flex-shrink-0"></i>
+                                                                    <span class="text-truncate">Quote</span>
+                                                                    @if(!empty($qData['grand_total']))
+                                                                        <span class="ml-auto font-weight-bold" style="font-size: 10px;">₹{{ $qData['grand_total'] >= 1000 ? round($qData['grand_total']/1000, 1).'k' : number_format($qData['grand_total']) }}</span>
+                                                                    @endif
+                                                                </a>
+                                                            @else
+                                                                <a href="{{ route('admin.course-enquiry.quotation', $enq->id) }}"
+                                                                   class="btn btn-sm btn-outline-secondary p-1 text-truncate text-left d-flex align-items-center text-muted"
+                                                                   style="font-size: 11px; line-height: 1.2; height: 26px; border-style: dashed;"
+                                                                   title="{{ __('Create Quotation') }}">
+                                                                    <i class="fas fa-plus mr-1 flex-shrink-0"></i>
+                                                                    <span>Quote</span>
+                                                                </a>
+                                                            @endif
 
-                                                    {{-- Delete --}}
-                                                    <a href="javascript:;" data-toggle="modal"
-                                                       data-target="#deleteModal"
-                                                       class="btn btn-danger btn-sm"
-                                                       onclick="deleteData({{ $enq->id }})" title="{{ __('Delete') }}">
-                                                        <i class="fa fa-trash" aria-hidden="true"></i>
-                                                    </a>
+                                                            {{-- Cell 2: Proforma (PI) --}}
+                                                            @if(!empty($pData['items']) && $enq->hasProformaInvoice())
+                                                                <a href="{{ route('admin.course-enquiry.proforma.view', $enq->id) }}"
+                                                                   target="_blank"
+                                                                   class="btn btn-sm btn-success p-1 text-truncate text-left d-flex align-items-center"
+                                                                   style="font-size: 11px; line-height: 1.2; height: 26px;"
+                                                                   title="{{ __('Proforma Invoice') }}: {{ $pData['invoice_number'] ?? '' }} (Rev {{ $enq->proforma_version }}) (₹{{ number_format($pData['grand_total'] ?? 0) }})">
+                                                                    <i class="fas fa-file-invoice-dollar mr-1 flex-shrink-0"></i>
+                                                                    <span class="text-truncate">PI</span>
+                                                                    @if(!empty($pData['grand_total']))
+                                                                        <span class="ml-auto font-weight-bold" style="font-size: 10px;">₹{{ $pData['grand_total'] >= 1000 ? round($pData['grand_total']/1000, 1).'k' : number_format($pData['grand_total']) }}</span>
+                                                                    @endif
+                                                                </a>
+                                                            @else
+                                                                <a href="{{ route('admin.course-enquiry.proforma', $enq->id) }}"
+                                                                   class="btn btn-sm btn-outline-secondary p-1 text-truncate text-left d-flex align-items-center text-muted"
+                                                                   style="font-size: 11px; line-height: 1.2; height: 26px; border-style: dashed;"
+                                                                   title="{{ __('Create Proforma Invoice') }}">
+                                                                    <i class="fas fa-plus mr-1 flex-shrink-0"></i>
+                                                                    <span>PI</span>
+                                                                </a>
+                                                            @endif
+
+                                                            {{-- Cell 3: Tax Invoice (Inv) --}}
+                                                            @if(!empty($iData['items']) && $enq->hasInvoice())
+                                                                <a href="{{ route('admin.course-enquiry.invoice.view', $enq->id) }}"
+                                                                   target="_blank"
+                                                                   class="btn btn-sm btn-info p-1 text-truncate text-left d-flex align-items-center text-white"
+                                                                   style="font-size: 11px; line-height: 1.2; height: 26px;"
+                                                                   title="{{ __('Tax Invoice') }}: {{ $iData['invoice_number'] ?? '' }} (₹{{ number_format($iData['grand_total'] ?? 0) }})">
+                                                                    <i class="fas fa-receipt mr-1 flex-shrink-0"></i>
+                                                                    <span class="text-truncate">Inv</span>
+                                                                    @if(!empty($iData['grand_total']))
+                                                                        <span class="ml-auto font-weight-bold" style="font-size: 10px;">₹{{ $iData['grand_total'] >= 1000 ? round($iData['grand_total']/1000, 1).'k' : number_format($iData['grand_total']) }}</span>
+                                                                    @endif
+                                                                </a>
+                                                            @else
+                                                                <a href="{{ route('admin.course-enquiry.invoice', $enq->id) }}"
+                                                                   class="btn btn-sm btn-outline-secondary p-1 text-truncate text-left d-flex align-items-center text-muted"
+                                                                   style="font-size: 11px; line-height: 1.2; height: 26px; border-style: dashed;"
+                                                                   title="{{ __('Create Tax Invoice') }}">
+                                                                    <i class="fas fa-plus mr-1 flex-shrink-0"></i>
+                                                                    <span>Inv</span>
+                                                                </a>
+                                                            @endif
+
+                                                            {{-- Cell 4: Payment (Pay) --}}
+                                                            @if($enq->hasInvoice() && ($paySummary['total_paid'] ?? 0) > 0)
+                                                                @if(($paySummary['payment_status'] ?? '') === 'paid')
+                                                                    <a href="{{ route('admin.course-enquiry.show', $enq->id) }}#payment-card"
+                                                                       class="btn btn-sm btn-success p-1 text-truncate text-left d-flex align-items-center"
+                                                                       style="font-size: 11px; line-height: 1.2; height: 26px;"
+                                                                       title="{{ __('Paid in Full: ₹') }}{{ number_format($paySummary['total_paid'], 2) }}">
+                                                                        <i class="fas fa-check-circle mr-1 flex-shrink-0"></i>
+                                                                        <span class="text-truncate">Paid</span>
+                                                                        <span class="ml-auto font-weight-bold" style="font-size: 10px;">₹{{ $paySummary['total_paid'] >= 1000 ? round($paySummary['total_paid']/1000, 1).'k' : number_format($paySummary['total_paid']) }}</span>
+                                                                    </a>
+                                                                @else
+                                                                    <a href="{{ route('admin.course-enquiry.show', $enq->id) }}#payment-card"
+                                                                       class="btn btn-sm btn-warning p-1 text-truncate text-left d-flex align-items-center text-dark font-weight-bold"
+                                                                       style="font-size: 11px; line-height: 1.2; height: 26px;"
+                                                                       title="{{ __('Advance: ₹') }}{{ number_format($paySummary['advance_paid'] > 0 ? $paySummary['advance_paid'] : $paySummary['total_paid']) }} | Due: ₹{{ number_format($paySummary['balance_due']) }}">
+                                                                        <i class="fas fa-adjust mr-1 flex-shrink-0"></i>
+                                                                        <span class="text-truncate">Adv</span>
+                                                                        @php $advAmt = $paySummary['advance_paid'] > 0 ? $paySummary['advance_paid'] : $paySummary['total_paid']; @endphp
+                                                                        <span class="ml-auto font-weight-bold" style="font-size: 10px;">₹{{ $advAmt >= 1000 ? round($advAmt/1000, 1).'k' : number_format($advAmt) }}</span>
+                                                                    </a>
+                                                                @endif
+                                                            @elseif($enq->hasInvoice())
+                                                                <a href="{{ route('admin.course-enquiry.show', $enq->id) }}#payment-card"
+                                                                   class="btn btn-sm btn-danger p-1 text-truncate text-left d-flex align-items-center"
+                                                                   style="font-size: 11px; line-height: 1.2; height: 26px;"
+                                                                   title="{{ __('Payment Pending - Due: ₹') }}{{ number_format($paySummary['grand_total'], 2) }}">
+                                                                    <i class="fas fa-clock mr-1 flex-shrink-0"></i>
+                                                                    <span class="text-truncate">Unpaid</span>
+                                                                </a>
+                                                            @else
+                                                                <a href="{{ route('admin.course-enquiry.show', $enq->id) }}#payment-card"
+                                                                   class="btn btn-sm btn-outline-secondary p-1 text-truncate text-left d-flex align-items-center text-muted"
+                                                                   style="font-size: 11px; line-height: 1.2; height: 26px; border-style: dashed;"
+                                                                   title="{{ __('Collect Payment (Tax Invoice needed first)') }}">
+                                                                    <i class="fas fa-credit-card mr-1 flex-shrink-0"></i>
+                                                                    <span>Pay</span>
+                                                                </a>
+                                                            @endif
+                                                        </div>
+
+                                                        {{-- Manage Controls (View & Delete) --}}
+                                                        <div class="d-flex flex-column pl-1 border-left" style="gap: 4px;">
+                                                            {{-- View Details --}}
+                                                            <a href="{{ route('admin.course-enquiry.show', $enq->id) }}"
+                                                               class="btn btn-sm btn-info text-white p-0 d-flex align-items-center justify-content-center"
+                                                               style="width: 26px; height: 26px;"
+                                                               title="{{ __('View Details') }}">
+                                                                <i class="fa fa-eye" style="font-size: 11px;"></i>
+                                                            </a>
+
+                                                            {{-- Delete --}}
+                                                            <a href="javascript:;" data-toggle="modal"
+                                                               data-target="#deleteModal"
+                                                               class="btn btn-sm btn-danger text-white p-0 d-flex align-items-center justify-content-center"
+                                                               style="width: 26px; height: 26px;"
+                                                               onclick="deleteData({{ $enq->id }})"
+                                                               title="{{ __('Delete') }}">
+                                                                <i class="fa fa-trash" style="font-size: 11px;"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @empty
                                             <x-empty-table :name="__('Enquiries')" route="" create="no"
-                                                :message="__('No enquiries found!')" colspan="10">
+                                                :message="__('No enquiries found!')" colspan="9">
                                             </x-empty-table>
                                         @endforelse
                                     </tbody>
