@@ -96,6 +96,9 @@ class AuthenticatedSessionController extends Controller
         }
 
         if ($user->role === 'vendor') {
+            if ($intendedUrl && !\Str::contains($intendedUrl, ['/login', '/register', '/admin'])) {
+                return redirect()->intended()->with($notification);
+            }
             session()->forget('url.intended');
             $ssoUrl = \App\Services\SsoTokenService::generateShopSsoUrl($user, 'dashboard');
             return redirect()->away($ssoUrl)->with($notification);

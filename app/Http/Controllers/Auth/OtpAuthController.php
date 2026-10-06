@@ -260,7 +260,10 @@ class OtpAuthController extends Controller
             $user->save();
         }
 
-        if ($user->role === 'vendor') {
+        $intended = session()->pull('url.intended');
+        if ($intended && !\Illuminate\Support\Str::contains($intended, ['/login', '/register', '/admin'])) {
+            $redirectUrl = $intended;
+        } elseif ($user->role === 'vendor') {
             $redirectUrl = \App\Services\SsoTokenService::generateShopSsoUrl($user, 'dashboard');
         } else {
             $redirectUrl = match ($user->role) {

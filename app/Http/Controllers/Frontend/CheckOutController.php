@@ -19,10 +19,14 @@ class CheckOutController extends Controller
             return redirect()->route('cart')->with(['messege' => __('Your cart is empty!'), 'alert-type' => 'info']);
         }
 
-        $enrollments = session()->get('enrollments') ?? [];
-        foreach($products as $product) {
-            if(in_array($product->id, $enrollments)) {
-                return redirect()->route('cart')->with(['messege' => __('You are already enrolled in this course'), 'alert-type' => 'error']);
+        // Individual students and teachers are checked against existing personal enrollments
+        // Schools can purchase multiple courses/packages to assign to school members
+        if (userAuth()?->role !== 'school') {
+            $enrollments = session()->get('enrollments') ?? [];
+            foreach($products as $product) {
+                if(in_array($product->id, $enrollments)) {
+                    return redirect()->route('cart')->with(['messege' => __('You are already enrolled in this course'), 'alert-type' => 'error']);
+                }
             }
         }
 

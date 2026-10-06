@@ -60,11 +60,10 @@
                                             <a
                                                 href="{{ route('course.show', $product->options['slug']) }}">{{ $product->name }}</a>
                                             <br>
-                                            @if (in_array($product->id, session()->get('enrollments')))
+                                            @if (userAuth()?->role !== 'school' && in_array($product->id, session()->get('enrollments') ?? []))
                                                 <span class="badge bg-warning mt-2">{{ __('Already purchased') }}</span>
-                                            @elseif (in_array($product->id, session()->get('instructor_courses')))
+                                            @elseif (in_array($product->id, session()->get('instructor_courses') ?? []))
                                                 <span class="badge bg-warning mt-2">{{ __('Own course') }}</span>
-                                            @else
                                             @endif
                                         </td>
                                         <td class="product__price">{{ currency($product->price) }}</td>

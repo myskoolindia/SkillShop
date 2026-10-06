@@ -611,7 +611,13 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        selectRole('student');
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlRole = urlParams.get('role');
+        const oldRole = "{{ old('role', '') }}";
+        const initialRole = (['school', 'teacher', 'student'].includes(urlRole)) 
+            ? urlRole 
+            : ((['school', 'teacher', 'student'].includes(oldRole)) ? oldRole : 'student');
+        selectRole(initialRole);
 
         const otpInputs = [1, 2, 3, 4, 5, 6].map(i => document.getElementById('otp-' + i)).filter(Boolean);
         otpInputs.forEach((input) => {

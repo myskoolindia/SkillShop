@@ -13,6 +13,113 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-8">
+                    {{-- Logged in Account Role Banner --}}
+                    @php
+                        $userRole = userAuth()?->role ?? 'student';
+                    @endphp
+                    <div class="card border-0 shadow-sm mb-4 rounded-3" style="background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%); border-left: 5px solid #4f46e5 !important;">
+                        <div class="card-body p-4">
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span class="text-muted small fw-semibold text-uppercase tracking-wider">{{ __('Account Type') }}:</span>
+                                        @if($userRole === 'school')
+                                            <span class="badge rounded-pill px-3 py-1" style="background:#8b5cf6; color:#fff; font-size:12px;">
+                                                <i class="fas fa-school me-1"></i> {{ __('School Account') }}
+                                            </span>
+                                        @elseif($userRole === 'teacher')
+                                            <span class="badge rounded-pill px-3 py-1" style="background:#f59e0b; color:#fff; font-size:12px;">
+                                                <i class="fas fa-chalkboard-teacher me-1"></i> {{ __('Teacher Account') }}
+                                            </span>
+                                        @elseif($userRole === 'student')
+                                            <span class="badge rounded-pill px-3 py-1" style="background:#0284c7; color:#fff; font-size:12px;">
+                                                <i class="fas fa-user-graduate me-1"></i> {{ __('Student Account') }}
+                                            </span>
+                                        @else
+                                            <span class="badge rounded-pill px-3 py-1 bg-secondary text-white" style="font-size:12px;">
+                                                <i class="fas fa-user me-1"></i> {{ ucfirst($userRole) }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <h5 class="mb-1 text-dark fw-bold">{{ userAuth()?->name }}</h5>
+                                    <p class="text-muted small mb-0">
+                                        <i class="far fa-envelope me-1"></i> {{ userAuth()?->email }}
+                                        @if(userAuth()?->phone)
+                                            <span class="mx-2">•</span> <i class="fab fa-whatsapp me-1 text-success"></i> +91 {{ userAuth()?->phone }}
+                                        @endif
+                                    </p>
+                                </div>
+                                <div>
+                                    <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form-checkout').submit();" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                                        <i class="fas fa-exchange-alt me-1"></i> {{ __('Switch Account') }}
+                                    </a>
+                                    <form id="logout-form-checkout" action="{{ route('logout') }}" method="POST" class="d-none">
+                                        @csrf
+                                    </form>
+                                </div>
+                            </div>
+
+                            <hr class="my-3 opacity-25">
+
+                            <div class="small text-secondary d-flex align-items-center gap-2">
+                                @if($userRole === 'school')
+                                    <i class="fas fa-info-circle text-primary fs-6"></i>
+                                    <span>{{ __('As an educational institution, you can purchase course access and assign them directly to your enrolled students & teachers from your School Dashboard.') }}</span>
+                                @elseif($userRole === 'teacher')
+                                    <i class="fas fa-info-circle text-warning fs-6"></i>
+                                    <span>{{ __('Purchasing under Teacher Account. Full curriculum access and lesson resources will be available in your portal upon completion.') }}</span>
+                                @else
+                                    <i class="fas fa-info-circle text-info fs-6"></i>
+                                    <span>{{ __('Personal student enrollment. After successful payment, course modules will be immediately accessible in your learning dashboard.') }}</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Selected Courses Summary --}}
+                    <div class="card border-0 shadow-sm mb-4 rounded-3">
+                        <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+                            <h6 class="mb-0 fw-bold text-dark">
+                                <i class="fas fa-book-open text-primary me-2"></i> {{ __('Courses in this Order') }} ({{ Cart::content()->count() }})
+                            </h6>
+                            <a href="{{ route('cart') }}" class="small text-primary text-decoration-none fw-semibold">
+                                {{ __('Edit Cart') }} <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="ps-3">{{ __('Course') }}</th>
+                                            <th class="text-end pe-3">{{ __('Price') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (Cart::content() as $item)
+                                            <tr>
+                                                <td class="ps-3 py-3">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        @if(!empty($item->options['image']))
+                                                            <img src="{{ asset($item->options['image']) }}" alt="{{ $item->name }}" style="width: 54px; height: 38px; object-fit: cover; border-radius: 6px;">
+                                                        @endif
+                                                        <div>
+                                                            <span class="fw-semibold text-dark d-block">{{ $item->name }}</span>
+                                                            <span class="text-muted small">{{ __('Online Course') }}</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-end pe-3 fw-bold text-dark">
+                                                    {{ currency($item->price) }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
                     <div id="show_currency_notifications">
                         @php
                             $BasicPaymentSupportedCurrenyListEnum =

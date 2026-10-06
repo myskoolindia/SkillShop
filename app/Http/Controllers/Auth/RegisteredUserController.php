@@ -146,7 +146,7 @@ class RegisteredUserController extends Controller
             default      => route('student.dashboard'),
         };
 
-        return redirect($defaultRoute)->with($notification);
+        return redirect()->intended($defaultRoute)->with($notification);
     }
 
     public function custom_user_verification($token)
