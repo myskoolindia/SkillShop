@@ -426,9 +426,7 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                     endif; ?>
 
                                 </div>
-                                <a href="<?= langBaseUrl(); ?>" class="btn btn-md btn-custom m-t-30">
-                                    <i class="icon-arrow-left m-r-2"></i><?= trans("keep_shopping") ?>
-                                </a>
+                                <?php /* Keep Shopping button hidden on plan cart pages */ ?>
                             </div>
 
                             <!-- ── Right column: order summary ── -->
