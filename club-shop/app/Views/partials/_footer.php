@@ -10,34 +10,34 @@ $footer_settings = getPortalFooterSettings();
 $social_links = getPortalSocialLinks();
 
 // Fallbacks if menus are empty in DB
-if (empty($footer_menu_one)) {
-    $footer_menu_one = [
-        ['label' => 'Home', 'link' => '/'],
-        ['label' => 'Courses', 'link' => '/courses'],
-        ['label' => 'AI & Robotics Lab', 'link' => '/labs/ai-robotics'],
-        ['label' => 'STEM Lab', 'link' => '/labs/stem'],
-        ['label' => 'ECEC Lab', 'link' => '/labs/ecec'],
-        ['label' => 'Composite Skill Lab', 'link' => '/labs/composite-skill'],
-    ];
-}
+// if (empty($footer_menu_one)) {
+//     $footer_menu_one = [
+//         ['label' => 'Home', 'link' => '/'],
+//         ['label' => 'Courses', 'link' => '/courses'],
+//         ['label' => 'AI & Robotics Lab', 'link' => '/labs/ai-robotics'],
+//         ['label' => 'STEM Lab', 'link' => '/labs/stem'],
+//         ['label' => 'ECEC Lab', 'link' => '/labs/ecec'],
+//         ['label' => 'Composite Skill Lab', 'link' => '/labs/composite-skill'],
+//     ];
+// }
 
-if (empty($footer_menu_two)) {
-    $footer_menu_two = [
-        ['label' => 'Skill 2 Skool', 'link' => '/skill2school'],
-        ['label' => 'TTT', 'link' => '/ttt'],
-        ['label' => 'Upskill 4 Teacher', 'link' => '/upskill4teacher'],
-        ['label' => 'Shop', 'link' => '/club-shop'],
-        ['label' => 'Blog', 'link' => '/blog'],
-        ['label' => 'Contact', 'link' => '/contact'],
-    ];
-}
+// if (empty($footer_menu_two)) {
+//     $footer_menu_two = [
+//         ['label' => 'Skill 2 Skool', 'link' => '/skill2school'],
+//         ['label' => 'TTT', 'link' => '/ttt'],
+//         ['label' => 'Upskill 4 Teacher', 'link' => '/upskill4teacher'],
+//         ['label' => 'Shop', 'link' => '/club-shop'],
+//         ['label' => 'Blog', 'link' => '/blog'],
+//         ['label' => 'Contact', 'link' => '/contact'],
+//     ];
+// }
 
-if (empty($footer_menu_three)) {
-    $footer_menu_three = [
-        ['label' => 'Terms & Conditions', 'link' => '/terms-and-conditions'],
-        ['label' => 'Privacy Policy', 'link' => '/privacy-policy'],
-    ];
-}
+// if (empty($footer_menu_three)) {
+//     $footer_menu_three = [
+//         ['label' => 'Terms & Conditions', 'link' => '/terms-and-conditions'],
+//         ['label' => 'Privacy Policy', 'link' => '/privacy-policy'],
+//     ];
+// }
 ?>
 
 <footer class="footer__area mt-0" style="margin-top: 0 !important;">
@@ -56,6 +56,9 @@ if (empty($footer_menu_three)) {
                             <p><?= !empty($footer_settings?->footer_text) ? esc($footer_settings->footer_text) : (!empty($baseSettings->about_footer) ? $baseSettings->about_footer : "Skillvation is an educational ecosystem dedicated to empowering learners and schools through hands-on skills, experiential labs, and future-ready curriculums."); ?></p>
                             <ul class="list-wrap">
                                 <li><?= !empty($footer_settings?->address) ? esc($footer_settings->address) : (!empty($baseSettings->contact_address) ? esc($baseSettings->contact_address) : 'India'); ?></li>
+                                <?php if (!empty($footer_settings?->address2)): ?>
+                                    <li><?= esc($footer_settings->address2); ?></li>
+                                <?php endif; ?>
                                 <?php if (!empty($footer_settings?->phone) || !empty($baseSettings->contact_phone)): ?>
                                     <li><?= esc($footer_settings?->phone ?? $baseSettings->contact_phone); ?></li>
                                 <?php endif; ?>
@@ -67,7 +70,7 @@ if (empty($footer_menu_three)) {
                 <!-- Col 2: Useful Links (Dynamic Menu One) -->
                 <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
                     <div class="footer__widget">
-                        <h4 class="footer__widget-title"><?= trans("useful_links") ?? "Useful Links"; ?></h4>
+                        <h4 class="footer__widget-title">Useful Links</h4>
                         <div class="footer__link">
                             <ul class="list-wrap">
                                 <?php foreach ($footer_menu_one as $mOne):
@@ -86,7 +89,7 @@ if (empty($footer_menu_three)) {
                 <!-- Col 3: Our Company (Dynamic Menu Two) -->
                 <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
                     <div class="footer__widget">
-                        <h4 class="footer__widget-title"><?= trans("our_company") ?? "Our Company"; ?></h4>
+                        <h4 class="footer__widget-title">Our Company</h4>
                         <div class="footer__link">
                             <ul class="list-wrap">
                                 <?php foreach ($footer_menu_two as $mTwo):
@@ -105,7 +108,7 @@ if (empty($footer_menu_three)) {
                 <!-- Col 4: Get In Touch -->
                 <div class="col-xl-3 col-lg-4 col-md-6">
                     <div class="footer__widget">
-                        <h4 class="footer__widget-title"><?= trans("get_in_touch") ?? "Get In Touch"; ?></h4>
+                        <h4 class="footer__widget-title">Get In Touch</h4>
                         <div class="footer__contact-content">
                             <p><?= !empty($footer_settings?->get_in_touch_text) ? esc($footer_settings->get_in_touch_text) : "Connect with us for partnerships, lab setups, school implementations, and educator training."; ?></p>
                             <ul class="list-wrap footer__social">

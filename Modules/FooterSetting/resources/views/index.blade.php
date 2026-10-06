@@ -50,6 +50,15 @@
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
+                                        <label>{{ __('Footer Address 2') }} <small class="text-muted">({{ __('e.g. Experience Centre, Branch Office') }})</small></label>
+                                        <input type="text" class="form-control" name="address2" value="{{ $footerSetting?->address2 }}">
+                                        @error('address2')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
                                         <label>{{ __('Footer Phone') }}</label>
                                         <input type="text" class="form-control" name="phone" value="{{ $footerSetting?->phone }}">
                                         @error('phone')

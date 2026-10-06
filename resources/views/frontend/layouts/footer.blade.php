@@ -60,7 +60,9 @@
                             <p>{{ $footerSetting?->footer_text }}</p>
                             <ul class="list-wrap">
                                 <li>{{ $footerSetting?->address }}</li>
-                                <li>Experience Center: 3rd Floor, above Reliance Smart, Akshayanagar, Bengaluru - 560068</li>
+                                @if($footerSetting?->address2)
+                                <li>{{ $footerSetting->address2 }}</li>
+                                @endif
                                 <li>{{ $footerSetting?->phone }}</li>
                             </ul>
                         </div>
