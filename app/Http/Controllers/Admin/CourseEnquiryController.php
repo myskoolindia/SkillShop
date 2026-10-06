@@ -170,6 +170,13 @@ class CourseEnquiryController extends Controller
                     'total'      => $total,
                 ];
             }
+
+            // Sort items grouped by category, then item title
+            usort($items, function ($a, $b) {
+                $catCmp = strcasecmp($a['category'] ?? 'General', $b['category'] ?? 'General');
+                if ($catCmp !== 0) return $catCmp;
+                return strcasecmp($a['item'] ?? '', $b['item'] ?? '');
+            });
         }
 
         $discount    = max(0, (float) $request->input('discount', 0));
@@ -291,6 +298,13 @@ class CourseEnquiryController extends Controller
                     'total'      => $total,
                 ];
             }
+
+            // Sort items grouped by category, then item title
+            usort($items, function ($a, $b) {
+                $catCmp = strcasecmp($a['category'] ?? 'General', $b['category'] ?? 'General');
+                if ($catCmp !== 0) return $catCmp;
+                return strcasecmp($a['item'] ?? '', $b['item'] ?? '');
+            });
         }
 
         $discount    = max(0, (float) $request->input('discount', 0));
@@ -435,6 +449,13 @@ class CourseEnquiryController extends Controller
                     'total'      => $total,
                 ];
             }
+
+            // Sort items grouped by category, then item title
+            usort($items, function ($a, $b) {
+                $catCmp = strcasecmp($a['category'] ?? 'General', $b['category'] ?? 'General');
+                if ($catCmp !== 0) return $catCmp;
+                return strcasecmp($a['item'] ?? '', $b['item'] ?? '');
+            });
         }
 
         $discount    = max(0, (float) $request->input('discount', 0));
@@ -619,6 +640,13 @@ class CourseEnquiryController extends Controller
                 'total'      => $total,
             ];
         }
+
+        // Sort items grouped by category, then item title
+        usort($items, function ($a, $b) {
+            $catCmp = strcasecmp($a['category'] ?? 'General', $b['category'] ?? 'General');
+            if ($catCmp !== 0) return $catCmp;
+            return strcasecmp($a['item'] ?? '', $b['item'] ?? '');
+        });
 
         return response()->json([
             'success'  => true,
@@ -841,7 +869,9 @@ class CourseEnquiryController extends Controller
                 })
                 ->where('pb.bundle_product_id', $bundle->id)
                 ->where('p.is_deleted', 0)
+                ->orderBy('cl.name', 'asc')
                 ->orderBy('pb.sort_order', 'asc')
+                ->orderBy('pd.title', 'asc')
                 ->select([
                     'p.id as product_id',
                     'p.sku',

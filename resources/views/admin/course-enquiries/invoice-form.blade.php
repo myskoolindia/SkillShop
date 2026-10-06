@@ -253,6 +253,9 @@
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h4><i class="fas fa-list-ol text-primary mr-2"></i>{{ __('Invoice Line Items') }}</h4>
                                 <div>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary mr-2" id="btnSortByCategory" title="{{ __('Sort and group line items by Category') }}">
+                                        <i class="fas fa-sort-alpha-down mr-1"></i>{{ __('Sort by Category') }}
+                                    </button>
                                     <button type="button" class="btn btn-sm btn-outline-primary mr-2" id="btnBrowseClubShop" data-toggle="modal" data-target="#clubShopModal">
                                         <i class="fas fa-store mr-1"></i>{{ __('ClubShop Catalog') }}
                                     </button>
@@ -280,7 +283,12 @@
                                             </tr>
                                         </thead>
                                         <tbody id="itemsBody">
-                                            @php $items = $invoice['items'] ?? []; @endphp
+                                            @php
+                                                $rawItems = $invoice['items'] ?? [];
+                                                $items = collect($rawItems)->sortBy(function($it) {
+                                                    return [strtoupper($it['category'] ?? 'General'), strtoupper($it['item'] ?? '')];
+                                                })->values()->all();
+                                            @endphp
                                             @forelse($items as $idx => $row)
                                                 <tr class="item-row">
                                                     <td class="text-center row-sno align-middle">{{ $loop->iteration }}</td>
@@ -802,6 +810,15 @@
                 return matchSearch && matchCat;
             });
 
+            // Sort filtered catalog items grouped by category, then title
+            filtered.sort(function (a, b) {
+                var catA = (a.category_name || 'General').toLowerCase();
+                var catB = (b.category_name || 'General').toLowerCase();
+                var cmp = catA.localeCompare(catB);
+                if (cmp !== 0) return cmp;
+                return (a.title || '').localeCompare(b.title || '');
+            });
+
             if (!filtered.length) {
                 tbody.html('<tr><td colspan="6" class="text-center py-4 text-muted">{{ __("No products match your filter.") }}</td></tr>');
                 $('#selectedCount').text('0');
@@ -809,7 +826,19 @@
             }
 
             var html = '';
+            var currentModalCat = null;
             filtered.forEach(function (p) {
+                var catName = p.category_name || 'General';
+                if (catName !== currentModalCat) {
+                    currentModalCat = catName;
+                    html += `
+                        <tr class="table-light" style="background:#f1f5f9; border-top:2px solid #cbd5e1; border-bottom:1px solid #cbd5e1;">
+                            <td colspan="6" class="py-2 px-3 font-weight-bold text-primary" style="font-size:12px; text-transform:uppercase; letter-spacing:0.5px;">
+                                <i class="fas fa-folder-open mr-2"></i> ${currentModalCat}
+                            </td>
+                        </tr>
+                    `;
+                }
                 html += `
                     <tr>
                         <td class="text-center align-middle">
@@ -817,7 +846,7 @@
                         </td>
                         <td class="align-middle"><code class="font-weight-bold text-dark">${p.sku || '-'}</code></td>
                         <td class="align-middle font-weight-bold">${p.title}</td>
-                        <td class="align-middle"><span class="badge badge-light border">${p.category_name || 'General'}</span></td>
+                        <td class="align-middle"><span class="badge badge-light border">${catName}</span></td>
                         <td class="text-right align-middle font-weight-bold text-primary">₹${(p.unit_price || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
                         <td class="text-center align-middle">
                             <button type="button" class="btn btn-sm btn-outline-primary btn-modal-use-single" data-prod='${JSON.stringify(p).replace(/'/g, "&#39;")}'>
@@ -898,8 +927,35 @@
                 populateRowWithProduct(newRow, prod);
             });
 
+            sortItemsTableByCategory();
             $('#clubShopModal').modal('hide');
             toastr.success(selectedCheckboxes.length + ' {{ __("products added successfully.") }}');
+        });
+
+        // Function: Sort items table rows grouped by Category, then Item Name
+        function sortItemsTableByCategory() {
+            var rows = itemsBody.find('tr.item-row').get();
+            if (!rows.length) return;
+
+            rows.sort(function (a, b) {
+                var catA = ($(a).find('.item-category').val() || 'General').toLowerCase().trim();
+                var catB = ($(b).find('.item-category').val() || 'General').toLowerCase().trim();
+                var cmp = catA.localeCompare(catB);
+                if (cmp !== 0) return cmp;
+                var itemA = ($(a).find('.item-name-input').val() || '').toLowerCase().trim();
+                var itemB = ($(b).find('.item-name-input').val() || '').toLowerCase().trim();
+                return itemA.localeCompare(itemB);
+            });
+
+            $.each(rows, function (idx, row) {
+                itemsBody.append(row);
+            });
+            reindexAndRecalculate();
+        }
+
+        $('#btnSortByCategory').on('click', function () {
+            sortItemsTableByCategory();
+            toastr.info('{{ __("Line items grouped and sorted by Category.") }}');
         });
 
         // Reload Package Items
@@ -921,7 +977,7 @@
                         res.items.forEach(function (item, idx) {
                             itemsBody.append(createRowHtml(idx, item));
                         });
-                        reindexAndRecalculate();
+                        sortItemsTableByCategory();
                         toastr.success(res.items.length + ' {{ __("package items loaded successfully.") }}');
                     } else {
                         toastr.info('{{ __("No default items found for this course/package.") }}');

@@ -64,6 +64,9 @@ $discountRate = !empty($product->bundle_discount_rate) ? $product->bundle_discou
                     <button type="button" class="btn btn-outline-success m-l-10" data-toggle="modal" data-target="#modalBulkCsvBundle">
                         <i class="fa fa-file-excel-o"></i>&nbsp;&nbsp;Bulk CSV Import (100+ Items)
                     </button>
+                    <button type="button" class="btn btn-outline-secondary m-l-10" onclick="sortBundleTableByCategory();" title="Sort and group items by Category">
+                        <i class="fa fa-sort-alpha-asc"></i>&nbsp;&nbsp;Sort by Category
+                    </button>
                 </div>
                 <div class="col-md-6 col-sm-12 text-right m-b-10">
                     <input type="text" id="bundle_filter_input" class="form-control" style="max-width:280px; display:inline-block;" placeholder="Filter components in table..." onkeyup="filterBundleTable();">
@@ -89,7 +92,19 @@ $discountRate = !empty($product->bundle_discount_rate) ? $product->bundle_discou
                     </thead>
                     <tbody id="bundle_components_tbody">
                         <?php if (!empty($bundleComponents)): ?>
-                            <?php foreach ($bundleComponents as $idx => $comp): ?>
+                            <?php 
+                            $currCatName = null;
+                            foreach ($bundleComponents as $idx => $comp): 
+                                $compCat = !empty($comp->category_name) ? $comp->category_name : 'General';
+                                if ($compCat !== $currCatName):
+                                    $currCatName = $compCat;
+                            ?>
+                                <tr class="bundle-category-header" style="background:#f1f5f9; border-top:2px solid #cbd5e1; border-bottom:1px solid #cbd5e1;">
+                                    <td colspan="10" style="padding:6px 12px; font-weight:700; color:#1e3a8a; font-size:12px; text-transform:uppercase; letter-spacing:0.5px;">
+                                        <i class="fa fa-folder-open-o text-primary"></i>&nbsp;&nbsp;<?= esc($currCatName); ?>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
                                 <tr class="bundle-row" data-id="<?= $comp->id; ?>" data-title="<?= esc(strtolower($comp->title)); ?>" data-sku="<?= esc(strtolower($comp->sku)); ?>" data-category="<?= esc(strtolower($comp->category_name ?? '')); ?>">
                                     <td><?= $idx + 1; ?></td>
                                     <td>
@@ -587,6 +602,38 @@ function uploadBundleCsv(productId) {
         error: function() {
             $('#bundle_csv_status').html('<div class="alert alert-danger py-2">Error uploading CSV file.</div>');
         }
+    });
+}
+
+function sortBundleTableByCategory() {
+    var tbody = $('#bundle_components_tbody');
+    var rows = tbody.find('tr.bundle-row').get();
+    if (!rows.length) return;
+
+    rows.sort(function(a, b) {
+        var catA = ($(a).attr('data-category') || 'general').trim();
+        var catB = ($(b).attr('data-category') || 'general').trim();
+        var cmp = catA.localeCompare(catB);
+        if (cmp !== 0) return cmp;
+        var titleA = ($(a).attr('data-title') || '').trim();
+        var titleB = ($(b).attr('data-title') || '').trim();
+        return titleA.localeCompare(titleB);
+    });
+
+    tbody.empty();
+    var currentCat = null;
+    rows.forEach(function(row, idx) {
+        var catName = $(row).attr('data-category') || 'general';
+        if (catName !== currentCat) {
+            currentCat = catName;
+            var headerHtml = '<tr class="bundle-category-header" style="background:#f1f5f9; border-top:2px solid #cbd5e1; border-bottom:1px solid #cbd5e1;">' +
+                '<td colspan="10" style="padding:6px 12px; font-weight:700; color:#1e3a8a; font-size:12px; text-transform:uppercase; letter-spacing:0.5px;">' +
+                '<i class="fa fa-folder-open-o text-primary"></i>&nbsp;&nbsp;' + (catName.charAt(0).toUpperCase() + catName.slice(1)) +
+                '</td></tr>';
+            tbody.append(headerHtml);
+        }
+        $(row).find('td:first').text(idx + 1);
+        tbody.append(row);
     });
 }
 </script>

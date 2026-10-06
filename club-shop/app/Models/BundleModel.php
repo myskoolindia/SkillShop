@@ -315,6 +315,15 @@ class BundleModel extends BaseModel
             $components[] = $item;
         }
 
+        // Sort components grouped by category, then sort order, then title
+        usort($components, function ($a, $b) {
+            $catA = $a->category_name ?? 'General';
+            $catB = $b->category_name ?? 'General';
+            $cmp = strcasecmp($catA, $catB);
+            if ($cmp !== 0) return $cmp;
+            return ($a->sort_order <=> $b->sort_order) ?: strcasecmp($a->title, $b->title);
+        });
+
         return $components;
     }
 

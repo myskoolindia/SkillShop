@@ -568,7 +568,24 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($items as $idx => $it)
+                @php
+                    $sortedItems = collect($items)->sortBy(function($it) {
+                        return [strtoupper($it['category'] ?? 'General'), strtoupper($it['item'] ?? '')];
+                    })->values();
+                    $currentCat = null;
+                @endphp
+                @forelse($sortedItems as $idx => $it)
+                    @php
+                        $itemCat = !empty($it['category']) ? trim($it['category']) : 'General';
+                    @endphp
+                    @if($itemCat !== $currentCat)
+                        @php $currentCat = $itemCat; @endphp
+                        <tr class="category-header-row" style="background: #f1f5f9; border-top: 2px solid #cbd5e1; border-bottom: 1px solid #cbd5e1;">
+                            <td colspan="7" style="padding: 7px 12px; font-weight: 800; color: #059669; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.6px;">
+                                <i class="fas fa-folder-open mr-2 text-success"></i> {{ $currentCat }}
+                            </td>
+                        </tr>
+                    @endif
                     <tr>
                         <td style="text-align: center; color: #94a3b8;">{{ $loop->iteration }}</td>
                         <td>

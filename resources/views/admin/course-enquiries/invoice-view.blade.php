@@ -649,11 +649,28 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($items as $idx => $item)
+                @php
+                    $sortedItems = collect($items)->sortBy(function($it) {
+                        return [strtoupper($it['category'] ?? 'Equipment'), strtoupper($it['item'] ?? '')];
+                    })->values();
+                    $currentCat = null;
+                @endphp
+                @forelse($sortedItems as $idx => $item)
+                    @php
+                        $itemCat = !empty($item['category']) ? trim($item['category']) : 'Equipment';
+                    @endphp
+                    @if($itemCat !== $currentCat)
+                        @php $currentCat = $itemCat; @endphp
+                        <tr class="category-header-row" style="background: #f1f5f9; border-top: 2px solid #cbd5e1; border-bottom: 1px solid #cbd5e1;">
+                            <td colspan="7" style="padding: 7px 12px; font-weight: 800; color: #1e3a8a; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.6px;">
+                                <i class="fas fa-folder-open mr-2 text-primary"></i> {{ $currentCat }}
+                            </td>
+                        </tr>
+                    @endif
                     <tr>
-                        <td style="text-align: center; font-weight: 600;">{{ $idx + 1 }}</td>
+                        <td style="text-align: center; font-weight: 600;">{{ $loop->iteration }}</td>
                         <td>
-                            <span class="badge-cat">{{ $item['category'] ?? 'Equipment' }}</span>
+                            <span class="badge-cat">{{ $itemCat }}</span>
                         </td>
                         <td>
                             <strong style="color: #0f172a;">{{ $item['item'] }}</strong>

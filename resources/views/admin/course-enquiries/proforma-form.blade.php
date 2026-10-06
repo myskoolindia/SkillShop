@@ -243,6 +243,9 @@
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h4><i class="fas fa-list-ol text-success mr-2"></i>{{ __('Invoice Line Items') }}</h4>
                                 <div>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary mr-2" id="btnSortByCategory" title="{{ __('Sort and group line items by Category') }}">
+                                        <i class="fas fa-sort-alpha-down mr-1"></i>{{ __('Sort by Category') }}
+                                    </button>
                                     <button type="button" class="btn btn-sm btn-outline-success mr-2" id="btnBrowseClubShop" data-toggle="modal" data-target="#clubShopModal">
                                         <i class="fas fa-store mr-1"></i>{{ __('ClubShop Catalog') }}
                                     </button>
@@ -270,7 +273,12 @@
                                             </tr>
                                         </thead>
                                         <tbody id="itemsBody">
-                                            @php $items = $proforma['items'] ?? []; @endphp
+                                            @php
+                                                $rawItems = $proforma['items'] ?? [];
+                                                $items = collect($rawItems)->sortBy(function($it) {
+                                                    return [strtoupper($it['category'] ?? 'General'), strtoupper($it['item'] ?? '')];
+                                                })->values()->all();
+                                            @endphp
                                             @forelse($items as $idx => $row)
                                                 <tr class="item-row">
                                                     <td class="text-center row-sno align-middle">{{ $loop->iteration }}</td>
@@ -787,6 +795,15 @@
                 return matchCat && matchSearch;
             });
 
+            // Sort filtered catalog items grouped by category, then title
+            filtered.sort(function (a, b) {
+                var catA = (a.category_name || 'General').toLowerCase();
+                var catB = (b.category_name || 'General').toLowerCase();
+                var cmp = catA.localeCompare(catB);
+                if (cmp !== 0) return cmp;
+                return (a.title || '').localeCompare(b.title || '');
+            });
+
             if (!filtered.length) {
                 tbody.html('<tr><td colspan="6" class="text-center py-4 text-muted">{{ __("No products found matching filters.") }}</td></tr>');
                 updateSelectedCount();
@@ -794,7 +811,19 @@
             }
 
             var html = '';
+            var currentModalCat = null;
             filtered.forEach(function (prod) {
+                var catName = prod.category_name || 'General';
+                if (catName !== currentModalCat) {
+                    currentModalCat = catName;
+                    html += `
+                        <tr class="table-light" style="background:#f1f5f9; border-top:2px solid #cbd5e1; border-bottom:1px solid #cbd5e1;">
+                            <td colspan="6" class="py-2 px-3 font-weight-bold text-success" style="font-size:12px; text-transform:uppercase; letter-spacing:0.5px;">
+                                <i class="fas fa-folder-open mr-2"></i> ${currentModalCat}
+                            </td>
+                        </tr>
+                    `;
+                }
                 var jsonStr = JSON.stringify(prod).replace(/'/g, "&#39;");
                 html += `
                     <tr>
@@ -808,7 +837,7 @@
                             ${prod.title}
                         </td>
                         <td class="align-middle">
-                            <span class="badge badge-light border">${prod.category_name || 'General'}</span>
+                            <span class="badge badge-light border">${catName}</span>
                         </td>
                         <td class="text-right align-middle font-weight-bold text-success">
                             ₹${(prod.unit_price || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}
@@ -903,9 +932,35 @@
                 }
             });
 
-            reindexAndRecalculate();
+            sortItemsTableByCategory();
             toastr.success(`Added ${checked.length} product(s) from ClubShop.`);
             $('#clubShopModal').modal('hide');
+        });
+
+        // Function: Sort items table rows grouped by Category, then Item Name
+        function sortItemsTableByCategory() {
+            var rows = itemsBody.find('tr.item-row').get();
+            if (!rows.length) return;
+
+            rows.sort(function (a, b) {
+                var catA = ($(a).find('.item-category').val() || 'General').toLowerCase().trim();
+                var catB = ($(b).find('.item-category').val() || 'General').toLowerCase().trim();
+                var cmp = catA.localeCompare(catB);
+                if (cmp !== 0) return cmp;
+                var itemA = ($(a).find('.item-name-input').val() || '').toLowerCase().trim();
+                var itemB = ($(b).find('.item-name-input').val() || '').toLowerCase().trim();
+                return itemA.localeCompare(itemB);
+            });
+
+            $.each(rows, function (idx, row) {
+                itemsBody.append(row);
+            });
+            reindexAndRecalculate();
+        }
+
+        $('#btnSortByCategory').on('click', function () {
+            sortItemsTableByCategory();
+            toastr.info('{{ __("Line items grouped and sorted by Category.") }}');
         });
 
         // Fetch / Reload default items (from ClubShop bundles)
@@ -923,7 +978,7 @@
                         res.items.forEach(function (it, idx) {
                             itemsBody.append(createRowHtml(idx, it));
                         });
-                        reindexAndRecalculate();
+                        sortItemsTableByCategory();
                         toastr.success('{{ __("Loaded package components directly from ClubShop!") }}');
                     } else {
                         toastr.info(res.message || '{{ __("No package components found.") }}');
