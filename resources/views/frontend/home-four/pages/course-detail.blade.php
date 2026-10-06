@@ -174,11 +174,11 @@
             </button>
 
             {{-- Request a Quote Button --}}
-            <button id="quote-btn" type="button" onclick="toggleQuoteForm()"
+            <!-- <button id="quote-btn" type="button" onclick="toggleQuoteForm()"
               class="text-primary hover:text-primary-dark hover:bg-primary/5 border border-primary/30 px-6 py-2.5 rounded-full text-xs font-semibold w-full transition-all flex items-center justify-center gap-2">
               <i class="fa-solid fa-file-lines text-xs"></i>
               <span>Institutional Quote / Enquiry</span>
-            </button>
+            </button> -->
           </div>
 
           <!-- Quote Form (hidden by default) -->

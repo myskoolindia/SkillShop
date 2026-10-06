@@ -145,6 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
       card.className = "w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] xl:w-[calc(25%-18px)] flex-shrink-0 snap-start";
       card.innerHTML = `
         <div class="h-full border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 bg-white flex flex-col justify-between group">
+        <a href="${courseUrl}">  
           <div class="h-48 bg-slate-100 overflow-hidden relative">
             <img src="${escapeHtml(image)}" alt="${escapeHtml(title)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null;this.src='${window.APP_CONFIG?.IMAGE_FALLBACK || ''}';" />
             <div class="absolute top-3 left-3">
@@ -153,7 +154,7 @@ document.addEventListener("DOMContentLoaded", function () {
               </span>
             </div>
           </div>
-          <div class="p-5 flex flex-col flex-grow justify-between space-y-3">
+          <div class="p-3 flex flex-col flex-grow justify-between space-y-3">
             <div>
               <h3 class="text-base font-bold text-slate-900 group-hover:text-primary transition-colors line-clamp-2 leading-snug">
                 ${escapeHtml(title)}
@@ -168,12 +169,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 <button type="button" onclick="carouselBuyNow(event, '${escapeHtml(courseId)}', '${escapeHtml(course.api_course_id || '')}')" class="px-3 py-1.5 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-full transition-all shadow-sm active:scale-95 flex items-center gap-1">
                   <i class="fa-solid fa-bolt text-[10px]"></i> Buy Now
                 </button>
-                <a href="${courseUrl}" class="px-2 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-primary hover:bg-slate-50 transition-colors inline-flex items-center gap-1">
-                  Details <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                </a>
+                
               </div>
             </div>
           </div>
+          </a>
         </div>
       `;
       containerEl.appendChild(card);
