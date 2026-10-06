@@ -167,7 +167,6 @@ class CartController extends BaseController
         $data['planKey'] = 'advance';
         $data['planLabel'] = 'Advance';
         $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 2;
-
         helperDeleteSession('mds_service_payment');
 
         echo view('partials/_header', $data);
@@ -194,7 +193,6 @@ class CartController extends BaseController
         $data['planKey'] = 'premium';
         $data['planLabel'] = 'Premium';
         $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 3;
-
         helperDeleteSession('mds_service_payment');
 
         echo view('partials/_header', $data);
