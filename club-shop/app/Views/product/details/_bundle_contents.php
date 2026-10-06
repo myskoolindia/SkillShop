@@ -105,7 +105,8 @@ if (!empty($targetBundleCat) && $targetBundleCat !== 'all') {
         $cNameClean = strtolower(trim($cGroup['name'] ?? ''));
         $cSlug = preg_replace('/[^a-zA-Z0-9_]/', '_', $cNameClean);
         $cId = (string)($cGroup['id'] ?? '');
-        if ($cKey === $targetBundleCat || $cSlug === $cleanParam || $cNameClean === $cleanParam || $cId === $cleanParam || str_contains($cNameClean, $cleanParam)) {
+        $cKeyClean = strtolower(trim(preg_replace('/^cat_/', '', $cKey)));
+        if ($cKey === $targetBundleCat || $cKeyClean === $cleanParam || $cSlug === $cleanParam || $cNameClean === $cleanParam || $cId === $cleanParam || str_contains($cNameClean, $cleanParam)) {
             $initialActiveCatKey = $cKey;
             break;
         }
@@ -431,21 +432,24 @@ if (!empty($targetBundleCat) && $targetBundleCat !== 'all') {
             </tbody>
             <?php if (!empty($bundleComponents)): ?>
                 <tfoot style="background: #f8fafc; border-top: 2px solid #e2e8f0; position: sticky; bottom: 0; z-index: 2;">
-                    <!-- Active Category Subtotal row (shown when filtering by category) -->
-                    <tr id="storefront_footer_cat_row" style="display: none; background: #f0f9ff; border-bottom: 1px dashed #cbd5e1;">
+                    <?php
+                    $initCatGroup = ($initialActiveCatKey !== 'all' && isset($groupedComponents[$initialActiveCatKey])) ? $groupedComponents[$initialActiveCatKey] : null;
+                    ?>
+                    <!-- Active Category Subtotal row (shown when filtering/customizing a specific category) -->
+                    <tr id="storefront_footer_cat_row" style="<?= !empty($initCatGroup) ? 'background: #f0f9ff; border-bottom: 1px dashed #cbd5e1;' : 'display: none; background: #f0f9ff; border-bottom: 1px dashed #cbd5e1;'; ?>">
                         <th colspan="5" class="text-right font-weight-bold text-primary" style="font-size: 13px;">
-                            <i class="fa fa-folder-open-o mr-1"></i><span id="storefront_footer_cat_name">Category</span> Subtotal:
+                            <i class="fa fa-folder-open-o mr-1"></i><span id="storefront_footer_cat_name"><?= esc($initCatGroup['name'] ?? 'Category'); ?></span> Subtotal:
                         </th>
                         <th class="text-center font-weight-bold text-muted small">—</th>
                         <th class="text-center font-weight-bold">
-                            <span id="storefront_footer_cat_units" class="badge badge-primary px-2 py-1" style="font-size:11.5px;">0 units</span>
+                            <span id="storefront_footer_cat_units" class="badge badge-primary px-2 py-1" style="font-size:11.5px;"><?= (int)($initCatGroup['total_units'] ?? 0); ?> units</span>
                         </th>
                         <th class="text-right font-weight-bold text-primary" style="font-size:14px;" id="storefront_footer_cat_price">
-                            <?= priceFormatted(0, $currencyCode, true); ?>
+                            <?= priceFormatted((float)($initCatGroup['total_price'] ?? 0), $currencyCode, true); ?>
                         </th>
                     </tr>
-                    <!-- Package Grand Total row -->
-                    <tr>
+                    <!-- Package Grand Total row (shown when viewing All categories) -->
+                    <tr id="storefront_footer_pkg_row" style="<?= !empty($initCatGroup) ? 'display: none;' : ''; ?>">
                         <th colspan="5" class="text-right font-weight-bold" style="font-size: 13.5px;">
                             <span id="storefront_footer_pkg_label">Package Total<?= $totalCategoriesCount > 1 ? ' (' . $totalCategoriesCount . ' Categories)' : ''; ?>:</span>
                         </th>
@@ -606,18 +610,41 @@ function formatBundleCurrency(amount) {
 }
 
 function updateStorefrontFooterSummary() {
-    var catTotals = window._latestCategoryTotals || {};
+    var catTotals = window._latestCategoryTotals;
+    if (!catTotals || $.isEmptyObject(catTotals)) {
+        catTotals = {};
+        $('.bundle-storefront-qty-input').each(function() {
+            var $this = $(this);
+            var q = parseInt($this.val()) || 0;
+            var unitPrice = parseFloat($this.data('unit-price')) || 0;
+            var catKey = $this.data('cat-key');
+            if (catKey) {
+                if (!catTotals[catKey]) {
+                    catTotals[catKey] = { units: 0, price: 0 };
+                }
+                catTotals[catKey].units += q;
+                catTotals[catKey].price += (unitPrice * q);
+            }
+        });
+        window._latestCategoryTotals = catTotals;
+    }
+
     var numCats = <?= (int)$totalCategoriesCount; ?>;
 
-    if (activeBundleCategoryKey !== 'all' && catTotals[activeBundleCategoryKey]) {
-        var catName = (typeof bundleCategoryNames !== 'undefined' && bundleCategoryNames[activeBundleCategoryKey]) ? bundleCategoryNames[activeBundleCategoryKey] : 'Category';
+    if (activeBundleCategoryKey && activeBundleCategoryKey !== 'all') {
+        var activeTotals = catTotals[activeBundleCategoryKey] || { units: 0, price: 0 };
+        var catName = (typeof bundleCategoryNames !== 'undefined' && bundleCategoryNames[activeBundleCategoryKey]) 
+            ? bundleCategoryNames[activeBundleCategoryKey] 
+            : ($('#bundle_cat_row_' + activeBundleCategoryKey + ' .bundle-cat-title').text() || 'Category');
+
         $('#storefront_footer_cat_name').text(catName);
-        $('#storefront_footer_cat_units').text((catTotals[activeBundleCategoryKey].units || 0) + ' units');
-        $('#storefront_footer_cat_price').text(formatBundleCurrency(catTotals[activeBundleCategoryKey].price || 0));
+        $('#storefront_footer_cat_units').text((activeTotals.units || 0) + ' units');
+        $('#storefront_footer_cat_price').text(formatBundleCurrency(activeTotals.price || 0));
         $('#storefront_footer_cat_row').show();
-        $('#storefront_footer_pkg_label').text('Package Grand Total (All Categories):');
+        $('#storefront_footer_pkg_row').hide();
     } else {
         $('#storefront_footer_cat_row').hide();
+        $('#storefront_footer_pkg_row').show();
         if (numCats > 1) {
             $('#storefront_footer_pkg_label').text('Package Total (' + numCats + ' Categories):');
         } else {
@@ -998,16 +1025,17 @@ $(document).ready(function() {
 
         if (targetBundleCat && targetBundleCat !== 'all') {
             // 1. Specific Category Customize Clicked: Open ONLY this category, hide other categories
+            var cleanParam = decodeURIComponent(targetBundleCat).toLowerCase().replace(/^cat_/, '').replace(/[\s\-_]+/g, '_').trim();
             var resolvedCatKey = targetBundleCat;
             if (!resolvedCatKey.startsWith('cat_') && $('#bundle_cat_row_cat_' + resolvedCatKey).length) {
                 resolvedCatKey = 'cat_' + resolvedCatKey;
             } else if (!$('#bundle_cat_row_' + resolvedCatKey).length) {
-                var cleanParam = targetBundleCat.toLowerCase().replace(/^cat_/, '').trim();
                 $('.bundle-category-header-row').each(function() {
                     var rowKey = $(this).attr('data-cat-key') || '';
-                    var rowName = ($(this).attr('data-cat-name') || '').toLowerCase().trim();
+                    var rowName = ($(this).attr('data-cat-name') || '').toLowerCase().replace(/[\s\-_]+/g, '_').trim();
                     var rowId = ($(this).attr('data-cat-id') || '').toString();
-                    if (rowKey.toLowerCase() === cleanParam || rowKey.toLowerCase() === ('cat_' + cleanParam) || rowName === cleanParam || rowName.indexOf(cleanParam) > -1 || rowId === cleanParam) {
+                    var cleanRowKey = rowKey.toLowerCase().replace(/^cat_/, '').replace(/[\s\-_]+/g, '_').trim();
+                    if (rowKey.toLowerCase() === targetBundleCat.toLowerCase() || cleanRowKey === cleanParam || rowName === cleanParam || rowName.indexOf(cleanParam) > -1 || rowId === cleanParam) {
                         resolvedCatKey = rowKey;
                         return false;
                     }
@@ -1041,6 +1069,7 @@ $(document).ready(function() {
 
             // Apply filters to display ONLY this category's items and header
             applyBundleStorefrontFilters();
+            recalculateStorefrontBundleTotals();
 
             // Smooth scroll to the target category with visual highlight
             setTimeout(function() {

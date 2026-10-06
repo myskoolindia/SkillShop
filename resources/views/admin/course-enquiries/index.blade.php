@@ -1,17 +1,17 @@
 @extends('admin.master_layout')
 @section('title')
-    <title>{{ __('Course Enquiries') }}</title>
+    <title>{{ __('Manage Enquiries') }}</title>
 @endsection
 @section('admin-content')
 <div class="main-content">
     <section class="section">
         <div class="section-header">
-            <h1>{{ __('Course Enquiries') }}</h1>
+            <h1>{{ __('Manage Enquiries') }}</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active">
                     <a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a>
                 </div>
-                <div class="breadcrumb-item">{{ __('Course Enquiries') }}</div>
+                <div class="breadcrumb-item">{{ __('Manage Enquiries') }}</div>
             </div>
         </div>
 
@@ -84,22 +84,34 @@
                                     <thead>
                                         <tr>
                                             <th>{{ __('SN') }}</th>
-                                            <th>{{ __('Name') }}</th>
+                                            <th>{{ __('Name / School') }}</th>
                                             <th>{{ __('Phone') }}</th>
                                             <th>{{ __('Email') }}</th>
                                             <th>{{ __('City') }}</th>
                                             <th>{{ __('Source') }}</th>
+                                            <th style="min-width: 165px;">{{ __('Action') }}</th>
                                             <th>{{ __('Status') }}</th>
                                             <th>{{ __('Date') }}</th>
-                                            <th class="text-center">{{ __('Actions') }}</th>
+                                            <th class="text-center">{{ __('Manage') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @forelse($enquiries as $enq)
+                                            @php
+                                                $qData = $enq->quotation_data;
+                                                $pData = $enq->proforma_invoice_data;
+                                                $iData = $enq->invoice_data;
+                                                $paySummary = $enq->invoice_payment_summary;
+                                            @endphp
                                             <tr>
                                                 <td>{{ $loop->iteration + ($enquiries->currentPage() - 1) * $enquiries->perPage() }}</td>
 
-                                                <td>{{ $enq->name }}</td>
+                                                <td>
+                                                    <strong>{{ $enq->name }}</strong>
+                                                    @if($enq->school)
+                                                        <br><small class="text-muted"><i class="fas fa-university mr-1"></i>{{ $enq->school }}</small>
+                                                    @endif
+                                                </td>
 
                                                 <td>{{ $enq->phone ?? '—' }}</td>
 
@@ -109,44 +121,155 @@
 
                                                 <td>
                                                     @if($enq->source)
-                                                        
-                                                    {{ ucwords(str_replace(['-','_'], ' ', $enq->source)) }}
-                                                        
+                                                        <span class="badge badge-light border">
+                                                            {{ ucwords(str_replace(['-','_'], ' ', $enq->source)) }}
+                                                        </span>
                                                     @else
                                                         —
                                                     @endif
                                                 </td>
 
+                                                {{-- Action (Documents & Payment) Column --}}
+                                                <td>
+                                                    <div class="d-flex flex-column" style="gap: 4px; min-width: 155px;">
+                                                        {{-- 1. Quotation badge --}}
+                                                        @if(!empty($qData['items']))
+                                                            <a href="{{ route('admin.course-enquiry.quotation.view', $enq->id) }}"
+                                                               target="_blank"
+                                                               class="badge badge-primary text-white py-1 px-2 d-flex justify-content-between align-items-center"
+                                                               title="{{ __('View Quotation') }}: {{ $qData['quotation_number'] ?? '' }}">
+                                                                <span><i class="fas fa-file-invoice mr-1"></i> {{ __('Quote') }}</span>
+                                                                @if(!empty($qData['grand_total']))
+                                                                    <span class="font-weight-normal ml-1">₹{{ number_format($qData['grand_total']) }}</span>
+                                                                @endif
+                                                            </a>
+                                                        @else
+                                                            <a href="{{ route('admin.course-enquiry.quotation', $enq->id) }}"
+                                                               class="badge badge-light border text-muted py-1 px-2 text-left"
+                                                               title="{{ __('Create Quotation') }}">
+                                                                <i class="fas fa-plus mr-1"></i> {{ __('Quote') }}
+                                                            </a>
+                                                        @endif
+
+                                                        {{-- 2. Proforma badge --}}
+                                                        @if(!empty($pData['items']) && $enq->hasProformaInvoice())
+                                                            <a href="{{ route('admin.course-enquiry.proforma.view', $enq->id) }}"
+                                                               target="_blank"
+                                                               class="badge badge-success text-white py-1 px-2 d-flex justify-content-between align-items-center"
+                                                               title="{{ __('View Proforma Invoice') }}: {{ $pData['invoice_number'] ?? '' }} (Rev {{ $enq->proforma_version }})">
+                                                                <span><i class="fas fa-file-invoice-dollar mr-1"></i> {{ __('Proforma') }}</span>
+                                                                @if(!empty($pData['grand_total']))
+                                                                    <span class="font-weight-normal ml-1">₹{{ number_format($pData['grand_total']) }}</span>
+                                                                @endif
+                                                            </a>
+                                                        @else
+                                                            <a href="{{ route('admin.course-enquiry.proforma', $enq->id) }}"
+                                                               class="badge badge-light border text-muted py-1 px-2 text-left"
+                                                               title="{{ __('Create Proforma Invoice') }}">
+                                                                <i class="fas fa-plus mr-1"></i> {{ __('Proforma') }}
+                                                            </a>
+                                                        @endif
+
+                                                        {{-- 3. Tax Invoice badge --}}
+                                                        @if(!empty($iData['items']) && $enq->hasInvoice())
+                                                            <a href="{{ route('admin.course-enquiry.invoice.view', $enq->id) }}"
+                                                               target="_blank"
+                                                               class="badge badge-info text-white py-1 px-2 d-flex justify-content-between align-items-center"
+                                                               title="{{ __('View Tax Invoice') }}: {{ $iData['invoice_number'] ?? '' }}">
+                                                                <span><i class="fas fa-receipt mr-1"></i> {{ __('Invoice') }}</span>
+                                                                @if(!empty($iData['grand_total']))
+                                                                    <span class="font-weight-normal ml-1">₹{{ number_format($iData['grand_total']) }}</span>
+                                                                @endif
+                                                            </a>
+                                                        @else
+                                                            <a href="{{ route('admin.course-enquiry.invoice', $enq->id) }}"
+                                                               class="badge badge-light border text-muted py-1 px-2 text-left"
+                                                               title="{{ __('Create Tax Invoice') }}">
+                                                                <i class="fas fa-plus mr-1"></i> {{ __('Invoice') }}
+                                                            </a>
+                                                        @endif
+
+                                                        {{-- 4. Payment badge --}}
+                                                        @if($enq->hasInvoice() && ($paySummary['total_paid'] ?? 0) > 0)
+                                                            @if(($paySummary['payment_status'] ?? '') === 'paid')
+                                                                <a href="{{ route('admin.course-enquiry.show', $enq->id) }}#payment-card"
+                                                                   class="badge badge-success text-white py-1 px-2 d-flex justify-content-between align-items-center"
+                                                                   title="{{ __('Paid in Full: ₹') }}{{ number_format($paySummary['total_paid'], 2) }}">
+                                                                    <span><i class="fas fa-check-circle mr-1"></i> {{ __('Paid') }}</span>
+                                                                    <span class="font-weight-normal ml-1">₹{{ number_format($paySummary['total_paid']) }}</span>
+                                                                </a>
+                                                            @else
+                                                                <a href="{{ route('admin.course-enquiry.show', $enq->id) }}#payment-card"
+                                                                   class="badge badge-warning text-dark py-1 px-2 d-flex justify-content-between align-items-center"
+                                                                   title="{{ __('Advance: ₹') }}{{ number_format($paySummary['advance_paid'] > 0 ? $paySummary['advance_paid'] : $paySummary['total_paid']) }} | Due: ₹{{ number_format($paySummary['balance_due']) }}">
+                                                                    <span><i class="fas fa-adjust mr-1"></i> {{ __('Advance') }}</span>
+                                                                    <span class="font-weight-bold ml-1">₹{{ number_format($paySummary['advance_paid'] > 0 ? $paySummary['advance_paid'] : $paySummary['total_paid']) }}</span>
+                                                                </a>
+                                                            @endif
+                                                        @elseif($enq->hasInvoice())
+                                                            <a href="{{ route('admin.course-enquiry.show', $enq->id) }}#payment-card"
+                                                               class="badge badge-danger text-white py-1 px-2 d-flex justify-content-between align-items-center"
+                                                               title="{{ __('Payment Pending - Due: ₹') }}{{ number_format($paySummary['grand_total'], 2) }}">
+                                                                <span><i class="fas fa-clock mr-1"></i> {{ __('Payment') }}</span>
+                                                                <span class="font-weight-normal ml-1">{{ __('Pending') }}</span>
+                                                            </a>
+                                                        @else
+                                                            <a href="{{ route('admin.course-enquiry.show', $enq->id) }}#payment-card"
+                                                               class="badge badge-light border text-muted py-1 px-2 text-left"
+                                                               title="{{ __('Collect Payment (Tax Invoice needed first)') }}">
+                                                                <i class="fas fa-hand-holding-usd mr-1"></i> {{ __('Payment') }}
+                                                            </a>
+                                                        @endif
+                                                    </div>
+                                                </td>
+
                                                 <td>
                                                     @if(!$enq->status || $enq->status === 'new')
-                                                        {{ __('New') }}
+                                                        <span class="badge badge-primary">{{ __('New') }}</span>
                                                     @elseif($enq->status === 'read')
-                                                        {{ __('Read') }}
+                                                        <span class="badge badge-secondary">{{ __('Read') }}</span>
                                                     @elseif($enq->status === 'contacted')
-                                                        {{ __('Contacted') }}
+                                                        <span class="badge badge-warning">{{ __('Contacted') }}</span>
                                                     @elseif($enq->status === 'closed')
-                                                        {{ __('Closed') }}
+                                                        <span class="badge badge-success">{{ __('Closed') }}</span>
                                                     @endif
                                                 </td>
 
-                                                <td>{{ $enq->created_at }}</td>
+                                                <td>{{ $enq->created_at?->format('d M Y') ?? '—' }}</td>
 
-                                                <td class="text-center min-200">
+                                                <td class="text-center" style="white-space: nowrap;">
+                                                    {{-- View Details --}}
                                                     <a href="{{ route('admin.course-enquiry.show', $enq->id) }}"
-                                                       class="m-1 text-white btn btn-sm btn-primary" title="{{ __('View') }}">
+                                                       class="btn btn-sm btn-info text-white" title="{{ __('View Details') }}">
                                                         <i class="fa fa-eye"></i>
                                                     </a>
+
+                                                    {{-- Quick Tax Invoice shortcut --}}
+                                                    @if($enq->hasInvoice())
+                                                        <a href="{{ route('admin.course-enquiry.invoice.view', $enq->id) }}"
+                                                           target="_blank"
+                                                           class="btn btn-sm btn-primary text-white" title="{{ __('View Tax Invoice') }}">
+                                                            <i class="fas fa-receipt"></i>
+                                                        </a>
+                                                    @else
+                                                        <a href="{{ route('admin.course-enquiry.invoice', $enq->id) }}"
+                                                           class="btn btn-sm btn-outline-primary" title="{{ __('Create Tax Invoice') }}">
+                                                            <i class="fas fa-receipt"></i>
+                                                        </a>
+                                                    @endif
+
+                                                    {{-- Delete --}}
                                                     <a href="javascript:;" data-toggle="modal"
                                                        data-target="#deleteModal"
                                                        class="btn btn-danger btn-sm"
-                                                       onclick="deleteData({{ $enq->id }})">
+                                                       onclick="deleteData({{ $enq->id }})" title="{{ __('Delete') }}">
                                                         <i class="fa fa-trash" aria-hidden="true"></i>
                                                     </a>
                                                 </td>
                                             </tr>
                                         @empty
                                             <x-empty-table :name="__('Enquiries')" route="" create="no"
-                                                :message="__('No enquiries found!')" colspan="9">
+                                                :message="__('No enquiries found!')" colspan="10">
                                             </x-empty-table>
                                         @endforelse
                                     </tbody>

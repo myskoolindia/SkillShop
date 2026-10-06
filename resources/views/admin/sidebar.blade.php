@@ -42,12 +42,19 @@
                 @endif
             @endif
 
-            @if(checkAdminHasPermission('order.management') || checkAdminHasPermission('coupon.management') || checkAdminHasPermission('withdraw.management'))
+            @if(checkAdminHasPermission('order.management') || checkAdminHasPermission('coupon.management') || checkAdminHasPermission('withdraw.management') || auth()->guard('admin')->check())
                 <li class="menu-header">{{ __('Manage Orders') }}</li>
 
                 @if (Module::isEnabled('Order') && checkAdminHasPermission('order.management'))
                     @include('order::sidebar')
                 @endif
+
+                <li class="{{ isRoute('admin.course-enquiries') || isRoute('admin.course-enquiry.*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.course-enquiries') }}">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span>{{ __('Manage Enquiries') }}</span>
+                    </a>
+                </li>
 
                 @if (Module::isEnabled('Coupon') && checkAdminHasPermission('coupon.management'))
                     @include('coupon::sidebar')
@@ -138,13 +145,6 @@
                 @if (Module::isEnabled('ContactMessage') && checkAdminHasPermission('contect.message.view'))
                     @include('contactmessage::sidebar')
                 @endif
-
-                <li class="{{ isRoute('admin.course-enquiries') || isRoute('admin.course-enquiry.show') ? 'active' : '' }}">
-                    <a class="nav-link" href="{{ route('admin.course-enquiries') }}">
-                        <i class="fas fa-inbox"></i>
-                        <span>{{ __('Course Enquiries') }}</span>
-                    </a>
-                </li>
             @endif
         </ul>
     </aside>

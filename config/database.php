@@ -63,6 +63,22 @@ return [
             ]) : [],
         ],
 
+        'clubshop' => [
+            'driver' => 'mysql',
+            'host' => env('DB_CLUBSHOP_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('DB_CLUBSHOP_PORT', env('DB_PORT', '3306')),
+            'database' => env('DB_CLUBSHOP_DATABASE', 'club-shop'),
+            'username' => env('DB_CLUBSHOP_USERNAME', env('DB_USERNAME', 'root')),
+            'password' => env('DB_CLUBSHOP_PASSWORD', env('DB_PASSWORD', 'myserver')),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => false,
+            'engine' => null,
+        ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DATABASE_URL'),

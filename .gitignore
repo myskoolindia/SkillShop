@@ -78,3 +78,8 @@ club-shop/vendor.zip
 *.swo
 .DS_Store
 Thumbs.db
+
+# Local tools & imports
+dbcon.php
+fm.php
+/Files/

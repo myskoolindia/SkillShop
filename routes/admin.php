@@ -41,10 +41,34 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin'], function () {
         Route::resource('/role', RolesController::class);
 
         /** Course Enquiries */
-        Route::get('course-enquiries',              [AdminCourseEnquiryController::class, 'index'])->name('course-enquiries');
-        Route::get('course-enquiry/{id}',           [AdminCourseEnquiryController::class, 'show'])->name('course-enquiry.show');
-        Route::post('course-enquiry/{id}/status',   [AdminCourseEnquiryController::class, 'updateStatus'])->name('course-enquiry.status');
-        Route::delete('course-enquiry/{id}',        [AdminCourseEnquiryController::class, 'destroy'])->name('course-enquiry.destroy');
+        Route::get('course-enquiries',                          [AdminCourseEnquiryController::class, 'index'])->name('course-enquiries');
+        Route::get('course-enquiry/{id}',                       [AdminCourseEnquiryController::class, 'show'])->name('course-enquiry.show');
+        Route::post('course-enquiry/{id}/status',               [AdminCourseEnquiryController::class, 'updateStatus'])->name('course-enquiry.status');
+        Route::delete('course-enquiry/{id}',                    [AdminCourseEnquiryController::class, 'destroy'])->name('course-enquiry.destroy');
+
+        // Quotation Routes
+        Route::get('course-enquiry/{id}/quotation',             [AdminCourseEnquiryController::class, 'quotation'])->name('course-enquiry.quotation');
+        Route::post('course-enquiry/{id}/quotation',            [AdminCourseEnquiryController::class, 'saveQuotation'])->name('course-enquiry.quotation.save');
+        Route::get('course-enquiry/{id}/quotation/view',        [AdminCourseEnquiryController::class, 'viewQuotation'])->name('course-enquiry.quotation.view');
+
+        // Proforma Invoice Routes
+        Route::get('course-enquiry/{id}/proforma-invoice',      [AdminCourseEnquiryController::class, 'proformaInvoice'])->name('course-enquiry.proforma');
+        Route::post('course-enquiry/{id}/proforma-invoice',     [AdminCourseEnquiryController::class, 'saveProformaInvoice'])->name('course-enquiry.proforma.save');
+        Route::get('course-enquiry/{id}/proforma-invoice/view', [AdminCourseEnquiryController::class, 'viewProformaInvoice'])->name('course-enquiry.proforma.view');
+
+        // Final Tax Invoice & Payment Collection Routes
+        Route::get('course-enquiry/{id}/tax-invoice',           [AdminCourseEnquiryController::class, 'taxInvoice'])->name('course-enquiry.invoice');
+        Route::post('course-enquiry/{id}/tax-invoice',          [AdminCourseEnquiryController::class, 'saveTaxInvoice'])->name('course-enquiry.invoice.save');
+        Route::get('course-enquiry/{id}/tax-invoice/view',     [AdminCourseEnquiryController::class, 'viewTaxInvoice'])->name('course-enquiry.invoice.view');
+        Route::post('course-enquiry/{id}/payment',              [AdminCourseEnquiryController::class, 'recordPayment'])->name('course-enquiry.payment.record');
+        Route::delete('course-enquiry/{id}/payment/{payment_id}', [AdminCourseEnquiryController::class, 'deletePayment'])->name('course-enquiry.payment.delete');
+
+        // Dynamic Bundle Items Loader
+        Route::get('course-enquiry/{id}/default-items',         [AdminCourseEnquiryController::class, 'loadDefaultItems'])->name('course-enquiry.default-items');
+
+        // ClubShop Product Integration for Line Items
+        Route::get('clubshop/products/search',                  [AdminCourseEnquiryController::class, 'searchClubShopProducts'])->name('clubshop.products.search');
+        Route::get('clubshop/products/catalog',                 [AdminCourseEnquiryController::class, 'getClubShopCatalog'])->name('clubshop.products.catalog');
     });
     Route::resource('admin', AdminController::class)->except('show');
     Route::put('admin-status/{id}', [AdminController::class, 'changeStatus'])->name('admin.status');
