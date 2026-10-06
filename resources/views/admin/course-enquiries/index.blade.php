@@ -84,7 +84,7 @@
                                     <thead>
                                         <tr>
                                             <th>{{ __('SN') }}</th>
-                                            <th>{{ __('Name / School') }}</th>
+                                            <th>{{ __('Name') }}</th>
                                             <th>{{ __('Phone') }}</th>
                                             <th>{{ __('Email') }}</th>
                                             <th>{{ __('City') }}</th>
@@ -99,39 +99,19 @@
                                             <tr>
                                                 <td>{{ $loop->iteration + ($enquiries->currentPage() - 1) * $enquiries->perPage() }}</td>
 
-                                                <td>
-                                                    <span class="{{ (!$enq->status || $enq->status === 'new') ? 'font-weight-bold' : '' }}">
-                                                        {{ $enq->name }}
-                                                    </span>
-                                                    @if($enq->designation)
-                                                        <br><small class="text-muted">{{ $enq->designation }}</small>
-                                                    @endif
-                                                    @if($enq->school)
-                                                        <br><small class="text-primary">
-                                                            <i class="fas fa-school fa-xs"></i> {{ $enq->school }}
-                                                        </small>
-                                                    @endif
-                                                </td>
+                                                <td>{{ $enq->name }}</td>
 
-                                                <td>
-                                                    <a href="tel:{{ $enq->phone }}">{{ $enq->phone }}</a>
-                                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/','',$enq->phone) }}"
-                                                       target="_blank" class="ml-1 text-success" title="WhatsApp">
-                                                        <i class="fab fa-whatsapp"></i>
-                                                    </a>
-                                                </td>
+                                                <td>{{ $enq->phone ?? '—' }}</td>
 
-                                                <td>
-                                                    <a href="mailto:{{ $enq->email }}">{{ $enq->email }}</a>
-                                                </td>
+                                                <td>{{ $enq->email }}</td>
 
                                                 <td>{{ $enq->city ?? '—' }}</td>
 
                                                 <td>
                                                     @if($enq->source)
-                                                        <span class="badge badge-info">
-                                                            {{ ucwords(str_replace(['-','_'], ' ', $enq->source)) }}
-                                                        </span>
+                                                        
+                                                    {{ ucwords(str_replace(['-','_'], ' ', $enq->source)) }}
+                                                        
                                                     @else
                                                         —
                                                     @endif
@@ -139,21 +119,17 @@
 
                                                 <td>
                                                     @if(!$enq->status || $enq->status === 'new')
-                                                        <span class="badge badge-primary">{{ __('New') }}</span>
+                                                        {{ __('New') }}
                                                     @elseif($enq->status === 'read')
-                                                        <span class="badge badge-secondary">{{ __('Read') }}</span>
+                                                        {{ __('Read') }}
                                                     @elseif($enq->status === 'contacted')
-                                                        <span class="badge badge-warning">{{ __('Contacted') }}</span>
+                                                        {{ __('Contacted') }}
                                                     @elseif($enq->status === 'closed')
-                                                        <span class="badge badge-success">{{ __('Closed') }}</span>
+                                                        {{ __('Closed') }}
                                                     @endif
                                                 </td>
 
-                                                <td>
-                                                    <span title="{{ $enq->created_at }}">
-                                                        {{ $enq->created_at?->diffForHumans() ?? '—' }}
-                                                    </span>
-                                                </td>
+                                                <td>{{ $enq->created_at }}</td>
 
                                                 <td class="text-center min-200">
                                                     <a href="{{ route('admin.course-enquiry.show', $enq->id) }}"

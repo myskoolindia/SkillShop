@@ -20,8 +20,9 @@
 
         <div class="section-body">
             <div class="mt-4 row justify-content-center">
-                <div class="col-12 col-lg-9">
+                <div class="col-12 col-lg-10">
 
+                    {{-- ── Contact + Enquiry Card ─────────────────── --}}
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h4 class="mb-0">
@@ -33,10 +34,7 @@
                             </h4>
                             <div class="d-flex align-items-center">
                                 <label class="mb-0 mr-2 text-muted font-weight-bold" style="font-size:13px;">{{ __('Status') }}:</label>
-                                <select id="statusDropdown"
-                                        class="form-control form-control-sm"
-                                        style="width:140px;"
-                                        data-id="{{ $enquiry->id }}">
+                                <select id="statusDropdown" class="form-control form-control-sm" style="width:140px;" data-id="{{ $enquiry->id }}">
                                     <option value="new"       {{ $enquiry->status == 'new'       ? 'selected' : '' }}>{{ __('New') }}</option>
                                     <option value="read"      {{ $enquiry->status == 'read'      ? 'selected' : '' }}>{{ __('Read') }}</option>
                                     <option value="contacted" {{ $enquiry->status == 'contacted' ? 'selected' : '' }}>{{ __('Contacted') }}</option>
@@ -58,9 +56,7 @@
                                                 <a href="tel:{{ $enquiry->phone }}" class="font-weight-bold">{{ $enquiry->phone }}</a>
                                                 &nbsp;
                                                 <a href="https://wa.me/{{ preg_replace('/[^0-9]/','',$enquiry->phone) }}"
-                                                   target="_blank"
-                                                   class="btn btn-success btn-sm py-0 px-2"
-                                                   style="font-size:12px;">
+                                                   target="_blank" class="btn btn-success btn-sm py-0 px-2" style="font-size:12px;">
                                                     <i class="fab fa-whatsapp"></i> WhatsApp
                                                 </a>
                                             </td>
@@ -71,7 +67,7 @@
                                         </tr>
                                         <tr>
                                             <td class="text-muted">{{ __('School') }}</td>
-                                            <td>{{ $enquiry->school ?? '—' }}</td>
+                                            <td class="font-weight-bold">{{ $enquiry->school ?? '—' }}</td>
                                         </tr>
                                         <tr>
                                             <td class="text-muted">{{ __('City') }}</td>
@@ -79,7 +75,7 @@
                                         </tr>
                                         @if($enquiry->address)
                                         <tr>
-                                            <td class="text-muted">{{ __('Address') }}</td>
+                                            <td class="text-muted">{{ __('Address / Space') }}</td>
                                             <td>{{ $enquiry->address }}</td>
                                         </tr>
                                         @endif
@@ -103,7 +99,7 @@
                                         </tr>
                                         <tr>
                                             <td class="text-muted">{{ __('Package') }}</td>
-                                            <td>{{ $enquiry->course_title ?? '—' }}</td>
+                                            <td class="font-weight-bold">{{ $enquiry->course_title ?? '—' }}</td>
                                         </tr>
                                         <tr>
                                             <td class="text-muted">{{ __('Request Type') }}</td>
@@ -136,6 +132,7 @@
 
                             </div>
 
+                            {{-- Action buttons --}}
                             <div class="mt-3 pt-3 border-top">
                                 <a href="https://wa.me/{{ preg_replace('/[^0-9]/','',$enquiry->phone) }}"
                                    target="_blank" class="btn btn-success mr-1">
@@ -154,130 +151,57 @@
                         </div>
                     </div>{{-- /.card --}}
 
-                    {{-- ── Quotation / Proposal Table ──────────────────── --}}
-                    @if($enquiry->quotation)
+                    {{-- ── Quotation / Bundle Items Card ──────────── --}}
                     @php
-                        $quot = json_decode($enquiry->quotation, true);
-                        $items = $quot['items'] ?? [];
-                        $grandTotal = $quot['grand_total'] ?? 0;
-                        // Group items by category
-                        $grouped = [];
-                        foreach($items as $row) {
-                            $cat = $row['category'] ?? 'General';
-                            $grouped[$cat][] = $row;
+                        // Map source → slug for live fetch
+                        $slugMap = [
+                            'composite-skill-lab-basic'   => 'basic-skill-1',
+                            'composite-skill-lab-advance' => 'advance-skill-1',
+                            'composite-skill-lab-premium' => 'premium-skill-1',
+                        ];
+                        $planSlug = $slugMap[$enquiry->source] ?? null;
+
+                        // Try stored quotation first
+                        $quotItems  = [];
+                        $grandTotal = 0;
+
+                        if ($enquiry->quotation) {
+                            $stored    = json_decode($enquiry->quotation, true);
+                            $quotItems = $stored['items']       ?? [];
+                            $grandTotal= $stored['grand_total'] ?? 0;
+                        }
+
+                        // If no stored items but we have a slug, fetch live from API
+                        if (empty($quotItems) && $planSlug) {
+                            try {
+                                $apiUrl  = url('/club-shop/api/products/slug/' . $planSlug);
+                                $resp    = \Illuminate\Support\Facades\Http::timeout(6)->get($apiUrl);
+                                $comps   = $resp->json('data.bundle_components', []);
+                                foreach ($comps as $c) {
+                                    $qty   = (int)   ($c['required_quantity'] ?? 0);
+                                    $price = (float) ($c['unit_price'] ?? 0);
+                                    if ($qty <= 0 || empty($c['title'])) continue;
+                                    $total       = $price * $qty;
+                                    $grandTotal += $total;
+                                    $quotItems[] = [
+                                        'category'   => $c['category_name'] ?? 'General',
+                                        'item'       => $c['title'],
+                                        'qty'        => $qty,
+                                        'unit_price' => $price,
+                                        'total'      => $total,
+                                    ];
+                                }
+                            } catch (\Throwable $e) {
+                                // silently skip
+                            }
                         }
                     @endphp
-                    @if(!empty($items))
-                    <div class="card mt-4">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h4 class="mb-0">
-                                <i class="fas fa-file-invoice text-warning mr-2"></i>
-                                {{ __('Quotation — Lab Bundle Items') }}
-                            </h4>
-                            <span class="badge badge-warning" style="font-size:13px;">
-                                {{ count($items) }} {{ __('items') }}
-                            </span>
-                        </div>
-                        <div class="card-body p-0">
-
-                            {{-- Proposal Header --}}
-                            <div class="px-4 py-3 border-bottom bg-light">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <p class="mb-1 font-weight-bold text-dark" style="font-size:14px;">
-                                            {{ __('Establishment of a Composite Skill Lab — Skillvation') }}
-                                        </p>
-                                        <p class="mb-0 text-muted" style="font-size:12px;">
-                                            {{ __('A multi-domain, hands-on skill education space for Grades 6–12') }}
-                                        </p>
-                                    </div>
-                                    <div class="col-md-6 text-md-right">
-                                        <p class="mb-1 text-muted" style="font-size:12px;">{{ __('To') }}: <strong>{{ $enquiry->name }}</strong>{{ $enquiry->designation ? ', '.$enquiry->designation : '' }}</p>
-                                        <p class="mb-0 text-muted" style="font-size:12px;">{{ $enquiry->school ?? '' }}{{ $enquiry->city ? ' · '.$enquiry->city : '' }}</p>
-                                        <p class="mb-0 text-muted" style="font-size:12px;">{{ $enquiry->created_at?->format('d M Y') }}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Items table grouped by category --}}
-                            <div class="table-responsive">
-                                <table class="table table-bordered mb-0" style="font-size:13px;">
-                                    <thead class="thead-dark">
-                                        <tr>
-                                            <th style="width:30px;">#</th>
-                                            <th>{{ __('Category') }}</th>
-                                            <th>{{ __('Item / Description') }}</th>
-                                            <th class="text-center" style="width:80px;">{{ __('Qty') }}</th>
-                                            <th class="text-right" style="width:110px;">{{ __('Unit Price') }}</th>
-                                            <th class="text-right" style="width:120px;">{{ __('Total') }}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @php $sno = 0; @endphp
-                                        @foreach($grouped as $category => $catItems)
-                                            @php
-                                                $catTotal = array_sum(array_column($catItems, 'total'));
-                                            @endphp
-                                            @foreach($catItems as $row)
-                                                @php $sno++; @endphp
-                                                <tr>
-                                                    <td class="text-muted">{{ $sno }}</td>
-                                                    <td>
-                                                        @if($loop->first)
-                                                            <span class="badge badge-secondary">{{ $category }}</span>
-                                                        @endif
-                                                    </td>
-                                                    <td class="font-weight-bold">{{ $row['item'] ?? '—' }}</td>
-                                                    <td class="text-center">{{ $row['qty'] ?? 0 }}</td>
-                                                    <td class="text-right">
-                                                        ₹{{ number_format($row['unit_price'] ?? 0, 2) }}
-                                                    </td>
-                                                    <td class="text-right font-weight-bold">
-                                                        ₹{{ number_format($row['total'] ?? 0, 2) }}
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                            {{-- Category subtotal --}}
-                                            <tr class="table-light">
-                                                <td colspan="5" class="text-right text-muted font-weight-bold" style="font-size:12px;">
-                                                    {{ $category }} {{ __('Subtotal') }}
-                                                </td>
-                                                <td class="text-right font-weight-bold text-primary">
-                                                    ₹{{ number_format($catTotal, 2) }}
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                    <tfoot>
-                                        <tr class="table-dark">
-                                            <td colspan="5" class="text-right font-weight-bold" style="font-size:14px;">
-                                                <i class="fas fa-rupee-sign mr-1"></i> {{ __('Grand Total') }}
-                                            </td>
-                                            <td class="text-right font-weight-bold" style="font-size:15px; color:#ffc107;">
-                                                ₹{{ number_format($grandTotal, 2) }}
-                                            </td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-
-                            {{-- Footer note --}}
-                            <div class="px-4 py-3 border-top bg-light">
-                                <p class="mb-1 text-muted" style="font-size:12px;">
-                                    <i class="fas fa-info-circle mr-1"></i>
-                                    {{ __('This quotation is based on the bundle items configured in the Skillvation lab package selected by the school. A detailed itemized budget will be prepared once priorities and vendor quotations are finalised.') }}
-                                </p>
-                                <p class="mb-0 text-muted" style="font-size:12px;">
-                                    {{ __('Phased procurement (core IT/electronics first, other domains in subsequent phases) can be considered to spread costs across budget cycles.') }}
-                                </p>
-                            </div>
-
-                        </div>
-                    </div>
-                    @endif
-                    @endif
 
                 </div>{{-- /.col --}}
+            </div>{{-- /.row --}}
+        </div>{{-- /.section-body --}}
+    </section>
+</div>
 @endsection
 
 @push('js')
@@ -291,10 +215,7 @@
             $.ajax({
                 type: 'POST',
                 url: '/admin/course-enquiry/' + id + '/status',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    status: status,
-                },
+                data: { _token: '{{ csrf_token() }}', status: status },
                 success: function (response) {
                     if (response.success) {
                         toastr.success('{{ __("Status updated successfully") }}');
