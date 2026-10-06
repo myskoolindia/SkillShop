@@ -97,6 +97,12 @@ class EmailSettingController extends Controller
             return view('globalsetting::email.template.qna_reply_mail', compact('template'));
         }elseif ($template->name == 'live_class_mail') {
             return view('globalsetting::email.template.live_class_mail', compact('template'));
+        } elseif ($template->name == 'skill_lab_enquiry_admin') {
+            return view('globalsetting::email.template.skill_lab_enquiry_admin', compact('template'));
+        } elseif ($template->name == 'skill_lab_enquiry_confirmation') {
+            return view('globalsetting::email.template.skill_lab_enquiry_confirmation', compact('template'));
+        } elseif ($template->name == 'skill_lab_enquiry_proposal') {
+            return view('globalsetting::email.template.skill_lab_enquiry_proposal', compact('template'));
         } else {
             $notification = __('Something went wrong');
             $notification = ['messege' => $notification, 'alert-type' => 'error'];

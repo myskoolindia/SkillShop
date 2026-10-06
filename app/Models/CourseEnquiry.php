@@ -18,6 +18,7 @@ class CourseEnquiry extends Model
         'city',
         'address',
         'message',
+        'quotation',
         'source',
         'status',
     ];

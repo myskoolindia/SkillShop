@@ -1194,7 +1194,7 @@
       @php
       $ecoCards = [
         [
-          'rev'   => true,
+          'rev'   => false,
           'num'   => '01',
           'img'   => asset('frontend/img/skillbox/Workonmaterialsandmachines.jpeg'),
           'alt'   => 'Skill Education Infrastructure — Labs',

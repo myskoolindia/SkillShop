@@ -1021,6 +1021,7 @@
           <form class="space-y-4" id="planEnquiryForm" data-source="composite-skill-lab-premium" data-title="Skillvation Premium Composite Skill Lab – Enquiry">
             <input type="hidden" name="source"       id="planSource">
             <input type="hidden" name="course_title" id="planTitle">
+            <input type="hidden" name="quotation"    id="planQuotation">
 
             <div>
               <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">School Name *</label>
@@ -1269,6 +1270,19 @@
   if (ttlEl) ttlEl.value = form.dataset.title  || '';
   form.addEventListener('submit', function (e) {
     e.preventDefault();
+    // ── Build quotation from loaded bundle components ──────────
+    var quotEl = document.getElementById('planQuotation');
+    if (quotEl && window._sksComponents && window._sksComponents.length) {
+      var rows = window._sksComponents
+        .filter(function(c){ return !c.is_optional && Number(c.required_quantity) > 0; })
+        .map(function(c){
+          var qty = Number(c.required_quantity) || 0;
+          var price = Number(c.unit_price) || 0;
+          return { category: c.category_name||'General', item: c.title, qty: qty, unit_price: price, total: price*qty };
+        });
+      var grandTotal = rows.reduce(function(s,r){ return s+r.total; }, 0);
+      quotEl.value = JSON.stringify({ items: rows, grand_total: grandTotal });
+    }
     var orig = btn.textContent;
     btn.disabled = true; btn.textContent = 'Submitting…';
     fetch('{{ route("course.enquiry.store") }}', {
@@ -1532,6 +1546,9 @@ Promise.all([
   var allCats    = res[1].data || [];
   var components = product.bundle_components || [];
   if(!components.length) throw new Error('empty bundle');
+
+  // Store globally so the enquiry form can build a quotation
+  window._sksComponents = components;
 
   var tree = {};
   allCats.forEach(function(c){ tree[c.id]=c; });
