@@ -157,21 +157,29 @@
             </div>
           </div>
 
-          <!-- Action Buttons — switched by JS based on course type -->
+          <!-- Action Buttons -->
+          <div class="flex flex-col gap-2.5">
+            {{-- Buy Now --}}
+            <button id="buy-now-btn" type="button" onclick="buyNow()"
+              class="bg-primary hover:bg-primary-dark text-white px-6 py-3.5 rounded-full text-sm font-bold w-full transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
+              <i class="fa-solid fa-bolt text-xs"></i>
+              <span>Buy Now</span>
+            </button>
 
-          {{-- Buy Now (shown for type=10 courses) --}}
-          <button id="buy-now-btn" onclick="buyNow()"
-            class="bg-primary hover:bg-primary-dark text-white px-6 py-3.5 rounded-full text-sm font-bold w-full transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
-            <i class="fa-solid fa-cart-shopping text-xs"></i>
-            <span>Buy Now</span>
-          </button>
+            {{-- Add to Cart --}}
+            <button id="add-to-cart-btn" type="button" onclick="addToCartAction()"
+              class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-6 py-3 rounded-full text-sm font-bold w-full transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2">
+              <i class="fa-solid fa-cart-shopping text-xs"></i>
+              <span>Add to Cart</span>
+            </button>
 
-          <!-- Request a Quote Button (default — shown for non-type-10) -->
-          <button id="quote-btn" onclick="toggleQuoteForm()"
-            class="d-none bg-primary hover:bg-primary-dark text-white px-6 py-3.5 rounded-full text-sm font-bold w-full transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
-            <i class="fa-solid fa-file-lines text-xs"></i>
-            <span>Request a Quote</span>
-          </button>
+            {{-- Request a Quote Button --}}
+            <button id="quote-btn" type="button" onclick="toggleQuoteForm()"
+              class="text-primary hover:text-primary-dark hover:bg-primary/5 border border-primary/30 px-6 py-2.5 rounded-full text-xs font-semibold w-full transition-all flex items-center justify-center gap-2">
+              <i class="fa-solid fa-file-lines text-xs"></i>
+              <span>Institutional Quote / Enquiry</span>
+            </button>
+          </div>
 
           <!-- Quote Form (hidden by default) -->
           <div id="quote-form-wrap" class="hidden">
@@ -333,23 +341,15 @@
       setCourseImage('course-side-image-2', fullImgUrl);
     }
 
-    // ── Switch action button based on course type ─────────────
-    // type=10 → Buy Now (goes to club-shop cart)
-    // all other types → Request a Quote form
-    const buyBtn   = document.getElementById('buy-now-btn');
-    const quoteBtn = document.getElementById('quote-btn');
-
-    if (String(course.type) === '10') {
-      // if (buyBtn)   buyBtn.classList.remove('hidden');
-      if (quoteBtn) quoteBtn.classList.add('hidden');
-    } else {
-      // if (buyBtn)   buyBtn.classList.add('hidden');
-      if (quoteBtn) quoteBtn.classList.remove('hidden');
+    // Store course details
+    if (course.type) {
+      window._courseType = String(course.type);
     }
-
-    // Store api_course_id so buyNow() can use it
     if (course.id) {
       window._apiCourseId = course.id;
+    }
+    if (course.lms_id) {
+      window._lmsCourseId = course.lms_id;
     }
   }
 
@@ -370,43 +370,163 @@
 
     if (isHidden) {
       wrap.classList.remove('hidden');
-      btn.innerHTML = '<i class="fa-solid fa-xmark text-xs"></i><span>Close</span>';
-      // Smooth scroll to form on mobile
+      btn.innerHTML = '<i class="fa-solid fa-xmark text-xs"></i><span>Close Enquiry Form</span>';
       setTimeout(() => wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
     } else {
       wrap.classList.add('hidden');
-      btn.innerHTML = '<i class="fa-solid fa-file-lines text-xs"></i><span>Request a Quote</span>';
+      btn.innerHTML = '<i class="fa-solid fa-file-lines text-xs"></i><span>Institutional Quote / Enquiry</span>';
     }
   }
 
   /*
-   * Buy Now — type=10 courses go directly to club-shop product page
+   * Buy Now — Adds course to cart and redirects straight to checkout
    */
-  function buyNow() {
+  async function buyNow() {
     const btn = document.getElementById('buy-now-btn');
-    // btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i><span>Loading...</span>';
+    const oldHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i><span>Processing...</span>';
 
-    // Use the api_course_id stored by updateCourse()
     const apiId = window._apiCourseId || '{{ $course ? $course->api_course_id : "" }}';
+    const lmsId = window._lmsCourseId || '{{ $course ? $course->id : "" }}' || courseId;
+    const courseType = window._courseType || '{{ $course ? $course->type : "" }}';
+
+    // Physical TTT products (type=10) redirect to club-shop product page if mapped
     const shopUrl = '{{ env("APP_URL") }}';
     const shopBase = shopUrl + '/club-shop';
-
-    // Map api_course_id to club-shop product slug/URL
-    // For TTT courses (type=10) redirect to the club-shop product page
     const productMap = {
       '49':  shopBase + '/annual-activity-kit-10-box-203',
       '102': shopBase + '/mega-sample-package-15-items',
     };
 
-    const destination = productMap[String(apiId)] || shopBase;
-    window.location.href = destination;
+    if (String(courseType) === '10' && productMap[String(apiId)]) {
+      window.location.href = productMap[String(apiId)];
+      return;
+    }
 
-    // Re-enable after redirect (in case browser blocks)
-    setTimeout(() => {
+    // Standard Course Purchase (Grade 2, 3, 6, 7, 8 / Skill2School courses)
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    const targetId = lmsId || apiId || courseId;
+
+    try {
+      const response = await fetch('{{ url("/add-to-cart") }}/' + encodeURIComponent(targetId), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': csrfToken,
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ _token: csrfToken })
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success' || data.status === 'already') {
+        if (typeof toastr !== 'undefined') {
+          toastr.success(data.message || 'Proceeding to checkout...');
+        }
+        window.location.href = data.checkout_url || '{{ route("checkout.index") }}';
+      } else {
+        // Fallback: try by API course ID
+        if (apiId && String(apiId) !== String(targetId)) {
+          const fallbackRes = await fetch('{{ url("/add-to-cart-by-api-id") }}/' + encodeURIComponent(apiId), {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': csrfToken,
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({ _token: csrfToken })
+          });
+          const fbData = await fallbackRes.json();
+          if (fbData.status === 'success' || fbData.status === 'already') {
+            window.location.href = fbData.checkout_url || '{{ route("checkout.index") }}';
+            return;
+          }
+        }
+
+        if (typeof toastr !== 'undefined') {
+          toastr.error(data.message || 'Unable to add course to cart.');
+        } else {
+          alert(data.message || 'Unable to add course to cart.');
+        }
+        btn.disabled = false;
+        btn.innerHTML = oldHtml;
+      }
+    } catch (err) {
+      console.error('Purchase flow error:', err);
       btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-cart-shopping text-xs"></i><span>Buy Now</span>';
-    }, 3000);
+      btn.innerHTML = oldHtml;
+      if (typeof toastr !== 'undefined') {
+        toastr.error('Network error during checkout. Please try again.');
+      } else {
+        alert('Network error during checkout. Please try again.');
+      }
+    }
+  }
+
+  /*
+   * Add To Cart — Adds course to cart without immediate redirect
+   */
+  async function addToCartAction() {
+    const btn = document.getElementById('add-to-cart-btn');
+    const oldHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i><span>Adding...</span>';
+
+    const apiId = window._apiCourseId || '{{ $course ? $course->api_course_id : "" }}';
+    const lmsId = window._lmsCourseId || '{{ $course ? $course->id : "" }}' || courseId;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    const targetId = lmsId || apiId || courseId;
+
+    try {
+      const response = await fetch('{{ url("/add-to-cart") }}/' + encodeURIComponent(targetId), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': csrfToken,
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ _token: csrfToken })
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        if (typeof toastr !== 'undefined') {
+          toastr.success(data.message || 'Course added to cart!');
+        }
+        document.querySelectorAll('.mini-cart-count').forEach(el => el.textContent = data.cart_count);
+        btn.innerHTML = '<i class="fa-solid fa-circle-check text-xs text-emerald-600"></i><span>Added to Cart</span>';
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-bag-shopping text-xs"></i><span>View Cart</span>';
+          btn.onclick = () => window.location.href = '{{ route("cart") }}';
+        }, 1200);
+      } else if (data.status === 'already') {
+        if (typeof toastr !== 'undefined') {
+          toastr.info(data.message || 'Already in cart!');
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-bag-shopping text-xs"></i><span>View Cart</span>';
+        btn.onclick = () => window.location.href = '{{ route("cart") }}';
+      } else {
+        if (typeof toastr !== 'undefined') {
+          toastr.error(data.message || 'Unable to add to cart.');
+        } else {
+          alert(data.message || 'Unable to add to cart.');
+        }
+        btn.disabled = false;
+        btn.innerHTML = oldHtml;
+      }
+    } catch (err) {
+      console.error('Add to cart error:', err);
+      btn.disabled = false;
+      btn.innerHTML = oldHtml;
+      if (typeof toastr !== 'undefined') {
+        toastr.error('Error adding to cart. Please try again.');
+      }
+    }
   }
 
   /*

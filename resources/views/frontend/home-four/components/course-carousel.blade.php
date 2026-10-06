@@ -162,11 +162,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 ${escapeHtml(desc)}
               </p>
             </div>
-            <div class="pt-4 border-t border-slate-100 flex items-center justify-between mt-auto">
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between mt-auto gap-2">
               <span class="text-base font-extrabold text-slate-900">${escapeHtml(price)}</span>
-              <a href="${courseUrl}" class="inline-flex items-center gap-1.5 text-xs font-bold text-primary group-hover:translate-x-1 transition-transform">
-                Explore <i class="fa-solid fa-arrow-right text-[10px]"></i>
-              </a>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="carouselBuyNow(event, '${escapeHtml(courseId)}', '${escapeHtml(course.api_course_id || '')}')" class="px-3 py-1.5 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-full transition-all shadow-sm active:scale-95 flex items-center gap-1">
+                  <i class="fa-solid fa-bolt text-[10px]"></i> Buy Now
+                </button>
+                <a href="${courseUrl}" class="px-2 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-primary hover:bg-slate-50 transition-colors inline-flex items-center gap-1">
+                  Details <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -205,6 +210,63 @@ document.addEventListener("DOMContentLoaded", function () {
       containerEl.scrollBy({ left: 320, behavior: 'smooth' });
     });
   }
+
+  window.carouselBuyNow = async function(e, courseId, apiId) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const btn = e ? e.currentTarget : null;
+    const oldHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-[10px]"></i>';
+    }
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    const targetId = courseId || apiId;
+
+    try {
+      const res = await fetch('{{ url("/add-to-cart") }}/' + encodeURIComponent(targetId), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': csrfToken,
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ _token: csrfToken })
+      });
+
+      const data = await res.json();
+      if (data.status === 'success' || data.status === 'already') {
+        window.location.href = data.checkout_url || '{{ route("checkout.index") }}';
+      } else {
+        if (apiId && String(apiId) !== String(targetId)) {
+          const fallback = await fetch('{{ url("/add-to-cart-by-api-id") }}/' + encodeURIComponent(apiId), {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': csrfToken,
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({ _token: csrfToken })
+          });
+          const fbData = await fallback.json();
+          if (fbData.status === 'success' || fbData.status === 'already') {
+            window.location.href = fbData.checkout_url || '{{ route("checkout.index") }}';
+            return;
+          }
+        }
+        if (typeof toastr !== 'undefined') toastr.error(data.message || 'Error adding to cart');
+        else alert(data.message || 'Error adding to cart');
+        if (btn) { btn.disabled = false; btn.innerHTML = oldHtml; }
+      }
+    } catch (err) {
+      console.error(err);
+      if (btn) { btn.disabled = false; btn.innerHTML = oldHtml; }
+      window.location.href = '{{ url("/course-detail") }}/' + encodeURIComponent(courseId);
+    }
+  };
 });
 </script>
 @endpush

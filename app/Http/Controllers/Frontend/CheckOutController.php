@@ -15,13 +15,14 @@ class CheckOutController extends Controller
     function index()
     {
         $products = Cart::content();
+        if ($products->count() == 0) {
+            return redirect()->route('cart')->with(['messege' => __('Your cart is empty!'), 'alert-type' => 'info']);
+        }
 
+        $enrollments = session()->get('enrollments') ?? [];
         foreach($products as $product) {
-            if(in_array($product->id, session()->get('enrollments'))) {
-                return redirect()->route('cart')->with(['messege' => __('Error occurred please try agin'), 'alert-type' => 'error']);
-            }
-            if(in_array($product->id, session()->get('enrollments'))) {
-                return redirect()->route('cart')->with(['messege' => __('Error occurred please try agin'), 'alert-type' => 'error']);
+            if(in_array($product->id, $enrollments)) {
+                return redirect()->route('cart')->with(['messege' => __('You are already enrolled in this course'), 'alert-type' => 'error']);
             }
         }
 

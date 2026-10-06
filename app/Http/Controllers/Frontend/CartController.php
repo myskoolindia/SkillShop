@@ -29,13 +29,30 @@ class CartController extends Controller {
     }
 
     function addToCart(Request $request, string $id) {
-        if ($this->checkItemExist($id)) {
-            return response(['status' => 'error', 'message' => 'Already added to cart!']);
+        $course = Course::active()->where('id', $id)->first();
+        if (!$course) {
+            $course = Course::active()->where('api_course_id', $id)->first();
         }
-        if ($this->checkIfOwnCourse($id)) {
+        if (!$course) {
+            $course = Course::active()->where('slug', $id)->first();
+        }
+
+        if (!$course) {
+            return response(['status' => 'error', 'message' => 'Course not found!']);
+        }
+
+        if ($this->checkItemExist($course->id)) {
+            return response([
+                'status' => 'already',
+                'message' => 'Already added to cart!',
+                'checkout_url' => route('checkout.index'),
+                'cart_url' => route('cart'),
+                'cart_count' => Cart::content()->count(),
+            ]);
+        }
+        if ($this->checkIfOwnCourse($course->id)) {
             return response(['status' => 'error', 'message' => 'You can not add to cart your own course!']);
         }
-        $course = Course::active()->where('id', $id)->first();
 
         $price = $course->discount > 0 ? $course->discount : $course->price;
 
@@ -54,7 +71,13 @@ class CartController extends Controller {
 
         $this->updateCouponDiscountAmount();
 
-        $response = ['status' => 'success', 'message' => 'Added to cart successfully!', 'cart_count' => Cart::content()->count()];
+        $response = [
+            'status' => 'success',
+            'message' => 'Added to cart successfully!',
+            'cart_count' => Cart::content()->count(),
+            'checkout_url' => route('checkout.index'),
+            'cart_url' => route('cart'),
+        ];
 
         $settings = cache()->get('setting');
         $marketingSettings = cache()->get('marketing_setting');
@@ -133,11 +156,29 @@ class CartController extends Controller {
             ->first();
 
         if (!$course) {
+            $course = Course::where('id', $api_course_id)
+                ->where('status', 'active')
+                ->first();
+        }
+
+        if (!$course) {
+            $course = Course::where('slug', $api_course_id)
+                ->where('status', 'active')
+                ->first();
+        }
+
+        if (!$course) {
             return response(['status' => 'error', 'message' => 'Course not found.']);
         }
 
         if ($this->checkItemExist($course->id)) {
-            return response(['status' => 'already', 'message' => 'Already in cart!', 'checkout_url' => route('checkout.index')]);
+            return response([
+                'status' => 'already',
+                'message' => 'Already in cart!',
+                'checkout_url' => route('checkout.index'),
+                'cart_url' => route('cart'),
+                'cart_count' => Cart::content()->count(),
+            ]);
         }
 
         if ($this->checkIfOwnCourse($course->id)) {
