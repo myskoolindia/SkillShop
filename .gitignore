@@ -48,6 +48,9 @@ Homestead.json
 auth.json
 /composer.lock
 /prodesign/
+
+# Sensitive config files with hardcoded credentials
+/config/database.php
 /designs/
 /public/uploads/custom-images/
 
