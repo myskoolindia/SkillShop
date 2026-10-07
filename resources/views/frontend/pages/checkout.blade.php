@@ -160,7 +160,7 @@
                             </div>
                         @endif
                     </div>
-                    <div class="wsus__payment_area">
+                    <!-- <div class="wsus__payment_area">
                         <div class="row">
                             @if (Session::get('payable_amount') > 0)
                                 @if ($basic_payment->stripe_status == 'active')
@@ -265,7 +265,7 @@
                                 </div>
                             @endif
                         </div>
-                    </div>
+                    </div> -->
                 </div>
                 <div class="col-lg-4">
                     <div class="cart__collaterals-wrap payment_slidebar">
@@ -356,7 +356,113 @@
                                 @endif
                             @endif
                         </ul>
+                        <div class="wsus__payment_area">
+                        <div class="row">
+                            @if (Session::get('payable_amount') > 0)
+                                @if ($basic_payment->stripe_status == 'active')
+                                    <div class="col-lg-3 col-6 col-sm-4">
+                                        <a class="wsus__single_payment" data-bs-toggle="modal" data-bs-target="#stripeModal"
+                                            href="javascript:;">
+                                            <img src="{{ asset($basic_payment->stripe_image) }}" alt="Pay with stripe"
+                                                class="img-fluid w-100">
+                                        </a>
+                                    </div>
+                                @endif
+
+                                @if ($basic_payment->paypal_status == 'active')
+                                    <div class="col-lg-3 col-6 col-sm-4">
+                                        <a class="wsus__single_payment" href="{{ route('pay-via-paypal') }}">
+                                            <img src="{{ asset($basic_payment->paypal_image) }}" alt="Pay with paypal"
+                                                class="img-fluid w-100">
+                                        </a>
+                                    </div>
+                                @endif
+
+
+                                @if ($basic_payment->bank_status == 'active')
+                                    <div class="col-lg-3 col-6 col-sm-4">
+                                        <a class="wsus__single_payment" data-bs-toggle="modal" data-bs-target="#bankModal"
+                                            href="javascript:;">
+                                            <img src="{{ asset($basic_payment->bank_image) }}" alt="Pay with bank"
+                                                class="img-fluid w-100">
+                                        </a>
+                                    </div>
+                                @endif
+
+                                @if ($razorpay_credentials->razorpay_status == 'active')
+                                    <div class="col-lg-12 col-12 col-sm-12">
+                                        <a href="javascript:;" class="btn btn-primary buy-now-btn w-100" id="razorpayBtn">
+                                            buy now
+                                        </a>
+                                    </div>
+
+                                    <form action="{{ route('pay-via-razorpay') }}" method="POST" class="d-none">
+                                        @csrf
+
+                                        <input type="hidden" name="payable_amount" value="{{ $payable_amount }}">
+
+                                        <script src="https://checkout.razorpay.com/v1/checkout.js" data-key="{{ $razorpay_credentials->razorpay_key }}"
+                                            data-currency="{{ $razorpay_credentials->currency_code }}"
+                                            data-amount="{{ $razorpay_credentials->payable_with_charge * 100 }}" data-buttontext="{{ __('Pay') }}"
+                                            data-name="{{ $razorpay_credentials->razorpay_name }}"
+                                            data-description="{{ $razorpay_credentials->razorpay_description }}"
+                                            data-image="{{ asset($razorpay_credentials->razorpay_image) }}" data-prefill.name="{{ userAuth()->name }}"
+                                            data-prefill.email="{{ userAuth()->email }}" data-theme.color="{{ $razorpay_credentials->razorpay_theme_color }}">
+                                        </script>
+                                    </form>
+                                @endif
+
+
+                                @if ($mollie_credentials->mollie_status == 'active')
+                                    <div class="col-lg-3 col-6 col-sm-4">
+                                        <a href="{{ route('pay-via-mollie') }}" class="wsus__single_payment">
+                                            <img src="{{ asset($mollie_credentials->mollie_image) }}" alt="payment method"
+                                                class="img-fluid w-100">
+                                        </a>
+                                    </div>
+                                @endif
+
+                                @if ($instamojo_credentials->instamojo_status == 'active')
+                                    <div class="col-lg-3 col-6 col-sm-4">
+                                        <a href="{{ route('pay-via-instamojo') }}" class="wsus__single_payment">
+                                            <img src="{{ asset($instamojo_credentials->instamojo_image) }}"
+                                                alt="instamojo method" class="img-fluid w-100">
+                                        </a>
+                                    </div>
+                                @endif
+
+                                @if ($flutterwave_credentials->flutterwave_status == 'active')
+                                    <div class="col-lg-3 col-6 col-sm-4">
+                                        <a href="javascript:;" class="wsus__single_payment" onclick="flutterwavePayment()">
+                                            <img src="{{ asset($flutterwave_credentials->flutterwave_image) }}"
+                                                alt="flutterwave method" class="img-fluid w-100">
+                                        </a>
+                                    </div>
+                                @endif
+
+                                @if ($payment_setting->paystack_status == 'active')
+                                    <div class="col-lg-3 col-6 col-sm-4">
+                                        <a href="javascript:;" class="wsus__single_payment" onclick="payWithPaystack()">
+                                            <img src="{{ asset($paystack_credentials->paystack_image) }}"
+                                                alt="paystack method" class="img-fluid w-100">
+                                        </a>
+                                    </div>
+                                @endif
+                            @else
+                                <div class="col-lg-3 col-6 col-sm-4">
+                                    <form action="{{ route('pay-via-free-gateway') }}" method="POST">
+                                        @csrf
+                                        <button class="wsus__single_payment border-0">
+                                            <img src="{{ asset('uploads/website-images/buy_now.png') }}"
+                                                alt="Pay with stripe" class="img-fluid w-100">
+                                        </button>
+                                    </form>
+                                </div>
+                            @endif
+                        </div>
                     </div>
+                    </div>
+                    
                 </div>
             </div>
         </div>

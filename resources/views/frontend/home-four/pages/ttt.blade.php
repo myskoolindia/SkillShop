@@ -336,24 +336,24 @@
 @include('frontend.home-four.components.course-carousel', [
   'type' => '10',
   'lms_only' => '1',
-  'title' => 'Explore Our Courses',
+  'title' => 'Explore Our Teachers Training Program',
   'subtitle' => 'Our specialised modules focus on practical classroom delivery and competencies',
   'tagline' => 'Teacher Development Courses'
 ])
 <!-- END: Course Carousel Section -->
 
 <!-- BEGIN: Specialised Teacher Training Programmes -->
-<section class="py-20 bg-slate-50 relative">
+<!-- <section class="py-20 bg-slate-50 relative">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
     <div class="text-center mb-16">
       <p class="text-blue-600 font-medium mb-2">Shape trainers who shape futures</p>
       <h2 class="text-3xl font-bold text-slate-900 mb-4">Specialised Teacher Training Programmes</h2>
       <p class="text-slate-600 max-w-2xl mx-auto">Skillvation also offers structured certification-oriented programmes for early-years educators:</p>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8"> -->
       
       <!-- Programme 1: Nursery Teacher Training -->
-      <div class="bg-white rounded-2xl overflow-hidden border border-blue-100/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col group">
+      <!-- <div class="bg-white rounded-2xl overflow-hidden border border-blue-100/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col group">
         <div class="relative h-52 overflow-hidden bg-slate-100">
           <img src="https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=600&q=80"
                alt="Nursery Teacher Training"
@@ -369,10 +369,10 @@
         <div class="p-6 flex-1 flex flex-col justify-between bg-white">
           <p class="text-slate-600 text-sm leading-relaxed">Foundational training for preschool educators in child development and early learning.</p>
         </div>
-      </div>
+      </div> -->
 
       <!-- Programme 2: Montessori Teacher Training -->
-      <div class="bg-white rounded-2xl overflow-hidden border border-blue-100/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col group">
+      <!-- <div class="bg-white rounded-2xl overflow-hidden border border-blue-100/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col group">
         <div class="relative h-52 overflow-hidden bg-slate-100">
           <img src="https://images.unsplash.com/photo-1596495577886-d920f1fb7238?auto=format&fit=crop&w=600&q=80"
                alt="Montessori Teacher Training"
@@ -388,10 +388,10 @@
         <div class="p-6 flex-1 flex flex-col justify-between bg-white">
           <p class="text-slate-600 text-sm leading-relaxed">Montessori-based pedagogy focusing on self-directed, activity-based learning.</p>
         </div>
-      </div>
+      </div> -->
 
       <!-- Programme 3: Early Childhood Education -->
-      <div class="bg-white rounded-2xl overflow-hidden border border-blue-100/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col group">
+      <!-- <div class="bg-white rounded-2xl overflow-hidden border border-blue-100/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col group">
         <div class="relative h-52 overflow-hidden bg-slate-100">
           <img src="https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=600&q=80"
                alt="Early Childhood Education"
@@ -407,11 +407,11 @@
         <div class="p-6 flex-1 flex flex-col justify-between bg-white">
           <p class="text-slate-600 text-sm leading-relaxed">Holistic training in early-years teaching, classroom setup, and child engagement.</p>
         </div>
-      </div>
+      </div> -->
 
-    </div>
+    <!-- </div>
   </div>
-</section>
+</section> -->
 <!-- END: Specialised Teacher Training Programmes -->
 
 <!-- BEGIN: CTA Section -->
