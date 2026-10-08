@@ -24,23 +24,50 @@ class CourseEnquiryController extends Controller
      * Map enquiry source → club-shop product slug + product page URL
      */
     private const PLAN_MAP = [
-        'composite-skill-lab-basic'   => [
+        'composite-skill-lab-basic'    => [
             'slug'     => 'basic-skill-1',
             'label'    => 'Basic Composite Skill Lab',
             'page_url' => '/club-shop/basic-skill-1',
             'cart_url' => '/club-shop/basic-cart',
         ],
-        'composite-skill-lab-advance' => [
+        'composite-skill-lab-advance'  => [
             'slug'     => 'advance-skill-1',
             'label'    => 'Advance Composite Skill Lab',
             'page_url' => '/club-shop/advance-skill-1',
             'cart_url' => '/club-shop/advance-cart',
         ],
-        'composite-skill-lab-premium' => [
+        'composite-skill-lab-premium'  => [
             'slug'     => 'premium-skill-1',
             'label'    => 'Premium Composite Skill Lab',
             'page_url' => '/club-shop/premium-skill-1',
             'cart_url' => '/club-shop/premium-cart',
+        ],
+        // composite-skill main page forms
+        'composite-skill-lab'          => [
+            'slug'     => null,
+            'label'    => 'Composite Skill Lab',
+            'page_url' => '/labs/composite-skill',
+            'cart_url' => '/labs/composite-skill',
+        ],
+        'composite-skill-lab-callback' => [
+            'slug'     => null,
+            'label'    => 'Composite Skill Lab — Callback',
+            'page_url' => '/labs/composite-skill',
+            'cart_url' => '/labs/composite-skill',
+        ],
+        // Skillvation Lab (STEM page)
+        'skillvation-lab-stem'         => [
+            'slug'     => null,
+            'label'    => 'Skillvation Lab',
+            'page_url' => '/labs/stem',
+            'cart_url' => '/labs/stem',
+        ],
+        // Course detail quote form
+        'course-detail-quote'          => [
+            'slug'     => null,
+            'label'    => 'Course Enquiry',
+            'page_url' => '/courses',
+            'cart_url' => '/courses',
         ],
     ];
 
@@ -63,6 +90,9 @@ class CourseEnquiryController extends Controller
         ]);
 
         $enquiry = CourseEnquiry::create($validated);
+
+        // ── Push to LeadDemo CRM (fire-and-forget) ────────────────
+        // $this->sendToLeadDemo($validated);
 
         try {
             self::setMailConfig();
@@ -264,6 +294,68 @@ class CourseEnquiryController extends Controller
             . '<td style="padding:10px;text-align:right;font-weight:800;color:#fbbf24;font-size:15px;">&#8377;' . number_format($grand, 2) . '</td>'
             . '</tr></tfoot>'
             . '</table>';
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Public wrapper — resend emails for an existing enquiry
+    // Called by Admin CourseEnquiryController::sendMail()
+    // ──────────────────────────────────────────────────────────────
+    public function resendMailForEnquiry(array $data): void    {
+        self::setMailConfig();
+
+        $adminEmail  = Setting::where('key', 'contact_message_receiver_mail')->value('value')
+                    ?? config('mail.from.address');
+        $source      = $data['source'] ?? '';
+        $sourceLabel = ucwords(str_replace(['-', '_'], ' ', $source));
+        $planInfo    = self::PLAN_MAP[$source] ?? null;
+        $packageName = $data['course_title'] ?? ($planInfo['label'] ?? $sourceLabel);
+
+        $bundleComponents = $this->fetchBundleComponents($planInfo['slug'] ?? null);
+        $quotationData    = $this->buildQuotationData($bundleComponents);
+        $quotationHtml    = $this->renderQuotationTable($quotationData);
+
+        $baseUrl     = url('/');
+        $productLink = $planInfo ? $baseUrl . $planInfo['page_url'] : '';
+        $cartLink    = $planInfo ? $baseUrl . $planInfo['cart_url']  : '';
+
+        $vars = [
+            '{{name}}'            => htmlspecialchars($data['name']),
+            '{{designation}}'     => $data['designation'] ? ', ' . htmlspecialchars($data['designation']) : '',
+            '{{school}}'          => htmlspecialchars($data['school'] ?? '—'),
+            '{{city}}'            => htmlspecialchars($data['city'] ?? '—'),
+            '{{phone}}'           => htmlspecialchars($data['phone'] ?? '—'),
+            '{{email}}'           => htmlspecialchars($data['email']),
+            '{{package}}'         => htmlspecialchars($packageName),
+            '{{source}}'          => htmlspecialchars($sourceLabel),
+            '{{request_type}}'    => htmlspecialchars($data['message'] ?? '—'),
+            '{{address}}'         => htmlspecialchars($data['address'] ?? '—'),
+            '{{date}}'            => now()->format('d M Y'),
+            '{{quotation_table}}' => $quotationHtml,
+            '{{admin_url}}'       => url('/admin/course-enquiries'),
+            '{{product_link}}'    => $productLink,
+            '{{cart_link}}'       => $cartLink,
+        ];
+
+        // Admin notification
+        $adminTpl = EmailTemplate::where('name', 'skill_lab_enquiry_admin')->first();
+        if ($adminTpl) {
+            $subject = str_replace(array_keys($vars), array_values($vars), $adminTpl->subject);
+            $body    = str_replace(array_keys($vars), array_values($vars), $adminTpl->message);
+            Mail::to($adminEmail)->send(new DefaultMail(['subject' => $subject], $body));
+        }
+
+        // Confirmation + PDF to school
+        $confirmTpl = EmailTemplate::where('name', 'skill_lab_enquiry_confirmation')->first();
+        if ($confirmTpl) {
+            $subject  = str_replace(array_keys($vars), array_values($vars), $confirmTpl->subject);
+            $body     = str_replace(array_keys($vars), array_values($vars), $confirmTpl->message);
+            $pdfBytes = $this->generateProposalPdf($data, $packageName, $quotationData, $planInfo);
+            $pdfName  = 'Skillvation_Proposal_'
+                      . preg_replace('/[^A-Za-z0-9_]/', '_', $data['school'] ?? 'School')
+                      . '.pdf';
+            Mail::to($data['email'])
+                ->send(new DefaultMail(['subject' => $subject], $body, $pdfBytes, $pdfName));
+        }
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -500,5 +592,67 @@ class CourseEnquiryController extends Controller
         $dompdf->render();
 
         return $dompdf->output();
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Push lead to LeadDemo CRM API
+    // ──────────────────────────────────────────────────────────────
+    private function sendToLeadDemo(array $data): void
+    {
+        $apiUrl = env('LEADDEMO_API_URL');
+
+        if (empty($apiUrl)) return;
+
+        try {
+            $source      = 'SV_WEBSITE';
+            $planInfo    = self::PLAN_MAP[$source] ?? null;
+            $packageName = $data['course_title'] ?? ($planInfo['label'] ?? ucwords(str_replace(['-','_'],' ',$source)));
+
+            // Remarks: package + request type
+            $remarks = trim(implode(' — ', array_filter([
+                $packageName,
+                $data['message'] ?? '',
+            ])));
+
+            // Notes: school + city + address
+            $notes = trim(implode(', ', array_filter([
+                $data['school']  ?? '',
+                $data['city']    ?? '',
+                $data['address'] ?? '',
+            ])));
+
+            $payload = [
+                'first_name'    => $data['name'],
+                'phone_number'  => $data['phone'] ?? '',
+                'user'          => '',
+                'language'      => 'English',
+                'remarks'       => $remarks ?: ('Interested in ' . $packageName),
+                'demo_type'     => 'walkthrough',
+                'demo_date'     => now()->addHour()->format('Y-m-d H:i'),
+                'notes'         => $notes ?: $packageName,
+                'incharge_name' => $data['school'] ?? 'website',
+                'campaign'      => $packageName,
+                'designation'   => $data['designation'] ?? '',
+                'source'        => $source,
+                'assigned_to'   => 116 ?? 1,
+            ];
+
+            $response = Http::timeout(8)
+                ->withoutVerifying()
+                ->post($apiUrl, $payload);
+
+            Log::info('[LeadDemo] Pushed lead', [
+                'status'   => $response->status(),
+                'phone'    => $data['phone'] ?? '',
+                'source'   => $source,
+                'response' => $response->json(),
+            ]);
+
+        } catch (\Throwable $e) {
+            Log::warning('[LeadDemo] Push failed: ' . $e->getMessage(), [
+                'phone' => $data['phone'] ?? '',
+            ]);
+            // Never block the main enquiry flow
+        }
     }
 }

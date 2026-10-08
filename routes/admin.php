@@ -43,8 +43,10 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin'], function () {
         /** Course Enquiries */
         Route::get('course-enquiries',                          [AdminCourseEnquiryController::class, 'index'])->name('course-enquiries');
         Route::get('course-enquiry/{id}',                       [AdminCourseEnquiryController::class, 'show'])->name('course-enquiry.show');
+        Route::post('course-enquiry/{id}/send-mail',            [AdminCourseEnquiryController::class, 'sendMail'])->name('course-enquiry.send-mail');
         Route::post('course-enquiry/{id}/status',               [AdminCourseEnquiryController::class, 'updateStatus'])->name('course-enquiry.status');
         Route::delete('course-enquiry/{id}',                    [AdminCourseEnquiryController::class, 'destroy'])->name('course-enquiry.destroy');
+        Route::post('course-enquiry/demo-scheduled',            [AdminCourseEnquiryController::class, 'demoScheduled'])->name('course-enquiry.demo-scheduled');
 
         // Quotation Routes
         Route::get('course-enquiry/{id}/quotation',             [AdminCourseEnquiryController::class, 'quotation'])->name('course-enquiry.quotation');

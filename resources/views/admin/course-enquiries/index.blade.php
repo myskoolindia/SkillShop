@@ -276,6 +276,15 @@
                                                                title="{{ __('Delete') }}">
                                                                 <i class="fa fa-trash" style="font-size: 11px;"></i>
                                                             </a>
+
+                                                            {{-- Demo Scheduled --}}
+                                                            <a href="javascript:;"
+                                                            class="btn btn-sm btn-warning text-dark p-0 d-flex align-items-center justify-content-center"
+                                                            style="width: 26px; height: 26px;"
+                                                            title="{{ __('Schedule Demo') }}"
+                                                            onclick="scheduleDemo({{ $enq->id }}, this)">
+                                                                <i class="fas fa-calendar-check" style="font-size: 11px;"></i>
+                                                            </a>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -316,6 +325,72 @@
             form.appendChild(mi);
         }
         mi.value = 'DELETE';
+    }
+    function scheduleDemo(id, button) {
+
+        if (!confirm('Are you sure you want to schedule the demo?')) {
+            return;
+        }
+
+        var originalHtml = button.innerHTML;
+
+        button.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size: 11px;"></i>';
+        button.style.pointerEvents = 'none';
+
+        $.ajax({
+            url: '{{ route("admin.course-enquiry.demo-scheduled") }}',
+            type: 'POST',
+            data: {
+                enquiry_id: id,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+
+                if (response.success) {
+                    button.classList.remove('btn-warning', 'text-dark');
+                    button.classList.add('btn-success', 'text-white');
+
+                    button.innerHTML =
+                        '<i class="fas fa-check" style="font-size: 11px;"></i>';
+
+                    button.title = 'Demo Scheduled';
+
+                    if (typeof toastr !== 'undefined') {
+                        toastr.success(
+                            response.message || 'Demo scheduled successfully.'
+                        );
+                    }
+                } else {
+                    button.innerHTML = originalHtml;
+                    button.style.pointerEvents = '';
+
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error(
+                            response.message || 'Unable to schedule demo.'
+                        );
+                    } else {
+                        alert(response.message || 'Unable to schedule demo.');
+                    }
+                }
+            },
+            error: function(xhr) {
+
+                button.innerHTML = originalHtml;
+                button.style.pointerEvents = '';
+
+                var message = 'Unable to schedule demo.';
+
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    message = xhr.responseJSON.message;
+                }
+
+                if (typeof toastr !== 'undefined') {
+                    toastr.error(message);
+                } else {
+                    alert(message);
+                }
+            }
+        });
     }
 </script>
 @endpush

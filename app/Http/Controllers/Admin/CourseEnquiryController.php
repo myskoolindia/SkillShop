@@ -1036,6 +1036,159 @@ class CourseEnquiryController extends Controller
     // ──────────────────────────────────────────────────────────────
     // HELPER: AMOUNT IN WORDS (INDIAN SYSTEM)
     // ──────────────────────────────────────────────────────────────
+    // SEND MAIL — resend confirmation + PDF proposal to enquirer
+    // ──────────────────────────────────────────────────────────────
+
+    public function sendMail($id)
+    {
+        $enquiry = CourseEnquiry::findOrFail($id);
+
+        try {
+            // Reuse the frontend controller's full mail + PDF flow
+            $frontend = new \App\Http\Controllers\Frontend\CourseEnquiryController();
+
+            $data = [
+                'name'         => $enquiry->name,
+                'email'        => $enquiry->email,
+                'phone'        => $enquiry->phone        ?? '',
+                'designation'  => $enquiry->designation  ?? '',
+                'school'       => $enquiry->school        ?? '',
+                'city'         => $enquiry->city          ?? '',
+                'address'      => $enquiry->address       ?? '',
+                'message'      => $enquiry->message       ?? '',
+                'source'       => $enquiry->source        ?? '',
+                'course_title' => $enquiry->course_title  ?? '',
+                'quotation'    => $enquiry->quotation     ?? null,
+            ];
+
+            // Trigger the full email flow (admin notification + confirmation + PDF)
+            $request = new \Illuminate\Http\Request();
+            $request->merge($data + ['_token' => csrf_token()]);
+
+            // Use the shared mail sender directly
+            $frontend->resendMailForEnquiry($data);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Mail sent successfully to ' . $enquiry->email,
+            ]);
+
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('[Admin SendMail] Failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Mail failed: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // SEND MAIL — resend confirmation + PDF proposal to enquirer
+    // ──────────────────────────────────────────────────────────────
+
+    public function sendMailtt($id)
+    {
+        $enquiry = CourseEnquiry::findOrFail($id);
+
+        try {
+            $frontend = new \App\Http\Controllers\Frontend\CourseEnquiryController();
+
+            $data = [
+                'name'         => $enquiry->name,
+                'email'        => $enquiry->email,
+                'phone'        => $enquiry->phone        ?? '',
+                'designation'  => $enquiry->designation  ?? '',
+                'school'       => $enquiry->school        ?? '',
+                'city'         => $enquiry->city          ?? '',
+                'address'      => $enquiry->address       ?? '',
+                'message'      => $enquiry->message       ?? '',
+                'source'       => $enquiry->source        ?? '',
+                'course_title' => $enquiry->course_title  ?? '',
+                'quotation'    => $enquiry->quotation     ?? null,
+            ];
+
+            $frontend->resendMailForEnquiry($data);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Mail sent successfully to ' . $enquiry->email,
+            ]);
+
+        } catch (\Throwable $e) {
+            Log::error('[Admin SendMail] Failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Mail failed: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // DEMO SCHEDULED — mark enquiry, update status to 'contacted',
+    // push to LeadDemo CRM, send confirmation mail to school
+    // ──────────────────────────────────────────────────────────────
+
+    public function demoScheduled(\Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            'enquiry_id' => ['required', 'integer', 'exists:course_enquiries,id'],
+            'demo_date'  => ['nullable', 'string'],
+            'demo_notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $enquiry   = CourseEnquiry::findOrFail($request->enquiry_id);
+        $demoDate  = $request->demo_date  ?? now()->addDay()->format('Y-m-d H:i');
+        $demoNotes = $request->demo_notes ?? 'Demo scheduled by admin.';
+
+        // Update enquiry
+        $enquiry->update([
+            'status'            => 'contacted',
+            'demo_scheduled_at' => $demoDate,
+            'demo_notes'        => $demoNotes,
+        ]);
+
+        // ── Push to LeadDemo CRM ──────────────────────────────────
+        try {
+            $apiUrl      = env('LEADDEMO_API_URL', 'http://localhost/leaddemo/api/demos/create');
+            $source      = $enquiry->source ?? '';
+            $packageName = $enquiry->course_title ?? ucwords(str_replace(['-','_'],' ',$source));
+
+            Http::timeout(8)->withoutVerifying()->post($apiUrl, [
+                'first_name'    => $enquiry->name,
+                'phone_number'  => $enquiry->phone ?? '',
+                'user'          => env('LEADDEMO_USER', '123'),
+                'language'      => 'English',
+                'remarks'       => 'Demo scheduled — ' . $packageName . ' | ' . ($enquiry->school ?? ''),
+                'demo_type'     => 'visit',
+                'demo_date'     => $demoDate,
+                'notes'         => $demoNotes . ' | School: ' . ($enquiry->school ?? '') . ', ' . ($enquiry->city ?? ''),
+                'incharge_name' => env('LEADDEMO_INCHARGE', 'Anitha Kumar'),
+                'campaign'      => $packageName,
+                'designation'   => $enquiry->designation ?? '',
+                'source'        => $source ?: 'skillvation-lab',
+                'assigned_to'   => (int) env('LEADDEMO_ASSIGNED_TO', 1),
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('[LeadDemo] Demo push failed: ' . $e->getMessage());
+        }
+
+        // ── Send demo confirmation email to school ────────────────
+        try {
+            $frontend = new \App\Http\Controllers\Frontend\CourseEnquiryController();
+            $frontend->sendDemoConfirmation($enquiry, $demoDate, $demoNotes);
+        } catch (\Throwable $e) {
+            Log::warning('[Admin DemoMail] Failed: ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'success'   => true,
+            'message'   => 'Demo scheduled successfully for ' . $enquiry->name . '.',
+            'demo_date' => $demoDate,
+            'status'    => 'contacted',
+        ]);
+    }
+
+    // ──────────────────────────────────────────────────────────────
 
     public static function amountInWords(float $amount): string
     {
@@ -1083,6 +1236,76 @@ class CourseEnquiryController extends Controller
             return self::convertNumberToWordsIndian((int)($number / 100000)) . ' Lakh' . ($number % 100000 ? ' ' . self::convertNumberToWordsIndian($number % 100000) : '');
         }
         return self::convertNumberToWordsIndian((int)($number / 10000000)) . ' Crore' . ($number % 10000000 ? ' ' . self::convertNumberToWordsIndian($number % 10000000) : '');
+    }
+    private function sendToLeadDemobb(array $data): void
+    {
+        $apiUrl = env('LEADDEMO_API_URL');
+
+        if (empty($apiUrl)) return;
+
+        try {
+            $source      = 'SV_WEBSITE';
+            $planInfo    = self::PLAN_MAP[$source] ?? null;
+            $packageName = $data['course_title'] ?? ($planInfo['label'] ?? ucwords(str_replace(['-','_'],' ',$source)));
+
+            // Remarks: package + request type
+            $remarks = trim(implode(' — ', array_filter([
+                $packageName,
+                $data['message'] ?? '',
+            ])));
+
+            // Notes: school + city + address
+            $notes = trim(implode(', ', array_filter([
+                $data['school']  ?? '',
+                $data['city']    ?? '',
+                $data['address'] ?? '',
+            ])));
+
+            $payload = [
+                'first_name'    => $data['name'],
+                'phone_number'  => $data['phone'] ?? '',
+                'user'          => '',
+                'language'      => 'English',
+                'remarks'       => $remarks ?: ('Interested in ' . $packageName),
+                'demo_type'     => 'walkthrough',
+                'demo_date'     => now()->addHour()->format('Y-m-d H:i'),
+                'notes'         => $notes ?: $packageName,
+                'incharge_name' => $data['school'] ?? 'website',
+                'campaign'      => $packageName,
+                'designation'   => $data['designation'] ?? '',
+                'source'        => $source,
+                'assigned_to'   => 116 ?? 1,
+            ];
+
+            $response = Http::timeout(8)
+                ->withoutVerifying()
+                ->post($apiUrl, $payload);
+
+            Log::info('[LeadDemo] Pushed lead', [
+                'status'   => $response->status(),
+                'phone'    => $data['phone'] ?? '',
+                'source'   => $source,
+                'response' => $response->json(),
+            ]);
+
+        } catch (\Throwable $e) {
+            Log::warning('[LeadDemo] Push failed: ' . $e->getMessage(), [
+                'phone' => $data['phone'] ?? '',
+            ]);
+            // Never block the main enquiry flow
+        }
+    }
+    public function demoScheduledbbb(Request $request)
+    {
+        $enquiry = CourseEnquiry::findOrFail($request->enquiry_id);
+
+        // $this->sendToLeadDemo($validated);
+        $this->sendToLeadDemo($enquiry->toArray());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Demo scheduled successfully.',
+        ]);
     }
 }
 

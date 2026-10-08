@@ -544,6 +544,7 @@
     const title = document.getElementById('course-title')?.textContent?.trim() || '';
     formData.append('course_id',    courseId);
     formData.append('course_title', title);
+    formData.append('source',       'course-detail-quote');
     // Update hidden subject with course name
     const subjectInput = document.getElementById('quote-subject');
     if (subjectInput) subjectInput.value = 'Quote Request' + (title ? ' — ' + title : '');

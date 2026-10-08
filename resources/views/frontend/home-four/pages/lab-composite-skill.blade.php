@@ -1997,14 +1997,14 @@
       </div>
 
       <div class="vl-form-grid-2">
-        <div class="vl-field" style="grid-column:1/-1;">
+        <!-- <div class="vl-field" style="grid-column:1/-1;">
           @include('frontend.home-four.partials._phone_otp', [
             'formId'       => 'cbForm',
             'phoneInputId' => 'cb_phone',
             'submitBtnId'  => 'cbSubmitBtn',
             'inputClass'   => 'vl-form-input',
           ])
-        </div>
+        </div> -->
         <div class="vl-field">
           <label for="cb_email">Email address</label>
           <input id="cb_email" name="email" type="email" placeholder="e.g. principal@school.edu.in" required>

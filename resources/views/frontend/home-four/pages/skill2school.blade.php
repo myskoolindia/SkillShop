@@ -111,7 +111,7 @@
     <h1 style="font-size:clamp(1.9rem,4vw,3rem);font-weight:800;margin-bottom:1.5rem;line-height:1.2;">
       Equip Your Students With Future Ready Skills<br>That Matter
     </h1>
-    <p style="font-size:clamp(1rem,1.4vw,1.2rem);max-width:56rem;margin:0 auto;opacity:.92;line-height:1.78;">
+    <p style="font-size:clamp(1rem,1.4vw,1.2rem);max-width:56rem;margin:0 auto;color:#fff;opacity:.92;line-height:1.78;">
       Skill 2 Skool enables schools to deliver new-age skill education aligned with NEP 2020, NCF 2023, SAFAL, and
       SQAAF, ensuring students are prepared not just for assessments—but for life beyond the classroom. Our skill
       ecosystem is designed to complement academics while strengthening competency, confidence, and real-world readiness.
@@ -125,7 +125,7 @@
 <section style="padding:0 24px;margin-top:-4rem;position:relative;z-index:20;margin-bottom:4rem;">
   <div style="max-width:1280px;margin:0 auto;">
     <div style="border-radius:1rem;overflow:hidden;box-shadow:0 25px 50px -12px rgba(0,0,0,.25);background:#fff;padding:8px;">
-      <img src="https://nodeapi.pedaskills.com/uploads/curriculum_1176f84f.png"
+      <img src="{{asset('frontend/img/skillbox/curriculum_1176f84f.jpeg')}}"
            alt="Importance of the Curriculum"
            style="width:100%;height:1015px;object-fit:cover;border-radius:.5rem;display:block;">
     </div>
@@ -354,7 +354,7 @@
   <div class="s2s-container" style="text-align:center;">
     <p style="color:var(--primary);font-weight:600;margin-bottom:.5rem;font-size:.875rem;text-transform:uppercase;letter-spacing:.06em;">How We Work</p>
     <h2 style="font-size:clamp(1.5rem,3vw,2.25rem);font-weight:700;color:var(--on-surface);margin-bottom:2.5rem;">Our Approach</h2>
-    <img src="https://nodeapi.pedaskills.com/uploads/our-approach_fa29a3cc.png"
+    <img src="{{asset('frontend/img/skillbox/our-approach_fa29a3cc.jpeg')}}"
          alt="Our Approach"
          style="width:100%;max-width:860px;height:auto;display:block;margin:0 auto;">
   </div>
@@ -367,7 +367,7 @@
   <div class="s2s-container" style="text-align:center;">
     <p style="color:var(--primary);font-weight:600;margin-bottom:.5rem;font-size:.875rem;text-transform:uppercase;letter-spacing:.06em;">Our Expertise</p>
     <h2 style="font-size:clamp(1.5rem,3vw,2.25rem);font-weight:700;color:var(--on-surface);margin-bottom:2.5rem;">Expertise in Pedaskills</h2>
-    <img src="https://nodeapi.pedaskills.com/uploads/experienc-expertise_82868586.png"
+    <img src="{{asset('frontend/img/skillbox/experienc-expertise_82868586.jpeg')}}"
          alt="Expertise in Pedaskills"
          style="width:100%;max-width:720px;height:auto;display:block;margin:0 auto;">
   </div>
@@ -380,7 +380,7 @@
   <div class="s2s-container" style="text-align:center;">
     <p style="color:var(--primary);font-weight:600;margin-bottom:.5rem;font-size:.875rem;text-transform:uppercase;letter-spacing:.06em;">What Students Gain</p>
     <h2 style="font-size:clamp(1.5rem,3vw,2.25rem);font-weight:700;color:var(--on-surface);margin-bottom:2.5rem;">Learning Outcomes</h2>
-    <img src="https://nodeapi.pedaskills.com/uploads/learning-outcome_3085ddc8.png"
+    <img src="{{asset('frontend/img/skillbox/learning-outcome_3085ddc8.jpeg')}}"
          alt="Learning Outcomes"
          style="width:100%;max-width:860px;height:auto;display:block;margin:0 auto;">
   </div>
@@ -390,10 +390,10 @@
      12. SAFAL & SQAAF
 ══════════════════════════════════════════════ --}}
 <section class="py-20 relative overflow-hidden">
-  <img alt="" class="absolute left-0 top-0 w-64 opacity-10 pointer-events-none transform -scale-x-100"
+  <!-- <img alt="" class="absolute left-0 top-0 w-64 opacity-10 pointer-events-none transform -scale-x-100"
     src="{{ asset('designs/img/skill2school-7.png') }}" />
   <img alt="" class="absolute right-0 bottom-0 w-64 pointer-events-none"
-    src="{{ asset('designs/img/skill2school-6.png') }}" />
+    src="{{ asset('designs/img/skill2school-6.png') }}" /> -->
   <div class="max-w-container-max mx-auto px-margin-mobile md:px-gutter">
     <div class="text-center mb-16">
       <p class="text-primary font-semibold mb-2 text-sm uppercase tracking-wider">Skill Readiness &amp; Student Mapping</p>
