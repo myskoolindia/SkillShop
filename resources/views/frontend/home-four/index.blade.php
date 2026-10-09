@@ -725,8 +725,8 @@
         
         <div>
           <div class="skillvation-media-card" style="height: auto !important; aspect-ratio: 16/9; overflow: hidden; border-radius: 8px;">
-            <iframe
-              src="https://www.youtube.com/embed/LGab-8Rf1jQ"
+          <iframe
+              src="https://www.youtube.com/embed/nBfEYkylnXU"
               title="Skillvation Education Video"
               style="width: 100%; height: 100%; min-height: 280px; border: none; display: block;"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
