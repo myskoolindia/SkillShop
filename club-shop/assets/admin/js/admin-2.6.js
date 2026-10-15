@@ -1132,5 +1132,16 @@ $(document).ready(function () {
         toggleCommissionInput();
         $select.on('change.select2 change', toggleCommissionInput);
     }
+
+    const $markupSelect = $('#markup_mode');
+    const $markupInput = $('#custom_markup_input');
+    if ($markupSelect.length && $markupInput.length) {
+        const toggleMarkupInput = function () {
+            $markupInput.toggle($markupSelect.val() === 'custom');
+        };
+        toggleMarkupInput();
+        $markupSelect.on('change.select2 change', toggleMarkupInput);
+    }
 });
+
 

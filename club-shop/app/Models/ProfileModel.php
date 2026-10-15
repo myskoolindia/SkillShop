@@ -90,6 +90,8 @@ class ProfileModel extends BaseModel
 
             //set commission
             $data = setCommissionFormValues($data);
+            //set markup
+            $data = setMarkupFormValues($data);
 
             return $this->builder->where('id', $user->id)->update($data);
         }

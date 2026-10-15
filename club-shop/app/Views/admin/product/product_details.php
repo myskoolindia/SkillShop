@@ -181,6 +181,26 @@
                 </div>
                 <div class="row row-product-details">
                     <div class="col-md-3 col-sm-12">
+                        <label class="control-label"><?= trans('seller_markup'); ?></label>
+                    </div>
+                    <div class="col-md-9 col-sm-12 right">
+                        <?php $pMarkup = getProductMarkupRate($product); ?>
+                        <?= $pMarkup; ?>%
+                    </div>
+                </div>
+                <div class="row row-product-details">
+                    <div class="col-md-3 col-sm-12">
+                        <label class="control-label"><?= trans('store_listing_price'); ?></label>
+                    </div>
+                    <div class="col-md-9 col-sm-12 right">
+                        <?php
+                        $listingPrice = calculateMarkupPrice($product->price_discounted > 0 ? $product->price_discounted : $product->price, $pMarkup);
+                        ?>
+                        <strong class="text-success"><?= priceFormatted($listingPrice, $product->currency) . ' ' . $product->currency; ?></strong>
+                    </div>
+                </div>
+                <div class="row row-product-details">
+                    <div class="col-md-3 col-sm-12">
                         <label class="control-label"><?= trans('vat'); ?></label>
                     </div>
                     <div class="col-md-9 col-sm-12 right">

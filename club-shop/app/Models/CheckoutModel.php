@@ -155,6 +155,7 @@ class CheckoutModel extends BaseModel
                 'product_options_snapshot' => $item->product_options_snapshot,
                 'product_options_summary' => $item->product_options_summary,
                 'product_commission_rate' => !empty($productCommissionRate) ? $productCommissionRate : 0,
+                'markup_rate' => !empty($item->markup_rate) ? $item->markup_rate : 0,
                 'extra_options' => $item->extra_options,
                 'created_at' => date('Y-m-d H:i:s'),
                 'bundle_items' => $item->bundle_items,

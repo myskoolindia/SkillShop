@@ -75,6 +75,21 @@
                             <label><?= trans('commission_rate'); ?>&nbsp;(%)</label>
                             <input type="number" name="commission_rate" id="commission_rate" class="form-control" min="0" max="99.99" step="0.01" value="<?= $user->commission_rate > 0 ? esc(formatDecimalClean($user->commission_rate)) : ''; ?>" placeholder="E.g. 5">
                         </div>
+
+                        <div class="form-group">
+                            <label for="markup_mode"><?= trans("seller_markup"); ?> (<?= trans("markup_rate"); ?>)</label>
+                            <select name="markup_mode" id="markup_mode" class="form-control">
+                                <option value="default" <?= (!isset($user->is_markup_set) || $user->is_markup_set == 0) ? 'selected' : ''; ?>><?= trans("default"); ?> (<?= esc(getSellerMarkupRate()); ?>%)</option>
+                                <option value="custom" <?= (isset($user->is_markup_set) && $user->is_markup_set == 1 && $user->markup_rate > 0) ? 'selected' : ''; ?>><?= trans("custom"); ?></option>
+                                <option value="none" <?= (isset($user->is_markup_set) && $user->is_markup_set == 1 && $user->markup_rate == 0) ? 'selected' : ''; ?>><?= trans("none"); ?> (0%)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="custom_markup_input" style="<?= (isset($user->is_markup_set) && $user->is_markup_set == 1 && $user->markup_rate > 0) ? '' : 'display: none;'; ?>">
+                            <label><?= trans('markup_rate'); ?>&nbsp;(%)</label>
+                            <input type="number" name="markup_rate" id="markup_rate" class="form-control" min="0" max="999.99" step="0.01" value="<?= (isset($user->markup_rate) && $user->markup_rate > 0) ? esc(formatDecimalClean($user->markup_rate)) : ''; ?>" placeholder="E.g. 20">
+                            <small class="text-muted">Markup added to product base prices to form customer listed prices.</small>
+                        </div>
                     <?php endif; ?>
                     <div class="form-group">
                         <label class="control-label"><?= trans('shop_description'); ?></label>

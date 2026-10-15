@@ -217,6 +217,7 @@ class OrderModel extends BaseModel
                 'product_options_snapshot' => !empty($item->product_options_snapshot) ? sanitizeJsonString($item->product_options_snapshot) : '',
                 'product_options_summary' => !empty($item->product_options_summary) ? sanitizeJsonString($item->product_options_summary) : '',
                 'commission_rate' => $item->product_commission_rate ?? 0,
+                'markup_rate' => !empty($item->markup_rate) ? $item->markup_rate : 0,
                 'order_status' => ($item->product_type === 'digital' && $orderStatus == 'payment_received') ? 'completed' : $orderStatus,
                 'is_approved' => ($item->product_type === 'digital') ? 1 : 0,
                 'shipping_tracking_number' => '',

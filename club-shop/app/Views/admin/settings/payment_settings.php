@@ -420,6 +420,35 @@
                         <label><?= trans('commission_rate'); ?>(%)</label>
                         <input type="number" name="commission_rate" class="form-control" min="0" max="100" step="0.01" value="<?= $paymentSettings->commission_rate; ?>">
                     </div>
+
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; margin: 20px 0;">
+                        <div class="form-group" style="margin-bottom: 12px;">
+                            <div class="m-b-10">
+                                <label style="font-size: 15px; font-weight: 600; color: #1e293b;"><i class="fa fa-percent text-primary"></i> <?= trans('seller_markup'); ?> (Seller Margin Markup)</label><br>
+                                <small style="font-size: 13px; color: #64748b;"><?= trans('seller_markup_exp'); ?></small>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 col-xs-12">
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" name="seller_markup_status" value="1" id="seller_markup_status_1" class="custom-control-input radio-seller-markup" <?= (!isset($paymentSettings->seller_markup_status) || $paymentSettings->seller_markup_status == 1) ? 'checked' : ''; ?>>
+                                        <label for="seller_markup_status_1" class="custom-control-label"><?= trans("enable"); ?></label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-xs-12">
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" name="seller_markup_status" value="0" id="seller_markup_status_2" class="custom-control-input radio-seller-markup" <?= (isset($paymentSettings->seller_markup_status) && $paymentSettings->seller_markup_status == 0) ? 'checked' : ''; ?>>
+                                        <label for="seller_markup_status_2" class="custom-control-label"><?= trans("disable"); ?></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="sellerMarkupRateContainer" class="form-group" <?= (isset($paymentSettings->seller_markup_status) && $paymentSettings->seller_markup_status == 0) ? 'style="display:none; margin-bottom: 0;"' : 'style="margin-bottom: 0;"'; ?>>
+                            <label><?= trans('seller_markup_rate'); ?> (%)</label>
+                            <input type="number" name="seller_markup_rate" class="form-control" min="0" max="1000" step="0.01" value="<?= isset($paymentSettings->seller_markup_rate) ? $paymentSettings->seller_markup_rate : 20.00; ?>" placeholder="E.g. 20">
+                            <small class="text-muted" style="display:block; margin-top:4px;">Default is 20%. A base price of ₹100 will list at ₹120 on the customer shop.</small>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <div class="m-b-10">
                             <label><?= trans('vat'); ?>&nbsp;(<?= trans("vat_exp"); ?>)</label><br>
@@ -590,6 +619,15 @@
             $('#commissionRateContainer').show();
         } else {
             $('#commissionRateContainer').hide();
+        }
+    });
+
+    $(document).on("change", ".radio-seller-markup", function () {
+        var val = $('input[name="seller_markup_status"]:checked').val();
+        if (val == '1') {
+            $('#sellerMarkupRateContainer').show();
+        } else {
+            $('#sellerMarkupRateContainer').hide();
         }
     });
 </script>

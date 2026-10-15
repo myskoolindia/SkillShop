@@ -943,6 +943,36 @@ if (!function_exists('setCommissionFormValues')) {
     }
 }
 
+//set markup form values
+if (!function_exists('setMarkupFormValues')) {
+    function setMarkupFormValues($data)
+    {
+        $validModes = ['default', 'custom', 'none'];
+        $mode = inputPost('markup_mode');
+
+        if (!in_array($mode, $validModes, true)) {
+            $mode = 'default';
+        }
+
+        $rate = inputPost('markup_rate');
+
+        if ($mode === 'custom') {
+            $data['is_markup_set'] = 1;
+            $data['markup_rate'] = (is_numeric($rate) && $rate >= 0) ? (float)$rate : 0;
+        } elseif ($mode === 'none') {
+            $data['is_markup_set'] = 1;
+            $data['markup_rate'] = 0;
+        } else {
+            // default (inherit)
+            $data['is_markup_set'] = 0;
+            $data['markup_rate'] = 0;
+        }
+
+        return $data;
+    }
+}
+
+
 //get vendor pages
 if (!function_exists('getVendorPages')) {
     function getVendorPages($userId)

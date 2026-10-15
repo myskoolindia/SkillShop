@@ -623,16 +623,17 @@ class ProductModel extends BaseModel
             }
         }
 
-        return $this->builder->limit($perPage + 1, $offset)->get()->getResult();
+        return applyProductMarkup($this->builder->limit($perPage + 1, $offset)->get()->getResult());
     }
 
     public function getCustomProductBySlug($slug)
     {
-        return $this->db->table('products')
+        $prod = $this->db->table('products')
             ->where('slug', $slug)
             ->where('is_bundle', 0)
             ->where('listing_type', 'custom')
             ->get()->getRow();
+        return applyProductMarkup($prod);
     }
 
 
@@ -656,7 +657,7 @@ class ProductModel extends BaseModel
         $cacheKey = 'latest_products_lang_' . $langId . '_limit_' . $limit;
         return getCacheData($cacheKey, function () use ($limit) {
             $this->buildQuery();
-            return $this->builder->orderBy('products.created_at DESC')->get(clrNum($limit))->getResult();
+            return applyProductMarkup($this->builder->orderBy('products.created_at DESC')->get(clrNum($limit))->getResult());
         }, 'product');
     }
 
@@ -664,7 +665,7 @@ class ProductModel extends BaseModel
     public function getPromotedProducts()
     {
         $this->buildQuery();
-        return $this->builder->where('products.is_promoted', 1)->orderBy('products.promote_start_date', 'DESC')->get()->getResult();
+        return applyProductMarkup($this->builder->where('products.is_promoted', 1)->orderBy('products.promote_start_date', 'DESC')->get()->getResult());
     }
 
     //get promoted products limited
@@ -673,7 +674,7 @@ class ProductModel extends BaseModel
         $cacheKey = 'promoted_products_lang_' . $langId . '_limit_' . $perPage . '_' . $offset;
         return getCacheData($cacheKey, function () use ($perPage, $offset) {
             $this->buildQuery();
-            return $this->builder->where('products.is_promoted', 1)->orderBy('products.promote_start_date DESC')->limit(clrNum($perPage) + 1, clrNum($offset))->get()->getResult();
+            return applyProductMarkup($this->builder->where('products.is_promoted', 1)->orderBy('products.promote_start_date DESC')->limit(clrNum($perPage) + 1, clrNum($offset))->get()->getResult());
         }, 'product');
     }
 
@@ -696,7 +697,7 @@ class ProductModel extends BaseModel
         $cacheKey = 'special_offers_lang_' . $langId;
         return getCacheData($cacheKey, function () {
             $this->buildQuery();
-            return $this->builder->where('products.is_special_offer', 1)->orderBy('products.special_offer_date', 'DESC')->limit(LIMIT_SPECIAL_OFFERS)->get()->getResult();
+            return applyProductMarkup($this->builder->where('products.is_special_offer', 1)->orderBy('products.special_offer_date', 'DESC')->limit(LIMIT_SPECIAL_OFFERS)->get()->getResult());
         }, 'product');
     }
 
@@ -723,7 +724,7 @@ class ProductModel extends BaseModel
                     $this->builder->where('products.category_id', $categoryId);
                 }
 
-                $productsArray[$category->id] = $this->builder->orderBy('products.id', 'DESC')->get(NUM_INDEX_CATEGORY_PRODUCTS)->getResult();
+                $productsArray[$category->id] = applyProductMarkup($this->builder->orderBy('products.id', 'DESC')->get(NUM_INDEX_CATEGORY_PRODUCTS)->getResult());
             }
 
 
@@ -738,14 +739,14 @@ class ProductModel extends BaseModel
     public function getRelatedProducts($productId, $categoryId)
     {
         $this->buildQuery();
-        return $this->builder->where('products.category_id', clrNum($categoryId))->where('products.id !=', clrNum($productId))->get(100)->getResult();
+        return applyProductMarkup($this->builder->where('products.category_id', clrNum($categoryId))->where('products.id !=', clrNum($productId))->get(100)->getResult());
     }
 
     //get more products by user
     public function getMoreProductsByUser($userId, $productId)
     {
         $this->buildQuery();
-        return $this->builder->where('users.id', clrNum($userId))->where('products.id != ', clrNum($productId))->orderBy('products.id DESC')->get(6)->getResult();
+        return applyProductMarkup($this->builder->where('users.id', clrNum($userId))->where('products.id != ', clrNum($productId))->orderBy('products.id DESC')->get(6)->getResult());
     }
 
     //get user wishlist products count
@@ -761,7 +762,7 @@ class ProductModel extends BaseModel
     {
         $this->buildQuery();
         $this->builder->join('wishlist', 'products.id = wishlist.product_id');
-        return $this->builder->where('wishlist.user_id', clrNum($userId))->orderBy('products.id DESC')->limit($perPage, $offset)->get()->getResult();
+        return applyProductMarkup($this->builder->where('wishlist.user_id', clrNum($userId))->orderBy('products.id DESC')->limit($perPage, $offset)->get()->getResult());
     }
 
     //get guest wishlist products count
@@ -781,7 +782,7 @@ class ProductModel extends BaseModel
         $wishlist = helperGetSession('mds_guest_wishlist');
         if (!empty($wishlist) && countItems($wishlist) > 0) {
             $this->buildQuery();
-            return $this->builder->whereIn('products.id', $wishlist, FALSE)->orderBy('products.id DESC')->limit($perPage, $offset)->get()->getResult();
+            return applyProductMarkup($this->builder->whereIn('products.id', $wishlist, FALSE)->orderBy('products.id DESC')->limit($perPage, $offset)->get()->getResult());
         }
         return array();
     }
@@ -790,7 +791,7 @@ class ProductModel extends BaseModel
     public function getDownloadableProduct($id)
     {
         $this->setBaseQuery();
-        return $this->builder->where('products.id', clrNum($id))->get()->getRow();
+        return applyProductMarkup($this->builder->where('products.id', clrNum($id))->get()->getRow());
     }
 
     //get user downloads count
@@ -826,16 +827,18 @@ class ProductModel extends BaseModel
     //get product by id
     public function getProduct($id)
     {
-        return $this->builder->select("products.*, pd.title")
+        $res = $this->builder->select("products.*, pd.title")
             ->join('product_details AS pd', 'pd.product_id = products.id AND pd.lang_id = ' . $this->db->escape($this->defaultLang->id), 'left')
             ->where('products.id', clrNum($id))->get()->getRow();
+        return applyProductMarkup($res);
     }
 
     //get available product
     public function getActiveProduct($id)
     {
         $this->buildQuery();
-        return $this->builder->where('products.id', clrNum($id))->get()->getRow();
+        $res = $this->builder->where('products.id', clrNum($id))->get()->getRow();
+        return applyProductMarkup($res);
     }
 
     //get product by slug
@@ -844,7 +847,7 @@ class ProductModel extends BaseModel
         $this->buildQuery(true);
         $row = $this->builder->where('products.slug', strSlug($slug))->get()->getRow();
         if (!empty($row) && $row->is_draft == 0 && $row->is_deleted == 0) {
-            return $row;
+            return applyProductMarkup($row);
         }
         return null;
     }
@@ -982,8 +985,9 @@ class ProductModel extends BaseModel
     public function getVendorProductsPaginated($userId, $listType, $perPage, $offset)
     {
         $this->filterUserProducts($listType, $userId);
-        return $this->builder->limit($perPage, $offset)->get()->getResult();
+        return applyProductMarkup($this->builder->limit($perPage, $offset)->get()->getResult());
     }
+
 
     //get seller products coupon count
     public function getSellerProductsCouponCount($userId)

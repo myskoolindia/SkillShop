@@ -1035,3 +1035,93 @@ if (!function_exists('setProductAsEdited')) {
         $model->setProductAsEdited($productId);
     }
 }
+
+//get seller markup rate
+if (!function_exists('getSellerMarkupRate')) {
+    function getSellerMarkupRate($userId = null)
+    {
+        if (!empty($userId)) {
+            $user = getUser($userId);
+            if (!empty($user) && isset($user->is_markup_set) && $user->is_markup_set == 1) {
+                return (float)$user->markup_rate;
+            }
+        }
+        $settings = getContextValue('paymentSettings');
+        if (!empty($settings)) {
+            if (isset($settings->seller_markup_status) && (int)$settings->seller_markup_status === 0) {
+                return 0.0;
+            }
+            if (isset($settings->seller_markup_rate) && $settings->seller_markup_rate !== null) {
+                return (float)$settings->seller_markup_rate;
+            }
+        }
+        return 20.0;
+    }
+}
+
+//get product markup rate
+if (!function_exists('getProductMarkupRate')) {
+    function getProductMarkupRate($product)
+    {
+        if (empty($product)) {
+            return 0.0;
+        }
+        if (is_object($product) && isset($product->is_markup_set) && $product->is_markup_set == 1) {
+            return (float)$product->markup_rate;
+        }
+        $userId = is_object($product) ? ($product->user_id ?? ($product->seller_id ?? null)) : null;
+        return getSellerMarkupRate($userId);
+    }
+}
+
+//calculate price with markup
+if (!function_exists('calculateMarkupPrice')) {
+    function calculateMarkupPrice($price, $markupRate)
+    {
+        $price = (float)$price;
+        if ($price <= 0 || $markupRate <= 0) {
+            return $price;
+        }
+        return round($price * (1 + ($markupRate / 100)), 2);
+    }
+}
+
+//apply product markup to object or array of objects
+if (!function_exists('applyProductMarkup')) {
+    function applyProductMarkup($product)
+    {
+        if (empty($product)) {
+            return $product;
+        }
+        if (is_array($product)) {
+            foreach ($product as &$item) {
+                $item = applyProductMarkup($item);
+            }
+            return $product;
+        }
+        if (!is_object($product)) {
+            return $product;
+        }
+        if (!empty($product->is_markup_applied)) {
+            return $product;
+        }
+        $markupRate = getProductMarkupRate($product);
+        $product->base_price = (float)($product->price ?? 0);
+        $product->base_price_discounted = (float)($product->price_discounted ?? 0);
+        $product->markup_rate = $markupRate;
+        if ($markupRate > 0) {
+            if (!empty($product->price) && (float)$product->price > 0) {
+                $product->price = calculateMarkupPrice($product->price, $markupRate);
+            }
+            if (!empty($product->price_discounted) && (float)$product->price_discounted > 0) {
+                $product->price_discounted = calculateMarkupPrice($product->price_discounted, $markupRate);
+            }
+            if (!empty($product->price) && !empty($product->price_discounted) && (float)$product->price_discounted < (float)$product->price) {
+                $product->discount_rate = intval((( (float)$product->price - (float)$product->price_discounted ) * 100) / (float)$product->price);
+            }
+        }
+        $product->is_markup_applied = true;
+        return $product;
+    }
+}
+

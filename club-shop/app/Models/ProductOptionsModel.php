@@ -108,20 +108,35 @@ class ProductOptionsModel extends Model
         }
 
         $variantsResult = $builder->get()->getResultObject();
+        $markupRate = 0;
+        if ($onlyActiveVariants) {
+            $product = getProduct($productId);
+            $markupRate = getProductMarkupRate($product);
+        }
 
         foreach ($variantsResult as $variantRow) {
             $variantComposition = $this->loadCompositionForVariant($variantRow->id);
 
             if (!empty($variantComposition['value_ids'])) {
                 sort($variantComposition['value_ids'], SORT_NUMERIC);
+                $vPrice = $variantRow->price;
+                $vPriceDiscounted = $variantRow->price_discounted;
+                if ($markupRate > 0) {
+                    if (!empty($vPrice) && (float)$vPrice > 0) {
+                        $vPrice = calculateMarkupPrice($vPrice, $markupRate);
+                    }
+                    if (!empty($vPriceDiscounted) && (float)$vPriceDiscounted > 0) {
+                        $vPriceDiscounted = calculateMarkupPrice($vPriceDiscounted, $markupRate);
+                    }
+                }
                 $variantsData[] = [
                     'id' => $variantRow->id,
                     'variant_hash' => $variantRow->variant_hash,
                     'stable_key' => implode('_', $variantComposition['value_ids']),
                     'name' => implode(' / ', $variantComposition['value_names']),
                     'sku' => $variantRow->sku,
-                    'price' => formatPrice($variantRow->price),
-                    'price_discounted' => formatPrice($variantRow->price_discounted),
+                    'price' => formatPrice($vPrice),
+                    'price_discounted' => formatPrice($vPriceDiscounted),
                     'quantity' => $variantRow->quantity === null ? '' : (string)$variantRow->quantity,
                     'weight' => $variantRow->weight === null ? '' : (string)$variantRow->weight,
                     'is_default' => (bool)$variantRow->is_default,
@@ -423,7 +438,20 @@ class ProductOptionsModel extends Model
             return null;
         }
 
-        return $this->db->table('product_option_variants')->where('sku', $sku)->where('product_id', clrNum($productId))->get()->getRow();
+        $v = $this->db->table('product_option_variants')->where('sku', $sku)->where('product_id', clrNum($productId))->get()->getRow();
+        if ($v && !empty($v->product_id)) {
+            $product = getProduct($v->product_id);
+            $markupRate = getProductMarkupRate($product);
+            if ($markupRate > 0) {
+                if (!empty($v->price) && (float)$v->price > 0) {
+                    $v->price = calculateMarkupPrice($v->price, $markupRate);
+                }
+                if (!empty($v->price_discounted) && (float)$v->price_discounted > 0) {
+                    $v->price_discounted = calculateMarkupPrice($v->price_discounted, $markupRate);
+                }
+            }
+        }
+        return $v;
     }
 
     /**
@@ -434,7 +462,20 @@ class ProductOptionsModel extends Model
      */
     public function getDefaultVariant(int $productId)
     {
-        return $this->db->table('product_option_variants')->where('product_id', $productId)->where('is_active', 1)->orderBy('is_default DESC, id')->limit(1)->get()->getRow();
+        $v = $this->db->table('product_option_variants')->where('product_id', $productId)->where('is_active', 1)->orderBy('is_default DESC, id')->limit(1)->get()->getRow();
+        if ($v && !empty($v->product_id)) {
+            $product = getProduct($v->product_id);
+            $markupRate = getProductMarkupRate($product);
+            if ($markupRate > 0) {
+                if (!empty($v->price) && (float)$v->price > 0) {
+                    $v->price = calculateMarkupPrice($v->price, $markupRate);
+                }
+                if (!empty($v->price_discounted) && (float)$v->price_discounted > 0) {
+                    $v->price_discounted = calculateMarkupPrice($v->price_discounted, $markupRate);
+                }
+            }
+        }
+        return $v;
     }
 
     /**
@@ -919,12 +960,38 @@ class ProductOptionsModel extends Model
     //get variation hash by id
     public function getVariantById($id)
     {
-        return $this->db->table('product_option_variants')->where('id', clrNum($id))->get()->getRow();
+        $v = $this->db->table('product_option_variants')->where('id', clrNum($id))->get()->getRow();
+        if ($v && !empty($v->product_id)) {
+            $product = getProduct($v->product_id);
+            $markupRate = getProductMarkupRate($product);
+            if ($markupRate > 0) {
+                if (!empty($v->price) && (float)$v->price > 0) {
+                    $v->price = calculateMarkupPrice($v->price, $markupRate);
+                }
+                if (!empty($v->price_discounted) && (float)$v->price_discounted > 0) {
+                    $v->price_discounted = calculateMarkupPrice($v->price_discounted, $markupRate);
+                }
+            }
+        }
+        return $v;
     }
 
     //get variation by hash
     public function getVariantByHash($hash)
     {
-        return $this->db->table('product_option_variants')->where('variant_hash', cleanStr($hash))->get()->getRow();
+        $v = $this->db->table('product_option_variants')->where('variant_hash', cleanStr($hash))->get()->getRow();
+        if ($v && !empty($v->product_id)) {
+            $product = getProduct($v->product_id);
+            $markupRate = getProductMarkupRate($product);
+            if ($markupRate > 0) {
+                if (!empty($v->price) && (float)$v->price > 0) {
+                    $v->price = calculateMarkupPrice($v->price, $markupRate);
+                }
+                if (!empty($v->price_discounted) && (float)$v->price_discounted > 0) {
+                    $v->price_discounted = calculateMarkupPrice($v->price_discounted, $markupRate);
+                }
+            }
+        }
+        return $v;
     }
 }

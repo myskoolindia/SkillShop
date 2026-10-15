@@ -579,7 +579,8 @@ class CartModel extends BaseModel
             'bundle_items' => !empty($bundleItems) ? safeJsonEncode($bundleItems) : null,
             'unit_price' => $isBundle && $bundleTotal > 0 ? $bundleTotal : null,
             'unit_price_base' => $isBundle && $bundleTotal > 0 ? $bundleTotal : null,
-            'total_price' => $isBundle && $bundleTotal > 0 ? ($bundleTotal * $quantity) : null
+            'total_price' => $isBundle && $bundleTotal > 0 ? ($bundleTotal * $quantity) : null,
+            'markup_rate' => $product->markup_rate ?? getProductMarkupRate($product)
         ];
 
         if ($this->builderCartItems->insert($cartItem)) {
@@ -800,6 +801,7 @@ class CartModel extends BaseModel
         $cartItem->product_vat = $vatAmount;
         $cartItem->product_vat_rate = $vatRate;
         $cartItem->seller_id = $product->user_id;
+        $cartItem->markup_rate = $product->markup_rate ?? getProductMarkupRate($product);
         $cartItem->chargeable_weight = !empty($variant) && isset($variant->weight) && $variant->weight > 0 ? $variant->weight : $product->chargeable_weight;
         $cartItem->is_stock_available = $isStockAvailable;
         //variant data

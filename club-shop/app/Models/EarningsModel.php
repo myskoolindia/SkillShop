@@ -79,17 +79,25 @@ class EarningsModel extends BaseModel
                         $vat = numToDecimal($orderProduct->product_vat);
                     }
                     $saleAmount = $saleAmount - $vat;
+
+                    // calculate seller base amount without the platform markup
+                    $markupRate = !empty($orderProduct->markup_rate) ? (float)$orderProduct->markup_rate : 0;
+                    $sellerBaseAmount = $saleAmount;
+                    if ($markupRate > 0) {
+                        $sellerBaseAmount = round($saleAmount / (1 + ($markupRate / 100)), 2);
+                    }
+
                     //calculate earned amount
-                    $earnedAmount = $saleAmount;
+                    $earnedAmount = $sellerBaseAmount;
                     $couponDiscount = 0;
                     $productIds = getCouponProductsArray($order);
                     if (!empty($productIds) && in_array($orderProduct->product_id, $productIds)) {
                         if ($order->coupon_discount_rate > 0 && $order->coupon_seller_id == $orderProduct->seller_id) {
-                            $couponDiscount = ($saleAmount * $order->coupon_discount_rate) / 100;
+                            $couponDiscount = ($sellerBaseAmount * $order->coupon_discount_rate) / 100;
                             $earnedAmount = $earnedAmount - $couponDiscount;
                         }
                     }
-                    $commission = ($saleAmount * $orderProduct->commission_rate) / 100;
+                    $commission = ($sellerBaseAmount * $orderProduct->commission_rate) / 100;
                     $earnedAmount = $earnedAmount - $commission;
                     $shippingCost = $this->getSingleProductShippingCost($orderProduct->order_id, $orderProduct->seller_id);
                     if (!empty($shippingCost)) {
@@ -113,7 +121,7 @@ class EarningsModel extends BaseModel
                         'order_number' => $order->order_number,
                         'order_product_id' => $orderProduct->id,
                         'user_id' => $orderProduct->seller_id,
-                        'sale_amount' => numToDecimal($saleAmount),
+                        'sale_amount' => numToDecimal($sellerBaseAmount),
                         'vat_rate' => $orderProduct->product_vat_rate,
                         'vat_amount' => $orderProduct->product_vat,
                         'commission_rate' => $orderProduct->commission_rate,

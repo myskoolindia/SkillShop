@@ -143,6 +143,8 @@ class ApiController extends BaseController
 
     private function formatProduct(object $p): array
     {
+        $p = applyProductMarkup($p);
+
         $image = $this->fileModel->getProductMainImage($p->id);
         $imageUrl = base_url('assets/img/no-image.jpg');
         if (!empty($image) && !empty($image->image_medium)) {
@@ -170,6 +172,9 @@ class ApiController extends BaseController
             'price'       => (float)$p->price,
             'price_discounted' => (float)$p->price_discounted,
             'discount_rate'    => (int)$p->discount_rate,
+            'markup_rate'      => (float)($p->markup_rate ?? 0),
+            'base_price'       => (float)($p->base_price ?? $p->price),
+            'base_price_discounted' => (float)($p->base_price_discounted ?? $p->price_discounted),
             'currency'    => $p->currency,
             'product_type'=> $p->product_type,
             'category_id' => (int)$p->category_id,
@@ -592,6 +597,7 @@ class ApiController extends BaseController
             if (empty($product)) {
                 return $this->json(['status' => 'error', 'message' => "Product ID {$productId} not found or inactive"], 404);
             }
+            $product = applyProductMarkup($product);
 
             if ($product->product_type === 'physical' && (int)$product->stock < $quantity) {
                 return $this->json(['status' => 'error', 'message' => "Insufficient stock for product ID {$productId} (available: {$product->stock})"], 422);
@@ -808,6 +814,8 @@ class ApiController extends BaseController
 
     private function formatProductDetail(object $p): array
     {
+        $p = applyProductMarkup($p);
+
         $langId  = (int)$this->activeLang->id;
         $details = getProductDetails($p->id, $langId);
 
@@ -849,6 +857,9 @@ class ApiController extends BaseController
             'price'            => (float)$p->price,
             'price_discounted' => (float)$p->price_discounted,
             'discount_rate'    => (int)$p->discount_rate,
+            'markup_rate'      => (float)($p->markup_rate ?? 0),
+            'base_price'       => (float)($p->base_price ?? $p->price),
+            'base_price_discounted' => (float)($p->base_price_discounted ?? $p->price_discounted),
             'currency'         => $p->currency,
             'product_type'     => $p->product_type,
             'listing_type'     => $p->listing_type,
@@ -955,6 +966,7 @@ class ApiController extends BaseController
             if (empty($product)) {
                 continue;
             }
+            $product = applyProductMarkup($product);
 
             $unitPrice = (float)($product->price_discounted > 0 ? $product->price_discounted : $product->price);
 
@@ -1291,6 +1303,7 @@ class ApiController extends BaseController
             if (empty($product)) {
                 continue;
             }
+            $product = applyProductMarkup($product);
 
             $unitPrice = (float)($product->price_discounted > 0 ? $product->price_discounted : $product->price);
 
@@ -1322,6 +1335,7 @@ class ApiController extends BaseController
                 ->where('id', (int)$item->product_id)
                 ->get()->getRow();
             if ($product && (int)$product->user_id === (int)$coupon->seller_id) {
+                $product = applyProductMarkup($product);
                 $unitPrice = (float)($product->price_discounted > 0 ? $product->price_discounted : $product->price);
                 if (!empty($exchangeRate) && $exchangeRate != 1) {
                     $unitPrice = $unitPrice * $exchangeRate;
