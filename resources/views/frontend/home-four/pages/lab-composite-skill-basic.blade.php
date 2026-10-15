@@ -1353,11 +1353,7 @@
 (function(){
 'use strict';
 
-var BASE = (function() {
-  var path = window.location.pathname;
-  var sub = path.indexOf('/skillvation.comphp') === 0 ? '/skillvation.comphp/club-shop' : '/club-shop';
-  return window.location.origin + sub;
-})();
+var BASE = '<?= rtrim(env("APP_URL"), "/") ?>/club-shop';
 
 var THEMES = [
   { keys:['life science','life form','biology','agriculture','food','health'],
