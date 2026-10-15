@@ -279,41 +279,51 @@ class CartModel extends BaseModel
 
                 $bundleModel = new \App\Models\BundleModel();
                 $bundleComps = $bundleModel->getBundleComponents($product->id, true);
+                $bundleCompsMap = [];
                 $optMap = [];
                 if (!empty($bundleComps)) {
                     foreach ($bundleComps as $bc) {
-                        $optMap[(int)$bc->component_product_id] = !empty($bc->is_optional) ? 1 : 0;
                         if (!empty($bc->id)) {
+                            $bundleCompsMap['c_' . $bc->id] = $bc;
                             $optMap['c_' . $bc->id] = !empty($bc->is_optional) ? 1 : 0;
                         }
+                        $bundleCompsMap['p_' . (int)$bc->component_product_id] = $bc;
+                        $optMap[(int)$bc->component_product_id] = !empty($bc->is_optional) ? 1 : 0;
                     }
                 }
 
                 if (is_array($bundle) && !empty($bundle)) {
                     foreach ($bundle as $b) {
                         $qty = (int)($b['qty'] ?? 0);
-                        if ($qty <= 0) {
-                            continue; // Optional item not chosen by customer
-                        }
                         $pid = $b['product_id'] ?? $b['main_product_id'] ?? null;
+                        $compObj = $bundleCompsMap['c_' . ($b['comp_id'] ?? 0)] ?? ($bundleCompsMap['p_' . (int)$pid] ?? null);
+
+                        // If component is no longer part of active bundle in DB, skip it
+                        if (!empty($bundleComps) && empty($compObj)) {
+                            continue;
+                        }
+
                         $p = getActiveProduct($pid);
                         if ($p) {
-                            $unitPrice = isset($b['unit_price']) ? (float)$b['unit_price'] : (float)($p->price_discounted > 0 ? $p->price_discounted : $p->price);
+                            $unitPrice = $compObj ? (float)$compObj->unit_price : (isset($b['unit_price']) ? (float)$b['unit_price'] : (float)($p->price_discounted > 0 ? $p->price_discounted : $p->price));
                             if ($this->paymentSettings->currency_converter == 1 && !empty($cart->currency_code) && !empty($cart->currency_exchange_rate)) {
                                 $unitPrice = convertCurrencyByExchangeRate($unitPrice, $cart->currency_exchange_rate);
                             }
                             $itemTotal = $unitPrice * $qty;
-                            $bundleSummary[] = $p->title . ' × ' . $qty;
+                            if ($qty > 0) {
+                                $bundleSummary[] = $p->title . ' × ' . $qty;
+                            }
 
-                            $catName = 'General';
-                            if (!empty($p->category_id)) {
-                                $cat = getCategory($p->category_id);
+                            $catName = !empty($compObj->category_name) ? $compObj->category_name : 'General';
+                            $catId = !empty($compObj->category_id) ? (int)$compObj->category_id : ($p->category_id ?? 0);
+                            if ($catName === 'General' && !empty($catId)) {
+                                $cat = getCategory($catId);
                                 if (!empty($cat)) {
                                     $catName = !empty($cat->cat_name) ? $cat->cat_name : (!empty($cat->name) ? $cat->name : 'General');
                                 }
                             }
 
-                            $origChildPrice = (float)($p->price > 0 ? $p->price : $unitPrice);
+                            $origChildPrice = (!empty($compObj->price) && (float)$compObj->price > 0) ? (float)$compObj->price : ((float)($p->price > 0 ? $p->price : $unitPrice));
                             if ($this->paymentSettings->currency_converter == 1 && !empty($cart->currency_code) && !empty($cart->currency_exchange_rate)) {
                                 $origChildPrice = convertCurrencyByExchangeRate($origChildPrice, $cart->currency_exchange_rate);
                             }
@@ -321,8 +331,8 @@ class CartModel extends BaseModel
 
                             $itemObj = new \stdClass();
                             $itemObj->product_id = $p->id;
-                            $itemObj->title = $p->title;
-                            $itemObj->category_id = $p->category_id ?? 0;
+                            $itemObj->title = !empty($compObj->title) ? $compObj->title : $p->title;
+                            $itemObj->category_id = $catId;
                             $itemObj->category_name = $catName;
                             $itemObj->product_url = generateProductUrl($p);
                             $itemObj->quantity = $qty;
@@ -331,9 +341,9 @@ class CartModel extends BaseModel
                             $itemObj->total_price = $itemTotal;
                             $itemObj->original_total_price = $origTotal;
                             $itemObj->has_discount = ($origChildPrice > $unitPrice);
-                            $itemObj->sku = $p->sku ?? '';
+                            $itemObj->sku = !empty($compObj->sku) ? $compObj->sku : ($p->sku ?? '');
                             $itemObj->image_data = $p->image_data ?? null;
-                            $itemObj->is_optional = $optMap['c_' . ($b['comp_id'] ?? 0)] ?? ($optMap[(int)$p->id] ?? 0);
+                            $itemObj->is_optional = !empty($compObj) ? (!empty($compObj->is_optional) ? 1 : 0) : ($optMap['c_' . ($b['comp_id'] ?? 0)] ?? ($optMap[(int)$p->id] ?? 0));
                             $bundleProducts[] = $itemObj;
                         }
                     }
@@ -341,16 +351,16 @@ class CartModel extends BaseModel
                     $comps = $bundleComps;
                     if (!empty($comps)) {
                         foreach ($comps as $c) {
-                            if (!empty($c->is_optional)) {
-                                continue;
-                            }
-                            $qty = max(1, (int)$c->required_quantity);
+                            $isOpt = !empty($c->is_optional);
+                            $qty = $isOpt ? 0 : max(1, (int)$c->required_quantity);
                             $unitPrice = (float)$c->unit_price;
                             if ($this->paymentSettings->currency_converter == 1 && !empty($cart->currency_code) && !empty($cart->currency_exchange_rate)) {
                                 $unitPrice = convertCurrencyByExchangeRate($unitPrice, $cart->currency_exchange_rate);
                             }
                             $itemTotal = $unitPrice * $qty;
-                            $bundleSummary[] = $c->title . ' × ' . $qty;
+                            if ($qty > 0) {
+                                $bundleSummary[] = $c->title . ' × ' . $qty;
+                            }
 
                             $catName = 'General';
                             $p = getActiveProduct($c->component_product_id);
@@ -487,14 +497,28 @@ class CartModel extends BaseModel
             $parsedBundle = is_string($bundleComponentsData) ? safeJsonDecode($bundleComponentsData, true) : $bundleComponentsData;
             if (!empty($parsedBundle) && is_array($parsedBundle)) {
                 $isBundle = 1;
+                $bundleModel = new \App\Models\BundleModel();
+                $comps = $bundleModel->getBundleComponents($product->id, true);
+                $compsMap = [];
+                if (!empty($comps)) {
+                    foreach ($comps as $c) {
+                        if (!empty($c->id)) {
+                            $compsMap['c_' . $c->id] = $c;
+                        }
+                        $compsMap['p_' . (int)$c->component_product_id] = $c;
+                    }
+                }
+
                 foreach ($parsedBundle as $bItem) {
                     $bPid = (int)($bItem['product_id'] ?? 0);
                     $bVarId = !empty($bItem['variant_id']) ? (int)$bItem['variant_id'] : null;
                     $bQty = max(0, min(99999, (int)($bItem['qty'] ?? 0)));
-                    $bUnitPrice = 0.0;
+                    $cObj = $compsMap['c_' . ($bItem['comp_id'] ?? 0)] ?? ($compsMap['p_' . $bPid] ?? null);
 
-                    // FINANCIAL SECURITY: Always fetch authoritative price from DB catalog, NEVER trust client input
-                    if ($bPid > 0) {
+                    $bUnitPrice = 0.0;
+                    if ($cObj) {
+                        $bUnitPrice = (float)$cObj->unit_price;
+                    } elseif ($bPid > 0) {
                         $bP = getActiveProduct($bPid);
                         if ($bP && $bP->status == 1) {
                             $bUnitPrice = (float)($bP->price_discounted > 0 ? $bP->price_discounted : $bP->price);
@@ -502,7 +526,7 @@ class CartModel extends BaseModel
                     }
                     $bundleTotal += ($bUnitPrice * $bQty);
                     $bundleItems[] = [
-                        'comp_id'    => (int)($bItem['comp_id'] ?? 0),
+                        'comp_id'    => (int)($bItem['comp_id'] ?? ($cObj->id ?? 0)),
                         'product_id' => $bPid,
                         'variant_id' => $bVarId,
                         'qty'        => $bQty,
@@ -514,13 +538,12 @@ class CartModel extends BaseModel
             $bundleModel = new \App\Models\BundleModel();
             $comps = $bundleModel->getBundleComponents($product->id, true);
             foreach ($comps as $c) {
-                // By default optional items are unchecked (excluded from default bundle selection)
-                if (!empty($c->is_optional)) {
-                    continue;
-                }
-                $cQty = max(1, (int)$c->required_quantity);
+                $isOpt = !empty($c->is_optional);
+                $cQty = $isOpt ? 0 : max(1, (int)$c->required_quantity);
                 $cPrice = (float)$c->unit_price;
-                $bundleTotal += ($cPrice * $cQty);
+                if ($cQty > 0) {
+                    $bundleTotal += ($cPrice * $cQty);
+                }
                 $bundleItems[] = [
                     'comp_id'    => (int)$c->id,
                     'product_id' => (int)$c->component_product_id,
@@ -706,30 +729,93 @@ class CartModel extends BaseModel
                 $totalPrice = convertCurrencyByExchangeRate($totalPrice, $cart->currency_exchange_rate);
             }
             $originalTotalPrice = $totalPrice;
-        } elseif (!empty($cartItem->is_bundle) && $cartItem->is_bundle == 1 && !empty($cartItem->bundle_items)) {
-            $bundleChildren = safeJsonDecode($cartItem->bundle_items, true);
-            $bundleTotal = 0.00;
-            $bundleOriginalTotal = 0.00;
-            if (!empty($bundleChildren) && is_array($bundleChildren)) {
-                foreach ($bundleChildren as $bChild) {
-                    $childQty = (int)($bChild['qty'] ?? 0);
-                    if ($childQty <= 0) {
-                        continue; // Optional item with 0 quantity
+        } elseif (!empty($cartItem->is_bundle) && $cartItem->is_bundle == 1) {
+            $bundleModel = new \App\Models\BundleModel();
+            $liveComps = $bundleModel->getBundleComponents((int)$product->id, true);
+
+            $existingBundleItems = safeJsonDecode($cartItem->bundle_items ?? '', true);
+            $userSelections = [];
+            if (!empty($existingBundleItems) && is_array($existingBundleItems)) {
+                foreach ($existingBundleItems as $bChild) {
+                    $cId = (int)($bChild['comp_id'] ?? 0);
+                    $pId = (int)($bChild['product_id'] ?? ($bChild['main_product_id'] ?? 0));
+                    $vId = !empty($bChild['variant_id']) ? (int)$bChild['variant_id'] : 0;
+                    if ($cId > 0) {
+                        $userSelections['c_' . $cId] = $bChild;
                     }
-                    $childPid = (int)($bChild['product_id'] ?? 0);
-                    $childPrice = 0.0;
-                    $childOriginalPrice = 0.0;
-                    if ($childPid > 0) {
-                        $cP = getActiveProduct($childPid);
-                        if ($cP && $cP->status == 1) {
-                            $childPrice = (float)($cP->price_discounted > 0 ? $cP->price_discounted : $cP->price);
-                            $childOriginalPrice = (float)($cP->price > 0 ? $cP->price : $childPrice);
-                        }
+                    if ($pId > 0) {
+                        $userSelections['p_' . $pId . '_' . $vId] = $bChild;
+                        $userSelections['p_' . $pId] = $bChild;
                     }
-                    $bundleTotal += ($childPrice * $childQty);
-                    $bundleOriginalTotal += ($childOriginalPrice * $childQty);
                 }
             }
+
+            $syncedBundleItems = [];
+            $bundleTotal = 0.00;
+            $bundleOriginalTotal = 0.00;
+
+            if (!empty($liveComps)) {
+                foreach ($liveComps as $c) {
+                    $cId = (int)$c->id;
+                    $pId = (int)$c->component_product_id;
+                    $vId = !empty($c->variant_id) ? (int)$c->variant_id : null;
+                    $isOpt = !empty($c->is_optional);
+
+                    $prevSelection = $userSelections['c_' . $cId] ?? ($userSelections['p_' . $pId . '_' . (int)$vId] ?? ($userSelections['p_' . $pId] ?? null));
+
+                    if ($isOpt) {
+                        $cQty = isset($prevSelection['qty']) ? (int)$prevSelection['qty'] : 0;
+                    } else {
+                        $reqQty = max(1, (int)$c->required_quantity);
+                        $cQty = (isset($prevSelection['qty']) && (int)$prevSelection['qty'] >= $reqQty) ? (int)$prevSelection['qty'] : $reqQty;
+                    }
+
+                    // Authoritative unit price from BundleModel (includes price_override and markup)
+                    $cUnitPrice = (float)$c->unit_price;
+                    $cOrigPrice = (!empty($c->price) && (float)$c->price > 0) ? (float)$c->price : $cUnitPrice;
+
+                    $syncedBundleItems[] = [
+                        'comp_id'    => $cId,
+                        'product_id' => $pId,
+                        'variant_id' => $vId,
+                        'qty'        => $cQty,
+                        'unit_price' => $cUnitPrice
+                    ];
+
+                    if ($cQty > 0) {
+                        $bundleTotal += ($cUnitPrice * $cQty);
+                        $bundleOriginalTotal += ($cOrigPrice * $cQty);
+                    }
+                }
+                $cartItem->bundle_items = safeJsonEncode($syncedBundleItems);
+            } else {
+                if (!empty($existingBundleItems) && is_array($existingBundleItems)) {
+                    foreach ($existingBundleItems as $bChild) {
+                        $childQty = (int)($bChild['qty'] ?? 0);
+                        if ($childQty <= 0) continue;
+                        $childPid = (int)($bChild['product_id'] ?? 0);
+                        $childPrice = 0.0;
+                        $childOriginalPrice = 0.0;
+                        if ($childPid > 0) {
+                            $cP = getActiveProduct($childPid);
+                            if ($cP && $cP->status == 1) {
+                                $childPrice = (float)($cP->price_discounted > 0 ? $cP->price_discounted : $cP->price);
+                                $childOriginalPrice = (float)($cP->price > 0 ? $cP->price : $childPrice);
+                            }
+                        }
+                        $bundleTotal += ($childPrice * $childQty);
+                        $bundleOriginalTotal += ($childOriginalPrice * $childQty);
+                    }
+                }
+            }
+
+            // Apply bundle discount rate if set
+            $bundleDiscountRate = !empty($product->bundle_discount_rate) ? (float)$product->bundle_discount_rate : 0.0;
+            if ($bundleDiscountRate > 0 && $bundleTotal > 0) {
+                $bundleOriginalTotal = max($bundleOriginalTotal, $bundleTotal);
+                $bundleTotal = $bundleTotal * (1 - ($bundleDiscountRate / 100));
+            }
+
             if ($bundleTotal <= 0) {
                 $bundleTotal = !empty($cartItem->unit_price) && (float)$cartItem->unit_price > 0 ? (float)$cartItem->unit_price : (float)($product->price_discounted > 0 ? $product->price_discounted : $product->price);
             }
@@ -739,6 +825,7 @@ class CartModel extends BaseModel
             if ((float)$product->price > $bundleTotal) {
                 $bundleOriginalTotal = max($bundleOriginalTotal, (float)$product->price);
             }
+
             $unitPrice = $bundleTotal;
             $originalUnitPrice = $bundleOriginalTotal;
             $unitPriceBase = $unitPrice;

@@ -60,7 +60,7 @@ class CartController extends BaseController
             'test-skill-1', 'basic-plan', 'advance-plan', 'premium-plan'
         ];
 
-        $ids = [1, 2, 3];
+        $ids = [1, 26, 27];
 
         try {
             $this->productModel->setBaseQuery(true);
@@ -68,7 +68,7 @@ class CartController extends BaseController
                 ->select('products.id')
                 ->groupStart()
                     ->whereIn('products.slug', $labSlugs)
-                    ->orWhereIn('products.id', [1, 2, 3])
+                    ->orWhereIn('products.id', [1, 26, 27])
                 ->groupEnd()
                 ->where('products.is_deleted', 0)
                 ->get()->getResult();
@@ -109,7 +109,11 @@ class CartController extends BaseController
                 if (in_array($itemPid, $otherLabIds, true)) {
                     $this->cartModel->removeCartItem($item->id);
                 } elseif ($itemPid === $selectedId) {
-                    $isSelectedInCart = true;
+                    if (!$isSelectedInCart) {
+                        $isSelectedInCart = true;
+                    } else {
+                        $this->cartModel->removeCartItem($item->id);
+                    }
                 }
                 // Note: non-LAB products (accessories, extra items, consumables) are left intact!
             }
@@ -155,7 +159,7 @@ class CartController extends BaseController
     {
         $product = $this->productModel->getProductBySlug('advance-skill-1');
         if (empty($product)) {
-            $product = $this->productModel->getActiveProduct(2);
+            $product = $this->productModel->getActiveProduct(26);
         }
 
         $this->syncSelectedLabCart($product);
@@ -166,7 +170,7 @@ class CartController extends BaseController
         $data['userSession'] = getUserSession();
         $data['planKey'] = 'advance';
         $data['planLabel'] = 'Advance';
-        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 2;
+        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 26;
         helperDeleteSession('mds_service_payment');
 
         echo view('partials/_header', $data);
@@ -181,7 +185,7 @@ class CartController extends BaseController
     {
         $product = $this->productModel->getProductBySlug('premium-skill-1');
         if (empty($product)) {
-            $product = $this->productModel->getActiveProduct(3);
+            $product = $this->productModel->getActiveProduct(27);
         }
 
         $this->syncSelectedLabCart($product);
@@ -192,7 +196,7 @@ class CartController extends BaseController
         $data['userSession'] = getUserSession();
         $data['planKey'] = 'premium';
         $data['planLabel'] = 'Premium';
-        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 3;
+        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 27;
         helperDeleteSession('mds_service_payment');
 
         echo view('partials/_header', $data);
