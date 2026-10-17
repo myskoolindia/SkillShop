@@ -444,7 +444,9 @@ class ApiController extends BaseController
                 $this->productModel->setBaseQuery(true);
                 $product = $this->productModel->builder
                     ->groupStart()
-                        ->where('products.slug', 'basic-skill-1')
+                        ->where('products.slug', 'cbse-composite-skill-lab-basic-68')
+                        ->orWhere('products.id', 68)
+                        ->orWhere('products.slug', 'basic-skill-1')
                         ->orWhere('products.slug', 'test-skill-1')
                         ->orWhere('products.id', 1)
                     ->groupEnd()
@@ -455,7 +457,9 @@ class ApiController extends BaseController
                 $this->productModel->setBaseQuery(true);
                 $product = $this->productModel->builder
                     ->groupStart()
-                        ->where('products.slug', 'advance-skill-1')
+                        ->where('products.slug', 'cbse-composite-skill-lab-advanced-72')
+                        ->orWhere('products.id', 72)
+                        ->orWhere('products.slug', 'advance-skill-1')
                         ->orWhere('products.id', 2)
                     ->groupEnd()
                     ->where('products.is_active', 1)
@@ -465,7 +469,9 @@ class ApiController extends BaseController
                 $this->productModel->setBaseQuery(true);
                 $product = $this->productModel->builder
                     ->groupStart()
-                        ->where('products.slug', 'premium-skill-1')
+                        ->where('products.slug', 'cbse-composite-skill-lab-premium-73')
+                        ->orWhere('products.id', 73)
+                        ->orWhere('products.slug', 'premium-skill-1')
                         ->orWhere('products.id', 3)
                     ->groupEnd()
                     ->where('products.is_active', 1)

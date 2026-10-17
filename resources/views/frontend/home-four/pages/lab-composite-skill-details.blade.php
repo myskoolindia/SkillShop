@@ -1269,7 +1269,7 @@ var countEl   = document.getElementById('sks-count');
 var itemsEl   = document.getElementById('sks-items');
 
 Promise.all([
-  fetch(BASE+'/api/products/slug/basic-skill-1').then(function(r){if(!r.ok)throw r.status;return r.json();}),
+  fetch(BASE+'/api/products/slug/cbse-composite-skill-lab-basic-68').then(function(r){if(!r.ok)throw r.status;return r.json();}),
   fetch(BASE+'/api/categories/tree').then(function(r){if(!r.ok)throw r.status;return r.json();}),
 ])
 .then(function(res){

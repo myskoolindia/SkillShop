@@ -56,11 +56,12 @@ class CartController extends BaseController
     private function getLabPlanProductIds(): array
     {
         $labSlugs = [
+            'cbse-composite-skill-lab-basic-68', 'cbse-composite-skill-lab-advanced-72', 'cbse-composite-skill-lab-premium-73',
             'basic-skill-1', 'advance-skill-1', 'premium-skill-1',
             'test-skill-1', 'basic-plan', 'advance-plan', 'premium-plan'
         ];
 
-        $ids = [1, 26, 27];
+        $ids = [68, 72, 73, 1, 26, 27];
 
         try {
             $this->productModel->setBaseQuery(true);
@@ -68,7 +69,7 @@ class CartController extends BaseController
                 ->select('products.id')
                 ->groupStart()
                     ->whereIn('products.slug', $labSlugs)
-                    ->orWhereIn('products.id', [1, 26, 27])
+                    ->orWhereIn('products.id', [68, 72, 73, 1, 26, 27])
                 ->groupEnd()
                 ->where('products.is_deleted', 0)
                 ->get()->getResult();
@@ -130,7 +131,13 @@ class CartController extends BaseController
      */
     public function basicCart()
     {
-        $product = $this->productModel->getProductBySlug('basic-skill-1');
+        $product = $this->productModel->getProductBySlug('cbse-composite-skill-lab-basic-68');
+        if (empty($product)) {
+            $product = $this->productModel->getActiveProduct(68);
+        }
+        if (empty($product)) {
+            $product = $this->productModel->getProductBySlug('basic-skill-1');
+        }
         if (empty($product)) {
             $product = $this->productModel->getActiveProduct(1);
         }
@@ -143,7 +150,7 @@ class CartController extends BaseController
         $data['userSession'] = getUserSession();
         $data['planKey'] = 'basic';
         $data['planLabel'] = 'Basic';
-        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 1;
+        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 68;
 
         helperDeleteSession('mds_service_payment');
 
@@ -157,7 +164,13 @@ class CartController extends BaseController
      */
     public function advanceCart()
     {
-        $product = $this->productModel->getProductBySlug('advance-skill-1');
+        $product = $this->productModel->getProductBySlug('cbse-composite-skill-lab-advanced-72');
+        if (empty($product)) {
+            $product = $this->productModel->getActiveProduct(72);
+        }
+        if (empty($product)) {
+            $product = $this->productModel->getProductBySlug('advance-skill-1');
+        }
         if (empty($product)) {
             $product = $this->productModel->getActiveProduct(26);
         }
@@ -170,7 +183,7 @@ class CartController extends BaseController
         $data['userSession'] = getUserSession();
         $data['planKey'] = 'advance';
         $data['planLabel'] = 'Advance';
-        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 26;
+        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 72;
         helperDeleteSession('mds_service_payment');
 
         echo view('partials/_header', $data);
@@ -183,7 +196,13 @@ class CartController extends BaseController
      */
     public function premiumCart()
     {
-        $product = $this->productModel->getProductBySlug('premium-skill-1');
+        $product = $this->productModel->getProductBySlug('cbse-composite-skill-lab-premium-73');
+        if (empty($product)) {
+            $product = $this->productModel->getActiveProduct(73);
+        }
+        if (empty($product)) {
+            $product = $this->productModel->getProductBySlug('premium-skill-1');
+        }
         if (empty($product)) {
             $product = $this->productModel->getActiveProduct(27);
         }
@@ -196,7 +215,7 @@ class CartController extends BaseController
         $data['userSession'] = getUserSession();
         $data['planKey'] = 'premium';
         $data['planLabel'] = 'Premium';
-        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 27;
+        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 73;
         helperDeleteSession('mds_service_payment');
 
         echo view('partials/_header', $data);

@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\Log;
 class CourseEnquiryController extends Controller
 {
     private const PLAN_SLUG_MAP = [
-        'composite-skill-lab-basic'   => 'basic-skill-1',
-        'composite-skill-lab-advance' => 'advance-skill-1',
-        'composite-skill-lab-premium' => 'premium-skill-1',
+        'composite-skill-lab-basic'   => 'cbse-composite-skill-lab-basic-68',
+        'composite-skill-lab-advance' => 'cbse-composite-skill-lab-advanced-72',
+        'composite-skill-lab-premium' => 'cbse-composite-skill-lab-premium-73',
     ];
 
     public function index(Request $request)

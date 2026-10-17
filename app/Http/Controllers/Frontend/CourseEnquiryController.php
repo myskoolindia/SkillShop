@@ -25,21 +25,21 @@ class CourseEnquiryController extends Controller
      */
     private const PLAN_MAP = [
         'composite-skill-lab-basic'    => [
-            'slug'     => 'basic-skill-1',
+            'slug'     => 'cbse-composite-skill-lab-basic-68',
             'label'    => 'Basic Composite Skill Lab',
-            'page_url' => '/club-shop/basic-skill-1',
+            'page_url' => '/club-shop/cbse-composite-skill-lab-basic-68',
             'cart_url' => '/club-shop/basic-cart',
         ],
         'composite-skill-lab-advance'  => [
-            'slug'     => 'advance-skill-1',
+            'slug'     => 'cbse-composite-skill-lab-advanced-72',
             'label'    => 'Advance Composite Skill Lab',
-            'page_url' => '/club-shop/advance-skill-1',
+            'page_url' => '/club-shop/cbse-composite-skill-lab-advanced-72',
             'cart_url' => '/club-shop/advance-cart',
         ],
         'composite-skill-lab-premium'  => [
-            'slug'     => 'premium-skill-1',
+            'slug'     => 'cbse-composite-skill-lab-premium-73',
             'label'    => 'Premium Composite Skill Lab',
-            'page_url' => '/club-shop/premium-skill-1',
+            'page_url' => '/club-shop/cbse-composite-skill-lab-premium-73',
             'cart_url' => '/club-shop/premium-cart',
         ],
         // composite-skill main page forms
