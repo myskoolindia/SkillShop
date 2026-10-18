@@ -672,9 +672,26 @@ class CourseEnquiryController extends Controller
 
         // Normalize items array
         $items = $stored['items'] ?? [];
+        if (empty($items) && !empty($stored['selected_components']) && is_array($stored['selected_components'])) {
+            foreach ($stored['selected_components'] as $c) {
+                $qty = (int) ($c['qty'] ?? 1);
+                $price = (float) ($c['unit_price'] ?? 0);
+                $items[] = [
+                    'category'   => $c['category'] ?? ($c['category_name'] ?? 'General'),
+                    'item'       => $c['title'] ?? 'Component',
+                    'hsn'        => $c['hsn'] ?? '9023',
+                    'qty'        => $qty,
+                    'unit_price' => $price,
+                    'total'      => (float) ($c['subtotal'] ?? ($qty * $price)),
+                ];
+            }
+        }
         $subtotal = (float) ($stored['subtotal'] ?? 0);
         if ($subtotal <= 0 && !empty($items)) {
             $subtotal = array_sum(array_column($items, 'total'));
+        }
+        if ($subtotal <= 0 && !empty($stored['selected_total_rs'])) {
+            $subtotal = (float) $stored['selected_total_rs'];
         }
         if ($subtotal <= 0 && !empty($stored['grand_total'])) {
             $subtotal = (float) $stored['grand_total'];

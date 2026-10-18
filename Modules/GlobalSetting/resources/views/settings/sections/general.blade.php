@@ -75,6 +75,16 @@
                     class="custom-switch-description">{{ __('Cursor Style') }}</span>
             </label>
         </div>
+        <div class="form-group mb-0">
+            <label class="d-flex align-items-center">
+                <input type="hidden" value="inactive" name="lab_customization_status" class="custom-switch-input">
+                <input type="checkbox" value="active" name="lab_customization_status"
+                    class="custom-switch-input" {{ ($setting?->lab_customization_status ?? 'active') == 'active' ? 'checked' : '' }}>
+                <span class="custom-switch-indicator"></span>
+                <span
+                    class="custom-switch-description">{{ __('Enable Skill Lab Customization (Package Configurator)') }}</span>
+            </label>
+        </div>
 
         <div class="form-group">
             <label class="d-flex align-items-center">

@@ -81,6 +81,9 @@ class GlobalSettingController extends Controller {
         Setting::where('key', 'cursor_dot_status')->update(['value' => $request?->cursor_dot_status]);
         Setting::where('key', 'preloader_status')->update(['value' => $request->preloader_status]);
         Setting::where('key', 'live_mail_send')->update(['value' => $request->live_mail_send]);
+        if ($request->has('lab_customization_status')) {
+            Setting::updateOrCreate(['key' => 'lab_customization_status'], ['value' => $request->lab_customization_status]);
+        }
 
         $this->put_setting_cache();
         Cache::forget('corn_working');

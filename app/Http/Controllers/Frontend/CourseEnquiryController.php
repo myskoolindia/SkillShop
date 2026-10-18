@@ -55,6 +55,12 @@ class CourseEnquiryController extends Controller
             'page_url' => '/labs/composite-skill',
             'cart_url' => '/labs/composite-skill',
         ],
+        'composite-skill-custom-package' => [
+            'slug'     => null,
+            'label'    => 'Custom Composite Skill Lab',
+            'page_url' => '/labs/composite-skill',
+            'cart_url' => '/labs/composite-skill',
+        ],
         // Skillvation Lab (STEM page)
         'skillvation-lab-stem'         => [
             'slug'     => null,
@@ -104,11 +110,37 @@ class CourseEnquiryController extends Controller
             $planInfo    = self::PLAN_MAP[$source] ?? null;
             $packageName = $validated['course_title'] ?? ($planInfo['label'] ?? $sourceLabel);
 
-            // ── Fetch bundle items server-side from Club Shop API ─
-            $bundleComponents = $this->fetchBundleComponents($planInfo['slug'] ?? null);
+            // ── Build quotation data (supports custom configurator JSON or club shop bundle)
+            $quotationData = null;
+            if (!empty($validated['quotation'])) {
+                $rawQ = is_string($validated['quotation']) ? json_decode($validated['quotation'], true) : $validated['quotation'];
+                if (is_array($rawQ) && !empty($rawQ['selected_components'])) {
+                    $items = [];
+                    $grouped = [];
+                    $grandTotal = 0;
+                    foreach ($rawQ['selected_components'] as $c) {
+                        $itemTitle = $c['title'] ?? 'Component';
+                        $cat       = $c['category'] ?? 'General';
+                        $qty       = (int) ($c['qty'] ?? 1);
+                        $price     = (float) ($c['unit_price'] ?? 0);
+                        $total     = (float) ($c['subtotal'] ?? ($price * $qty));
+                        $grandTotal += $total;
+                        $items[] = compact('cat', 'qty', 'price', 'total') + ['item' => $itemTitle];
+                        $grouped[$cat] = ($grouped[$cat] ?? 0) + $total;
+                    }
+                    $quotationData = [
+                        'items'       => $items,
+                        'grouped'     => $grouped,
+                        'grand_total' => $grandTotal,
+                    ];
+                }
+            }
 
-            // ── Build quotation data from server-fetched components
-            $quotationData = $this->buildQuotationData($bundleComponents);
+            if (!$quotationData) {
+                // ── Fetch bundle items server-side from Club Shop API ─
+                $bundleComponents = $this->fetchBundleComponents($planInfo['slug'] ?? null);
+                $quotationData    = $this->buildQuotationData($bundleComponents);
+            }
 
             // ── Build the HTML table (used in email body for admin)
             $quotationHtml = $this->renderQuotationTable($quotationData);
@@ -139,32 +171,37 @@ class CourseEnquiryController extends Controller
 
             // ── 1. Admin notification ─────────────────────────────
             $adminTpl = EmailTemplate::where('name', 'skill_lab_enquiry_admin')->first();
-            if ($adminTpl) {
-                $adminSubject = str_replace(array_keys($vars), array_values($vars), $adminTpl->subject);
-                $adminBody    = str_replace(array_keys($vars), array_values($vars), $adminTpl->message);
-                Mail::to($adminEmail)->send(new DefaultMail(['subject' => $adminSubject], $adminBody));
-            }
+            $adminSubject = ($adminTpl && !empty($adminTpl->subject))
+                ? str_replace(array_keys($vars), array_values($vars), $adminTpl->subject)
+                : "New Skill Lab Enquiry: {$packageName} – " . ($validated['school'] ?? 'School');
+            $adminBody = ($adminTpl && !empty($adminTpl->message))
+                ? str_replace(array_keys($vars), array_values($vars), $adminTpl->message)
+                : "<p>New enquiry from <strong>{$validated['name']}</strong> ({$validated['school']})</p><p>Package: {$packageName}</p><p>Phone: {$validated['phone']}</p><p>Email: {$validated['email']}</p>{$quotationHtml}";
+
+            Mail::to($adminEmail)->send(new DefaultMail(['subject' => $adminSubject], $adminBody));
 
             // ── 2. Confirmation + PDF proposal to enquirer ────────
             $confirmTpl = EmailTemplate::where('name', 'skill_lab_enquiry_confirmation')->first();
-            if ($confirmTpl) {
-                $confirmSubject = str_replace(array_keys($vars), array_values($vars), $confirmTpl->subject);
-                $confirmBody    = str_replace(array_keys($vars), array_values($vars), $confirmTpl->message);
+            $confirmSubject = ($confirmTpl && !empty($confirmTpl->subject))
+                ? str_replace(array_keys($vars), array_values($vars), $confirmTpl->subject)
+                : "Skillvation Composite Skill Lab Proposal – " . ($validated['school'] ?? 'School');
+            $confirmBody = ($confirmTpl && !empty($confirmTpl->message))
+                ? str_replace(array_keys($vars), array_values($vars), $confirmTpl->message)
+                : "<p>Dear {$validated['name']},</p><p>Thank you for your interest in Skillvation. Please find attached your customized Proposal PDF.</p>{$quotationHtml}";
 
-                // Generate PDF with full proposal + dynamic bundle items
-                $pdfBytes  = $this->generateProposalPdf($validated, $packageName, $quotationData, $planInfo);
-                $pdfName   = 'Skillvation_Proposal_'
-                           . preg_replace('/[^A-Za-z0-9_]/', '_', $validated['school'] ?? 'School')
-                           . '.pdf';
+            // Generate PDF with full proposal + dynamic bundle items
+            $pdfBytes  = $this->generateProposalPdf($validated, $packageName, $quotationData, $planInfo);
+            $pdfName   = 'Skillvation_Proposal_'
+                       . preg_replace('/[^A-Za-z0-9_]/', '_', $validated['school'] ?? 'School')
+                       . '.pdf';
 
-                Mail::to($validated['email'])
-                    ->send(new DefaultMail(
-                        ['subject' => $confirmSubject],
-                        $confirmBody,
-                        $pdfBytes,
-                        $pdfName
-                    ));
-            }
+            Mail::to($validated['email'])
+                ->send(new DefaultMail(
+                    ['subject' => $confirmSubject],
+                    $confirmBody,
+                    $pdfBytes,
+                    $pdfName
+                ));
 
         } catch (\Throwable $e) {
             Log::error('[CourseEnquiry] Mail failed: ' . $e->getMessage(), [
@@ -310,21 +347,80 @@ class CourseEnquiryController extends Controller
         $planInfo    = self::PLAN_MAP[$source] ?? null;
         $packageName = $data['course_title'] ?? ($planInfo['label'] ?? $sourceLabel);
 
-        $bundleComponents = $this->fetchBundleComponents($planInfo['slug'] ?? null);
-        $quotationData    = $this->buildQuotationData($bundleComponents);
-        $quotationHtml    = $this->renderQuotationTable($quotationData);
+        $quotationData = null;
+        if (!empty($data['quotation'])) {
+            $q = is_string($data['quotation']) ? json_decode($data['quotation'], true) : $data['quotation'];
+            if (!empty($q['items'])) {
+                $quotationData = [
+                    'items'       => $q['items'],
+                    'grouped'     => $q['grouped'] ?? [],
+                    'grand_total' => $q['grand_total'] ?? ($q['total'] ?? 0),
+                ];
+            } elseif (!empty($q['selected_components'])) {
+                $items = [];
+                $grouped = [];
+                $grandTotal = 0;
+                foreach ($q['selected_components'] as $c) {
+                    $itemTitle = $c['title'] ?? 'Component';
+                    $cat       = $c['category'] ?? ($c['category_name'] ?? 'General');
+                    $qty       = (int) ($c['qty'] ?? ($c['required_quantity'] ?? 1));
+                    $price     = (float) ($c['unit_price'] ?? 0);
+                    $total     = (float) ($c['subtotal'] ?? ($price * $qty));
+                    $grandTotal += $total;
+                    $items[] = compact('cat', 'qty', 'price', 'total') + ['item' => $itemTitle];
+                    $grouped[$cat] = ($grouped[$cat] ?? 0) + $total;
+                }
+                $quotationData = [
+                    'items'       => $items,
+                    'grouped'     => $grouped,
+                    'grand_total' => $grandTotal,
+                ];
+            }
+        }
+
+        if (!$quotationData && !empty($data['selected_components'])) {
+            $rawComponents = is_string($data['selected_components']) ? json_decode($data['selected_components'], true) : $data['selected_components'];
+            if (is_array($rawComponents) && !empty($rawComponents)) {
+                $items = [];
+                $grouped = [];
+                $grandTotal = 0;
+                foreach ($rawComponents as $c) {
+                    if (empty($c['title'])) continue;
+                    $qty = (int) ($c['required_quantity'] ?? ($c['qty'] ?? 1));
+                    $price = (float) ($c['unit_price'] ?? ($c['price'] ?? 0));
+                    if ($qty <= 0) continue;
+                    $cat = $c['category_name'] ?? ($c['cat'] ?? 'General');
+                    $total = $price * $qty;
+                    $grandTotal += $total;
+                    $items[] = compact('cat', 'qty', 'price', 'total') + ['item' => $c['title']];
+                    $grouped[$cat] = ($grouped[$cat] ?? 0) + $total;
+                }
+                $quotationData = [
+                    'items'       => $items,
+                    'grouped'     => $grouped,
+                    'grand_total' => $grandTotal,
+                ];
+            }
+        }
+
+        if (!$quotationData) {
+            $bundleComponents = $this->fetchBundleComponents($planInfo['slug'] ?? null);
+            $quotationData    = $this->buildQuotationData($bundleComponents);
+        }
+
+        $quotationHtml = $this->renderQuotationTable($quotationData);
 
         $baseUrl     = url('/');
         $productLink = $planInfo ? $baseUrl . $planInfo['page_url'] : '';
         $cartLink    = $planInfo ? $baseUrl . $planInfo['cart_url']  : '';
 
         $vars = [
-            '{{name}}'            => htmlspecialchars($data['name']),
-            '{{designation}}'     => $data['designation'] ? ', ' . htmlspecialchars($data['designation']) : '',
+            '{{name}}'            => htmlspecialchars($data['name'] ?? ''),
+            '{{designation}}'     => (!empty($data['designation'])) ? ', ' . htmlspecialchars($data['designation']) : '',
             '{{school}}'          => htmlspecialchars($data['school'] ?? '—'),
             '{{city}}'            => htmlspecialchars($data['city'] ?? '—'),
             '{{phone}}'           => htmlspecialchars($data['phone'] ?? '—'),
-            '{{email}}'           => htmlspecialchars($data['email']),
+            '{{email}}'           => htmlspecialchars($data['email'] ?? ''),
             '{{package}}'         => htmlspecialchars($packageName),
             '{{source}}'          => htmlspecialchars($sourceLabel),
             '{{request_type}}'    => htmlspecialchars($data['message'] ?? '—'),
@@ -338,24 +434,30 @@ class CourseEnquiryController extends Controller
 
         // Admin notification
         $adminTpl = EmailTemplate::where('name', 'skill_lab_enquiry_admin')->first();
-        if ($adminTpl) {
-            $subject = str_replace(array_keys($vars), array_values($vars), $adminTpl->subject);
-            $body    = str_replace(array_keys($vars), array_values($vars), $adminTpl->message);
-            Mail::to($adminEmail)->send(new DefaultMail(['subject' => $subject], $body));
-        }
+        $adminSubject = ($adminTpl && !empty($adminTpl->subject))
+            ? str_replace(array_keys($vars), array_values($vars), $adminTpl->subject)
+            : "Skill Lab Enquiry: {$packageName} – " . ($data['school'] ?? 'School');
+        $adminBody = ($adminTpl && !empty($adminTpl->message))
+            ? str_replace(array_keys($vars), array_values($vars), $adminTpl->message)
+            : "<p>Enquiry for <strong>{$data['name']}</strong> ({$data['school']})</p><p>Package: {$packageName}</p>{$quotationHtml}";
+
+        Mail::to($adminEmail)->send(new DefaultMail(['subject' => $adminSubject], $adminBody));
 
         // Confirmation + PDF to school
         $confirmTpl = EmailTemplate::where('name', 'skill_lab_enquiry_confirmation')->first();
-        if ($confirmTpl) {
-            $subject  = str_replace(array_keys($vars), array_values($vars), $confirmTpl->subject);
-            $body     = str_replace(array_keys($vars), array_values($vars), $confirmTpl->message);
-            $pdfBytes = $this->generateProposalPdf($data, $packageName, $quotationData, $planInfo);
-            $pdfName  = 'Skillvation_Proposal_'
-                      . preg_replace('/[^A-Za-z0-9_]/', '_', $data['school'] ?? 'School')
-                      . '.pdf';
-            Mail::to($data['email'])
-                ->send(new DefaultMail(['subject' => $subject], $body, $pdfBytes, $pdfName));
-        }
+        $confirmSubject = ($confirmTpl && !empty($confirmTpl->subject))
+            ? str_replace(array_keys($vars), array_values($vars), $confirmTpl->subject)
+            : "Skillvation Composite Skill Lab Proposal – " . ($data['school'] ?? 'School');
+        $confirmBody = ($confirmTpl && !empty($confirmTpl->message))
+            ? str_replace(array_keys($vars), array_values($vars), $confirmTpl->message)
+            : "<p>Dear {$data['name']},</p><p>Please find attached your customized Proposal PDF.</p>{$quotationHtml}";
+
+        $pdfBytes = $this->generateProposalPdf($data, $packageName, $quotationData, $planInfo);
+        $pdfName  = 'Skillvation_Proposal_'
+                  . preg_replace('/[^A-Za-z0-9_]/', '_', $data['school'] ?? 'School')
+                  . '.pdf';
+        Mail::to($data['email'])
+            ->send(new DefaultMail(['subject' => $confirmSubject], $confirmBody, $pdfBytes, $pdfName));
     }
 
     // ──────────────────────────────────────────────────────────────
