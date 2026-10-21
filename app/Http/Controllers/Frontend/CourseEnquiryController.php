@@ -63,10 +63,10 @@ class CourseEnquiryController extends Controller
         ],
         // Skillvation Lab (STEM page)
         'skillvation-lab-stem'         => [
-            'slug'     => null,
+            'slug'     => 'skillvation-lab',
             'label'    => 'Skillvation Lab',
-            'page_url' => '/labs/stem',
-            'cart_url' => '/labs/stem',
+            'page_url' => '/club-shop/skillvation-lab',
+            'cart_url' => '/club-shop/skillvation-cart',
         ],
         // Course detail quote form
         'course-detail-quote'          => [

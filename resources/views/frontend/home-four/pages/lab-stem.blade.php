@@ -3,6 +3,76 @@
 @section('meta_title', 'Skillvation Lab — Building Schools That Prepare Students for the Future')
 @section('meta_description', 'Skillvation Lab helps schools create structured, practical learning environments covering Robotics, AI, STEM, Electronics, Design Thinking, and more. Complete turnkey lab solution for ICSE and State Board schools.')
 
+@push('styles')
+<style>
+  /* Kit section styles */
+  #skill-sectors-columns { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+  #skill-sectors-columns > div.hidden { display: none !important; }
+  #skill-sectors-columns > div:not(.hidden):only-child { flex: 0 0 100% !important; }
+  .skill-acc-row button:focus-visible { outline: 2px solid #3b82f6; outline-offset: -2px; }
+
+  /* Kit Carousel styles */
+  .sks-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #1e293b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .sks-nav-btn:hover {
+    background: #ffffff;
+    color: #f4742b;
+    border-color: #fdba74;
+    box-shadow: 0 8px 24px rgba(244,116,43,0.22);
+    transform: translateY(-50%) scale(1.08);
+  }
+  .sks-nav-btn:active {
+    transform: translateY(-50%) scale(0.96);
+  }
+  .sks-nav-prev { left: -22px; }
+  .sks-nav-next { right: -22px; }
+  @media (max-width: 768px) {
+    .sks-nav-prev { left: 4px; }
+    .sks-nav-next { right: 4px; }
+    .sks-nav-btn {
+      width: 38px;
+      height: 38px;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    }
+  }
+  .sks-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .sks-dot.active {
+    width: 26px;
+    border-radius: 13px;
+    background: #f4742b;
+  }
+  .sks-box-card {
+    flex-shrink: 0;
+    box-sizing: border-box;
+    width: 100%;
+  }
+</style>
+@endpush
 @section('contents')
 
 <!-- =====================================================================
@@ -179,6 +249,89 @@
         </div>
       </div>
       @endforeach
+    </div>
+
+  </div>
+</section>
+
+{{-- =====================================================================
+     DYNAMIC KIT EXPLORER (Live Category & Component Inventory)
+     ===================================================================== --}}
+<section class="py-16 lg:py-20 bg-white" id="skill-sectors-section">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <div class="text-center max-w-2xl mx-auto mb-12">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-navy/10 text-brand-navy text-xs font-bold uppercase tracking-wider mb-3">
+        Skillvation Lab
+      </div>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
+        Explore Components in the Skillvation Lab Kit
+      </h2>
+      <p class="mt-3 text-slate-500 text-sm sm:text-base">
+        Browse the curated equipment, activity items, and consumable resources included in the Skillvation Lab.
+      </p>
+    </div>
+
+    {{-- Loading Indicator --}}
+    <div id="sks-loading" class="text-center py-16">
+      <div class="inline-flex items-center gap-3 text-brand-navy font-medium text-sm">
+        <i class="fa-solid fa-circle-notch fa-spin text-xl text-brand-orange"></i>
+        <span>Loading kit inventory details…</span>
+      </div>
+    </div>
+
+    {{-- Error State --}}
+    <div id="sks-error" class="hidden max-w-md mx-auto bg-red-50 border border-red-200 text-red-700 rounded-2xl p-6 text-center">
+      <i class="fa-solid fa-triangle-exclamation text-2xl mb-2 text-red-400"></i>
+      <p class="text-sm font-medium">Unable to load kit details at this moment. Please refresh the page.</p>
+    </div>
+
+    {{-- Dynamic Carousel Container --}}
+    <div id="sks-content" class="hidden">
+      <div style="position:relative;">
+        <button id="sks-box-prev" type="button" aria-label="Previous"
+          class="sks-nav-btn sks-nav-prev">
+          <i class="fa-solid fa-chevron-left" style="font-size:12px;"></i>
+        </button>
+        <button id="sks-box-next" type="button" aria-label="Next"
+          class="sks-nav-btn sks-nav-next">
+          <i class="fa-solid fa-chevron-right" style="font-size:12px;"></i>
+        </button>
+
+        <div style="overflow:hidden;border-radius:12px;" id="sks-carousel-viewport">
+          <div id="sks-boxes"
+               style="display:flex;gap:16px;transition:transform .45s cubic-bezier(.25,1,.5,1);will-change:transform;align-items:flex-start;"></div>
+        </div>
+
+        {{-- Dots pagination indicator --}}
+        <div id="sks-dots" style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:18px;"></div>
+      </div>
+
+      {{-- CTA Bar inside Kit Box --}}
+      <div style="margin-top:40px;border-radius:16px;background:linear-gradient(135deg,#0b2545 0%,#1e3a8a 100%);padding:28px 32px;display:flex;flex-wrap:wrap;align-items:center;gap:20px;box-shadow:0 8px 30px rgba(11,37,69,.25);">
+        <div style="flex:1;min-width:220px;">
+          <h4 style="font-size:17px;font-weight:800;color:#fff;margin:0 0 6px;">Need a Tailored Configuration?</h4>
+          <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Adjust quantities, add optional modules or custom skill domains to match your school's exact requirements.</p>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <a id="sks-btn-customise" href="#cta-section"
+             style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
+            <i class="fa-solid fa-sliders" style="font-size:11px;"></i> Customise This Lab
+          </a>
+          <a id="" href="#cta-section"
+             style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
+            <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
+          </a>
+        </div>
+      </div>
+
+      {{-- Count Badge --}}
+      <div style="text-align:center;margin-top:20px;">
+        <span style="display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:20px;background:rgba(11,37,69,.05);border:1px solid rgba(11,37,69,.1);color:#0b2545;font-size:11px;font-weight:700;">
+          <i class="fa-solid fa-circle-check" style="color:#22c55e;"></i>
+          <span id="sks-count">…</span> categories · <span id="sks-items">…</span> items in this lab
+        </span>
+      </div>
     </div>
 
   </div>
@@ -627,5 +780,446 @@
     .finally(function () { btn.disabled = false; btn.textContent = orig; });
   });
 }());
+</script>
+<script>
+(function(){
+'use strict';
+
+var BASE = '<?= rtrim(env("APP_URL"), "/") ?>/club-shop';
+
+var THEMES = [
+  { keys:['life science','life form','biology','agriculture','food','health'],
+    hdrBg:'#059669', border:'#a7f3d0', bg:'#f0fdf4', dotColor:'#059669', hoverBg:'#dcfce7', shadow:false },
+  { keys:['human service','healthcare service','finance','service','retail','tourism'],
+    hdrBg:'#ea580c', border:'#fed7aa', bg:'#fff7ed', dotColor:'#ea580c', hoverBg:'#ffedd5', shadow:false },
+  { keys:['machine','material','technology','tech','stem','electr','robot','coding','craft'],
+    hdrBg:'#28246f', border:'#bfdbfe', bg:'#eff6ff', dotColor:'#28246f', hoverBg:'#dbeafe', shadow:false },
+  { keys:['infra','construct','civil','storage','furniture'],
+    hdrBg:'#d97706', border:'#fde68a', bg:'#fffbeb', dotColor:'#d97706', hoverBg:'#fef3c7', shadow:false },
+];
+var DEFAULT_THEME = { hdrBg:'#28246f', border:'#bfdbfe', bg:'#eff6ff', dotColor:'#28246f', hoverBg:'#dbeafe', shadow:false };
+
+function getTheme(parentName){
+  var n = (parentName||'').toLowerCase();
+  for(var i=0;i<THEMES.length;i++)
+    if(THEMES[i].keys.some(function(k){ return n.includes(k); })) return THEMES[i];
+  return DEFAULT_THEME;
+}
+
+var ICONS=[
+  [['food','kitchen','cup','spoon','bowl','whisk','spatula','rolling','measur','cook','bak'],'fa-utensils'],
+  [['agri','farm','crop','soil'],'fa-leaf'],
+  [['horti','plant','nursery'],'fa-tree'],
+  [['animal','livestock','dairy'],'fa-cow'],
+  [['sustain','eco','recycle'],'fa-recycle'],
+  [['health','medical','first-aid','first aid','clinic','aid kit'],'fa-heart-pulse'],
+  [['beauty','wellness','spa'],'fa-spa'],
+  [['retail','shop','store'],'fa-shop'],
+  [['bank','financ','bfsi'],'fa-landmark'],
+  [['robot','ai','automat'],'fa-robot'],
+  [['electron','ece','circuit'],'fa-bolt'],
+  [['cod','program','it ','ites','software','data'],'fa-desktop'],
+  [['carpent','wood'],'fa-hammer'],
+  [['design','innovat'],'fa-pen-ruler'],
+  [['apparel','fashion','stitch'],'fa-shirt'],
+  [['photo','media','film','video','avgc'],'fa-camera'],
+  [['avion','drone','aeronaut'],'fa-plane'],
+  [['ar &','vr','3d print','virtual','augment'],'fa-vr-cardboard'],
+  [['potter','craft','clay'],'fa-paint-brush'],
+  [['infra','build','construct'],'fa-building'],
+  [['tour','hospitality'],'fa-map-location-dot'],
+  [['activity'],'fa-star'],
+];
+function getIcon(n){
+  n=(n||'').toLowerCase();
+  for(var i=0;i<ICONS.length;i++)
+    if(ICONS[i][0].some(function(k){ return n.includes(k); })) return ICONS[i][1];
+  return 'fa-cube';
+}
+
+function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function rupee(n){ return '₹\u202F'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:2}); }
+
+function openRow(row){
+  var body = row.querySelector('.sks-body');
+  var chev = row.querySelector('.sks-chev');
+  if(!body) return;
+  var wrap = row.closest('[data-sks-rows]');
+  if(wrap) wrap.querySelectorAll('.sks-row[data-open="1"]').forEach(function(r){
+    if(r===row) return;
+    r.dataset.open='0';
+    var b=r.querySelector('.sks-body'), c=r.querySelector('.sks-chev');
+    if(b) b.style.maxHeight='0';
+    if(c) c.style.transform='rotate(0deg)';
+  });
+  body.style.maxHeight = (body.scrollHeight + 300) + 'px';
+  if(chev) chev.style.transform='rotate(180deg)';
+  row.dataset.open='1';
+}
+function closeRow(row){
+  var body=row.querySelector('.sks-body'), chev=row.querySelector('.sks-chev');
+  if(body) body.style.maxHeight='0';
+  if(chev) chev.style.transform='rotate(0deg)';
+  row.dataset.open='0';
+}
+
+function buildRow(catName, comps, theme, productUrl, isOpenByDefault){
+  var icon  = getIcon(catName);
+  var rowId = 'sks-r-'+Math.random().toString(36).slice(2,8);
+  var totalQ=0, totalV=0;
+  comps.forEach(function(c){
+    var q = c.is_optional ? 0 : Number(c.required_quantity || 0);
+    totalQ += q;
+    totalV += Number(c.unit_price) * q;
+  });
+  var subtitle = totalQ > 0
+    ? rupee(totalV) + ' · ' + totalQ + ' unit' + (totalQ !== 1 ? 's' : '')
+    : comps.length + ' item' + (comps.length !== 1 ? 's' : '') + ' (optional)';
+
+  var itemRows = comps.map(function(c){
+    var qty    = c.is_optional ? 0 : Number(c.required_quantity || 0);
+    var line   = Number(c.unit_price) * qty;
+    var opt    = c.is_optional
+      ? '<span style="margin-left:5px;padding:1px 5px;border-radius:3px;background:#fef3c7;color:#92400e;border:1px solid #fde68a;font-size:9px;font-weight:700;">optional</span>'
+      : '';
+    var rawImg = c.image_small || c.image || '';
+    var imgSrc = '';
+    if(rawImg){
+      if(rawImg.startsWith('http://') || rawImg.startsWith('https://') || rawImg.startsWith('/')){
+        imgSrc = rawImg;
+      } else {
+        imgSrc = BASE + '/' + (rawImg.startsWith('uploads/') ? rawImg : 'uploads/images/' + rawImg);
+      }
+    }
+    var img = imgSrc
+      ? '<img src="'+esc(imgSrc)+'" alt="'+esc(c.title)+'" loading="lazy" '
+          +'style="width:36px;height:36px;object-fit:cover;border-radius:6px;border:1px solid #e2e8f0;flex-shrink:0;" '
+          +'onerror="this.style.display=\'none\';">'
+      : '<span style="width:36px;height:36px;border-radius:6px;background:#f1f5f9;border:1px solid #e2e8f0;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;">'
+          +'<i class="fa-solid fa-cube" style="color:#cbd5e1;font-size:12px;"></i></span>';
+
+    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #f1f5f9;">'
+      +img
+      +'<div style="flex:1;min-width:0;">'
+        +'<div style="font-size:13px;font-weight:600;color:#1e293b;line-height:1.3;">'+esc(c.title)+opt+'</div>'
+        +(c.sku?'<div style="font-size:10.5px;color:#94a3b8;font-family:monospace;margin-top:2px;">'+esc(c.sku)+'</div>':'')
+      +'</div>'
+      +'<div style="text-align:right;flex-shrink:0;">'
+        +'<div style="font-size:12.5px;font-weight:700;color:'+(qty===0?'#94a3b8':theme.dotColor)+';">'+(qty===0?'—':rupee(line))+'</div>'
+        +'<div style="font-size:10.5px;color:#94a3b8;">'+(qty===0?'0 (optional)':qty+' × '+rupee(c.unit_price))+'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+
+  var initialOpen = isOpenByDefault ? '1' : '0';
+  var initialMaxHeight = isOpenByDefault ? 'max-height:800px;' : 'max-height:0;';
+  var initialChev = isOpenByDefault ? 'transform:rotate(180deg);' : 'transform:rotate(0deg);';
+
+  return '<div class="sks-row" id="'+rowId+'" data-open="'+initialOpen+'" '
+      +'style="border-bottom:1px solid rgba(0,0,0,.06);cursor:pointer;" '
+      +'data-hover="'+esc(theme.hoverBg)+'">'
+    +'<button type="button" '
+        +'onclick="(function(){var r=document.getElementById(\''+rowId+'\');r.dataset.open===\'1\'?sksClose(r):sksOpen(r);})()" '
+        +'style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 16px;background:transparent;border:none;cursor:pointer;text-align:left;transition:background .15s;">'
+      +'<span style="width:34px;height:34px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+        +'<i class="fa-solid '+icon+'" style="font-size:13px;color:'+theme.dotColor+';"></i>'
+      +'</span>'
+      +'<div style="flex:1;min-width:0;">'
+        +'<div style="font-size:14px;font-weight:600;color:#1e293b;">'+esc(catName)+'</div>'
+        +'<div style="font-size:11px;color:#94a3b8;margin-top:2px;">'+subtitle+'</div>'
+      +'</div>'
+      +'<i class="fa-solid fa-chevron-down sks-chev" style="font-size:11px;color:#94a3b8;transition:transform .25s;flex-shrink:0;'+initialChev+'"></i>'
+    +'</button>'
+    +'<div class="sks-body" style="'+initialMaxHeight+'overflow:hidden;transition:max-height .35s ease;">'
+      +itemRows
+      +(totalQ>0?'<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f8fafc;border-top:1px solid #e2e8f0;">'
+          +'<span style="font-size:11.5px;font-weight:700;color:#64748b;">'+comps.length+' item'+(comps.length!==1?'s':'')+' · '+totalQ+' units</span>'
+          +'<span style="font-size:13.5px;font-weight:800;color:'+theme.dotColor+';">'+rupee(totalV)+'</span>'
+        +'</div>':'')
+    +'</div>'
+  +'</div>';
+}
+
+window.sksOpen  = openRow;
+window.sksClose = closeRow;
+
+function bootHover(root){
+  root.querySelectorAll('.sks-row').forEach(function(row){
+    var timer=null, btn=row.querySelector('button'), body=row.querySelector('.sks-body');
+    var hoverBg=row.getAttribute('data-hover')||'#f1f5f9';
+    row.addEventListener('mouseenter',function(){
+      clearTimeout(timer); if(btn) btn.style.background=hoverBg;
+    });
+    row.addEventListener('mouseleave',function(){
+      if(btn) btn.style.background='transparent';
+    });
+  });
+}
+
+function buildBox(parentName, parentId, subGroups, theme, productUrl, isCenter){
+  var el = document.createElement('div');
+  el.className = 'sks-box-card';
+  el.style.cssText = 'border:2px solid '+theme.border+';background:'+theme.bg+';'
+    +'overflow:hidden;border-radius:12px;box-sizing:border-box;'
+    +(theme.shadow?'box-shadow:0 8px 24px rgba(0,0,0,.08);':'');
+
+  var catNames = Object.keys(subGroups);
+
+  var hdr = '<div style="background:'+theme.hdrBg+';padding:13px 18px;display:flex;align-items:center;gap:10px;">'
+    +'<i class="fa-solid '+getIcon(parentName)+'" style="color:#fff;font-size:16px;"></i>'
+    +'<span style="font-weight:700;color:#fff;font-size:15.5px;">'+esc(parentName)+'</span>'
+    +'<span style="margin-left:auto;background:rgba(255,255,255,.22);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">'
+      +catNames.length+' categor'+(catNames.length!==1?'ies':'y')
+    +'</span>'
+  +'</div>';
+
+  var rows = '<div data-sks-rows>'
+    + catNames.map(function(cn, idx){ return buildRow(cn, subGroups[cn], theme, productUrl, idx === 0); }).join('')
+  + '</div>';
+
+  el.innerHTML = hdr + rows;
+  bootHover(el);
+  return el;
+}
+
+var loadEl    = document.getElementById('sks-loading');
+var errEl     = document.getElementById('sks-error');
+var contentEl = document.getElementById('sks-content');
+var boxesEl   = document.getElementById('sks-boxes');
+var countEl   = document.getElementById('sks-count');
+var itemsEl   = document.getElementById('sks-items');
+
+Promise.all([
+  fetch(BASE+'/api/products/slug/skillvation-lab').then(function(r){if(!r.ok)throw r.status;return r.json();}),
+  fetch(BASE+'/api/categories/tree').then(function(r){if(!r.ok)throw r.status;return r.json();}),
+])
+.then(function(res){
+  var product    = res[0].data;
+  var allCats    = res[1].data || [];
+  var components = product.bundle_components || [];
+  if(!components.length) throw new Error('empty bundle');
+
+  // Store globally so the enquiry form can build a quotation
+  window._sksComponents = components;
+
+  var tree = {};
+  allCats.forEach(function(c){ tree[c.id]=c; });
+
+  var productUrl   = product.url || (BASE+'/'+product.slug);
+  var customiseUrl = (BASE+'/skillvation-cart') || productUrl;
+
+  var groups   = {};
+  var usedCats = {};
+  var totalItems = 0;
+
+  components.forEach(function(c){
+    var catId  = Number(c.category_id);
+    var catNode= tree[catId] || {id:catId, name:c.category_name||'General', parent_id:0, parent_name:''};
+    var parentId, parentName;
+
+    if(!catNode.parent_id || catNode.parent_id===0){
+      parentId   = catId;
+      parentName = catNode.name;
+    } else {
+      parentId   = catNode.parent_id;
+      var pNode  = tree[parentId] || {};
+      parentName = pNode.name || catNode.parent_name || 'General';
+    }
+
+    if(!groups[parentId]) groups[parentId]={ name:parentName, subGroups:{} };
+    var subCat = c.category_name || catNode.name || 'General';
+    if(!groups[parentId].subGroups[subCat]) groups[parentId].subGroups[subCat]=[];
+    groups[parentId].subGroups[subCat].push(c);
+    usedCats[(subCat).toLowerCase()] = true;
+    totalItems++;
+  });
+
+  var parentIds = Object.keys(groups);
+  var totalCats = parentIds.length;
+
+  var maxItems  = 0, maxKey = parentIds[0];
+  parentIds.forEach(function(pid){
+    var count=Object.values(groups[pid].subGroups).reduce(function(s,a){return s+a.length;},0);
+    if(count>maxItems){ maxItems=count; maxKey=pid; }
+  });
+
+  if(countEl) countEl.textContent = totalCats;
+  if(itemsEl) itemsEl.textContent = totalItems;
+  var btnC=document.getElementById('sks-btn-customise'), btnP=document.getElementById('sks-btn-product');
+  if(btnC) btnC.href = customiseUrl;
+  if(btnP) btnP.href = productUrl;
+
+  // Unhide content container BEFORE building cards and measuring layout
+  if(loadEl) loadEl.classList.add('hidden');
+  if(contentEl) contentEl.classList.remove('hidden');
+
+  boxesEl.innerHTML = '';
+  parentIds.forEach(function(pid){
+    var g      = groups[pid];
+    var theme  = getTheme(g.name);
+    var isCenter = (pid===maxKey && parentIds.length>1);
+    var box    = buildBox(g.name, pid, g.subGroups, theme, productUrl, isCenter);
+    boxesEl.appendChild(box);
+  });
+
+  (function(){
+    var GAP = 16;
+    var current = 0;
+    var boxes = Array.prototype.slice.call(boxesEl.children);
+    var total = boxes.length;
+    var prevBtn = document.getElementById('sks-box-prev');
+    var nextBtn = document.getElementById('sks-box-next');
+    var dotsContainer = document.getElementById('sks-dots');
+    var viewport = document.getElementById('sks-carousel-viewport');
+
+    function getVisibleCount(){
+      var w = window.innerWidth;
+      if (w < 640) return 1;
+      if (w < 1024) return Math.min(2, total);
+      return Math.min(3, total);
+    }
+
+    function getContainerW(){
+      var w = 0;
+      if (viewport && viewport.clientWidth > 0) {
+        w = viewport.clientWidth;
+      } else if (contentEl && contentEl.clientWidth > 0) {
+        w = contentEl.clientWidth;
+      } else if (boxesEl.parentElement && boxesEl.parentElement.clientWidth > 0) {
+        w = boxesEl.parentElement.clientWidth;
+      } else {
+        w = window.innerWidth - 32;
+      }
+      return w;
+    }
+
+    function getCardW(){
+      var visible = getVisibleCount();
+      var containerW = getContainerW();
+      var totalGap = GAP * (visible - 1);
+      var w = Math.floor((containerW - totalGap) / visible);
+      return Math.max(240, w);
+    }
+
+    function applyWidths(){
+      var w = getCardW();
+      boxes.forEach(function(b){
+        b.style.width     = w + 'px';
+        b.style.minWidth  = w + 'px';
+        b.style.maxWidth  = w + 'px';
+        b.style.flex      = '0 0 ' + w + 'px';
+      });
+    }
+
+    function renderDots(){
+      if (!dotsContainer) return;
+      dotsContainer.innerHTML = '';
+      var visible = getVisibleCount();
+      var maxIdx = Math.max(0, total - visible);
+      var dotCount = maxIdx + 1;
+      if (dotCount <= 1) {
+        dotsContainer.style.display = 'none';
+        return;
+      }
+      dotsContainer.style.display = 'flex';
+      for (var i = 0; i < dotCount; i++) {
+        var dot = document.createElement('span');
+        dot.className = 'sks-dot' + (i === current ? ' active' : '');
+        dot.setAttribute('data-idx', i);
+        dot.addEventListener('click', (function(idx){
+          return function(){ go(idx); };
+        })(i));
+        dotsContainer.appendChild(dot);
+      }
+    }
+
+    function updateDots(){
+      if (!dotsContainer) return;
+      var dots = dotsContainer.querySelectorAll('.sks-dot');
+      dots.forEach(function(d, i){
+        if (i === current) {
+          d.classList.add('active');
+        } else {
+          d.classList.remove('active');
+        }
+      });
+    }
+
+    function go(idx){
+      var visible = getVisibleCount();
+      var maxIdx = Math.max(0, total - visible);
+      if (maxIdx === 0) {
+        current = 0;
+      } else if (idx > maxIdx) {
+        current = 0; // Infinite loop wrap-around
+      } else if (idx < 0) {
+        current = maxIdx; // Infinite loop wrap-around to end
+      } else {
+        current = idx;
+      }
+
+      var w = getCardW();
+      boxesEl.style.transform = 'translateX(-' + (current * (w + GAP)) + 'px)';
+      updateDots();
+    }
+
+    requestAnimationFrame(function(){
+      applyWidths();
+      renderDots();
+      go(0);
+    });
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', function(){ go(current - 1); });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', function(){ go(current + 1); });
+    }
+
+    // Touch & swipe support for mobile
+    var touchStartX = 0;
+    var touchEndX = 0;
+    var touchStartY = 0;
+    var touchEndY = 0;
+
+    if (viewport) {
+      viewport.addEventListener('touchstart', function(e){
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+      }, {passive: true});
+
+      viewport.addEventListener('touchend', function(e){
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+        var diffX = touchStartX - touchEndX;
+        var diffY = touchStartY - touchEndY;
+        if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+          if (diffX > 0) {
+            go(current + 1); // Swiped left -> next
+          } else {
+            go(current - 1); // Swiped right -> prev
+          }
+        }
+      }, {passive: true});
+    }
+
+    var resizeTimer;
+    window.addEventListener('resize', function(){
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function(){
+        applyWidths();
+        renderDots();
+        go(current);
+      }, 80);
+    });
+  })();
+})
+.catch(function(e){
+  console.log('sks notice (offline/static fallback):', e);
+  if(loadEl) loadEl.classList.add('hidden');
+  if(errEl) errEl.classList.remove('hidden');
+});
+
+})();
 </script>
 @endpush

@@ -224,6 +224,39 @@ class CartController extends BaseController
     }
 
     /**
+     * Skillvations Cart
+     */
+    public function skilllabCart()
+    {
+        $product = $this->productModel->getProductBySlug('skillvation-lab');
+        if (empty($product)) {
+            $product = $this->productModel->getActiveProduct(74);
+        }
+        if (empty($product)) {
+            $product = $this->productModel->getProductBySlug('skillvation-lab');
+        }
+        if (empty($product)) {
+            $product = $this->productModel->getActiveProduct(1);
+        }
+
+        $this->syncSelectedLabCart($product);
+
+        $data = setPageMeta('Sillvation Plan — Cart');
+        $data['isTranslatable'] = true;
+        $data['cart'] = $this->cartModel->getCart();
+        $data['userSession'] = getUserSession();
+        $data['planKey'] = 'skilllab';
+        $data['planLabel'] = 'Skillvation';
+        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 74;
+
+        helperDeleteSession('mds_service_payment');
+
+        echo view('partials/_header', $data);
+        echo view('cart/skillvation-cart', $data);
+        echo view('partials/_footer');
+    }
+
+    /**
      * Add to Cart Bundle
      */
     // public function addToCartBundle()

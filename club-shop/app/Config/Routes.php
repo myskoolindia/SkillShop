@@ -731,6 +731,7 @@ if (!empty($languages)) {
         $routes->get($key . 'basic-cart', 'CartController::basicCart');
         $routes->get($key . 'advance-cart', 'CartController::advanceCart');
         $routes->get($key . 'premium-cart', 'CartController::premiumCart');
+        $routes->get($key . 'skillvation-cart', 'CartController::skilllabCart');
         $routes->get($key . $csrt->cart . '/' . $csrt->shipping, 'CartController::shipping');
         $routes->get($key . $csrt->cart . '/' . $csrt->payment_method, 'CartController::paymentMethod');
         $routes->get($key . $csrt->cart . '/' . $csrt->payment, 'CartController::payment');
