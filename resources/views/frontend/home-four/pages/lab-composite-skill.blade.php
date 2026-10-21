@@ -934,15 +934,15 @@
     background: #ffffff;
     border: 2px solid #ede9fe;
     border-radius: 20px;
-    padding: 24px 28px;
+    padding: 20px 24px;
     margin-bottom: 24px;
     box-shadow: 0 4px 18px rgba(99, 102, 241, 0.06);
   }
   .vl-edu-bar-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    gap: 16px;
+    align-items: flex-start;
+    gap: 12px;
     margin-bottom: 20px;
     flex-wrap: wrap;
   }
@@ -954,6 +954,7 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;
+    flex-shrink: 0;
   }
   .vl-edu-params-grid {
     display: grid;
@@ -962,15 +963,34 @@
   }
   @media (max-width: 960px) {
     .vl-edu-params-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+  }
+  @media (max-width: 600px) {
+    .vl-edu-campus-bar {
+      padding: 16px;
+    }
+    .vl-edu-bar-header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .vl-edu-kpi-pill {
+      align-items: center;
+      flex-direction: row;
+      justify-content: space-between;
+      padding: 10px 14px;
+    }
+    .vl-edu-params-grid {
       grid-template-columns: 1fr;
-      gap: 16px;
+      gap: 12px;
     }
   }
   .vl-edu-param-col {
     background: #fbf9fd;
     border: 1.5px solid #f1f5f9;
     border-radius: 14px;
-    padding: 16px;
+    padding: 14px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -984,25 +1004,29 @@
     font-weight: 800;
     color: #1e293b;
     margin-bottom: 10px;
+    flex-wrap: wrap;
   }
   .vl-edu-tier-btns {
     display: flex;
+    flex-wrap: wrap;
     gap: 6px;
     margin-bottom: 10px;
   }
   .vl-edu-tier-btn, .vl-edu-chip {
     flex: 1;
-    padding: 8px 10px;
+    min-width: 60px;
+    padding: 8px 6px;
     border-radius: 10px;
     border: 1.5px solid #e2e8f0;
     background: #ffffff;
     color: #475569;
     font-family: 'Outfit', sans-serif;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: center;
+    white-space: nowrap;
   }
   .vl-edu-tier-btn:hover, .vl-edu-chip:hover {
     border-color: #cbd5e1;
@@ -1034,12 +1058,13 @@
   }
   .vl-edu-stat-num {
     font-family: 'Outfit', sans-serif;
-    font-size: 0.98rem;
+    font-size: 0.95rem;
     font-weight: 900;
     color: #1e1b4b;
+    line-height: 1.3;
   }
   .vl-edu-stat-sub {
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     color: #64748b;
     font-weight: 600;
     margin-top: 2px;
@@ -1047,6 +1072,7 @@
   .vl-edu-grade-row {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 6px;
     margin-top: auto;
     padding-top: 6px;
@@ -2353,6 +2379,547 @@
     .cb-modal-box { padding: 28px 20px; }
     .cb-modal-box .vl-form-grid-2 { grid-template-columns: 1fr !important; }
   }
+
+  /* ==================== COMPREHENSIVE MOBILE RESPONSIVE ==================== */
+
+  /* --- Global Mobile Adjustments --- */
+  @media (max-width: 768px) {
+    .vidyalab-wrap {
+      padding: 0 16px;
+    }
+    .vl-section {
+      padding: 56px 0;
+    }
+    .vl-section-head {
+      margin-bottom: 32px;
+    }
+    .vl-section-head h2 {
+      font-size: clamp(1.6rem, 6vw, 2.2rem);
+    }
+    .vl-section-head p {
+      font-size: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .vidyalab-wrap {
+      padding: 0 14px;
+    }
+    .vl-section {
+      padding: 40px 0;
+    }
+    .vl-section-head {
+      margin-bottom: 24px;
+    }
+    .vl-section-head h2 {
+      font-size: clamp(1.45rem, 5.5vw, 1.85rem);
+    }
+    .vl-section-head p {
+      font-size: 0.94rem;
+      line-height: 1.6;
+    }
+  }
+
+  /* --- Hero Section Mobile --- */
+  @media (max-width: 768px) {
+    .vl-hero-vibrant {
+      padding: 48px 0 56px;
+    }
+    .vl-hero-vibrant h1 {
+      font-size: clamp(1.75rem, 6.5vw, 2.6rem);
+      margin-top: 10px;
+    }
+    .vl-hero-vibrant p.lead {
+      font-size: 1rem;
+      margin-top: 16px;
+    }
+    .vl-hero-ctas {
+      margin-top: 24px;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .vl-btn-vibrant-cta,
+    .vl-btn-glass-cta {
+      width: 100%;
+      justify-content: center;
+      padding: 14px 20px;
+      font-size: 0.98rem;
+    }
+    .vl-hero-stats {
+      margin-top: 28px;
+      padding-top: 20px;
+      gap: 10px;
+    }
+    .vl-stat-box {
+      padding: 12px 14px;
+      border-radius: 12px;
+    }
+    .vl-stat-box .num {
+      font-size: 1.55rem;
+    }
+    .vl-stat-box .label {
+      font-size: 0.75rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .vl-hero-vibrant {
+      padding: 36px 0 44px;
+    }
+    .vl-hero-vibrant h1 {
+      font-size: clamp(1.5rem, 6vw, 2rem);
+    }
+    .vl-badge-pill {
+      font-size: 0.72rem;
+      padding: 5px 12px;
+    }
+  }
+
+  /* --- Hero Image Responsive --- */
+  .vl-hero-grid > div:last-child img {
+    width: 100%;
+    height: auto;
+    border-radius: 16px;
+    display: block;
+    object-fit: cover;
+    max-height: 340px;
+  }
+  @media (max-width: 980px) {
+    .vl-hero-grid > div:last-child img {
+      max-height: 280px;
+      border-radius: 14px;
+    }
+  }
+  @media (max-width: 480px) {
+    .vl-hero-grid > div:last-child img {
+      max-height: 200px;
+      border-radius: 12px;
+    }
+  }
+
+  /* --- Outcomes Section Mobile --- */
+  @media (max-width: 768px) {
+    .vl-outcomes-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    .vl-outcome-content {
+      padding: 22px 20px;
+    }
+    .vl-outcome-card h3 {
+      font-size: 1.3rem;
+    }
+    .vl-outcome-card p {
+      font-size: 0.94rem;
+    }
+    .vl-outcome-img {
+      aspect-ratio: 16 / 10;
+    }
+  }
+
+  /* --- Features Section Mobile --- */
+  @media (max-width: 768px) {
+    .vl-features-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    .vl-feature-card-body {
+      padding: 20px;
+    }
+    .vl-feature-card h3 {
+      font-size: 1.18rem;
+    }
+    .vl-feature-card-img {
+      height: 180px;
+    }
+  }
+
+  /* --- Pricing Section Mobile --- */
+  @media (max-width: 768px) {
+    .vl-plans-grid {
+      grid-template-columns: 1fr;
+      max-width: 100%;
+      gap: 24px;
+    }
+    .vl-plan-card {
+      padding: 28px 22px;
+      border-radius: 20px;
+    }
+    .vl-plan-price {
+      font-size: 2.6rem;
+    }
+    .vl-plan-summary {
+      font-size: 0.92rem;
+    }
+    .vl-plan-list li {
+      font-size: 0.9rem;
+      gap: 10px;
+    }
+    .vl-plan-check-icon {
+      width: 20px;
+      height: 20px;
+      font-size: 0.72rem;
+    }
+    .vl-plan-badge-top {
+      font-size: 0.74rem;
+      padding: 6px 18px;
+    }
+  }
+
+  /* --- Package Toggle Mobile --- */
+  @media (max-width: 600px) {
+    .vl-pkg-toggle-pill {
+      flex-direction: column;
+      border-radius: 16px;
+      width: 100%;
+    }
+    .vl-pkg-tab-btn {
+      width: 100%;
+      justify-content: center;
+      padding: 12px 16px;
+      font-size: 0.88rem;
+      border-radius: 12px;
+    }
+  }
+
+  /* --- Custom Advisor Banner Mobile --- */
+  @media (max-width: 768px) {
+    .vl-custom-advisor-banner {
+      flex-direction: column;
+      text-align: center;
+      padding: 20px 16px;
+      gap: 16px;
+    }
+    .vl-cab-content h3 {
+      font-size: 1.1rem;
+    }
+    .vl-cab-content p {
+      font-size: 0.88rem;
+    }
+    .vl-cab-cta-btn {
+      width: 100%;
+    }
+  }
+
+  /* --- Custom Package Builder Mobile --- */
+  @media (max-width: 768px) {
+    .vl-edu-campus-bar {
+      padding: 16px 14px;
+      border-radius: 16px;
+    }
+    .vl-edu-bar-header {
+      flex-direction: column;
+      gap: 12px;
+    }
+    .vl-edu-kpi-pill {
+      align-items: center;
+      flex-direction: row;
+      justify-content: space-between;
+      padding: 10px 14px;
+    }
+    .vl-edu-params-grid {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    .vl-edu-tier-btns {
+      gap: 6px;
+    }
+    .vl-edu-tier-btn, .vl-edu-chip {
+      min-width: 55px;
+      padding: 8px 4px;
+      font-size: 0.74rem;
+    }
+    .vl-cp-slider-ticks {
+      font-size: 0.68rem;
+    }
+    .vl-ps-section {
+      padding: 22px 16px;
+      border-radius: 18px;
+    }
+    .vl-ps-header {
+      flex-direction: column;
+      gap: 14px;
+    }
+    .vl-ps-header-actions {
+      width: 100%;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .vl-ps-cat-suggest-btn,
+    .vl-ps-auto-suggest-btn {
+      width: 100%;
+      justify-content: center;
+      font-size: 0.85rem;
+      padding: 12px 14px;
+    }
+    .vl-ps-intel-box {
+      padding: 14px 16px;
+      border-radius: 14px;
+    }
+    .vl-ps-intel-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .vl-ps-intel-val {
+      font-size: 1.1rem;
+    }
+    .vl-ps-intel-feedback {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .vl-ps-cbse-meter {
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .vl-ps-alloc-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .vl-ps-shelf {
+      padding: 16px;
+      border-radius: 14px;
+    }
+    .vl-ps-shelf-head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .vl-ps-shelf-title {
+      font-size: 0.92rem;
+      flex-wrap: wrap;
+    }
+    .vl-ps-shelf-cards {
+      grid-template-columns: 1fr;
+    }
+    .vl-ps-grid {
+      grid-template-columns: 1fr;
+      max-height: 400px;
+    }
+    .vl-ps-summary-bar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 16px;
+      padding: 16px 18px;
+      border-radius: 14px;
+    }
+    .vl-ps-sum-metrics {
+      flex-direction: column;
+      gap: 14px;
+    }
+    .vl-ps-sum-val {
+      font-size: 1.2rem;
+    }
+    .vl-ps-sum-actions {
+      flex-direction: column;
+      gap: 10px;
+    }
+    .vl-ps-reset-btn,
+    .vl-ps-order-btn {
+      width: 100%;
+      justify-content: center;
+      text-align: center;
+    }
+    .vl-ps-title-wrap h3 {
+      font-size: 1.15rem;
+    }
+  }
+
+  /* --- Lead Form Section Mobile --- */
+  @media (max-width: 768px) {
+    .vl-form-panel {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+    .vl-form-card {
+      padding: 24px 18px;
+      border-radius: 20px;
+    }
+    .vl-form-grid-2 {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+    .vl-field input,
+    .vl-field textarea {
+      padding: 12px 14px;
+      font-size: 0.94rem;
+      border-radius: 10px;
+    }
+    .vl-form-submit-vibrant {
+      padding: 15px;
+      font-size: 1rem;
+      border-radius: 12px;
+    }
+    .vl-checklist-items {
+      margin-top: 20px;
+      gap: 14px;
+    }
+    .vl-checklist-items li {
+      font-size: 0.94rem;
+    }
+  }
+
+  /* --- Comparison Table Mobile (card-style stacking) --- */
+  @media (max-width: 768px) {
+    .vl-table-card {
+      border-radius: 16px;
+    }
+    .vl-table th,
+    .vl-table td {
+      padding: 14px 16px;
+      font-size: 0.85rem;
+    }
+    .vl-table th {
+      font-size: 0.88rem;
+    }
+    .vl-table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .vl-table {
+      min-width: 600px;
+    }
+  }
+
+  /* --- FAQ Carousel Mobile --- */
+  @media (max-width: 768px) {
+    .vl-faq-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .vl-faq-card {
+      padding: 22px 20px;
+      border-radius: 16px;
+    }
+    .vl-faq-card__q {
+      font-size: 1.08rem;
+    }
+    .vl-faq-card__a {
+      font-size: 0.9rem;
+    }
+    .vl-faq-nav {
+      margin-top: 28px;
+      padding-top: 20px;
+      gap: 14px;
+    }
+    .vl-faq-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+    }
+  }
+
+  /* --- Final CTA Mobile --- */
+  @media (max-width: 768px) {
+    .vl-final-cta-vibrant {
+      padding: 56px 0;
+    }
+    .vl-final-cta-vibrant h2 {
+      font-size: clamp(1.6rem, 5.5vw, 2.4rem);
+    }
+    .vl-final-cta-vibrant p {
+      font-size: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .vl-final-cta-vibrant {
+      padding: 40px 0;
+    }
+    .vl-final-cta-vibrant h2 {
+      font-size: clamp(1.4rem, 5vw, 1.85rem);
+    }
+  }
+
+  /* --- Modals Mobile --- */
+  @media (max-width: 600px) {
+    .cb-modal-backdrop,
+    .custom-pkg-modal-backdrop {
+      padding: 12px;
+      align-items: flex-end;
+    }
+    .cb-modal-box,
+    .custom-pkg-modal-box {
+      padding: 24px 18px;
+      border-radius: 20px 20px 0 0;
+      max-height: 95vh;
+    }
+    .cb-modal-header {
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+    }
+    .cb-modal-header h2,
+    #cbModalTitle,
+    #cpModalTitle {
+      font-size: 1.25rem !important;
+    }
+    .custom-pkg-summary-pill {
+      flex-direction: column;
+      gap: 10px;
+      text-align: center;
+    }
+    .custom-pkg-summary-pill > div:last-child {
+      text-align: center;
+    }
+  }
+
+  /* --- Fix Overflow Globally on Mobile --- */
+  @media (max-width: 768px) {
+    .vidyalab-page {
+      overflow-x: hidden;
+    }
+    .vl-hero-vibrant::before {
+      width: 300px;
+      height: 300px;
+      top: -60px;
+      right: -40px;
+    }
+    .vl-hero-vibrant::after {
+      width: 250px;
+      height: 250px;
+      bottom: -60px;
+      left: -40px;
+    }
+    .vl-final-cta-vibrant::before {
+      width: 250px;
+      height: 250px;
+    }
+  }
+
+  /* --- Touch-Friendly Interactions for Mobile --- */
+  @media (max-width: 768px) {
+    .vl-outcome-card:hover,
+    .vl-feature-card:hover,
+    .vl-plan-card:hover,
+    .vl-faq-card:hover {
+      transform: none;
+    }
+    .vl-outcome-card:active,
+    .vl-feature-card:active {
+      transform: scale(0.99);
+    }
+  }
+
+  /* --- Blueprint Glass Card Mobile --- */
+  @media (max-width: 768px) {
+    .vl-blueprint-glass {
+      padding: 18px;
+      border-radius: 16px;
+    }
+    .vl-blueprint-head {
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
+    }
+  }
+
+  /* --- Smooth scroll for mobile --- */
+  @media (max-width: 768px) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
 </style>
 @endpush
 
@@ -2386,8 +2953,8 @@
       </div>
 
       <!-- Floor Plan Schematic Card -->
-       <div class="">
-      <img src="{{ asset('/frontend/img/skillbox/workonhumanservices.jpeg') }}" alt="Leaders of Learning - School with Children">
+       <div class="vl-hero-media-wrap">
+      <img src="{{ asset('/frontend/img/skillbox/workonhumanservices.jpeg') }}" alt="Leaders of Learning - School with Children" style="width:100%;height:auto;border-radius:16px;display:block;object-fit:cover;max-height:360px;">
       <div class="vl-hero-stats">
           <div class="vl-stat-box">
             <span class="num">200+</span>
@@ -2932,42 +3499,22 @@
             </div>
           </div>
 
-          {{-- Filter & Search Toolbar --}}
-          <div class="vl-ps-toolbar">
-            <div class="vl-ps-search-row">
-              <div class="vl-ps-search-wrap">
-                <svg class="vl-ps-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" class="vl-ps-search-input" id="psSearchInput" placeholder="Search products by title, keyword, or equipment (e.g. Robotics, Arduino, Hydroponics, Soldering)..." oninput="filterProductCatalog()">
-              </div>
-            </div>
-
-            {{-- Filter by Package Source --}}
-            <div class="vl-ps-filter-tabs">
-              <span class="vl-ps-filter-label">Package Tier:</span>
-              <button type="button" class="vl-ps-pill active" data-pkg-filter="all" onclick="setPackageFilter('all', this)">
-                All Packages <span class="vl-ps-pill-badge" id="badgePkgAll">33</span>
-              </button>
-              <button type="button" class="vl-ps-pill pkg-basic" data-pkg-filter="basic" onclick="setPackageFilter('basic', this)">
-                Basic Package (₹3L) <span class="vl-ps-pill-badge" id="badgePkgBasic">0</span>
-              </button>
-              <button type="button" class="vl-ps-pill pkg-advance" data-pkg-filter="advance" onclick="setPackageFilter('advance', this)">
-                Advance Package (₹6L) <span class="vl-ps-pill-badge" id="badgePkgAdvance">0</span>
-              </button>
-              <button type="button" class="vl-ps-pill pkg-premium" data-pkg-filter="premium" onclick="setPackageFilter('premium', this)">
-                Premium Package (₹10L) <span class="vl-ps-pill-badge" id="badgePkgPremium">0</span>
-              </button>
-            </div>
-
-            {{-- Filter by Product Category --}}
-            <div class="vl-ps-filter-tabs">
-              <span class="vl-ps-filter-label">Category:</span>
-              <button type="button" class="vl-ps-pill active" data-cat-filter="all" onclick="setCategoryFilter('all', this)">All Categories</button>
-              <button type="button" class="vl-ps-pill" data-cat-filter="life" onclick="setCategoryFilter('life', this)">Form 1: Life Forms &amp; Agri</button>
-              <button type="button" class="vl-ps-pill" data-cat-filter="machines" onclick="setCategoryFilter('machines', this)">Form 2: Machines, Robotics &amp; IoT</button>
-              <button type="button" class="vl-ps-pill" data-cat-filter="digital" onclick="setCategoryFilter('digital', this)">Form 3: Digital, Coding &amp; AI</button>
-              <button type="button" class="vl-ps-pill" data-cat-filter="infra" onclick="setCategoryFilter('infra', this)">Infrastructure, Tools &amp; Training</button>
-            </div>
+          {{-- Filter by Category (simplified, no confusing search/package tier filters) --}}
+          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1.5px solid #f1f5f9;">
+            <span style="font-size:0.8rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;margin-right:4px;">Filter by:</span>
+            <button type="button" class="vl-ps-pill active" data-cat-filter="all" onclick="setCategoryFilter('all', this)">All Components</button>
+            <button type="button" class="vl-ps-pill" data-cat-filter="life" onclick="setCategoryFilter('life', this)">🌱 Life Forms</button>
+            <button type="button" class="vl-ps-pill" data-cat-filter="machines" onclick="setCategoryFilter('machines', this)">⚙️ Machines &amp; Robotics</button>
+            <button type="button" class="vl-ps-pill" data-cat-filter="digital" onclick="setCategoryFilter('digital', this)">💻 Digital &amp; Coding</button>
+            <button type="button" class="vl-ps-pill" data-cat-filter="infra" onclick="setCategoryFilter('infra', this)">🏗️ Infrastructure</button>
           </div>
+
+          {{-- Hidden inputs to keep JS working (package filter defaults to all) --}}
+          <input type="hidden" id="psSearchInput" value="">
+          <span id="badgePkgAll" style="display:none;">0</span>
+          <span id="badgePkgBasic" style="display:none;">0</span>
+          <span id="badgePkgAdvance" style="display:none;">0</span>
+          <span id="badgePkgPremium" style="display:none;">0</span>
 
           {{-- Product Cards Grid --}}
           <div class="vl-ps-grid" id="psProductsGrid">
