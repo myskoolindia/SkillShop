@@ -172,17 +172,20 @@ $discountRate = !empty($product->bundle_discount_rate) ? $product->bundle_discou
     </div>
 </div>
 
-<!-- Modal: Add Product / Variant Live Search -->
+<!-- Modal: Add Product / Variant Live Search & Multi-Select -->
 <div class="modal fade" id="modalAddBundleItem" tabindex="-1" role="dialog" aria-labelledby="modalAddBundleItemLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalAddBundleItemLabel"><i class="fa fa-search"></i> Select Product & Variation for Package</h5>
+            <div class="modal-header d-flex justify-content-between align-items-center">
+                <h5 class="modal-title" id="modalAddBundleItemLabel">
+                    <i class="fa fa-cubes text-primary"></i> Add Products to Package
+                </h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
+                <!-- Search & Category Filters -->
                 <div class="row">
                     <div class="col-md-5 col-12 mb-2">
                         <label class="font-weight-bold"><i class="fa fa-folder-open text-primary"></i> Category</label>
@@ -217,12 +220,45 @@ $discountRate = !empty($product->bundle_discount_rate) ? $product->bundle_discou
                         </div>
                     </div>
                 </div>
-                <div id="bundle_search_results" style="max-height: 280px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 4px; padding: 10px; margin-top: 10px;">
+
+                <!-- Multi-Select Action Bar -->
+                <div id="bundle_multi_select_bar" style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:8px 12px; margin-top:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="bundle_check_all_products" onchange="toggleSelectAllBundleProducts(this.checked);">
+                            <label class="custom-control-label font-weight-bold text-dark" for="bundle_check_all_products" style="cursor:pointer; font-size:13px;">Select All</label>
+                        </div>
+                        <span class="badge badge-primary" id="bundle_selected_count_badge" style="display:none; font-size:11.5px; padding:3px 8px; border-radius:10px;">0 selected</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <label class="small mb-0 font-weight-bold text-muted">Default Qty:</label>
+                            <input type="number" id="batch_bundle_item_qty" class="form-control form-control-sm" min="0" value="1" style="width:65px; height:28px; padding:2px 6px; font-weight:600;">
+                        </div>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="batch_bundle_item_is_optional" onchange="onBatchOptionalChange(this.checked);">
+                            <label class="custom-control-label small font-weight-bold text-secondary" for="batch_bundle_item_is_optional" style="cursor:pointer;" title="Optional items start with 0 qty for buyers">Optional</label>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-success font-weight-bold" id="btn_batch_add_bundle_items" style="display:none; padding:4px 12px; font-size:12px;" onclick="addSelectedBundleProducts();">
+                            <i class="fa fa-plus-circle"></i> Add Selected (<span id="batch_selected_btn_count">0</span>)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Feedback Alert Container -->
+                <div id="bundle_modal_feedback" style="display:none; margin-top:8px;"></div>
+
+                <!-- Search Results List -->
+                <div id="bundle_search_results" style="max-height: 320px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 4px; padding: 10px; margin-top: 10px;">
                     <div class="text-muted text-center py-3"><i class="fa fa-spinner fa-spin"></i> Loading products...</div>
                 </div>
 
-                <div id="bundle_selected_item_preview" class="mt-3 p-3 bg-light rounded" style="display:none; margin-top:15px; padding:12px; background:#f8f9fa; border-radius:6px;">
-                    <h6 class="font-weight-bold mb-2">Configure Selection</h6>
+                <!-- Single Configure Selection Box -->
+                <div id="bundle_selected_item_preview" class="mt-3 p-3 bg-light rounded" style="display:none; margin-top:15px; padding:12px; background:#f8f9fa; border-radius:6px; border:1px solid #e2e8f0;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="font-weight-bold mb-0 text-primary"><i class="fa fa-sliders"></i> Configure Single Item: <span id="bundle_selected_item_preview_title" class="text-dark"></span></h6>
+                        <button type="button" class="close text-muted" onclick="$('#bundle_selected_item_preview').slideUp(150); $('#btn_confirm_add_bundle_item').hide(); selectedProductForBundle = null;" title="Close configure box">&times;</button>
+                    </div>
                     <div class="row align-items-center">
                         <div class="col-md-5" id="bundle_variant_select_container">
                             <label class="small font-weight-bold">Variant (if applicable)</label>
@@ -234,7 +270,7 @@ $discountRate = !empty($product->bundle_discount_rate) ? $product->bundle_discou
                         </div>
                         <div class="col-md-4">
                             <label class="small font-weight-bold">Price Override (Optional)</label>
-                            <input type="number" step="0.01" id="bundle_item_price" class="form-control form-control-sm" placeholder="Default">
+                            <input type="number" step="0.01" id="bundle_item_price" class="form-control form-control-sm" placeholder="Default price">
                         </div>
                         <div class="col-12 mt-2 pt-2" style="border-top: 1px dashed #dee2e6;">
                             <div class="custom-control custom-checkbox">
@@ -247,9 +283,14 @@ $discountRate = !empty($product->bundle_discount_rate) ? $product->bundle_discou
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="btn_confirm_add_bundle_item" style="display:none;" onclick="confirmAddBundleItem();"><i class="fa fa-plus"></i> Add to Package</button>
+            <div class="modal-footer d-flex justify-content-between align-items-center">
+                <div>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" class="btn btn-primary" id="btn_confirm_add_bundle_item" style="display:none;" onclick="confirmAddBundleItem();"><i class="fa fa-check"></i> Add Configured Item</button>
+                    <button type="button" class="btn btn-success" id="btn_modal_footer_batch_add" style="display:none;" onclick="addSelectedBundleProducts();"><i class="fa fa-plus-circle"></i> Add Selected Items</button>
+                </div>
             </div>
         </div>
     </div>
@@ -291,6 +332,7 @@ $discountRate = !empty($product->bundle_discount_rate) ? $product->bundle_discou
 var selectedProductForBundle = null;
 var bundleRowIndex = <?= count($bundleComponents); ?>;
 window.bundleSearchResultsList = [];
+window.bundleSelectedMap = {};
 var bundleSearchTimer = null;
 
 function debouncedSearchBundle(query) {
@@ -303,6 +345,10 @@ function debouncedSearchBundle(query) {
 $(document).ready(function() {
     $('#modalAddBundleItem').on('shown.bs.modal', function() {
         $('#bundle_product_search_query').focus();
+        $('#bundle_modal_feedback').hide().empty();
+        window.bundleSelectedMap = {};
+        $('#bundle_check_all_products').prop('checked', false);
+        updateBatchSelectionUI();
         searchProductsForBundle($('#bundle_product_search_query').val() || '');
     });
 });
@@ -329,11 +375,22 @@ function filterBundleTable() {
     });
 }
 
+function getExistingBundleProductIds() {
+    var pids = [];
+    $('#table_bundle_components tbody tr.bundle-row').each(function() {
+        var pid = parseInt($(this).find('input[name*="[component_product_id]"]').val()) || 0;
+        if (pid > 0 && pids.indexOf(pid) === -1) {
+            pids.push(pid);
+        }
+    });
+    return pids;
+}
+
 function removeBundleRow(btn) {
     $(btn).closest('tr').remove();
     recalculateBundleTotals();
     if ($('#table_bundle_components tbody tr.bundle-row').length === 0) {
-        $('#bundle_components_tbody').html('<tr id="empty_bundle_row"><td colspan="9" class="text-center p-4 text-muted"><i class="fa fa-inbox fa-2x mb-2"></i><br>No component items added yet.</td></tr>');
+        $('#bundle_components_tbody').html('<tr id="empty_bundle_row"><td colspan="10" class="text-center p-4 text-muted"><i class="fa fa-inbox fa-2x mb-2"></i><br>No component items added yet. Click <strong>Add Product / Variant</strong> or use <strong>Bulk CSV Import</strong> to add 100+ items.</td></tr>');
     }
 }
 
@@ -345,11 +402,13 @@ function triggerBundleSearch() {
 function searchProductsForBundle(query) {
     query = (query || '').trim();
     var categoryId = parseInt($('#bundle_product_search_category_id').val()) || 0;
+    var existingIds = getExistingBundleProductIds();
 
     var postData = {
         query: query,
         category_id: categoryId,
-        exclude_id: <?= $product->id; ?>
+        exclude_id: <?= $product->id; ?>,
+        exclude_product_ids: existingIds.join(',')
     };
     if (typeof MdsConfig !== 'undefined' && MdsConfig.csrfTokenName) {
         postData[MdsConfig.csrfTokenName] = $('meta[name="X-CSRF-TOKEN"]').attr('content') || '<?= csrf_hash(); ?>';
@@ -366,28 +425,154 @@ function searchProductsForBundle(query) {
             'X-Requested-With': 'XMLHttpRequest'
         },
         success: function(response) {
-            if (response && response.status === 'success' && response.data && response.data.length > 0) {
-                window.bundleSearchResultsList = response.data;
-                var html = '<ul class="list-group mb-0">';
-                $.each(response.data, function(idx, item) {
-                    var varBadge = item.variants && item.variants.length > 0 ? '<span class="badge badge-info ml-1">' + item.variants.length + ' variants</span>' : '';
-                    var catBadge = item.category_name ? '<span class="badge badge-light border text-secondary ml-1" style="font-size:10.5px;"><i class="fa fa-folder-o"></i> ' + $('<div>').text(item.category_name).html() + '</span>' : '';
-                    var imgTag = item.image_small ? '<img src="' + item.image_small + '" style="width:36px; height:36px; object-fit:cover; border-radius:4px; margin-right:10px;">' : '<div style="width:36px; height:36px; background:#eee; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; margin-right:10px; color:#aaa;"><i class="fa fa-cube"></i></div>';
-                    html += '<li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-2" style="cursor:pointer;" onclick="selectProductForBundleByIndex(' + idx + ');">';
-                    html += '<div class="d-flex align-items-center" style="max-width:80%;">' + imgTag + '<div><strong>' + $('<div>').text(item.title).html() + '</strong>' + catBadge + varBadge + '<br><small class="text-muted">SKU: <code>' + (item.sku || 'N/A') + '</code> | Stock: ' + item.stock + ' | Price: ' + item.price + '</small></div></div>';
-                    html += '<button type="button" class="btn btn-sm btn-outline-primary"><i class="fa fa-check"></i> Select</button>';
-                    html += '</li>';
+            if (response && response.status === 'success' && response.data) {
+                // Client-side safeguard to ensure already added items are strictly excluded
+                var currentExistingIds = getExistingBundleProductIds();
+                window.bundleSearchResultsList = response.data.filter(function(item) {
+                    return currentExistingIds.indexOf(item.id) === -1;
                 });
-                html += '</ul>';
-                $('#bundle_search_results').html(html);
+                // Reset batch selections that are no longer in results
+                window.bundleSelectedMap = {};
+                $('#bundle_check_all_products').prop('checked', false);
+                updateBatchSelectionUI();
+                renderBundleSearchResultsList(query);
             } else {
-                $('#bundle_search_results').html('<div class="text-muted text-center py-3"><i class="fa fa-info-circle"></i> No matching products found' + (query ? ' for "' + $('<div>').text(query).html() + '"' : '') + '</div>');
+                $('#bundle_search_results').html('<div class="text-muted text-center py-3"><i class="fa fa-info-circle"></i> No products found' + (query ? ' for "' + $('<div>').text(query).html() + '"' : '') + '</div>');
             }
         },
         error: function(xhr, status, error) {
             $('#bundle_search_results').html('<div class="text-danger text-center py-3"><i class="fa fa-warning"></i> Search error: ' + error + '</div>');
         }
     });
+}
+
+function renderBundleSearchResultsList(query) {
+    if (!window.bundleSearchResultsList || window.bundleSearchResultsList.length === 0) {
+        var msg = 'No matching products available to add.';
+        var existingCount = getExistingBundleProductIds().length;
+        if (existingCount > 0) {
+            msg = 'All matching products from this category / search have already been added to the package.';
+        }
+        $('#bundle_search_results').html('<div class="text-muted text-center py-4"><i class="fa fa-check-circle text-success fa-2x mb-2" style="display:block;"></i>' + msg + '</div>');
+        return;
+    }
+
+    var html = '<ul class="list-group mb-0">';
+    $.each(window.bundleSearchResultsList, function(idx, item) {
+        var isChecked = window.bundleSelectedMap[item.id] ? 'checked' : '';
+        var catBadge = item.category_name ? '<span class="badge badge-light border text-secondary ml-1" style="font-size:10.5px;"><i class="fa fa-folder-o"></i> ' + $('<div>').text(item.category_name).html() + '</span>' : '';
+        var imgTag = item.image_small ? '<img src="' + item.image_small + '" style="width:40px; height:40px; object-fit:cover; border-radius:4px; margin-right:10px; flex-shrink:0;">' : '<div style="width:40px; height:40px; background:#eee; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; margin-right:10px; color:#aaa; flex-shrink:0;"><i class="fa fa-cube"></i></div>';
+        
+        var variantSelectorHtml = '';
+        if (item.variants && item.variants.length > 0) {
+            variantSelectorHtml = '<div class="mt-1" style="max-width:320px;" onclick="event.stopPropagation();">' +
+                '<select class="custom-select custom-select-sm bundle-item-variant-select" id="bundle_item_var_' + idx + '" style="font-size:11px; height:26px; padding:2px 6px;" onchange="onVariantChangeInSearch(' + idx + ', this);">' +
+                '<option value="" data-sku="' + (item.sku || '') + '" data-price="' + item.price + '" data-stock="' + item.stock + '">-- Base Product (SKU: ' + (item.sku || 'N/A') + ') --</option>';
+            $.each(item.variants, function(vIdx, v) {
+                variantSelectorHtml += '<option value="' + v.id + '" data-sku="' + (v.sku || '') + '" data-price="' + v.price + '" data-stock="' + v.quantity + '">' + $('<div>').text(v.name).html() + ' (SKU: ' + (v.sku || 'N/A') + ' - Stock: ' + v.quantity + ')</option>';
+            });
+            variantSelectorHtml += '</select></div>';
+        }
+
+        html += '<li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-2 bundle-search-item-row" data-prod-id="' + item.id + '" data-idx="' + idx + '" style="cursor:pointer;" onclick="onBundleRowClick(event, ' + idx + ');">';
+        html += '<div class="d-flex align-items-center" style="max-width:76%;">';
+        html += '<div class="custom-control custom-checkbox mr-2" style="margin-right:8px;" onclick="event.stopPropagation();">';
+        html += '<input type="checkbox" class="custom-control-input bundle-product-chk" id="bundle_chk_' + idx + '" data-idx="' + idx + '" ' + isChecked + ' onchange="onBundleItemCheckChange(' + idx + ', this.checked);">';
+        html += '<label class="custom-control-label" for="bundle_chk_' + idx + '" style="cursor:pointer;"></label>';
+        html += '</div>';
+        html += imgTag;
+        html += '<div style="min-width:0;">';
+        html += '<strong style="font-size:13px; color:#1e293b;">' + $('<div>').text(item.title).html() + '</strong>' + catBadge;
+        html += '<div class="text-muted" style="font-size:11px; margin-top:1px;">SKU: <code id="bundle_item_sku_disp_' + idx + '">' + (item.sku || 'N/A') + '</code> | Stock: <span id="bundle_item_stock_disp_' + idx + '">' + item.stock + '</span> | Price: <strong style="color:#0284c7;" id="bundle_item_price_disp_' + idx + '">' + item.price + '</strong></div>';
+        html += variantSelectorHtml;
+        html += '</div></div>';
+        html += '<div style="white-space:nowrap; display:flex; gap:6px; align-items:center;" onclick="event.stopPropagation();">';
+        html += '<button type="button" class="btn btn-xs btn-outline-secondary" onclick="configureSingleBundleItem(' + idx + ');" title="Configure price override or variant"><i class="fa fa-sliders"></i> Configure</button>';
+        html += '<button type="button" class="btn btn-xs btn-outline-primary" onclick="quickAddSingleBundleItem(' + idx + ');" title="Quick Add to package"><i class="fa fa-plus"></i> Add</button>';
+        html += '</div>';
+        html += '</li>';
+    });
+    html += '</ul>';
+    $('#bundle_search_results').html(html);
+}
+
+function onBundleRowClick(e, idx) {
+    if ($(e.target).is('input, select, button, a, label')) return;
+    var $chk = $('#bundle_chk_' + idx);
+    var newChecked = !$chk.is(':checked');
+    $chk.prop('checked', newChecked);
+    onBundleItemCheckChange(idx, newChecked);
+}
+
+function onVariantChangeInSearch(idx, selectEl) {
+    var $opt = $(selectEl).find('option:selected');
+    var sku = $opt.data('sku');
+    var price = $opt.data('price');
+    var stock = $opt.data('stock');
+    if (sku !== undefined) $('#bundle_item_sku_disp_' + idx).text(sku || 'N/A');
+    if (price !== undefined) $('#bundle_item_price_disp_' + idx).text(price);
+    if (stock !== undefined) $('#bundle_item_stock_disp_' + idx).text(stock);
+}
+
+function toggleSelectAllBundleProducts(checked) {
+    $('.bundle-product-chk').prop('checked', checked);
+    if (checked) {
+        if (window.bundleSearchResultsList && window.bundleSearchResultsList.length) {
+            window.bundleSearchResultsList.forEach(function(item, idx) {
+                window.bundleSelectedMap[item.id] = {
+                    item: item,
+                    variantSelectId: '#bundle_item_var_' + idx
+                };
+            });
+        }
+    } else {
+        window.bundleSelectedMap = {};
+    }
+    updateBatchSelectionUI();
+}
+
+function onBundleItemCheckChange(idx, checked) {
+    if (!window.bundleSearchResultsList || !window.bundleSearchResultsList[idx]) return;
+    var item = window.bundleSearchResultsList[idx];
+    if (checked) {
+        window.bundleSelectedMap[item.id] = {
+            item: item,
+            variantSelectId: '#bundle_item_var_' + idx
+        };
+    } else {
+        delete window.bundleSelectedMap[item.id];
+    }
+    
+    var totalVisible = $('.bundle-product-chk').length;
+    var totalChecked = $('.bundle-product-chk:checked').length;
+    $('#bundle_check_all_products').prop('checked', totalVisible > 0 && totalVisible === totalChecked);
+    
+    updateBatchSelectionUI();
+}
+
+function updateBatchSelectionUI() {
+    var count = Object.keys(window.bundleSelectedMap).length;
+    if (count > 0) {
+        $('#bundle_selected_count_badge').text(count + ' selected').show();
+        $('#batch_selected_btn_count').text(count);
+        $('#btn_batch_add_bundle_items').show();
+        $('#btn_modal_footer_batch_add').html('<i class="fa fa-plus-circle"></i> Add ' + count + ' Selected Items to Package').show();
+    } else {
+        $('#bundle_selected_count_badge').hide();
+        $('#btn_batch_add_bundle_items').hide();
+        $('#btn_modal_footer_batch_add').hide();
+    }
+}
+
+function onBatchOptionalChange(checked) {
+    if (checked) {
+        $('#batch_bundle_item_qty').val(0).attr('min', 0);
+    } else {
+        if (parseInt($('#batch_bundle_item_qty').val()) <= 0) {
+            $('#batch_bundle_item_qty').val(1);
+        }
+        $('#batch_bundle_item_qty').attr('min', 1);
+    }
 }
 
 function toggleModalBundleOptional(checked) {
@@ -418,12 +603,171 @@ function onBundleOptionalChange(checkbox) {
     recalculateBundleTotals();
 }
 
-function selectProductForBundleByIndex(idx) {
+function renderBundleComponentRowHtml(item, variantId, variantName, sku, price, stock, qty, isOptional, priceOverride) {
+    var unitPrice = (priceOverride !== '' && priceOverride !== null && priceOverride !== undefined) ? parseFloat(priceOverride) : parseFloat(price);
+    var totalPrice = (unitPrice * qty).toFixed(2);
+    
+    var imgHtml = item.image_small ? '<img src="' + item.image_small + '" style="width:45px; height:45px; object-fit:cover; border-radius:4px;">' : '<div style="width:45px; height:45px; background:#eee; border-radius:4px; display:flex; align-items:center; justify-content:center; color:#999;"><i class="fa fa-image"></i></div>';
+    var catName = item.category_name || '';
+    var catBadge = catName ? '<span class="badge badge-light border text-secondary" style="font-size:10.5px;"><i class="fa fa-folder-o"></i> ' + $('<div>').text(catName).html() + '</span>' : '';
+    var varBadge = variantName ? '<span class="badge badge-info" style="font-size:10.5px;"><i class="fa fa-tag"></i> ' + $('<div>').text(variantName).html() + '</span>' : '';
+
+    var rowIdx = bundleRowIndex++;
+    return '<tr class="bundle-row" data-id="0" data-title="' + (item.title || '').toLowerCase() + '" data-sku="' + (sku || '').toLowerCase() + '" data-category="' + catName.toLowerCase() + '">' +
+        '<td>' + ($('#table_bundle_components tbody tr.bundle-row').length + 1) + '</td>' +
+        '<td>' + imgHtml + '</td>' +
+        '<td><div class="font-weight-bold">' + $('<div>').text(item.title).html() + '</div>' +
+        '<div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:2px;">' + catBadge + varBadge + '</div>' +
+        '<input type="hidden" name="bundle_items[' + rowIdx + '][component_product_id]" value="' + item.id + '">' +
+        '<input type="hidden" name="bundle_items[' + rowIdx + '][variant_id]" value="' + (variantId || '') + '">' +
+        '</td>' +
+        '<td><code>' + (sku || 'N/A') + '</code></td>' +
+        '<td class="text-center" style="vertical-align: middle;">' +
+        '<div class="custom-control custom-checkbox">' +
+        '<input type="checkbox" class="custom-control-input bundle-optional-checkbox" id="bundle_opt_' + rowIdx + '" name="bundle_items[' + rowIdx + '][is_optional]" value="1" ' + (isOptional ? 'checked' : '') + ' onchange="onBundleOptionalChange(this);">' +
+        '<label class="custom-control-label small" for="bundle_opt_' + rowIdx + '" title="Optional item starts with 0 qty for buyer"></label>' +
+        '</div>' +
+        '</td>' +
+        '<td><input type="number" min="' + (isOptional ? '0' : '1') + '" max="9999" name="bundle_items[' + rowIdx + '][quantity]" class="form-control form-control-sm bundle-qty-input" value="' + qty + '" onchange="recalculateBundleTotals();"></td>' +
+        '<td><input type="number" step="0.01" min="0" name="bundle_items[' + rowIdx + '][price_override]" class="form-control form-control-sm bundle-price-input" value="' + (priceOverride !== '' && priceOverride !== null && priceOverride !== undefined ? priceOverride : unitPrice) + '" onchange="recalculateBundleTotals();"></td>' +
+        '<td class="font-weight-bold text-muted item-row-total">' + totalPrice + '</td>' +
+        '<td><span class="badge ' + (stock >= qty ? 'badge-success' : 'badge-danger') + '">' + stock + ' in stock</span></td>' +
+        '<td class="text-center"><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeBundleRow(this);"><i class="fa fa-trash"></i></button></td>' +
+        '</tr>';
+}
+
+function addSelectedBundleProducts() {
+    var selectedKeys = Object.keys(window.bundleSelectedMap);
+    if (!selectedKeys.length) {
+        alert('Please select at least one product using the checkboxes.');
+        return;
+    }
+    
+    var batchQty = parseInt($('#batch_bundle_item_qty').val());
+    var isOptional = $('#batch_bundle_item_is_optional').is(':checked') ? 1 : 0;
+    if (isNaN(batchQty) || batchQty < 0) {
+        batchQty = isOptional ? 0 : 1;
+    }
+    if (!isOptional && batchQty < 1) {
+        batchQty = 1;
+    }
+    
+    $('#empty_bundle_row').remove();
+    var addedCount = 0;
+    var newlyAddedIds = [];
+    
+    selectedKeys.forEach(function(pid) {
+        var entry = window.bundleSelectedMap[pid];
+        if (!entry || !entry.item) return;
+        var item = entry.item;
+        
+        var variantId = null;
+        var variantName = '';
+        var sku = item.sku || '';
+        var price = item.price || 0;
+        var stock = item.stock || 0;
+        
+        var $varSelect = $(entry.variantSelectId);
+        if ($varSelect.length && $varSelect.val()) {
+            variantId = $varSelect.val();
+            var $opt = $varSelect.find('option:selected');
+            variantName = $opt.text();
+            sku = $opt.data('sku') || sku;
+            price = $opt.data('price') !== undefined ? $opt.data('price') : price;
+            stock = $opt.data('stock') !== undefined ? $opt.data('stock') : stock;
+        }
+        
+        var rowHtml = renderBundleComponentRowHtml(item, variantId, variantName, sku, price, stock, batchQty, isOptional, '');
+        $('#bundle_components_tbody').append(rowHtml);
+        addedCount++;
+        newlyAddedIds.push(item.id);
+    });
+    
+    recalculateBundleTotals();
+    
+    // Clear batch selection
+    window.bundleSelectedMap = {};
+    $('#bundle_check_all_products').prop('checked', false);
+    updateBatchSelectionUI();
+    
+    // Remove newly added products from current search results list
+    if (window.bundleSearchResultsList && window.bundleSearchResultsList.length) {
+        window.bundleSearchResultsList = window.bundleSearchResultsList.filter(function(it) {
+            return newlyAddedIds.indexOf(it.id) === -1;
+        });
+        renderBundleSearchResultsList();
+    }
+    
+    $('#bundle_modal_feedback').html(
+        '<div class="alert alert-success alert-dismissible fade show py-2 px-3 small font-weight-bold" role="alert">' +
+        '<i class="fa fa-check-circle"></i> Successfully added ' + addedCount + ' product(s) to package! ' +
+        'You can select more products or close this window when done.' +
+        '<button type="button" class="close py-2" data-dismiss="alert" aria-label="Close">' +
+        '<span aria-hidden="true">&times;</span>' +
+        '</button>' +
+        '</div>'
+    ).show();
+}
+
+function quickAddSingleBundleItem(idx) {
+    if (!window.bundleSearchResultsList || !window.bundleSearchResultsList[idx]) return;
+    var item = window.bundleSearchResultsList[idx];
+    
+    var variantId = null;
+    var variantName = '';
+    var sku = item.sku || '';
+    var price = item.price || 0;
+    var stock = item.stock || 0;
+    
+    var $varSelect = $('#bundle_item_var_' + idx);
+    if ($varSelect.length && $varSelect.val()) {
+        variantId = $varSelect.val();
+        var $opt = $varSelect.find('option:selected');
+        variantName = $opt.text();
+        sku = $opt.data('sku') || sku;
+        price = $opt.data('price') !== undefined ? $opt.data('price') : price;
+        stock = $opt.data('stock') !== undefined ? $opt.data('stock') : stock;
+    }
+    
+    var batchQty = parseInt($('#batch_bundle_item_qty').val());
+    var isOptional = $('#batch_bundle_item_is_optional').is(':checked') ? 1 : 0;
+    if (isNaN(batchQty) || batchQty < 0) {
+        batchQty = isOptional ? 0 : 1;
+    }
+    if (!isOptional && batchQty < 1) {
+        batchQty = 1;
+    }
+    
+    $('#empty_bundle_row').remove();
+    var rowHtml = renderBundleComponentRowHtml(item, variantId, variantName, sku, price, stock, batchQty, isOptional, '');
+    $('#bundle_components_tbody').append(rowHtml);
+    recalculateBundleTotals();
+    
+    delete window.bundleSelectedMap[item.id];
+    window.bundleSearchResultsList = window.bundleSearchResultsList.filter(function(it) {
+        return it.id !== item.id;
+    });
+    renderBundleSearchResultsList();
+    updateBatchSelectionUI();
+    
+    $('#bundle_modal_feedback').html(
+        '<div class="alert alert-success alert-dismissible fade show py-2 px-3 small font-weight-bold" role="alert">' +
+        '<i class="fa fa-check-circle"></i> Added "' + $('<div>').text(item.title).html() + '" to package!' +
+        '<button type="button" class="close py-2" data-dismiss="alert" aria-label="Close">' +
+        '<span aria-hidden="true">&times;</span>' +
+        '</button>' +
+        '</div>'
+    ).show();
+}
+
+function configureSingleBundleItem(idx) {
     if (!window.bundleSearchResultsList || !window.bundleSearchResultsList[idx]) return;
     var item = window.bundleSearchResultsList[idx];
     selectedProductForBundle = item;
+    
     $('#bundle_selected_item_preview').slideDown(150);
     $('#btn_confirm_add_bundle_item').show();
+    $('#bundle_selected_item_preview_title').text(item.title);
     $('#bundle_item_is_optional').prop('checked', false);
     $('#bundle_item_qty').val(1).attr('min', 1);
     $('#bundle_item_price').val('');
@@ -436,8 +780,17 @@ function selectProductForBundleByIndex(idx) {
         $.each(item.variants, function(vIdx, v) {
             variantSelect.append('<option value="' + v.id + '" data-sku="' + (v.sku || '') + '" data-price="' + v.price + '" data-stock="' + v.quantity + '">' + $('<div>').text(v.name).html() + ' (SKU: ' + (v.sku || 'N/A') + ' - Stock: ' + v.quantity + ')</option>');
         });
+        var inlineVarVal = $('#bundle_item_var_' + idx).val();
+        if (inlineVarVal) {
+            variantSelect.val(inlineVarVal);
+        }
     } else {
         $('#bundle_variant_select_container').hide();
+    }
+    
+    var previewEl = document.getElementById('bundle_selected_item_preview');
+    if (previewEl) {
+        previewEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 }
 
@@ -445,24 +798,6 @@ function confirmAddBundleItem() {
     if (!selectedProductForBundle) return;
     
     var variantId = $('#bundle_item_variant_id').val() || null;
-
-    // Check if this product/variant is already in the bundle table
-    var isDuplicate = false;
-    $('#table_bundle_components tbody tr.bundle-row').each(function() {
-        var existingProdId = $(this).find('input[name*="[component_product_id]"]').val();
-        var existingVarId = $(this).find('input[name*="[variant_id]"]').val() || '';
-        if (existingProdId == selectedProductForBundle.id && existingVarId == (variantId || '')) {
-            isDuplicate = true;
-            return false;
-        }
-    });
-    if (isDuplicate) {
-        alert('This product / variant has already been added to this bundle.');
-        return;
-    }
-
-    $('#empty_bundle_row').remove();
-    
     var variantName = '';
     var sku = selectedProductForBundle.sku || '';
     var price = selectedProductForBundle.price || 0;
@@ -477,7 +812,7 @@ function confirmAddBundleItem() {
     
     var isOptional = $('#bundle_item_is_optional').is(':checked') ? 1 : 0;
     var qty = parseInt($('#bundle_item_qty').val());
-    if (isNaN(qty)) {
+    if (isNaN(qty) || qty < 0) {
         qty = isOptional ? 0 : 1;
     }
     if (!isOptional && qty < 1) {
@@ -485,44 +820,36 @@ function confirmAddBundleItem() {
     }
 
     var priceOverride = $('#bundle_item_price').val();
-    var unitPrice = priceOverride !== '' ? parseFloat(priceOverride) : parseFloat(price);
-    var totalPrice = (unitPrice * qty).toFixed(2);
     
-    var imgHtml = selectedProductForBundle.image_small ? '<img src="' + selectedProductForBundle.image_small + '" style="width:45px; height:45px; object-fit:cover; border-radius:4px;">' : '<div style="width:45px; height:45px; background:#eee; border-radius:4px; display:flex; align-items:center; justify-content:center; color:#999;"><i class="fa fa-image"></i></div>';
-    var catName = selectedProductForBundle.category_name || '';
-    var catBadge = catName ? '<span class="badge badge-light border text-secondary" style="font-size:10.5px;"><i class="fa fa-folder-o"></i> ' + $('<div>').text(catName).html() + '</span>' : '';
-    var varBadge = variantName ? '<span class="badge badge-info" style="font-size:10.5px;"><i class="fa fa-tag"></i> ' + $('<div>').text(variantName).html() + '</span>' : '';
-
-    var rowIdx = bundleRowIndex++;
-    var rowHtml = '<tr class="bundle-row" data-title="' + selectedProductForBundle.title.toLowerCase() + '" data-sku="' + sku.toLowerCase() + '" data-category="' + catName.toLowerCase() + '">' +
-        '<td>' + ($('#table_bundle_components tbody tr.bundle-row').length + 1) + '</td>' +
-        '<td>' + imgHtml + '</td>' +
-        '<td><div class="font-weight-bold">' + $('<div>').text(selectedProductForBundle.title).html() + '</div>' +
-        '<div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:2px;">' + catBadge + varBadge + '</div>' +
-        '<input type="hidden" name="bundle_items[' + rowIdx + '][component_product_id]" value="' + selectedProductForBundle.id + '">' +
-        '<input type="hidden" name="bundle_items[' + rowIdx + '][variant_id]" value="' + (variantId || '') + '">' +
-        '</td>' +
-        '<td><code>' + sku + '</code></td>' +
-        '<td class="text-center" style="vertical-align: middle;">' +
-        '<div class="custom-control custom-checkbox">' +
-        '<input type="checkbox" class="custom-control-input bundle-optional-checkbox" id="bundle_opt_' + rowIdx + '" name="bundle_items[' + rowIdx + '][is_optional]" value="1" ' + (isOptional ? 'checked' : '') + ' onchange="onBundleOptionalChange(this);">' +
-        '<label class="custom-control-label small" for="bundle_opt_' + rowIdx + '" title="Optional item starts with 0 qty for buyer"></label>' +
-        '</div>' +
-        '</td>' +
-        '<td><input type="number" min="' + (isOptional ? '0' : '1') + '" max="9999" name="bundle_items[' + rowIdx + '][quantity]" class="form-control form-control-sm bundle-qty-input" value="' + qty + '" onchange="recalculateBundleTotals();"></td>' +
-        '<td><input type="number" step="0.01" min="0" name="bundle_items[' + rowIdx + '][price_override]" class="form-control form-control-sm bundle-price-input" value="' + (priceOverride !== '' ? priceOverride : unitPrice) + '" onchange="recalculateBundleTotals();"></td>' +
-        '<td class="font-weight-bold text-muted item-row-total">' + totalPrice + '</td>' +
-        '<td><span class="badge ' + (stock >= qty ? 'badge-success' : 'badge-danger') + '">' + stock + ' in stock</span></td>' +
-        '<td class="text-center"><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeBundleRow(this);"><i class="fa fa-trash"></i></button></td>' +
-        '</tr>';
-        
+    $('#empty_bundle_row').remove();
+    var rowHtml = renderBundleComponentRowHtml(selectedProductForBundle, variantId, variantName, sku, price, stock, qty, isOptional, priceOverride);
     $('#bundle_components_tbody').append(rowHtml);
     recalculateBundleTotals();
-    $('#modalAddBundleItem').modal('hide');
-    $('#bundle_product_search_query').val('');
-    $('#bundle_search_results').html('<div class="text-muted text-center py-3">Type above or click Search to find products...</div>');
-    $('#bundle_selected_item_preview').hide();
+    
+    var addedTitle = selectedProductForBundle.title;
+    var addedId = selectedProductForBundle.id;
+    
+    delete window.bundleSelectedMap[addedId];
+    if (window.bundleSearchResultsList && window.bundleSearchResultsList.length) {
+        window.bundleSearchResultsList = window.bundleSearchResultsList.filter(function(it) {
+            return it.id !== addedId;
+        });
+        renderBundleSearchResultsList();
+    }
+    updateBatchSelectionUI();
+    
+    $('#bundle_selected_item_preview').slideUp(150);
     $('#btn_confirm_add_bundle_item').hide();
+    selectedProductForBundle = null;
+    
+    $('#bundle_modal_feedback').html(
+        '<div class="alert alert-success alert-dismissible fade show py-2 px-3 small font-weight-bold" role="alert">' +
+        '<i class="fa fa-check-circle"></i> Added "' + $('<div>').text(addedTitle).html() + '" to package!' +
+        '<button type="button" class="close py-2" data-dismiss="alert" aria-label="Close">' +
+        '<span aria-hidden="true">&times;</span>' +
+        '</button>' +
+        '</div>'
+    ).show();
 }
 
 function recalculateBundleTotals() {

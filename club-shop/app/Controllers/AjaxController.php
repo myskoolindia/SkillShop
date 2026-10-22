@@ -1235,6 +1235,13 @@ class AjaxController extends BaseController
             $query = trim($this->request->getVar('query') ?? inputPost('query') ?? '');
             $categoryId = (int)($this->request->getVar('category_id') ?? inputPost('category_id') ?? 0);
             $excludeId = (int)($this->request->getVar('exclude_id') ?? inputPost('exclude_id') ?? 0);
+            $excludeProductIdsRaw = $this->request->getVar('exclude_product_ids') ?? inputPost('exclude_product_ids') ?? '';
+            $excludeProductIds = [];
+            if (is_array($excludeProductIdsRaw)) {
+                $excludeProductIds = array_filter(array_map('intval', $excludeProductIdsRaw));
+            } elseif (is_string($excludeProductIdsRaw) && strlen(trim($excludeProductIdsRaw)) > 0) {
+                $excludeProductIds = array_filter(array_map('intval', explode(',', $excludeProductIdsRaw)));
+            }
 
             $db = \Config\Database::connect();
             $langId = (int)(defaultLangId() ?? 1);
@@ -1247,6 +1254,9 @@ class AjaxController extends BaseController
 
             if ($excludeId > 0) {
                 $builder->where('p.id !=', $excludeId);
+            }
+            if (!empty($excludeProductIds)) {
+                $builder->whereNotIn('p.id', $excludeProductIds);
             }
 
             if ($categoryId > 0) {
