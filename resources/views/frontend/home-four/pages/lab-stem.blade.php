@@ -43,14 +43,10 @@
   .sks-nav-prev { left: -22px; }
   .sks-nav-next { right: -22px; }
   @media (max-width: 768px) {
-    .sks-nav-prev { left: 4px; }
-    .sks-nav-next { right: 4px; }
-    .sks-nav-btn {
-      width: 38px;
-      height: 38px;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(6px);
-      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    .sks-nav-btn,
+    .sks-nav-prev,
+    .sks-nav-next {
+      display: none !important;
     }
   }
   .sks-dot {
