@@ -1098,7 +1098,7 @@
             <p class="text-xs text-slate-500 mt-1">Fill out the form below to receive detailed equipment lists and layout plans.</p>
           </div>
 
-          <form class="space-y-4" id="planEnquiryForm" data-source="composite-skill-lab-basic" data-title="Skillvation Basic Composite Skill Lab – Enquiry">
+          <form class="space-y-4" id="planEnquiryForm" data-source="composite-skill-lab-basic" data-title="Standard Composite Skill Lab – Enquiry">
             <input type="hidden" name="source"       id="planSource">
             <input type="hidden" name="course_title" id="planTitle">
             <input type="hidden" name="quotation"    id="planQuotation">
@@ -1142,7 +1142,7 @@
               <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Request Type *</label>
                 <select name="message" required class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all">
-                  <option value="Request a Detailed Package">Request a Detailed Package</option>
+                  <option value="Request Detailed Proposal">Request detailed proposal</option>
                   <option value="Book a Skill Lab Visit">Book a Skill Lab Visit</option>
                   <option value="Schedule a Demo with Academic Team">Schedule a Demo with Academic Team</option>
                 </select>
@@ -1155,7 +1155,7 @@
             </div>
 
             <button type="submit" id="planEnquiryBtn" class="w-full py-4 rounded-xl bg-brand-orange hover:bg-brand-orangehover text-white text-sm font-bold shadow-lg shadow-brand-orange/20 transition-all duration-200">
-              Request Callback
+              Request Proposal
             </button>
 
             <p class="text-xs text-center text-slate-400 mt-2">
