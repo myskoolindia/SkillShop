@@ -567,8 +567,8 @@ class CourseEnquiryController extends Controller
 <div class="page">
   <div class="hdr">
     <div class="hdr-title">PROPOSAL</div>
-    <div class="hdr-sub">Establishment of a Composite Skill Lab — Skillvation</div>
-    <div class="hdr-sub">A multi-domain, hands-on skill education space for Grades 6–12</div>
+    <div class="hdr-sub">Establishment of Standard Composite Skill Lab</div>
+    <div class="hdr-sub">A multi-domain, hands-on skill education space for Grades 6–10</div>
     <div class="hdr-badge">MYSKOOL LEARNING PRIVATE LIMITED</div>
   </div>
 
@@ -587,7 +587,7 @@ class CourseEnquiryController extends Controller
     </tr>
     <tr>
       <td class="ml">Subject:</td>
-      <td colspan="3">Proposal to establish a Composite Skill Lab ("Skillvation") for Grades 6–12</td>
+      <td colspan="3">Proposal to establish a Standard Composite Skill Lab for Grades 6–10</td>
     </tr>
   </table>
 
@@ -602,45 +602,26 @@ class CourseEnquiryController extends Controller
     <li>Develop critical thinking, creativity, collaboration and problem-solving through project-based learning.</li>
   </ul>
 
-  <h2>3. Proposed Name &amp; Identity</h2>
-  <p>The lab is proposed to be branded <strong>"Skillvation"</strong> (Skill + Innovation), giving it a distinct identity for student engagement, showcases, and communication with parents and the community.</p>
-
-  <h2>4. Scope: Grade Range</h2>
-  <p>The lab will serve <strong>Grades 6 to 12</strong> as a single composite space, in keeping with CBSE\'s guideline that schools may establish one lab covering this grade band.</p>
-
-  <h2>5. Skill Domains Covered</h2>
-  <table class="dt">
-    <thead><tr><th>Domain</th><th>Focus Areas</th><th>Core Equipment</th></tr></thead>
-    <tbody>
-      <tr><td><strong>IT / ITeS &amp; AI</strong></td><td>Computer hardware, coding, AI fundamentals, data handling</td><td>PCs/laptops, AI learning kits, coding boards</td></tr>
-      <tr><td><strong>Robotics, Electronics &amp; 3D Printing</strong></td><td>Circuit building, robotics kits, CAD design, 3D printing</td><td>Robotics kits, electronics trainer kits, 3D printer</td></tr>
-      <tr><td><strong>Healthcare</strong></td><td>First aid, hygiene, basic diagnostics, wellness</td><td>First-aid kits, BP/pulse demo kits, anatomy models</td></tr>
-      <tr><td><strong>Agriculture</strong></td><td>Soil testing, hydroponics, plant biology, farming</td><td>Hydroponics kit, soil-testing kit, germination trays</td></tr>
-      <tr><td><strong>Apparel &amp; Design</strong></td><td>Pattern making, textiles, basic tailoring</td><td>Sewing kits, fabric samples, design templates</td></tr>
-      <tr><td><strong>Food Production &amp; Nutrition</strong></td><td>Food safety, nutrition basics, preservation</td><td>Hygiene kits, food-testing kits, display models</td></tr>
-    </tbody>
-  </table>
-
-  <h2>6. Infrastructure Requirements</h2>
+  <h2>3. Infrastructure Requirements</h2>
   <ul>
     <li>Dedicated space: <strong>600 sq. ft.</strong> (single composite lab) or <strong>two separate labs of 400 sq. ft. each</strong>, as per CBSE guidelines.</li>
     <li>Reliable power supply with safety-compliant wiring, adequate lighting and ventilation.</li>
   </ul>
 
-  <h2>7. Curriculum Integration</h2>
+  <h2>4. Curriculum Integration</h2>
   <ul>
     <li>Aligns with NCF-SE\'s three "forms of work" and mandatory skill-subject requirement from Grade 6 onward.</li>
     <li>Weekly rotation across domains, with project-based assessment.</li>
     <li>Grade 6–8: foundational exposure across all domains; Grade 9–12: specialisation in one or two domains.</li>
   </ul>
 
-  <h2>8. Staffing &amp; Training</h2>
+  <h2>5. Staffing &amp; Training</h2>
   <ul>
     <li>Existing computer/science faculty trained as lab coordinators, supplemented by domain resource persons.</li>
     <li>Orientation and safety training for all staff prior to roll out.</li>
   </ul>
 
-  <h2>9. Expected Outcomes</h2>
+  <h2>6. Expected Outcomes</h2>
   <ul>
     <li>Full compliance with CBSE\'s Composite Skill Lab mandate.</li>
     <li>Measurable improvement in students\' practical, vocational and problem-solving skills.</li>
@@ -648,22 +629,10 @@ class CourseEnquiryController extends Controller
     <li>A scalable model that can extend to further grades in a future phase.</li>
   </ul>
 
-  <h2>10. Implementation Timeline (Indicative)</h2>
-  <table class="dt">
-    <thead><tr><th>Phase</th><th>Activities</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Weeks 1–2</strong></td><td>Space planning, procurement approvals, vendor selection</td></tr>
-      <tr><td><strong>Weeks 3–5</strong></td><td>Civil work, electrical fittings, furniture installation</td></tr>
-      <tr><td><strong>Weeks 6–7</strong></td><td>Equipment installation and testing across all domains</td></tr>
-      <tr><td><strong>Week 8</strong></td><td>Teacher orientation and safety training</td></tr>
-      <tr><td><strong>Week 9+</strong></td><td>Phased roll out of modules; parent/community showcase</td></tr>
-    </tbody>
-  </table>
-
-  <h2>11. Product Details</h2>
+  <h2>7. Product Details</h2>
   ' . $productLinkHtml . '
 
-  <h2>12. Quotation — ' . $pkg . '</h2>
+  <h2>8. Quotation — ' . $pkg . '</h2>
   ' . $quotTable . '
   <div class="note">
     A detailed, itemized budget will be prepared once domain priorities and vendor quotations are finalised.
@@ -671,12 +640,12 @@ class CourseEnquiryController extends Controller
     to spread costs across budget cycles.
   </div>
 
-  <h2>13. Conclusion</h2>
+  <h2>9. Conclusion</h2>
   <p>Skillvation offers the school a structured, CBSE-aligned way to give students hands-on exposure across a broad range of skill domains. We request approval to proceed to the detailed planning and procurement stage.</p>
 
   <div class="footer">
     <strong>MYSKOOL LEARNING PRIVATE LIMITED</strong><br>
-    +91 98450 26782 &nbsp;|&nbsp; infomyskoolonline@gmail.com &nbsp;|&nbsp; www.skillvation.com &nbsp;|&nbsp; www.pedaskills.com<br>
+    +91 98450 26782 &nbsp;|&nbsp; infomyskoolonline@gmail.com &nbsp;|&nbsp; www.skillvation.com <br>
     Bengaluru, Karnataka
   </div>
 </div>
