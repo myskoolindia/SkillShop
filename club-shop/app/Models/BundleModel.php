@@ -184,8 +184,9 @@ class BundleModel extends BaseModel
             }
 
             foreach ($productsResult as $prod) {
-                $prod->base_price = (float)($prod->price ?? 0);
-                $prod->base_price_discounted = (float)($prod->price_discounted ?? 0);
+                $prod = applyProductMarkup($prod);
+                $prod->base_price = (float)($prod->base_price ?? ($prod->price ?? 0));
+                $prod->base_price_discounted = (float)($prod->base_price_discounted ?? ($prod->price_discounted ?? 0));
                 // Get main image
                 $img = $this->db->table('images')->where('product_id', $prod->id)->orderBy('is_main', 'DESC')->get()->getRow();
                 $prod->image_small = !empty($img) ? getProductImageURL($img, 'image_small') : getProductMainImage($prod->id, 'image_small');
@@ -290,23 +291,47 @@ class BundleModel extends BaseModel
             $item->short_description = $prod->short_description ?? '';
             $item->description = $prod->description ?? '';
 
-            // Pricing
+            // Pricing: determine original undiscounted price and effective discounted unit price
+            $origPrice = 0.0;
+            $unitPrice = 0.0;
+            $childDiscountRate = getProductDiscountRate($prod);
+
             if ($row->price_override !== null) {
                 $overrideVal = (float)$row->price_override;
+                $origPrice = $overrideVal;
+                if ($childDiscountRate > 0) {
+                    $discountAmt = round($overrideVal * ($childDiscountRate / 100), 2);
+                    $unitPrice = max(0, round($overrideVal - $discountAmt, 2));
+                } else {
+                    $unitPrice = $overrideVal;
+                }
                 $item->base_price_override = $overrideVal;
-                $item->unit_price = $overrideVal;
                 $item->price_override = $row->price_override;
             } elseif ($variant && $variant->price_discounted > 0) {
-                $item->unit_price = (float)$variant->price_discounted;
+                $origPrice = (float)($variant->price > 0 ? $variant->price : $variant->price_discounted);
+                $unitPrice = (float)$variant->price_discounted;
                 $item->price_override = null;
             } elseif ($variant && $variant->price > 0) {
-                $item->unit_price = (float)$variant->price;
+                $origPrice = (float)$variant->price;
+                if ($childDiscountRate > 0) {
+                    $discountAmt = round($origPrice * ($childDiscountRate / 100), 2);
+                    $unitPrice = max(0, round($origPrice - $discountAmt, 2));
+                } else {
+                    $unitPrice = $origPrice;
+                }
                 $item->price_override = null;
             } else {
-                $item->unit_price = (float)($prod->price_discounted > 0 ? $prod->price_discounted : $prod->price);
+                $origPrice = (float)($prod->price > 0 ? $prod->price : $prod->base_price);
+                $unitPrice = (float)($prod->price_discounted > 0 ? $prod->price_discounted : $prod->price);
                 $item->price_override = null;
             }
+
+            $item->price = $origPrice;
+            $item->unit_price = $unitPrice;
+            $item->discount_rate = $childDiscountRate;
+            $item->has_discount = ($origPrice > $unitPrice);
             $item->total_price = $item->unit_price * $item->required_quantity;
+            $item->original_total_price = $item->price * $item->required_quantity;
 
             // Stock
             if ($variant) {

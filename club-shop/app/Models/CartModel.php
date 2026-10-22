@@ -323,7 +323,7 @@ class CartModel extends BaseModel
                                 }
                             }
 
-                            $origChildPrice = (!empty($compObj->price) && (float)$compObj->price > 0) ? (float)$compObj->price : ((float)($p->price > 0 ? $p->price : $unitPrice));
+                            $origChildPrice = (!empty($compObj->price) && (float)$compObj->price > 0) ? (float)$compObj->price : ((isset($b['original_price']) && (float)$b['original_price'] > 0) ? (float)$b['original_price'] : ((float)($p->price > 0 ? $p->price : $unitPrice)));
                             if ($this->paymentSettings->currency_converter == 1 && !empty($cart->currency_code) && !empty($cart->currency_exchange_rate)) {
                                 $origChildPrice = convertCurrencyByExchangeRate($origChildPrice, $cart->currency_exchange_rate);
                             }
@@ -780,11 +780,12 @@ class CartModel extends BaseModel
                     $cOrigPrice = (!empty($c->price) && (float)$c->price > 0) ? (float)$c->price : $cUnitPrice;
 
                     $syncedBundleItems[] = [
-                        'comp_id'    => $cId,
-                        'product_id' => $pId,
-                        'variant_id' => $vId,
-                        'qty'        => $cQty,
-                        'unit_price' => $cUnitPrice
+                        'comp_id'        => $cId,
+                        'product_id'     => $pId,
+                        'variant_id'     => $vId,
+                        'qty'            => $cQty,
+                        'unit_price'     => $cUnitPrice,
+                        'original_price' => $cOrigPrice
                     ];
 
                     if ($cQty > 0) {
@@ -814,11 +815,11 @@ class CartModel extends BaseModel
                 }
             }
 
-            // Apply bundle discount rate if set
+            // Apply bundle discount rate if set explicitly on bundle product
             $bundleDiscountRate = !empty($product->bundle_discount_rate) ? (float)$product->bundle_discount_rate : 0.0;
             if ($bundleDiscountRate > 0 && $bundleTotal > 0) {
                 $bundleOriginalTotal = max($bundleOriginalTotal, $bundleTotal);
-                $bundleTotal = $bundleTotal * (1 - ($bundleDiscountRate / 100));
+                $bundleTotal = round($bundleTotal * (1 - ($bundleDiscountRate / 100)), 2);
             }
 
             if ($bundleTotal <= 0) {
@@ -827,7 +828,7 @@ class CartModel extends BaseModel
             if ($bundleOriginalTotal <= 0) {
                 $bundleOriginalTotal = (float)($product->price > 0 ? $product->price : $bundleTotal);
             }
-            if ((float)$product->price > $bundleTotal) {
+            if ((float)$product->price > $bundleOriginalTotal) {
                 $bundleOriginalTotal = max($bundleOriginalTotal, (float)$product->price);
             }
 
