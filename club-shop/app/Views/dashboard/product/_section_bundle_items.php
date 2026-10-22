@@ -174,7 +174,7 @@ $discountRate = !empty($product->bundle_discount_rate) ? $product->bundle_discou
 
 <!-- Modal: Add Product / Variant Live Search & Multi-Select -->
 <div class="modal fade" id="modalAddBundleItem" tabindex="-1" role="dialog" aria-labelledby="modalAddBundleItemLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-xl" role="document" style="max-width: 1200px;">
         <div class="modal-content">
             <div class="modal-header d-flex justify-content-between align-items-center">
                 <h5 class="modal-title" id="modalAddBundleItemLabel">
@@ -248,47 +248,16 @@ $discountRate = !empty($product->bundle_discount_rate) ? $product->bundle_discou
                 <!-- Feedback Alert Container -->
                 <div id="bundle_modal_feedback" style="display:none; margin-top:8px;"></div>
 
-                <!-- Search Results List -->
-                <div id="bundle_search_results" style="max-height: 320px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 4px; padding: 10px; margin-top: 10px;">
+                <!-- Search Results List with Single Row Cards -->
+                <div id="bundle_search_results" style="max-height: 480px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 6px; padding: 10px; margin-top: 10px; background: #f8fafc;">
                     <div class="text-muted text-center py-3"><i class="fa fa-spinner fa-spin"></i> Loading products...</div>
-                </div>
-
-                <!-- Single Configure Selection Box -->
-                <div id="bundle_selected_item_preview" class="mt-3 p-3 bg-light rounded" style="display:none; margin-top:15px; padding:12px; background:#f8f9fa; border-radius:6px; border:1px solid #e2e8f0;">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="font-weight-bold mb-0 text-primary"><i class="fa fa-sliders"></i> Configure Single Item: <span id="bundle_selected_item_preview_title" class="text-dark"></span></h6>
-                        <button type="button" class="close text-muted" onclick="$('#bundle_selected_item_preview').slideUp(150); $('#btn_confirm_add_bundle_item').hide(); selectedProductForBundle = null;" title="Close configure box">&times;</button>
-                    </div>
-                    <div class="row align-items-center">
-                        <div class="col-md-5" id="bundle_variant_select_container">
-                            <label class="small font-weight-bold">Variant (if applicable)</label>
-                            <select id="bundle_item_variant_id" class="form-control form-control-sm custom-select"></select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="small font-weight-bold">Quantity in Package</label>
-                            <input type="number" id="bundle_item_qty" class="form-control form-control-sm" min="1" value="1">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="small font-weight-bold">Price Override (Optional)</label>
-                            <input type="number" step="0.01" id="bundle_item_price" class="form-control form-control-sm" placeholder="Default price">
-                        </div>
-                        <div class="col-12 mt-2 pt-2" style="border-top: 1px dashed #dee2e6;">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="bundle_item_is_optional" onchange="toggleModalBundleOptional(this.checked);">
-                                <label class="custom-control-label small font-weight-bold text-dark" for="bundle_item_is_optional" style="cursor:pointer;">
-                                    <i class="fa fa-plus-circle text-primary"></i> Mark as Optional Item (Item starts with 0 qty; buyer can add when purchasing)
-                                </label>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
             <div class="modal-footer d-flex justify-content-between align-items-center">
                 <div>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
-                <div style="display:flex; gap:8px;">
-                    <button type="button" class="btn btn-primary" id="btn_confirm_add_bundle_item" style="display:none;" onclick="confirmAddBundleItem();"><i class="fa fa-check"></i> Add Configured Item</button>
+                <div>
                     <button type="button" class="btn btn-success" id="btn_modal_footer_batch_add" style="display:none;" onclick="addSelectedBundleProducts();"><i class="fa fa-plus-circle"></i> Add Selected Items</button>
                 </div>
             </div>
@@ -457,15 +426,28 @@ function renderBundleSearchResultsList(query) {
         return;
     }
 
-    var html = '<ul class="list-group mb-0">';
+    var defaultBatchQty = parseInt($('#batch_bundle_item_qty').val());
+    if (isNaN(defaultBatchQty) || defaultBatchQty < 0) defaultBatchQty = 1;
+    var defaultBatchOpt = $('#batch_bundle_item_is_optional').is(':checked');
+
+    var html = '<div class="d-none d-md-flex align-items-center justify-content-between px-3 py-2 bg-light border text-muted font-weight-bold mb-2" style="font-size:11.5px; text-transform:uppercase; letter-spacing:0.5px; border-radius:6px; gap:12px;">' +
+        '<div style="width:32px; text-align:center;">#</div>' +
+        '<div style="flex:1; min-width:240px;">Product &amp; Variant Details</div>' +
+        '<div style="width:80px; text-align:center;">Qty</div>' +
+        '<div style="width:125px; text-align:center;">Price Override</div>' +
+        '<div style="width:85px; text-align:center;">Optional</div>' +
+        '<div style="width:85px; text-align:right;">Action</div>' +
+    '</div>';
+
+    html += '<ul class="list-group mb-0" style="gap:6px;">';
     $.each(window.bundleSearchResultsList, function(idx, item) {
         var isChecked = window.bundleSelectedMap[item.id] ? 'checked' : '';
         var catBadge = item.category_name ? '<span class="badge badge-light border text-secondary ml-1" style="font-size:10.5px;"><i class="fa fa-folder-o"></i> ' + $('<div>').text(item.category_name).html() + '</span>' : '';
-        var imgTag = item.image_small ? '<img src="' + item.image_small + '" style="width:40px; height:40px; object-fit:cover; border-radius:4px; margin-right:10px; flex-shrink:0;">' : '<div style="width:40px; height:40px; background:#eee; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; margin-right:10px; color:#aaa; flex-shrink:0;"><i class="fa fa-cube"></i></div>';
+        var imgTag = item.image_small ? '<img src="' + item.image_small + '" style="width:42px; height:42px; object-fit:cover; border-radius:4px; margin-right:10px; flex-shrink:0;">' : '<div style="width:42px; height:42px; background:#f1f5f9; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; margin-right:10px; color:#94a3b8; flex-shrink:0;"><i class="fa fa-cube"></i></div>';
         
         var variantSelectorHtml = '';
         if (item.variants && item.variants.length > 0) {
-            variantSelectorHtml = '<div class="mt-1" style="max-width:320px;" onclick="event.stopPropagation();">' +
+            variantSelectorHtml = '<div class="mt-1" style="max-width:340px;" onclick="event.stopPropagation();">' +
                 '<select class="custom-select custom-select-sm bundle-item-variant-select" id="bundle_item_var_' + idx + '" style="font-size:11px; height:26px; padding:2px 6px;" onchange="onVariantChangeInSearch(' + idx + ', this);">' +
                 '<option value="" data-sku="' + (item.sku || '') + '" data-price="' + item.price + '" data-stock="' + item.stock + '">-- Base Product (SKU: ' + (item.sku || 'N/A') + ') --</option>';
             $.each(item.variants, function(vIdx, v) {
@@ -474,30 +456,85 @@ function renderBundleSearchResultsList(query) {
             variantSelectorHtml += '</select></div>';
         }
 
-        html += '<li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-2 bundle-search-item-row" data-prod-id="' + item.id + '" data-idx="' + idx + '" style="cursor:pointer;" onclick="onBundleRowClick(event, ' + idx + ');">';
-        html += '<div class="d-flex align-items-center" style="max-width:76%;">';
-        html += '<div class="custom-control custom-checkbox mr-2" style="margin-right:8px;" onclick="event.stopPropagation();">';
+        var rowQty = defaultBatchOpt ? 0 : defaultBatchQty;
+
+        html += '<li class="list-group-item p-2 bundle-search-item-row" data-prod-id="' + item.id + '" data-idx="' + idx + '" style="border:1px solid #e2e8f0; border-radius:6px; background:#fff; transition:all 0.15s ease;">';
+        html += '<div class="d-flex align-items-center justify-content-between flex-nowrap" style="gap:12px;">';
+        
+        // 1. Checkbox
+        html += '<div style="width:32px; text-align:center; flex-shrink:0;" onclick="event.stopPropagation();">';
+        html += '<div class="custom-control custom-checkbox d-inline-block">';
         html += '<input type="checkbox" class="custom-control-input bundle-product-chk" id="bundle_chk_' + idx + '" data-idx="' + idx + '" ' + isChecked + ' onchange="onBundleItemCheckChange(' + idx + ', this.checked);">';
         html += '<label class="custom-control-label" for="bundle_chk_' + idx + '" style="cursor:pointer;"></label>';
-        html += '</div>';
+        html += '</div></div>';
+
+        // 2. Name & Details (Image, Title, SKU, Stock, Base Price, Variant dropdown)
+        html += '<div class="d-flex align-items-center" style="flex:1; min-width:240px; overflow:hidden;">';
         html += imgTag;
-        html += '<div style="min-width:0;">';
-        html += '<strong style="font-size:13px; color:#1e293b;">' + $('<div>').text(item.title).html() + '</strong>' + catBadge;
-        html += '<div class="text-muted" style="font-size:11px; margin-top:1px;">SKU: <code id="bundle_item_sku_disp_' + idx + '">' + (item.sku || 'N/A') + '</code> | Stock: <span id="bundle_item_stock_disp_' + idx + '">' + item.stock + '</span> | Price: <strong style="color:#0284c7;" id="bundle_item_price_disp_' + idx + '">' + item.price + '</strong></div>';
+        html += '<div style="min-width:0; flex:1;">';
+        html += '<div class="d-flex align-items-center flex-wrap" style="gap:4px;">';
+        html += '<strong class="text-dark text-truncate" style="font-size:13px; max-width:340px;" title="' + $('<div>').text(item.title).html() + '">' + $('<div>').text(item.title).html() + '</strong>' + catBadge;
+        html += '</div>';
+        html += '<div class="text-muted text-truncate" style="font-size:11px; margin-top:1px;">SKU: <code id="bundle_item_sku_disp_' + idx + '">' + (item.sku || 'N/A') + '</code> | Stock: <span id="bundle_item_stock_disp_' + idx + '">' + item.stock + '</span> | Price: <strong style="color:#0284c7;" id="bundle_item_price_disp_' + idx + '">' + item.price + '</strong></div>';
         html += variantSelectorHtml;
         html += '</div></div>';
-        html += '<div style="white-space:nowrap; display:flex; gap:6px; align-items:center;" onclick="event.stopPropagation();">';
-        html += '<button type="button" class="btn btn-xs btn-outline-secondary" onclick="configureSingleBundleItem(' + idx + ');" title="Configure price override or variant"><i class="fa fa-sliders"></i> Configure</button>';
-        html += '<button type="button" class="btn btn-xs btn-outline-primary" onclick="quickAddSingleBundleItem(' + idx + ');" title="Quick Add to package"><i class="fa fa-plus"></i> Add</button>';
+
+        // 3. Qty Field
+        html += '<div style="width:80px; flex-shrink:0;" onclick="event.stopPropagation();">';
+        html += '<input type="number" id="bundle_row_qty_' + idx + '" class="form-control form-control-sm text-center font-weight-bold bundle-row-qty" min="' + (defaultBatchOpt ? 0 : 1) + '" value="' + rowQty + '" style="height:32px; padding:2px 6px; font-size:13px;" title="Quantity in package" onchange="onRowQtyChange(' + idx + ');">';
         html += '</div>';
-        html += '</li>';
+
+        // 4. Price Override Field
+        html += '<div style="width:125px; flex-shrink:0;" onclick="event.stopPropagation();">';
+        html += '<input type="number" step="0.01" min="0" id="bundle_row_price_' + idx + '" class="form-control form-control-sm bundle-row-price" placeholder="Default (' + item.price + ')" style="height:32px; padding:2px 6px; font-size:12px;" title="Price override (optional)">';
+        html += '</div>';
+
+        // 5. Optional Checkbox
+        html += '<div style="width:85px; text-align:center; flex-shrink:0;" onclick="event.stopPropagation();">';
+        html += '<div class="custom-control custom-checkbox d-inline-block">';
+        html += '<input type="checkbox" class="custom-control-input bundle-row-opt" id="bundle_row_opt_' + idx + '" ' + (defaultBatchOpt ? 'checked' : '') + ' onchange="onRowOptionalChange(' + idx + ', this.checked);">';
+        html += '<label class="custom-control-label small font-weight-bold text-secondary" for="bundle_row_opt_' + idx + '" style="cursor:pointer;" title="Optional items start with 0 qty for buyers">Optional</label>';
+        html += '</div></div>';
+
+        // 6. Add Button
+        html += '<div style="width:85px; text-align:right; flex-shrink:0;" onclick="event.stopPropagation();">';
+        html += '<button type="button" class="btn btn-sm btn-primary font-weight-bold px-3" onclick="quickAddSingleBundleItem(' + idx + ');" title="Add this item to package"><i class="fa fa-plus"></i> Add</button>';
+        html += '</div>';
+
+        html += '</div></li>';
     });
     html += '</ul>';
     $('#bundle_search_results').html(html);
 }
 
+function onRowQtyChange(idx) {
+    var $qtyInput = $('#bundle_row_qty_' + idx);
+    var val = parseInt($qtyInput.val());
+    var isOpt = $('#bundle_row_opt_' + idx).is(':checked');
+    if (isNaN(val) || val < 0) {
+        $qtyInput.val(isOpt ? 0 : 1);
+    } else if (!isOpt && val < 1) {
+        $qtyInput.val(1);
+    }
+}
+
+function onRowOptionalChange(idx, checked) {
+    var $qtyInput = $('#bundle_row_qty_' + idx);
+    if (checked) {
+        $qtyInput.attr('min', 0);
+        if (parseInt($qtyInput.val()) <= 0) {
+            $qtyInput.val(0);
+        }
+    } else {
+        $qtyInput.attr('min', 1);
+        if (parseInt($qtyInput.val()) < 1) {
+            $qtyInput.val(1);
+        }
+    }
+}
+
 function onBundleRowClick(e, idx) {
-    if ($(e.target).is('input, select, button, a, label')) return;
+    if ($(e.target).is('input, select, button, a, label, .custom-control-label')) return;
     var $chk = $('#bundle_chk_' + idx);
     var newChecked = !$chk.is(':checked');
     $chk.prop('checked', newChecked);
@@ -510,7 +547,10 @@ function onVariantChangeInSearch(idx, selectEl) {
     var price = $opt.data('price');
     var stock = $opt.data('stock');
     if (sku !== undefined) $('#bundle_item_sku_disp_' + idx).text(sku || 'N/A');
-    if (price !== undefined) $('#bundle_item_price_disp_' + idx).text(price);
+    if (price !== undefined) {
+        $('#bundle_item_price_disp_' + idx).text(price);
+        $('#bundle_row_price_' + idx).attr('placeholder', 'Default (' + price + ')');
+    }
     if (stock !== undefined) $('#bundle_item_stock_disp_' + idx).text(stock);
 }
 
@@ -520,8 +560,12 @@ function toggleSelectAllBundleProducts(checked) {
         if (window.bundleSearchResultsList && window.bundleSearchResultsList.length) {
             window.bundleSearchResultsList.forEach(function(item, idx) {
                 window.bundleSelectedMap[item.id] = {
+                    idx: idx,
                     item: item,
-                    variantSelectId: '#bundle_item_var_' + idx
+                    variantSelectId: '#bundle_item_var_' + idx,
+                    qtyInputId: '#bundle_row_qty_' + idx,
+                    priceInputId: '#bundle_row_price_' + idx,
+                    optCheckId: '#bundle_row_opt_' + idx
                 };
             });
         }
@@ -536,8 +580,12 @@ function onBundleItemCheckChange(idx, checked) {
     var item = window.bundleSearchResultsList[idx];
     if (checked) {
         window.bundleSelectedMap[item.id] = {
+            idx: idx,
             item: item,
-            variantSelectId: '#bundle_item_var_' + idx
+            variantSelectId: '#bundle_item_var_' + idx,
+            qtyInputId: '#bundle_row_qty_' + idx,
+            priceInputId: '#bundle_row_price_' + idx,
+            optCheckId: '#bundle_row_opt_' + idx
         };
     } else {
         delete window.bundleSelectedMap[item.id];
@@ -573,17 +621,14 @@ function onBatchOptionalChange(checked) {
         }
         $('#batch_bundle_item_qty').attr('min', 1);
     }
-}
-
-function toggleModalBundleOptional(checked) {
-    if (checked) {
-        $('#bundle_item_qty').val(0).attr('min', 0);
-    } else {
-        if (parseInt($('#bundle_item_qty').val()) <= 0) {
-            $('#bundle_item_qty').val(1);
+    $('.bundle-row-opt').each(function() {
+        var idx = $(this).attr('id').replace('bundle_row_opt_', '');
+        var isRowChecked = $('#bundle_chk_' + idx).is(':checked');
+        if (isRowChecked || $('.bundle-product-chk:checked').length === 0) {
+            $(this).prop('checked', checked);
+            onRowOptionalChange(idx, checked);
         }
-        $('#bundle_item_qty').attr('min', 1);
-    }
+    });
 }
 
 function onBundleOptionalChange(checkbox) {
@@ -643,15 +688,6 @@ function addSelectedBundleProducts() {
         return;
     }
     
-    var batchQty = parseInt($('#batch_bundle_item_qty').val());
-    var isOptional = $('#batch_bundle_item_is_optional').is(':checked') ? 1 : 0;
-    if (isNaN(batchQty) || batchQty < 0) {
-        batchQty = isOptional ? 0 : 1;
-    }
-    if (!isOptional && batchQty < 1) {
-        batchQty = 1;
-    }
-    
     $('#empty_bundle_row').remove();
     var addedCount = 0;
     var newlyAddedIds = [];
@@ -660,6 +696,7 @@ function addSelectedBundleProducts() {
         var entry = window.bundleSelectedMap[pid];
         if (!entry || !entry.item) return;
         var item = entry.item;
+        var idx = entry.idx;
         
         var variantId = null;
         var variantName = '';
@@ -676,8 +713,23 @@ function addSelectedBundleProducts() {
             price = $opt.data('price') !== undefined ? $opt.data('price') : price;
             stock = $opt.data('stock') !== undefined ? $opt.data('stock') : stock;
         }
+
+        var $optCheck = $(entry.optCheckId);
+        var isOptional = $optCheck.length && $optCheck.is(':checked') ? 1 : 0;
+
+        var $qtyInput = $(entry.qtyInputId);
+        var qty = $qtyInput.length ? parseInt($qtyInput.val()) : 1;
+        if (isNaN(qty) || qty < 0) {
+            qty = isOptional ? 0 : 1;
+        }
+        if (!isOptional && qty < 1) {
+            qty = 1;
+        }
+
+        var $priceInput = $(entry.priceInputId);
+        var priceOverride = $priceInput.length ? ($priceInput.val() || '').trim() : '';
         
-        var rowHtml = renderBundleComponentRowHtml(item, variantId, variantName, sku, price, stock, batchQty, isOptional, '');
+        var rowHtml = renderBundleComponentRowHtml(item, variantId, variantName, sku, price, stock, qty, isOptional, priceOverride);
         $('#bundle_components_tbody').append(rowHtml);
         addedCount++;
         newlyAddedIds.push(item.id);
@@ -729,17 +781,19 @@ function quickAddSingleBundleItem(idx) {
         stock = $opt.data('stock') !== undefined ? $opt.data('stock') : stock;
     }
     
-    var batchQty = parseInt($('#batch_bundle_item_qty').val());
-    var isOptional = $('#batch_bundle_item_is_optional').is(':checked') ? 1 : 0;
-    if (isNaN(batchQty) || batchQty < 0) {
-        batchQty = isOptional ? 0 : 1;
+    var isOptional = $('#bundle_row_opt_' + idx).is(':checked') ? 1 : 0;
+    var qty = parseInt($('#bundle_row_qty_' + idx).val());
+    if (isNaN(qty) || qty < 0) {
+        qty = isOptional ? 0 : 1;
     }
-    if (!isOptional && batchQty < 1) {
-        batchQty = 1;
+    if (!isOptional && qty < 1) {
+        qty = 1;
     }
     
+    var priceOverride = ($('#bundle_row_price_' + idx).val() || '').trim();
+    
     $('#empty_bundle_row').remove();
-    var rowHtml = renderBundleComponentRowHtml(item, variantId, variantName, sku, price, stock, batchQty, isOptional, '');
+    var rowHtml = renderBundleComponentRowHtml(item, variantId, variantName, sku, price, stock, qty, isOptional, priceOverride);
     $('#bundle_components_tbody').append(rowHtml);
     recalculateBundleTotals();
     
@@ -752,99 +806,7 @@ function quickAddSingleBundleItem(idx) {
     
     $('#bundle_modal_feedback').html(
         '<div class="alert alert-success alert-dismissible fade show py-2 px-3 small font-weight-bold" role="alert">' +
-        '<i class="fa fa-check-circle"></i> Added "' + $('<div>').text(item.title).html() + '" to package!' +
-        '<button type="button" class="close py-2" data-dismiss="alert" aria-label="Close">' +
-        '<span aria-hidden="true">&times;</span>' +
-        '</button>' +
-        '</div>'
-    ).show();
-}
-
-function configureSingleBundleItem(idx) {
-    if (!window.bundleSearchResultsList || !window.bundleSearchResultsList[idx]) return;
-    var item = window.bundleSearchResultsList[idx];
-    selectedProductForBundle = item;
-    
-    $('#bundle_selected_item_preview').slideDown(150);
-    $('#btn_confirm_add_bundle_item').show();
-    $('#bundle_selected_item_preview_title').text(item.title);
-    $('#bundle_item_is_optional').prop('checked', false);
-    $('#bundle_item_qty').val(1).attr('min', 1);
-    $('#bundle_item_price').val('');
-    
-    var variantSelect = $('#bundle_item_variant_id');
-    variantSelect.empty();
-    if (item.variants && item.variants.length > 0) {
-        $('#bundle_variant_select_container').show();
-        variantSelect.append('<option value="">-- Simple / Base Product --</option>');
-        $.each(item.variants, function(vIdx, v) {
-            variantSelect.append('<option value="' + v.id + '" data-sku="' + (v.sku || '') + '" data-price="' + v.price + '" data-stock="' + v.quantity + '">' + $('<div>').text(v.name).html() + ' (SKU: ' + (v.sku || 'N/A') + ' - Stock: ' + v.quantity + ')</option>');
-        });
-        var inlineVarVal = $('#bundle_item_var_' + idx).val();
-        if (inlineVarVal) {
-            variantSelect.val(inlineVarVal);
-        }
-    } else {
-        $('#bundle_variant_select_container').hide();
-    }
-    
-    var previewEl = document.getElementById('bundle_selected_item_preview');
-    if (previewEl) {
-        previewEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-}
-
-function confirmAddBundleItem() {
-    if (!selectedProductForBundle) return;
-    
-    var variantId = $('#bundle_item_variant_id').val() || null;
-    var variantName = '';
-    var sku = selectedProductForBundle.sku || '';
-    var price = selectedProductForBundle.price || 0;
-    var stock = selectedProductForBundle.stock || 0;
-    
-    if (variantId) {
-        var selectedOpt = $('#bundle_item_variant_id option:selected');
-        variantName = selectedOpt.text();
-        sku = selectedOpt.data('sku') || sku;
-        stock = selectedOpt.data('stock') !== undefined ? selectedOpt.data('stock') : stock;
-    }
-    
-    var isOptional = $('#bundle_item_is_optional').is(':checked') ? 1 : 0;
-    var qty = parseInt($('#bundle_item_qty').val());
-    if (isNaN(qty) || qty < 0) {
-        qty = isOptional ? 0 : 1;
-    }
-    if (!isOptional && qty < 1) {
-        qty = 1;
-    }
-
-    var priceOverride = $('#bundle_item_price').val();
-    
-    $('#empty_bundle_row').remove();
-    var rowHtml = renderBundleComponentRowHtml(selectedProductForBundle, variantId, variantName, sku, price, stock, qty, isOptional, priceOverride);
-    $('#bundle_components_tbody').append(rowHtml);
-    recalculateBundleTotals();
-    
-    var addedTitle = selectedProductForBundle.title;
-    var addedId = selectedProductForBundle.id;
-    
-    delete window.bundleSelectedMap[addedId];
-    if (window.bundleSearchResultsList && window.bundleSearchResultsList.length) {
-        window.bundleSearchResultsList = window.bundleSearchResultsList.filter(function(it) {
-            return it.id !== addedId;
-        });
-        renderBundleSearchResultsList();
-    }
-    updateBatchSelectionUI();
-    
-    $('#bundle_selected_item_preview').slideUp(150);
-    $('#btn_confirm_add_bundle_item').hide();
-    selectedProductForBundle = null;
-    
-    $('#bundle_modal_feedback').html(
-        '<div class="alert alert-success alert-dismissible fade show py-2 px-3 small font-weight-bold" role="alert">' +
-        '<i class="fa fa-check-circle"></i> Added "' + $('<div>').text(addedTitle).html() + '" to package!' +
+        '<i class="fa fa-check-circle"></i> Added "' + $('<div>').text(item.title).html() + '" (Qty: ' + qty + ') to package!' +
         '<button type="button" class="close py-2" data-dismiss="alert" aria-label="Close">' +
         '<span aria-hidden="true">&times;</span>' +
         '</button>' +
