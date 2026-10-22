@@ -223,22 +223,22 @@ $discountRate = !empty($product->bundle_discount_rate) ? $product->bundle_discou
 
                 <!-- Multi-Select Action Bar -->
                 <div id="bundle_multi_select_bar" style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:8px 12px; margin-top:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="bundle_check_all_products" onchange="toggleSelectAllBundleProducts(this.checked);">
-                            <label class="custom-control-label font-weight-bold text-dark" for="bundle_check_all_products" style="cursor:pointer; font-size:13px;">Select All</label>
-                        </div>
-                        <span class="badge badge-primary" id="bundle_selected_count_badge" style="display:none; font-size:11.5px; padding:3px 8px; border-radius:10px;">0 selected</span>
+                    <div style="display:inline-flex; align-items:center; gap:8px;">
+                        <label style="cursor:pointer; font-size:13px; font-weight:bold; margin-bottom:0; display:inline-flex; align-items:center; gap:6px; color:#1e293b;">
+                            <input type="checkbox" id="bundle_check_all_products" onchange="toggleSelectAllBundleProducts(this.checked);" style="width:17px; height:17px; margin:0; cursor:pointer;">
+                            Select All
+                        </label>
+                        <span class="badge" id="bundle_selected_count_badge" style="display:none; background:#0284c7; color:#fff; font-size:11px; padding:3px 8px; border-radius:10px;">0 selected</span>
                     </div>
-                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                        <div style="display:flex; align-items:center; gap:4px;">
-                            <label class="small mb-0 font-weight-bold text-muted">Default Qty:</label>
-                            <input type="number" id="batch_bundle_item_qty" class="form-control form-control-sm" min="0" value="1" style="width:65px; height:28px; padding:2px 6px; font-weight:600;">
+                    <div style="display:inline-flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                        <div style="display:inline-flex; align-items:center; gap:6px;">
+                            <label class="small mb-0 font-weight-bold text-muted" style="margin-bottom:0;">Default Qty:</label>
+                            <input type="number" id="batch_bundle_item_qty" class="form-control input-sm" min="0" value="1" style="width:65px; height:28px; padding:2px 6px; font-weight:600; display:inline-block;">
                         </div>
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="batch_bundle_item_is_optional" onchange="onBatchOptionalChange(this.checked);">
-                            <label class="custom-control-label small font-weight-bold text-secondary" for="batch_bundle_item_is_optional" style="cursor:pointer;" title="Optional items start with 0 qty for buyers">Optional</label>
-                        </div>
+                        <label style="cursor:pointer; font-size:12px; font-weight:600; margin-bottom:0; display:inline-flex; align-items:center; gap:4px; color:#475569;" title="Optional items start with 0 qty for buyers">
+                            <input type="checkbox" id="batch_bundle_item_is_optional" onchange="onBatchOptionalChange(this.checked);" style="width:16px; height:16px; margin:0; cursor:pointer;">
+                            Optional
+                        </label>
                         <button type="button" class="btn btn-sm btn-success font-weight-bold" id="btn_batch_add_bundle_items" style="display:none; padding:4px 12px; font-size:12px;" onclick="addSelectedBundleProducts();">
                             <i class="fa fa-plus-circle"></i> Add Selected (<span id="batch_selected_btn_count">0</span>)
                         </button>
@@ -248,8 +248,8 @@ $discountRate = !empty($product->bundle_discount_rate) ? $product->bundle_discou
                 <!-- Feedback Alert Container -->
                 <div id="bundle_modal_feedback" style="display:none; margin-top:8px;"></div>
 
-                <!-- Search Results List with Single Row Cards -->
-                <div id="bundle_search_results" style="max-height: 480px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 6px; padding: 10px; margin-top: 10px; background: #f8fafc;">
+                <!-- Search Results List with Single Row Table -->
+                <div id="bundle_search_results" style="max-height: 480px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 6px; padding: 0; margin-top: 10px; background: #fff;">
                     <div class="text-muted text-center py-3"><i class="fa fa-spinner fa-spin"></i> Loading products...</div>
                 </div>
             </div>
@@ -430,25 +430,30 @@ function renderBundleSearchResultsList(query) {
     if (isNaN(defaultBatchQty) || defaultBatchQty < 0) defaultBatchQty = 1;
     var defaultBatchOpt = $('#batch_bundle_item_is_optional').is(':checked');
 
-    var html = '<div class="d-none d-md-flex align-items-center justify-content-between px-3 py-2 bg-light border text-muted font-weight-bold mb-2" style="font-size:11.5px; text-transform:uppercase; letter-spacing:0.5px; border-radius:6px; gap:12px;">' +
-        '<div style="width:32px; text-align:center;">#</div>' +
-        '<div style="flex:1; min-width:240px;">Product &amp; Variant Details</div>' +
-        '<div style="width:80px; text-align:center;">Qty</div>' +
-        '<div style="width:125px; text-align:center;">Price Override</div>' +
-        '<div style="width:85px; text-align:center;">Optional</div>' +
-        '<div style="width:85px; text-align:right;">Action</div>' +
-    '</div>';
+    var html = '<div class="table-responsive" style="margin-bottom:0;">';
+    html += '<table class="table table-hover table-bordered table-striped" style="margin-bottom:0; background:#fff; font-size:12px;">';
+    html += '<thead>';
+    html += '<tr class="active" style="color:#475569; font-weight:bold; font-size:11.5px; text-transform:uppercase; letter-spacing:0.4px;">';
+    html += '<th style="width:36px; text-align:center; vertical-align:middle;">#</th>';
+    html += '<th style="width:48px; text-align:center; vertical-align:middle;">Img</th>';
+    html += '<th style="vertical-align:middle; min-width:240px;">Product &amp; Variant Details</th>';
+    html += '<th style="width:85px; text-align:center; vertical-align:middle;">Qty</th>';
+    html += '<th style="width:130px; text-align:center; vertical-align:middle;">Price Override</th>';
+    html += '<th style="width:90px; text-align:center; vertical-align:middle;">Optional</th>';
+    html += '<th style="width:85px; text-align:center; vertical-align:middle;">Action</th>';
+    html += '</tr>';
+    html += '</thead>';
+    html += '<tbody>';
 
-    html += '<ul class="list-group mb-0" style="gap:6px;">';
     $.each(window.bundleSearchResultsList, function(idx, item) {
         var isChecked = window.bundleSelectedMap[item.id] ? 'checked' : '';
-        var catBadge = item.category_name ? '<span class="badge badge-light border text-secondary ml-1" style="font-size:10.5px;"><i class="fa fa-folder-o"></i> ' + $('<div>').text(item.category_name).html() + '</span>' : '';
-        var imgTag = item.image_small ? '<img src="' + item.image_small + '" style="width:42px; height:42px; object-fit:cover; border-radius:4px; margin-right:10px; flex-shrink:0;">' : '<div style="width:42px; height:42px; background:#f1f5f9; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; margin-right:10px; color:#94a3b8; flex-shrink:0;"><i class="fa fa-cube"></i></div>';
+        var catBadge = item.category_name ? '<span class="badge" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; font-size:10px; font-weight:500; margin-left:4px;"><i class="fa fa-folder-o"></i> ' + $('<div>').text(item.category_name).html() + '</span>' : '';
+        var imgTag = item.image_small ? '<img src="' + item.image_small + '" style="width:40px; height:40px; object-fit:cover; border-radius:4px; display:inline-block;">' : '<div style="width:40px; height:40px; background:#f1f5f9; border-radius:4px; display:inline-block; line-height:40px; text-align:center; color:#94a3b8;"><i class="fa fa-cube"></i></div>';
         
         var variantSelectorHtml = '';
         if (item.variants && item.variants.length > 0) {
-            variantSelectorHtml = '<div class="mt-1" style="max-width:340px;" onclick="event.stopPropagation();">' +
-                '<select class="custom-select custom-select-sm bundle-item-variant-select" id="bundle_item_var_' + idx + '" style="font-size:11px; height:26px; padding:2px 6px;" onchange="onVariantChangeInSearch(' + idx + ', this);">' +
+            variantSelectorHtml = '<div style="margin-top:4px;" onclick="event.stopPropagation();">' +
+                '<select class="form-control input-sm bundle-item-variant-select" id="bundle_item_var_' + idx + '" style="font-size:11px; height:26px; padding:2px 6px; max-width:320px; display:inline-block;" onchange="onVariantChangeInSearch(' + idx + ', this);">' +
                 '<option value="" data-sku="' + (item.sku || '') + '" data-price="' + item.price + '" data-stock="' + item.stock + '">-- Base Product (SKU: ' + (item.sku || 'N/A') + ') --</option>';
             $.each(item.variants, function(vIdx, v) {
                 variantSelectorHtml += '<option value="' + v.id + '" data-sku="' + (v.sku || '') + '" data-price="' + v.price + '" data-stock="' + v.quantity + '">' + $('<div>').text(v.name).html() + ' (SKU: ' + (v.sku || 'N/A') + ' - Stock: ' + v.quantity + ')</option>';
@@ -458,52 +463,50 @@ function renderBundleSearchResultsList(query) {
 
         var rowQty = defaultBatchOpt ? 0 : defaultBatchQty;
 
-        html += '<li class="list-group-item p-2 bundle-search-item-row" data-prod-id="' + item.id + '" data-idx="' + idx + '" style="border:1px solid #e2e8f0; border-radius:6px; background:#fff; transition:all 0.15s ease;">';
-        html += '<div class="d-flex align-items-center justify-content-between flex-nowrap" style="gap:12px;">';
+        html += '<tr class="bundle-search-item-row" data-prod-id="' + item.id + '" data-idx="' + idx + '" style="cursor:pointer;" onclick="onBundleRowClick(event, ' + idx + ');">';
         
         // 1. Checkbox
-        html += '<div style="width:32px; text-align:center; flex-shrink:0;" onclick="event.stopPropagation();">';
-        html += '<div class="custom-control custom-checkbox d-inline-block">';
-        html += '<input type="checkbox" class="custom-control-input bundle-product-chk" id="bundle_chk_' + idx + '" data-idx="' + idx + '" ' + isChecked + ' onchange="onBundleItemCheckChange(' + idx + ', this.checked);">';
-        html += '<label class="custom-control-label" for="bundle_chk_' + idx + '" style="cursor:pointer;"></label>';
-        html += '</div></div>';
+        html += '<td style="width:36px; text-align:center; vertical-align:middle;" onclick="event.stopPropagation();">';
+        html += '<input type="checkbox" class="bundle-product-chk" id="bundle_chk_' + idx + '" data-idx="' + idx + '" ' + isChecked + ' onchange="onBundleItemCheckChange(' + idx + ', this.checked);" style="width:17px; height:17px; margin:0 auto; cursor:pointer; display:block;">';
+        html += '</td>';
 
-        // 2. Name & Details (Image, Title, SKU, Stock, Base Price, Variant dropdown)
-        html += '<div class="d-flex align-items-center" style="flex:1; min-width:240px; overflow:hidden;">';
+        // 2. Image
+        html += '<td style="width:48px; text-align:center; vertical-align:middle; padding:4px;">';
         html += imgTag;
-        html += '<div style="min-width:0; flex:1;">';
-        html += '<div class="d-flex align-items-center flex-wrap" style="gap:4px;">';
-        html += '<strong class="text-dark text-truncate" style="font-size:13px; max-width:340px;" title="' + $('<div>').text(item.title).html() + '">' + $('<div>').text(item.title).html() + '</strong>' + catBadge;
-        html += '</div>';
-        html += '<div class="text-muted text-truncate" style="font-size:11px; margin-top:1px;">SKU: <code id="bundle_item_sku_disp_' + idx + '">' + (item.sku || 'N/A') + '</code> | Stock: <span id="bundle_item_stock_disp_' + idx + '">' + item.stock + '</span> | Price: <strong style="color:#0284c7;" id="bundle_item_price_disp_' + idx + '">' + item.price + '</strong></div>';
+        html += '</td>';
+
+        // 3. Name & Details (Title, SKU, Stock, Base Price, Variant dropdown)
+        html += '<td style="vertical-align:middle;">';
+        html += '<div><strong class="text-dark" style="font-size:13px;">' + $('<div>').text(item.title).html() + '</strong>' + catBadge + '</div>';
+        html += '<div class="text-muted" style="font-size:11px; margin-top:2px;">SKU: <code id="bundle_item_sku_disp_' + idx + '">' + (item.sku || 'N/A') + '</code> | Stock: <span id="bundle_item_stock_disp_' + idx + '">' + item.stock + '</span> | Price: <strong style="color:#0284c7;" id="bundle_item_price_disp_' + idx + '">' + item.price + '</strong></div>';
         html += variantSelectorHtml;
-        html += '</div></div>';
+        html += '</td>';
 
-        // 3. Qty Field
-        html += '<div style="width:80px; flex-shrink:0;" onclick="event.stopPropagation();">';
-        html += '<input type="number" id="bundle_row_qty_' + idx + '" class="form-control form-control-sm text-center font-weight-bold bundle-row-qty" min="' + (defaultBatchOpt ? 0 : 1) + '" value="' + rowQty + '" style="height:32px; padding:2px 6px; font-size:13px;" title="Quantity in package" onchange="onRowQtyChange(' + idx + ');">';
-        html += '</div>';
+        // 4. Qty Field
+        html += '<td style="width:85px; text-align:center; vertical-align:middle;" onclick="event.stopPropagation();">';
+        html += '<input type="number" id="bundle_row_qty_' + idx + '" class="form-control input-sm text-center font-weight-bold bundle-row-qty" min="' + (defaultBatchOpt ? 0 : 1) + '" value="' + rowQty + '" style="width:68px; margin:0 auto; height:30px; padding:2px 4px; font-size:13px; font-weight:bold; display:inline-block;" title="Quantity in package" onchange="onRowQtyChange(' + idx + ');">';
+        html += '</td>';
 
-        // 4. Price Override Field
-        html += '<div style="width:125px; flex-shrink:0;" onclick="event.stopPropagation();">';
-        html += '<input type="number" step="0.01" min="0" id="bundle_row_price_' + idx + '" class="form-control form-control-sm bundle-row-price" placeholder="Default (' + item.price + ')" style="height:32px; padding:2px 6px; font-size:12px;" title="Price override (optional)">';
-        html += '</div>';
+        // 5. Price Override Field
+        html += '<td style="width:130px; text-align:center; vertical-align:middle;" onclick="event.stopPropagation();">';
+        html += '<input type="number" step="0.01" min="0" id="bundle_row_price_' + idx + '" class="form-control input-sm text-center bundle-row-price" placeholder="Default (' + item.price + ')" style="width:115px; margin:0 auto; height:30px; padding:2px 4px; font-size:12px; display:inline-block;" title="Price override (optional)">';
+        html += '</td>';
 
-        // 5. Optional Checkbox
-        html += '<div style="width:85px; text-align:center; flex-shrink:0;" onclick="event.stopPropagation();">';
-        html += '<div class="custom-control custom-checkbox d-inline-block">';
-        html += '<input type="checkbox" class="custom-control-input bundle-row-opt" id="bundle_row_opt_' + idx + '" ' + (defaultBatchOpt ? 'checked' : '') + ' onchange="onRowOptionalChange(' + idx + ', this.checked);">';
-        html += '<label class="custom-control-label small font-weight-bold text-secondary" for="bundle_row_opt_' + idx + '" style="cursor:pointer;" title="Optional items start with 0 qty for buyers">Optional</label>';
-        html += '</div></div>';
+        // 6. Optional Checkbox
+        html += '<td style="width:90px; text-align:center; vertical-align:middle;" onclick="event.stopPropagation();">';
+        html += '<label style="cursor:pointer; margin-bottom:0; font-weight:600; font-size:11.5px; display:inline-flex; align-items:center; gap:4px; color:#475569;" title="Optional items start with 0 qty for buyers">';
+        html += '<input type="checkbox" class="bundle-row-opt" id="bundle_row_opt_' + idx + '" ' + (defaultBatchOpt ? 'checked' : '') + ' onchange="onRowOptionalChange(' + idx + ', this.checked);" style="width:16px; height:16px; margin:0; cursor:pointer;"> Optional';
+        html += '</label>';
+        html += '</td>';
 
-        // 6. Add Button
-        html += '<div style="width:85px; text-align:right; flex-shrink:0;" onclick="event.stopPropagation();">';
-        html += '<button type="button" class="btn btn-sm btn-primary font-weight-bold px-3" onclick="quickAddSingleBundleItem(' + idx + ');" title="Add this item to package"><i class="fa fa-plus"></i> Add</button>';
-        html += '</div>';
+        // 7. Add Button
+        html += '<td style="width:85px; text-align:center; vertical-align:middle;" onclick="event.stopPropagation();">';
+        html += '<button type="button" class="btn btn-sm btn-primary font-weight-bold" onclick="quickAddSingleBundleItem(' + idx + ');" style="padding:4px 10px; font-size:12px;" title="Add this item to package"><i class="fa fa-plus"></i> Add</button>';
+        html += '</td>';
 
-        html += '</div></li>';
+        html += '</tr>';
     });
-    html += '</ul>';
+    html += '</tbody></table></div>';
     $('#bundle_search_results').html(html);
 }
 
