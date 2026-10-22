@@ -1098,11 +1098,51 @@ if (!function_exists('getCategoryMarkupRate')) {
     }
 }
 
+//check if store markup is active
+if (!function_exists('isStoreMarkupActive')) {
+    function isStoreMarkupActive()
+    {
+        $settings = getContextValue('paymentSettings');
+        if (!empty($settings) && isset($settings->seller_markup_status)) {
+            return ((int)$settings->seller_markup_status === 1);
+        }
+        try {
+            $db = \Config\Database::connect();
+            $row = $db->table('payment_settings')->select('seller_markup_status')->where('id', 1)->get()->getRow();
+            if (!empty($row) && (int)$row->seller_markup_status === 1) {
+                return true;
+            }
+        } catch (\Exception $e) {
+        }
+        return false;
+    }
+}
+
+//check if store discount is active
+if (!function_exists('isStoreDiscountActive')) {
+    function isStoreDiscountActive()
+    {
+        $settings = getContextValue('paymentSettings');
+        if (!empty($settings) && isset($settings->seller_discount_status)) {
+            return ((int)$settings->seller_discount_status === 1);
+        }
+        try {
+            $db = \Config\Database::connect();
+            $row = $db->table('payment_settings')->select('seller_discount_status')->where('id', 1)->get()->getRow();
+            if (!empty($row) && (int)$row->seller_discount_status === 1) {
+                return true;
+            }
+        } catch (\Exception $e) {
+        }
+        return false;
+    }
+}
+
 //get product markup rate
 if (!function_exists('getProductMarkupRate')) {
     function getProductMarkupRate($product)
     {
-        if (empty($product)) {
+        if (empty($product) || !isStoreMarkupActive()) {
             return 0.0;
         }
         // 1. Product direct exception
@@ -1192,7 +1232,7 @@ if (!function_exists('getCategoryDiscountRate')) {
 if (!function_exists('getProductDiscountRate')) {
     function getProductDiscountRate($product)
     {
-        if (empty($product)) {
+        if (empty($product) || !isStoreDiscountActive()) {
             return 0.0;
         }
         $categoryId = is_object($product) ? ($product->category_id ?? null) : null;
@@ -1270,11 +1310,16 @@ if (!function_exists('applyProductMarkup')) {
         $product->price = $markedPrice;
 
         // 2. Apply Category Exception or Global Discount
+        $isDiscountActive = isStoreDiscountActive();
         $categoryId = $product->category_id ?? null;
         $catDiscount = !empty($categoryId) ? getCategoryDiscountRate($categoryId) : null;
         $globalDiscount = getGlobalDiscountRate();
 
-        if ($catDiscount !== null) {
+        if (!$isDiscountActive) {
+            // Discounts disabled globally
+            $product->price_discounted = $product->price;
+            $product->discount_rate = 0;
+        } elseif ($catDiscount !== null) {
             // Category has explicit exception
             if ((float)$catDiscount === 0.0) {
                 // EXEMPT from discount

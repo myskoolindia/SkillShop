@@ -828,7 +828,7 @@ class CartModel extends BaseModel
             if ($bundleOriginalTotal <= 0) {
                 $bundleOriginalTotal = (float)($product->price > 0 ? $product->price : $bundleTotal);
             }
-            if ((float)$product->price > $bundleOriginalTotal) {
+            if (empty($liveComps) && (float)$product->price > $bundleOriginalTotal) {
                 $bundleOriginalTotal = max($bundleOriginalTotal, (float)$product->price);
             }
 

@@ -294,25 +294,39 @@ class BundleModel extends BaseModel
             // Pricing: determine original undiscounted price and effective discounted unit price
             $origPrice = 0.0;
             $unitPrice = 0.0;
-            $childDiscountRate = getProductDiscountRate($prod);
+            $isDiscountActive = isStoreDiscountActive();
 
             if ($row->price_override !== null) {
                 $overrideVal = (float)$row->price_override;
                 $origPrice = $overrideVal;
-                if ($childDiscountRate > 0) {
-                    $discountAmt = round($overrideVal * ($childDiscountRate / 100), 2);
+                $overrideDiscountRate = 0.0;
+
+                if ($isDiscountActive) {
+                    $catDisc = !empty($prod->category_id) ? getCategoryDiscountRate($prod->category_id) : null;
+                    if ($catDisc !== null) {
+                        $overrideDiscountRate = (float)$catDisc;
+                    } else {
+                        $overrideDiscountRate = getGlobalDiscountRate();
+                    }
+                }
+
+                if ($overrideDiscountRate > 0) {
+                    $discountAmt = round($overrideVal * ($overrideDiscountRate / 100), 2);
                     $unitPrice = max(0, round($overrideVal - $discountAmt, 2));
                 } else {
                     $unitPrice = $overrideVal;
                 }
                 $item->base_price_override = $overrideVal;
                 $item->price_override = $row->price_override;
-            } elseif ($variant && $variant->price_discounted > 0) {
+                $childDiscountRate = $overrideDiscountRate;
+            } elseif ($variant && $variant->price_discounted > 0 && $isDiscountActive) {
                 $origPrice = (float)($variant->price > 0 ? $variant->price : $variant->price_discounted);
                 $unitPrice = (float)$variant->price_discounted;
                 $item->price_override = null;
+                $childDiscountRate = getProductDiscountRate($prod);
             } elseif ($variant && $variant->price > 0) {
                 $origPrice = (float)$variant->price;
+                $childDiscountRate = $isDiscountActive ? getProductDiscountRate($prod) : 0.0;
                 if ($childDiscountRate > 0) {
                     $discountAmt = round($origPrice * ($childDiscountRate / 100), 2);
                     $unitPrice = max(0, round($origPrice - $discountAmt, 2));
@@ -322,8 +336,9 @@ class BundleModel extends BaseModel
                 $item->price_override = null;
             } else {
                 $origPrice = (float)($prod->price > 0 ? $prod->price : $prod->base_price);
-                $unitPrice = (float)($prod->price_discounted > 0 ? $prod->price_discounted : $prod->price);
+                $unitPrice = (float)(($isDiscountActive && $prod->price_discounted > 0) ? $prod->price_discounted : $prod->price);
                 $item->price_override = null;
+                $childDiscountRate = $isDiscountActive ? getProductDiscountRate($prod) : 0.0;
             }
 
             $item->price = $origPrice;
