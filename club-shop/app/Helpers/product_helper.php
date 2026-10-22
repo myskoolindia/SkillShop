@@ -1042,7 +1042,7 @@ if (!function_exists('getSellerMarkupRate')) {
     {
         if (!empty($userId)) {
             $user = getUser($userId);
-            if (!empty($user) && isset($user->is_markup_set) && $user->is_markup_set == 1) {
+            if (!empty($user) && isset($user->is_markup_set) && (int)$user->is_markup_set === 1) {
                 return (float)$user->markup_rate;
             }
         }
@@ -1059,6 +1059,45 @@ if (!function_exists('getSellerMarkupRate')) {
     }
 }
 
+//get category markup rate (handles category exception & ancestor inheritance; returns null if default/inherit)
+if (!function_exists('getCategoryMarkupRate')) {
+    function getCategoryMarkupRate($categoryId)
+    {
+        if (empty($categoryId)) {
+            return null;
+        }
+        $category = getCategory($categoryId);
+        if (empty($category)) {
+            return null;
+        }
+        if (isset($category->is_markup_set) && (int)$category->is_markup_set === 1) {
+            return (float)$category->markup_rate; // 0.0 for exempt (none), or custom rate
+        }
+
+        // Check ancestors using category_paths
+        try {
+            $db = \Config\Database::connect();
+            $parent = $db->table('category_paths cp')
+                ->select('c.markup_rate, c.is_markup_set')
+                ->join('categories c', 'cp.ancestor_id = c.id')
+                ->where('cp.descendant_id', $category->id)
+                ->where('c.is_markup_set', 1)
+                ->where('c.id !=', $category->id)
+                ->orderBy('cp.depth', 'ASC')
+                ->get()
+                ->getRow();
+
+            if (!empty($parent)) {
+                return (float)$parent->markup_rate;
+            }
+        } catch (\Exception $e) {
+            // fallback
+        }
+
+        return null;
+    }
+}
+
 //get product markup rate
 if (!function_exists('getProductMarkupRate')) {
     function getProductMarkupRate($product)
@@ -1066,11 +1105,98 @@ if (!function_exists('getProductMarkupRate')) {
         if (empty($product)) {
             return 0.0;
         }
-        if (is_object($product) && isset($product->is_markup_set) && $product->is_markup_set == 1) {
+        // 1. Product direct exception
+        if (is_object($product) && isset($product->is_markup_set) && (int)$product->is_markup_set === 1) {
             return (float)$product->markup_rate;
         }
+        // 2. Category exception (immediate or ancestor)
+        $categoryId = is_object($product) ? ($product->category_id ?? null) : null;
+        if (!empty($categoryId)) {
+            $catMarkup = getCategoryMarkupRate($categoryId);
+            if ($catMarkup !== null) {
+                return (float)$catMarkup;
+            }
+        }
+        // 3. Seller or Global setting
         $userId = is_object($product) ? ($product->user_id ?? ($product->seller_id ?? null)) : null;
         return getSellerMarkupRate($userId);
+    }
+}
+
+//get global store discount rate from settings
+if (!function_exists('getGlobalDiscountRate')) {
+    function getGlobalDiscountRate()
+    {
+        $settings = getContextValue('paymentSettings');
+        if (!empty($settings)) {
+            if (isset($settings->seller_discount_status) && (int)$settings->seller_discount_status === 0) {
+                return 0.0;
+            }
+            if (isset($settings->seller_discount_rate) && $settings->seller_discount_rate !== null) {
+                return (float)$settings->seller_discount_rate;
+            }
+        }
+        return 0.0;
+    }
+}
+
+//get category discount rate (handles category exception & ancestor inheritance; returns null if default/inherit)
+if (!function_exists('getCategoryDiscountRate')) {
+    function getCategoryDiscountRate($categoryId)
+    {
+        if (empty($categoryId)) {
+            return null;
+        }
+        $category = getCategory($categoryId);
+        if (empty($category)) {
+            return null;
+        }
+        if (isset($category->is_discount_set) && (int)$category->is_discount_set === 1) {
+            return (float)$category->discount_rate; // 0.0 for exempt (none), or custom rate
+        }
+
+        // Check ancestors using category_paths
+        try {
+            $db = \Config\Database::connect();
+            $parent = $db->table('category_paths cp')
+                ->select('c.discount_rate, c.is_discount_set')
+                ->join('categories c', 'cp.ancestor_id = c.id')
+                ->where('cp.descendant_id', $category->id)
+                ->where('c.is_discount_set', 1)
+                ->where('c.id !=', $category->id)
+                ->orderBy('cp.depth', 'ASC')
+                ->get()
+                ->getRow();
+
+            if (!empty($parent)) {
+                return (float)$parent->discount_rate;
+            }
+        } catch (\Exception $e) {
+            // fallback
+        }
+
+        return null;
+    }
+}
+
+//get product discount rate
+if (!function_exists('getProductDiscountRate')) {
+    function getProductDiscountRate($product)
+    {
+        if (empty($product)) {
+            return 0.0;
+        }
+        $categoryId = is_object($product) ? ($product->category_id ?? null) : null;
+        if (!empty($categoryId)) {
+            $catDiscount = getCategoryDiscountRate($categoryId);
+            if ($catDiscount !== null) {
+                return (float)$catDiscount;
+            }
+        }
+        if (is_object($product) && isset($product->discount_rate) && (float)$product->discount_rate > 0) {
+            return (float)$product->discount_rate;
+        }
+        return getGlobalDiscountRate();
     }
 }
 
@@ -1086,7 +1212,19 @@ if (!function_exists('calculateMarkupPrice')) {
     }
 }
 
-//apply product markup to object or array of objects
+//calculate price with discount
+if (!function_exists('calculateDiscountPrice')) {
+    function calculateDiscountPrice($price, $discountRate)
+    {
+        $price = (float)$price;
+        if ($price <= 0 || $discountRate <= 0) {
+            return $price;
+        }
+        return round($price * (1 - ($discountRate / 100)), 2);
+    }
+}
+
+//apply product markup and discount to object or array of objects
 if (!function_exists('applyProductMarkup')) {
     function applyProductMarkup($product)
     {
@@ -1105,10 +1243,13 @@ if (!function_exists('applyProductMarkup')) {
         if (!empty($product->is_markup_applied)) {
             return $product;
         }
+
         $markupRate = getProductMarkupRate($product);
         $product->base_price = (float)($product->price ?? 0);
         $product->base_price_discounted = (float)($product->price_discounted ?? 0);
         $product->markup_rate = $markupRate;
+
+        // 1. Apply Markup
         if ($markupRate > 0) {
             if (!empty($product->price) && (float)$product->price > 0) {
                 $product->price = calculateMarkupPrice($product->price, $markupRate);
@@ -1116,12 +1257,44 @@ if (!function_exists('applyProductMarkup')) {
             if (!empty($product->price_discounted) && (float)$product->price_discounted > 0) {
                 $product->price_discounted = calculateMarkupPrice($product->price_discounted, $markupRate);
             }
-            if (!empty($product->price) && !empty($product->price_discounted) && (float)$product->price_discounted < (float)$product->price) {
-                $product->discount_rate = intval((( (float)$product->price - (float)$product->price_discounted ) * 100) / (float)$product->price);
+        }
+
+        // 2. Apply Category Exception or Global Discount
+        $categoryId = $product->category_id ?? null;
+        $catDiscount = !empty($categoryId) ? getCategoryDiscountRate($categoryId) : null;
+        $globalDiscount = getGlobalDiscountRate();
+
+        if ($catDiscount !== null) {
+            // Category has explicit exception
+            if ((float)$catDiscount === 0.0) {
+                // EXEMPT from discount
+                $product->price_discounted = $product->price;
+                $product->discount_rate = 0;
+            } else {
+                // Custom category discount rate
+                $product->discount_rate = (int)round($catDiscount);
+                $product->price_discounted = calculateDiscountPrice($product->price, $catDiscount);
+            }
+        } else {
+            // Default category: inherits global store discount or seller's existing discount
+            if (!empty($product->base_price_discounted) && (float)$product->base_price_discounted < (float)$product->base_price && (float)$product->base_price_discounted > 0) {
+                // Product had a seller discount
+                if (!empty($product->price) && !empty($product->price_discounted) && (float)$product->price_discounted < (float)$product->price) {
+                    $product->discount_rate = intval((( (float)$product->price - (float)$product->price_discounted ) * 100) / (float)$product->price);
+                }
+            } elseif ($globalDiscount > 0 && !empty($product->price) && (float)$product->price > 0) {
+                // Apply global store discount
+                $product->discount_rate = (int)round($globalDiscount);
+                $product->price_discounted = calculateDiscountPrice($product->price, $globalDiscount);
+            } else {
+                $product->price_discounted = $product->price;
+                $product->discount_rate = 0;
             }
         }
+
         $product->is_markup_applied = true;
         return $product;
     }
 }
+
 

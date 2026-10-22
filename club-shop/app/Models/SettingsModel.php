@@ -594,7 +594,9 @@ class SettingsModel extends BaseModel
             'vat_status' => inputPost('vat_status'),
             'cart_location_selection' => inputPost('cart_location_selection'),
             'seller_markup_status' => !empty(inputPost('seller_markup_status')) ? 1 : 0,
-            'seller_markup_rate' => inputPost('seller_markup_rate') !== null ? (float)inputPost('seller_markup_rate') : 20.00
+            'seller_markup_rate' => inputPost('seller_markup_rate') !== null ? (float)inputPost('seller_markup_rate') : 20.00,
+            'seller_discount_status' => !empty(inputPost('seller_discount_status')) ? 1 : 0,
+            'seller_discount_rate' => inputPost('seller_discount_rate') !== null ? (float)inputPost('seller_discount_rate') : 0.00
         ];
         if (empty(inputPost('commission'))) {
             $data['commission_rate'] = 0;

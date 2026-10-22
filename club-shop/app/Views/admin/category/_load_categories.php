@@ -21,8 +21,14 @@ if (!empty($categories)):
                         <?php endif; ?>
                         <?= esc($category->cat_name); ?> <span class="id">( <?= trans("id") . ': ' . $category->id; ?>)</span></div>
                     <div class="right">
-                        <?php if ($category->is_commission_set == 1): ?>
-                            &nbsp;&nbsp;<label class="label bg-warning""><i class="fa fa-hand-holding-dollar"></i>&nbsp;<?= esc(formatDecimalClean($category->commission_rate)); ?>%</label>
+                        <?php if (isset($category->is_commission_set) && $category->is_commission_set == 1): ?>
+                            &nbsp;&nbsp;<label class="label bg-warning"><i class="fa fa-hand-holding-dollar"></i>&nbsp;<?= esc(formatDecimalClean($category->commission_rate)); ?>%</label>
+                        <?php endif;
+                        if (isset($category->is_markup_set) && $category->is_markup_set == 1): ?>
+                            &nbsp;&nbsp;<label class="label bg-purple" title="Markup Exception"><i class="fa fa-percent"></i>&nbsp;Markup: <?= $category->markup_rate > 0 ? '+' . esc(formatDecimalClean($category->markup_rate)) . '%' : '0% (Exempt)'; ?></label>
+                        <?php endif;
+                        if (isset($category->is_discount_set) && $category->is_discount_set == 1): ?>
+                            &nbsp;&nbsp;<label class="label bg-primary" title="Discount Exception"><i class="fa fa-tag"></i>&nbsp;Disc: <?= $category->discount_rate > 0 ? '-' . esc(formatDecimalClean($category->discount_rate)) . '%' : '0% (Exempt)'; ?></label>
                         <?php endif;
                         if ($category->is_featured == 1): ?>
                             <label class="label bg-teal"><?= trans("featured"); ?></label>

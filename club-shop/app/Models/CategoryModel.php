@@ -360,6 +360,10 @@ class CategoryModel extends BaseModel
 
         // set commission
         $data = setCommissionFormValues($data);
+        // set markup exception
+        $data = setMarkupFormValues($data);
+        // set discount exception
+        $data = setDiscountFormValues($data);
 
         return $data;
     }

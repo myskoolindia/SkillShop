@@ -70,15 +70,45 @@
                     <div class="form-group">
                         <label for="commission_mode"><?= trans("commission"); ?></label>
                         <select name="commission_mode" id="commission_mode" class="form-control">
-                            <option value="default" <?= $category->is_commission_set == 0 ? 'selected' : ''; ?>><?= trans("default"); ?></option>
-                            <option value="custom" <?= $category->is_commission_set == 1 && $category->commission_rate > 0 ? 'selected' : ''; ?>><?= trans("custom"); ?></option>
-                            <option value="none" <?= $category->is_commission_set == 1 && $category->commission_rate == 0 ? 'selected' : ''; ?>><?= trans("none"); ?> (0%)</option>
+                            <option value="default" <?= (!isset($category->is_commission_set) || $category->is_commission_set == 0) ? 'selected' : ''; ?>><?= trans("default"); ?></option>
+                            <option value="custom" <?= (isset($category->is_commission_set) && $category->is_commission_set == 1 && $category->commission_rate > 0) ? 'selected' : ''; ?>><?= trans("custom"); ?></option>
+                            <option value="none" <?= (isset($category->is_commission_set) && $category->is_commission_set == 1 && $category->commission_rate == 0) ? 'selected' : ''; ?>><?= trans("none"); ?> (0%)</option>
                         </select>
                     </div>
 
-                    <div class="form-group" id="custom_commission_input" style="<?= $category->is_commission_set == 1 && $category->commission_rate > 0 ? '' : 'display: none;'; ?>">
+                    <div class="form-group" id="custom_commission_input" style="<?= (isset($category->is_commission_set) && $category->is_commission_set == 1 && $category->commission_rate > 0) ? '' : 'display: none;'; ?>">
                         <label><?= trans('commission_rate'); ?>&nbsp;(%)</label>
-                        <input type="number" name="commission_rate" id="commission_rate" class="form-control" min="0" max="99.99" step="0.01" value="<?= $category->commission_rate > 0 ? esc(formatDecimalClean($category->commission_rate)) : ''; ?>" placeholder="E.g. 5">
+                        <input type="number" name="commission_rate" id="commission_rate" class="form-control" min="0" max="99.99" step="0.01" value="<?= (isset($category->commission_rate) && $category->commission_rate > 0) ? esc(formatDecimalClean($category->commission_rate)) : ''; ?>" placeholder="E.g. 5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="markup_mode"><?= trans("seller_markup"); ?> (Markup Exception)</label>
+                        <select name="markup_mode" id="markup_mode" class="form-control">
+                            <option value="default" <?= (!isset($category->is_markup_set) || $category->is_markup_set == 0) ? 'selected' : ''; ?>><?= trans("default"); ?> (Inherit Global/Parent)</option>
+                            <option value="custom" <?= (isset($category->is_markup_set) && $category->is_markup_set == 1 && $category->markup_rate > 0) ? 'selected' : ''; ?>><?= trans("custom"); ?></option>
+                            <option value="none" <?= (isset($category->is_markup_set) && $category->is_markup_set == 1 && $category->markup_rate == 0) ? 'selected' : ''; ?>><?= trans("none"); ?> (0% / Exempt)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="custom_markup_input" style="<?= (isset($category->is_markup_set) && $category->is_markup_set == 1 && $category->markup_rate > 0) ? '' : 'display: none;'; ?>">
+                        <label><?= trans('markup_rate'); ?>&nbsp;(%)</label>
+                        <input type="number" name="markup_rate" id="markup_rate" class="form-control" min="0" max="999.99" step="0.01" value="<?= (isset($category->markup_rate) && $category->markup_rate > 0) ? esc(formatDecimalClean($category->markup_rate)) : ''; ?>" placeholder="E.g. 15">
+                        <small class="text-muted">Custom markup rate for products under this category (overrides global markup).</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="discount_mode">Store Discount (Discount Exception)</label>
+                        <select name="discount_mode" id="discount_mode" class="form-control">
+                            <option value="default" <?= (!isset($category->is_discount_set) || $category->is_discount_set == 0) ? 'selected' : ''; ?>><?= trans("default"); ?> (Inherit Global/Parent)</option>
+                            <option value="custom" <?= (isset($category->is_discount_set) && $category->is_discount_set == 1 && $category->discount_rate > 0) ? 'selected' : ''; ?>><?= trans("custom"); ?></option>
+                            <option value="none" <?= (isset($category->is_discount_set) && $category->is_discount_set == 1 && $category->discount_rate == 0) ? 'selected' : ''; ?>><?= trans("none"); ?> (0% / Exempt)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="custom_discount_input" style="<?= (isset($category->is_discount_set) && $category->is_discount_set == 1 && $category->discount_rate > 0) ? '' : 'display: none;'; ?>">
+                        <label>Discount Rate&nbsp;(%)</label>
+                        <input type="number" name="discount_rate" id="discount_rate" class="form-control" min="0" max="99.99" step="0.01" value="<?= (isset($category->discount_rate) && $category->discount_rate > 0) ? esc(formatDecimalClean($category->discount_rate)) : ''; ?>" placeholder="E.g. 10">
+                        <small class="text-muted">Custom discount rate for products under this category (overrides global store discount).</small>
                     </div>
 
                     <div class="form-group">

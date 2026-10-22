@@ -449,6 +449,34 @@
                         </div>
                     </div>
 
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; margin: 20px 0;">
+                        <div class="form-group" style="margin-bottom: 12px;">
+                            <div class="m-b-10">
+                                <label style="font-size: 15px; font-weight: 600; color: #1e293b;"><i class="fa fa-tag text-success"></i> Store / Global Discount</label><br>
+                                <small style="font-size: 13px; color: #64748b;">Enable or disable default discount applied across products in the store. Can be customized or exempted per category.</small>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 col-xs-12">
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" name="seller_discount_status" value="1" id="seller_discount_status_1" class="custom-control-input radio-seller-discount" <?= (!empty($paymentSettings->seller_discount_status)) ? 'checked' : ''; ?>>
+                                        <label for="seller_discount_status_1" class="custom-control-label"><?= trans("enable"); ?></label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-xs-12">
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" name="seller_discount_status" value="0" id="seller_discount_status_2" class="custom-control-input radio-seller-discount" <?= (empty($paymentSettings->seller_discount_status)) ? 'checked' : ''; ?>>
+                                        <label for="seller_discount_status_2" class="custom-control-label"><?= trans("disable"); ?></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="sellerDiscountRateContainer" class="form-group" <?= empty($paymentSettings->seller_discount_status) ? 'style="display:none; margin-bottom: 0;"' : 'style="margin-bottom: 0;"'; ?>>
+                            <label>Default Store Discount Rate (%)</label>
+                            <input type="number" name="seller_discount_rate" class="form-control" min="0" max="99.99" step="0.01" value="<?= isset($paymentSettings->seller_discount_rate) ? $paymentSettings->seller_discount_rate : 0.00; ?>" placeholder="E.g. 10">
+                            <small class="text-muted" style="display:block; margin-top:4px;">Default discount percentage applied to marked-up store listing prices.</small>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <div class="m-b-10">
                             <label><?= trans('vat'); ?>&nbsp;(<?= trans("vat_exp"); ?>)</label><br>
@@ -628,6 +656,15 @@
             $('#sellerMarkupRateContainer').show();
         } else {
             $('#sellerMarkupRateContainer').hide();
+        }
+    });
+
+    $(document).on("change", ".radio-seller-discount", function () {
+        var val = $('input[name="seller_discount_status"]:checked').val();
+        if (val == '1') {
+            $('#sellerDiscountRateContainer').show();
+        } else {
+            $('#sellerDiscountRateContainer').hide();
         }
     });
 </script>

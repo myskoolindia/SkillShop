@@ -63,6 +63,36 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="markup_mode"><?= trans("seller_markup"); ?> (Markup Exception)</label>
+                        <select name="markup_mode" id="markup_mode" class="form-control">
+                            <option value="default"><?= trans("default"); ?> (Inherit Global/Parent)</option>
+                            <option value="custom"><?= trans("custom"); ?></option>
+                            <option value="none"><?= trans("none"); ?> (0% / Exempt)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="custom_markup_input" style="display: none">
+                        <label><?= trans('markup_rate'); ?>&nbsp;(%)</label>
+                        <input type="number" name="markup_rate" id="markup_rate" class="form-control" min="0" max="999.99" step="0.01" placeholder="E.g. 15">
+                        <small class="text-muted">Custom markup rate for products under this category (overrides global markup).</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="discount_mode">Store Discount (Discount Exception)</label>
+                        <select name="discount_mode" id="discount_mode" class="form-control">
+                            <option value="default"><?= trans("default"); ?> (Inherit Global/Parent)</option>
+                            <option value="custom"><?= trans("custom"); ?></option>
+                            <option value="none"><?= trans("none"); ?> (0% / Exempt)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="custom_discount_input" style="display: none">
+                        <label>Discount Rate&nbsp;(%)</label>
+                        <input type="number" name="discount_rate" id="discount_rate" class="form-control" min="0" max="99.99" step="0.01" placeholder="E.g. 10">
+                        <small class="text-muted">Custom discount rate for products under this category (overrides global store discount).</small>
+                    </div>
+
+                    <div class="form-group">
                         <?= formSwitch('status', trans('status'), 1); ?>
                     </div>
 
