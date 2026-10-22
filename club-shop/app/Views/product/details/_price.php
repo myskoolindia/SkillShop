@@ -17,18 +17,14 @@
         </div>
     <?php else:
         if (!empty($productPrice)):?>
-            <div id="div-product-discounted-price" class="<?= $productDiscountRate > 0 ? 'text-product-discounted' : ''; ?>">
+            <div id="div-product-price" style="<?= $productDiscountRate > 0 ? 'display:inline-block; margin-right:8px;' : 'display:none;'; ?>">
+                <del class="original-price" style="font-size:18px; color:#868e96; text-decoration:line-through;"><?= $productPrice; ?></del>
+            </div>
+            <div id="div-product-discounted-price" class="<?= $productDiscountRate > 0 ? 'text-product-discounted' : ''; ?>" style="display:inline-block;">
                 <span class="final-price"><?= $productPriceDiscounted; ?></span>
             </div>
-            <div id="div-product-price">
-                <?php if ($productDiscountRate > 0): ?>
-                    <span class="original-price"><?= $productPrice; ?></span>
-                <?php endif; ?>
-            </div>
-            <div id="div-product-discount-rate">
-                <?php if ($productDiscountRate > 0): ?>
-                    <span class="discount-rate">-<?= discountRateFormat($productDiscountRate); ?></span>
-                <?php endif; ?>
+            <div id="div-product-discount-rate" style="<?= $productDiscountRate > 0 ? 'display:inline-block; margin-left:8px;' : 'display:none;'; ?>">
+                <span class="discount-rate">-<?= discountRateFormat($productDiscountRate); ?></span>
             </div>
         <?php endif;
     endif; ?>

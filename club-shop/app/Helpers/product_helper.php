@@ -1262,15 +1262,12 @@ if (!function_exists('applyProductMarkup')) {
         $product->base_price_discounted = (float)($product->price_discounted ?? 0);
         $product->markup_rate = $markupRate;
 
-        // 1. Apply Markup
-        if ($markupRate > 0) {
-            if (!empty($product->price) && (float)$product->price > 0) {
-                $product->price = calculateMarkupPrice($product->price, $markupRate);
-            }
-            if (!empty($product->price_discounted) && (float)$product->price_discounted > 0) {
-                $product->price_discounted = calculateMarkupPrice($product->price_discounted, $markupRate);
-            }
+        // 1. Apply Markup to base price
+        $markedPrice = (float)$product->base_price;
+        if ($markupRate > 0 && $markedPrice > 0) {
+            $markedPrice = calculateMarkupPrice($markedPrice, $markupRate);
         }
+        $product->price = $markedPrice;
 
         // 2. Apply Category Exception or Global Discount
         $categoryId = $product->category_id ?? null;
@@ -1284,19 +1281,23 @@ if (!function_exists('applyProductMarkup')) {
                 $product->price_discounted = $product->price;
                 $product->discount_rate = 0;
             } else {
-                // Custom category discount rate
+                // Custom category discount rate applied on base price
                 $product->discount_rate = (int)round($catDiscount);
-                $product->price_discounted = calculateDiscountPrice($product->price, $catDiscount);
+                $discountAmount = round($product->base_price * ($catDiscount / 100), 2);
+                $product->price_discounted = max(0, round($product->price - $discountAmount, 2));
             }
         } elseif ($globalDiscount > 0 && !empty($product->price) && (float)$product->price > 0) {
-            // Apply global store discount to default categories
+            // Apply global store discount to default categories based on base price
             $product->discount_rate = (int)round($globalDiscount);
-            $product->price_discounted = calculateDiscountPrice($product->price, $globalDiscount);
+            $discountAmount = round($product->base_price * ($globalDiscount / 100), 2);
+            $product->price_discounted = max(0, round($product->price - $discountAmount, 2));
         } else {
             // No category exception and no global discount: fall back to product's own original seller discount
             if (!empty($product->base_price_discounted) && (float)$product->base_price_discounted < (float)$product->base_price && (float)$product->base_price_discounted > 0) {
-                if (!empty($product->price) && !empty($product->price_discounted) && (float)$product->price_discounted < (float)$product->price) {
-                    $product->discount_rate = intval((( (float)$product->price - (float)$product->price_discounted ) * 100) / (float)$product->price);
+                $sellerDiscountAmount = round((float)$product->base_price - (float)$product->base_price_discounted, 2);
+                $product->price_discounted = max(0, round((float)$product->price - $sellerDiscountAmount, 2));
+                if (!empty($product->price) && (float)$product->price > 0 && (float)$product->price_discounted < (float)$product->price) {
+                    $product->discount_rate = (int)round((( (float)$product->price - (float)$product->price_discounted ) * 100) / (float)$product->price);
                 }
             } else {
                 $product->price_discounted = $product->price;

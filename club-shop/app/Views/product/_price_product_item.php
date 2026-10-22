@@ -28,8 +28,8 @@ if (!empty($product->price)) {
         <a href="<?= generateProductUrl($product); ?>" class="a-meta-request-quote"><?= trans("request_a_quote") ?></a>
     <?php elseif (!empty($product->price) && $product->price > 0): ?>
         <?php if ($baseVars->isPriceSingleLine): ?>
-            <?= $discountedPriceHtml ?>
             <?= $originalPriceHtml ?>
+            <?= $discountedPriceHtml ?>
         <?php else: ?>
             <?= $originalPriceHtml ?>
             <?php if ($hasDiscount): ?><br><?php endif; ?>

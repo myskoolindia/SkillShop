@@ -473,18 +473,14 @@
                                                     </div>
                                                 <?php else:
                                                     if (!empty($prdtPrice)):?>
-                                                        <div id="div-product-discounted-price" class="<?= $prdtDiscountRate > 0 ? 'text-product-discounted' : ''; ?>">
+                                                        <div id="div-product-price" style="<?= $prdtDiscountRate > 0 ? 'display:inline-block; margin-right:8px;' : 'display:none;'; ?>">
+                                                            <del class="original-price" style="font-size:18px; color:#868e96; text-decoration:line-through;"><?= $prdtPrice; ?></del>
+                                                        </div>
+                                                        <div id="div-product-discounted-price" class="<?= $prdtDiscountRate > 0 ? 'text-product-discounted' : ''; ?>" style="display:inline-block;">
                                                             <span class="final-price"><?= $prdtPriceDiscounted; ?></span>
                                                         </div>
-                                                        <div id="div-product-price">
-                                                            <?php if ($prdtDiscountRate > 0): ?>
-                                                                <span class="original-price"><?= $prdtPrice; ?></span>
-                                                            <?php endif; ?>
-                                                        </div>
-                                                        <div id="div-product-discount-rate">
-                                                            <?php if ($prdtDiscountRate > 0): ?>
-                                                                <span class="discount-rate">-<?= discountRateFormat($prdtDiscountRate); ?></span>
-                                                            <?php endif; ?>
+                                                        <div id="div-product-discount-rate" style="<?= $prdtDiscountRate > 0 ? 'display:inline-block; margin-left:8px;' : 'display:none;'; ?>">
+                                                            <span class="discount-rate">-<?= discountRateFormat($prdtDiscountRate); ?></span>
                                                         </div>
                                                     <?php endif;
                                                 endif; ?>

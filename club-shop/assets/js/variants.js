@@ -210,8 +210,8 @@
 
                             if (variant.discount_rate > 0) {
                                 if (elements.price) {
-                                    elements.price.innerHTML = `<span class="original-price">${variant.price}</span>`;
-                                    elements.price.style.display = '';
+                                    elements.price.innerHTML = `<del class="original-price">${variant.price}</del>`;
+                                    elements.price.style.display = 'inline-block';
                                 }
                                 if (elements.priceDiscountRate) {
                                     elements.priceDiscountRate.innerHTML = `<span class="discount-rate">-${variant.discount_rate}%</span>`;

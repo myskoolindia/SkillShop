@@ -109,9 +109,11 @@ class ProductOptionsModel extends Model
 
         $variantsResult = $builder->get()->getResultObject();
         $markupRate = 0;
+        $discountRate = 0;
         if ($onlyActiveVariants) {
             $product = getProduct($productId);
             $markupRate = getProductMarkupRate($product);
+            $discountRate = !empty($product->discount_rate) ? (float)$product->discount_rate : 0;
         }
 
         foreach ($variantsResult as $variantRow) {
@@ -119,15 +121,22 @@ class ProductOptionsModel extends Model
 
             if (!empty($variantComposition['value_ids'])) {
                 sort($variantComposition['value_ids'], SORT_NUMERIC);
-                $vPrice = $variantRow->price;
-                $vPriceDiscounted = $variantRow->price_discounted;
-                if ($markupRate > 0) {
-                    if (!empty($vPrice) && (float)$vPrice > 0) {
-                        $vPrice = calculateMarkupPrice($vPrice, $markupRate);
-                    }
-                    if (!empty($vPriceDiscounted) && (float)$vPriceDiscounted > 0) {
-                        $vPriceDiscounted = calculateMarkupPrice($vPriceDiscounted, $markupRate);
-                    }
+                $basePrice = (float)($variantRow->price ?? 0);
+                $baseDiscounted = (float)($variantRow->price_discounted ?? 0);
+
+                $vPrice = $basePrice;
+                if ($markupRate > 0 && $vPrice > 0) {
+                    $vPrice = calculateMarkupPrice($vPrice, $markupRate);
+                }
+
+                if ($discountRate > 0 && $vPrice > 0) {
+                    $dAmount = round($basePrice * ($discountRate / 100), 2);
+                    $vPriceDiscounted = max(0, round($vPrice - $dAmount, 2));
+                } elseif ($baseDiscounted > 0 && $baseDiscounted < $basePrice) {
+                    $sellerD = round($basePrice - $baseDiscounted, 2);
+                    $vPriceDiscounted = max(0, round($vPrice - $sellerD, 2));
+                } else {
+                    $vPriceDiscounted = $vPrice;
                 }
                 $variantsData[] = [
                     'id' => $variantRow->id,
@@ -439,19 +448,7 @@ class ProductOptionsModel extends Model
         }
 
         $v = $this->db->table('product_option_variants')->where('sku', $sku)->where('product_id', clrNum($productId))->get()->getRow();
-        if ($v && !empty($v->product_id)) {
-            $product = getProduct($v->product_id);
-            $markupRate = getProductMarkupRate($product);
-            if ($markupRate > 0) {
-                if (!empty($v->price) && (float)$v->price > 0) {
-                    $v->price = calculateMarkupPrice($v->price, $markupRate);
-                }
-                if (!empty($v->price_discounted) && (float)$v->price_discounted > 0) {
-                    $v->price_discounted = calculateMarkupPrice($v->price_discounted, $markupRate);
-                }
-            }
-        }
-        return $v;
+        return $this->applyPricingToVariant($v);
     }
 
     /**
@@ -463,19 +460,7 @@ class ProductOptionsModel extends Model
     public function getDefaultVariant(int $productId)
     {
         $v = $this->db->table('product_option_variants')->where('product_id', $productId)->where('is_active', 1)->orderBy('is_default DESC, id')->limit(1)->get()->getRow();
-        if ($v && !empty($v->product_id)) {
-            $product = getProduct($v->product_id);
-            $markupRate = getProductMarkupRate($product);
-            if ($markupRate > 0) {
-                if (!empty($v->price) && (float)$v->price > 0) {
-                    $v->price = calculateMarkupPrice($v->price, $markupRate);
-                }
-                if (!empty($v->price_discounted) && (float)$v->price_discounted > 0) {
-                    $v->price_discounted = calculateMarkupPrice($v->price_discounted, $markupRate);
-                }
-            }
-        }
-        return $v;
+        return $this->applyPricingToVariant($v);
     }
 
     /**
@@ -961,37 +946,55 @@ class ProductOptionsModel extends Model
     public function getVariantById($id)
     {
         $v = $this->db->table('product_option_variants')->where('id', clrNum($id))->get()->getRow();
-        if ($v && !empty($v->product_id)) {
-            $product = getProduct($v->product_id);
-            $markupRate = getProductMarkupRate($product);
-            if ($markupRate > 0) {
-                if (!empty($v->price) && (float)$v->price > 0) {
-                    $v->price = calculateMarkupPrice($v->price, $markupRate);
-                }
-                if (!empty($v->price_discounted) && (float)$v->price_discounted > 0) {
-                    $v->price_discounted = calculateMarkupPrice($v->price_discounted, $markupRate);
-                }
-            }
-        }
-        return $v;
+        return $this->applyPricingToVariant($v);
     }
 
     //get variation by hash
     public function getVariantByHash($hash)
     {
         $v = $this->db->table('product_option_variants')->where('variant_hash', cleanStr($hash))->get()->getRow();
-        if ($v && !empty($v->product_id)) {
-            $product = getProduct($v->product_id);
-            $markupRate = getProductMarkupRate($product);
-            if ($markupRate > 0) {
-                if (!empty($v->price) && (float)$v->price > 0) {
-                    $v->price = calculateMarkupPrice($v->price, $markupRate);
-                }
-                if (!empty($v->price_discounted) && (float)$v->price_discounted > 0) {
-                    $v->price_discounted = calculateMarkupPrice($v->price_discounted, $markupRate);
-                }
-            }
+        return $this->applyPricingToVariant($v);
+    }
+
+    /**
+     * Apply markup and discount consistently to a variant object
+     */
+    public function applyPricingToVariant($v, $product = null)
+    {
+        if (empty($v) || empty($v->product_id)) {
+            return $v;
         }
+        if (empty($product) || $product->id != $v->product_id) {
+            $product = getProduct($v->product_id);
+        }
+        if (empty($product)) {
+            return $v;
+        }
+
+        $markupRate = getProductMarkupRate($product);
+        $discountRate = !empty($product->discount_rate) ? (float)$product->discount_rate : 0;
+
+        $basePrice = (float)($v->price ?? 0);
+        $baseDiscountedPrice = (float)($v->price_discounted ?? 0);
+        $v->base_price = $basePrice;
+        $v->base_price_discounted = $baseDiscountedPrice;
+
+        $markedPrice = $basePrice;
+        if ($markupRate > 0 && $markedPrice > 0) {
+            $markedPrice = calculateMarkupPrice($markedPrice, $markupRate);
+        }
+        $v->price = $markedPrice;
+
+        if ($discountRate > 0 && $markedPrice > 0) {
+            $discountAmount = round($basePrice * ($discountRate / 100), 2);
+            $v->price_discounted = max(0, round($markedPrice - $discountAmount, 2));
+        } elseif ($baseDiscountedPrice > 0 && $baseDiscountedPrice < $basePrice) {
+            $sellerDiscountAmount = round($basePrice - $baseDiscountedPrice, 2);
+            $v->price_discounted = max(0, round($markedPrice - $sellerDiscountAmount, 2));
+        } else {
+            $v->price_discounted = $markedPrice;
+        }
+
         return $v;
     }
 }
