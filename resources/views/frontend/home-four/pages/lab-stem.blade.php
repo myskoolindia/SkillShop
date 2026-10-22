@@ -3392,7 +3392,7 @@
               <h3>Select Lab Components Across Any Package with <span class="vl-grad-violet">AI Intelligence</span></h3>
               <p>Explore and customize equipment across Basic, Advance, and Premium packages. The intelligent engine validates CBSE Circular Skill-75/2024 compliance and balances your campus budget in real time.</p>
             </div>
-            <div class="vl-ps-header-actions">
+            <!-- <div class="vl-ps-header-actions">
               <button type="button" class="vl-ps-cat-suggest-btn" id="psCatSuggestBtn" onclick="autoSuggestForActiveCategory()">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
                 <span id="psCatSuggestBtnLabel">Suggest for Current Category</span>
@@ -3401,7 +3401,7 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
                 <span>Auto-Suggest Best Mix for Budget</span>
               </button>
-            </div>
+            </div> -->
           </div>
 
           {{-- Intelligence Meter Strip --}}
@@ -3436,64 +3436,6 @@
                 <span id="psFeedbackText">Click "Auto-Suggest Best Mix" or check individual products below to build your custom package.</span>
               </div>
 
-              {{-- CBSE 3 Forms Compliance Tags --}}
-              <div class="vl-ps-cbse-meter">
-                <span style="font-size:0.75rem; color:#64748b; text-transform:uppercase;">CBSE Compliance:</span>
-                <span class="vl-ps-cbse-pill" id="psPillForm1">Form 1: Life Forms (0)</span>
-                <span class="vl-ps-cbse-pill" id="psPillForm2">Form 2: Machines (0)</span>
-                <span class="vl-ps-cbse-pill" id="psPillForm3">Form 3: Digital/AI (0)</span>
-                <span class="vl-ps-cbse-pill" id="psPillInfra">Infra &amp; Lab (0)</span>
-              </div>
-            </div>
-
-            {{-- Category Allocation Breakdown --}}
-            <div class="vl-ps-alloc-grid">
-              <div class="vl-ps-alloc-card">
-                <div class="vl-ps-alloc-title">
-                  <span>Form 1: Life Forms</span>
-                  <span id="allocPillForm1" style="font-size:0.7rem;color:#059669;font-weight:700;">₹0</span>
-                </div>
-                <div class="vl-ps-alloc-val" id="allocValForm1">₹0 <span style="font-size:0.72rem;color:#94a3b8;font-weight:500;">/ ~20%</span></div>
-                <div class="vl-ps-alloc-bar"><div class="vl-ps-alloc-fill" id="allocFillForm1" style="width:0%;background:#059669;"></div></div>
-              </div>
-              <div class="vl-ps-alloc-card">
-                <div class="vl-ps-alloc-title">
-                  <span>Form 2: Machines/IoT</span>
-                  <span id="allocPillForm2" style="font-size:0.7rem;color:#2563eb;font-weight:700;">₹0</span>
-                </div>
-                <div class="vl-ps-alloc-val" id="allocValForm2">₹0 <span style="font-size:0.72rem;color:#94a3b8;font-weight:500;">/ ~35%</span></div>
-                <div class="vl-ps-alloc-bar"><div class="vl-ps-alloc-fill" id="allocFillForm2" style="width:0%;background:#2563eb;"></div></div>
-              </div>
-              <div class="vl-ps-alloc-card">
-                <div class="vl-ps-alloc-title">
-                  <span>Form 3: Digital &amp; AI</span>
-                  <span id="allocPillForm3" style="font-size:0.7rem;color:#7c3aed;font-weight:700;">₹0</span>
-                </div>
-                <div class="vl-ps-alloc-val" id="allocValForm3">₹0 <span style="font-size:0.72rem;color:#94a3b8;font-weight:500;">/ ~25%</span></div>
-                <div class="vl-ps-alloc-bar"><div class="vl-ps-alloc-fill" id="allocFillForm3" style="width:0%;background:#7c3aed;"></div></div>
-              </div>
-              <div class="vl-ps-alloc-card">
-                <div class="vl-ps-alloc-title">
-                  <span>Infra &amp; Training</span>
-                  <span id="allocPillInfra" style="font-size:0.7rem;color:#d97706;font-weight:700;">₹0</span>
-                </div>
-                <div class="vl-ps-alloc-val" id="allocValInfra">₹0 <span style="font-size:0.72rem;color:#94a3b8;font-weight:500;">/ ~20%</span></div>
-                <div class="vl-ps-alloc-bar"><div class="vl-ps-alloc-fill" id="allocFillInfra" style="width:0%;background:#d97706;"></div></div>
-              </div>
-            </div>
-          </div>
-
-          {{-- Intelligent Suggestion Shelf --}}
-          <div class="vl-ps-shelf" id="psSmartShelf">
-            <div class="vl-ps-shelf-head">
-              <div class="vl-ps-shelf-title">
-                <span class="vl-sparkle-pill">⚡ AI Smart Recommender</span>
-                <span id="psShelfCategoryTitle">Suggested Additions for Active Selection</span>
-              </div>
-              <span class="vl-ps-shelf-meta" id="psShelfBudgetHint">Fits within remaining budget</span>
-            </div>
-            <div class="vl-ps-shelf-cards" id="psShelfCardsGrid">
-              {{-- Dynamically generated by JS with top 3 matching products --}}
             </div>
           </div>
 
@@ -3549,7 +3491,7 @@
 
       <p style="margin-top:30px; font-size:0.92rem; color:var(--vl-muted); text-align:center; font-weight:500;">
         All package prices and suggestions are indicative turnkey estimates. Exact formal quote is finalized after free architectural &amp; electrical spatial assessment. &nbsp;·&nbsp;
-        <a href="#checklist" style="color:#db2777; font-weight:800; text-decoration:underline;">Contact our advisors</a> for trust &amp; multi-branch group concessions.
+        <a href="#demo" style="color:#db2777; font-weight:800; text-decoration:underline;">Contact our advisors</a> for trust &amp; multi-branch group concessions.
       </p>
     </div>
   </section>
@@ -3873,7 +3815,7 @@
       </div>
 
       <!-- Right: Form -->
-      <div class="lg:col-span-7" id="planEnquiryForm11>
+      <div class="lg:col-span-7">
         <div class="bg-white/95 rounded-3xl p-6 sm:p-8 shadow-xl border border-white/80">
           <h3 class="text-lg font-black text-brand-navy mb-1">Talk to Our Team</h3>
           <p class="text-xs text-slate-500 mb-6">Fill out the form and we'll reach out to explore the right Skillvation Lab for your school.</p>
@@ -3883,6 +3825,7 @@
                 data-title="Skillvation Lab — Enquiry">
             <input type="hidden" name="source"       id="planSource">
             <input type="hidden" name="course_title" id="planTitle">
+            <input type="hidden" name="quotation"    id="planQuotation">
 
             <div>
               <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">School Name *</label>
@@ -4749,14 +4692,59 @@ Promise.all([
 
       // ── Custom Proposal Modal Open / Close ───────────────────
       window.openCustomProposalModal = function () {
-        const modal = document.getElementById('customProposalModal');
-        const form  = document.getElementById('customProposalForm');
-        const conf  = document.getElementById('cpConfirmMsg');
-        if (modal) {
-          modal.style.display = 'flex';
-          document.body.style.overflow = 'hidden';
-          if (form) form.style.display = '';
-          if (conf) conf.style.display = 'none';
+        // Build a summary of the currently selected items.
+        const items = [];
+        let total = 0;
+        for (const id in selectedProducts) {
+          const sel = selectedProducts[id];
+          if (!sel || !sel.item) continue;
+          const lineTotal = (sel.item.price || 0) * (sel.qty || 1);
+          total += lineTotal;
+          items.push({
+            product_id: sel.item.real_id || null,
+            title: sel.item.title,
+            category: sel.item.real_category || sel.item.catLabel || '',
+            qty: sel.qty || 1,
+            unit_price: sel.item.price || 0,
+            total_price: lineTotal
+          });
+        }
+
+        // Populate the enquiry form's hidden quotation field (JSON for the backend).
+        const qEl = document.getElementById('planQuotation');
+        if (qEl) {
+          qEl.value = JSON.stringify({
+            type: 'custom_package_advisor',
+            budget_lakhs: state.budget,
+            students: state.students,
+            total_amount: total,
+            item_count: items.length,
+            items: items
+          });
+        }
+
+        // Pre-fill the requirements box with a human-readable summary.
+        const msgBox = document.querySelector('#planEnquiryForm textarea[name="address"]');
+        if (msgBox) {
+          let txt = 'Custom Package Advisor request\n';
+          txt += 'Target budget: ₹' + Number(state.budget).toFixed(2) + ' Lakh · Students: ' + state.students + '\n';
+          txt += 'Selected items (' + items.length + ') — Total ₹' + total.toLocaleString('en-IN') + ':\n';
+          items.forEach(function (it) {
+            txt += '• ' + it.title + ' × ' + it.qty + ' (₹' + it.total_price.toLocaleString('en-IN') + ')\n';
+          });
+          // Only overwrite if the user hasn't typed something custom already.
+          if (!msgBox.value || msgBox.dataset.autofilled === '1') {
+            msgBox.value = txt;
+            msgBox.dataset.autofilled = '1';
+          }
+        }
+
+        // Scroll to the enquiry form so the user can complete the request.
+        const target = document.getElementById('demo');
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          const firstInput = document.querySelector('#planEnquiryForm input[name="school"]');
+          if (firstInput) setTimeout(function () { firstInput.focus(); }, 500);
         }
       };
 
@@ -5191,6 +5179,11 @@ Promise.all([
         }
         renderProductCatalog();
         updateProductSelectionIntelligence();
+      };
+
+      // Toggle a product card's selected state (used by the product grid onclick)
+      window.toggleProductSelection = function (id) {
+        window.selectSingleProduct(id);
       };
 
       // Adjust quantity
