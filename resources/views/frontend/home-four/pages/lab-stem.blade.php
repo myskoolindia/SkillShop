@@ -3955,6 +3955,16 @@ var THEMES = [
 ];
 var DEFAULT_THEME = { hdrBg:'#28246f', border:'#bfdbfe', bg:'#eff6ff', dotColor:'#28246f', hoverBg:'#dbeafe', shadow:false };
 
+// Position-based palette: 1st box blue, 2nd green, 3rd orange (then repeats)
+var POSITION_THEMES = [
+  { hdrBg:'#28246f', border:'#bfdbfe', bg:'#eff6ff', dotColor:'#28246f', hoverBg:'#dbeafe', shadow:false }, // blue
+  { hdrBg:'#059669', border:'#a7f3d0', bg:'#f0fdf4', dotColor:'#059669', hoverBg:'#dcfce7', shadow:false }, // green
+  { hdrBg:'#f4742b', border:'#fed7aa', bg:'#fff7ed', dotColor:'#f4742b', hoverBg:'#ffedd5', shadow:false }, // orange
+];
+
+function getThemeByIndex(idx){
+  return POSITION_THEMES[idx % POSITION_THEMES.length];
+}
 function getTheme(parentName){
   var n = (parentName||'').toLowerCase();
   for(var i=0;i<THEMES.length;i++)
@@ -4124,8 +4134,6 @@ function buildBox(parentName, parentId, subGroups, theme, productUrl, isCenter){
   var hdr = '<div style="background:'+theme.hdrBg+';padding:13px 18px;display:flex;align-items:center;gap:10px;">'
     +'<i class="fa-solid '+getIcon(parentName)+'" style="color:#fff;font-size:16px;"></i>'
     +'<span style="font-weight:700;color:#fff;font-size:15.5px;">'+esc(parentName)+'</span>'
-    +'<span style="margin-left:auto;background:rgba(255,255,255,.22);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">'
-      +catNames.length+' categor'+(catNames.length!==1?'ies':'y')
     +'</span>'
   +'</div>';
 
@@ -4210,9 +4218,9 @@ Promise.all([
   if(contentEl) contentEl.classList.remove('hidden');
 
   boxesEl.innerHTML = '';
-  parentIds.forEach(function(pid){
+  parentIds.forEach(function(pid, idx){
     var g      = groups[pid];
-    var theme  = getTheme(g.name);
+    var theme  = getThemeByIndex(idx); // 1st blue, 2nd green, 3rd orange, repeating
     var isCenter = (pid===maxKey && parentIds.length>1);
     var box    = buildBox(g.name, pid, g.subGroups, theme, productUrl, isCenter);
     boxesEl.appendChild(box);
