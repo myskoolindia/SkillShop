@@ -52,6 +52,9 @@
                 $itemIndex = 0;
                 $totalItemCount = count($cart->items);
                 foreach ($cart->items as $cartItem): 
+                    if ((int)($cartItem->quantity ?? 0) <= 0) {
+                        continue;
+                    }
                     $itemIndex++;
                 ?>
                     <?php
@@ -133,7 +136,8 @@
                         <!-- Collapsible Full Width Bundle Items Breakdown -->
                         <?php if(!empty($cartItem->is_bundle) && (!empty($cartItem->bundle_categories) || !empty($cartItem->bundle_products) || !empty($cartItem->bundle_summary))): 
                             $bundleCollapseId = 'collapse_bundle_' . $cartItem->product_id . '_' . $itemIndex;
-                            $bundleItemCount = !empty($cartItem->bundle_products) ? count($cartItem->bundle_products) : (!empty($cartItem->bundle_summary) ? count($cartItem->bundle_summary) : 0);
+                            $activeBundleProds = array_filter($cartItem->bundle_products ?? [], function($p) { return (int)($p->quantity ?? 0) > 0; });
+                            $bundleItemCount = !empty($activeBundleProds) ? count($activeBundleProds) : (!empty($cartItem->bundle_summary) ? count($cartItem->bundle_summary) : 0);
                         ?>
                             <div class="bundle-collapse-wrapper" style="margin-top: 8px;">
                                 <a class="bundle-toggle-btn collapsed" 
@@ -155,7 +159,14 @@
                                 <div class="collapse" id="<?= $bundleCollapseId; ?>">
                                     <?php if(!empty($cartItem->bundle_categories)): ?>
                                         <div class="bundle-items-summary" style="margin-top: 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; width: 100%; padding: 6px;">
-                                            <?php foreach($cartItem->bundle_categories as $bCategory): ?>
+                                            <?php foreach($cartItem->bundle_categories as $bCategory): 
+                                                $catItems = array_filter($bCategory['items'] ?? [], function($a) {
+                                                    return (int)($a->quantity ?? 0) > 0;
+                                                });
+                                                if (empty($catItems)) {
+                                                    continue;
+                                                }
+                                            ?>
                                                 <div style="margin-top: 4px; margin-bottom: 6px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
                                                     <div style="background: #f1f5f9; font-weight: 700; font-size: 11px; color: #334155; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; padding: 5px 8px; flex-wrap: wrap; gap: 4px;">
                                                         <span><i class="fa fa-folder-open" style="color: #4f46e5;"></i> <?= esc($bCategory['name']); ?> <strong style="color: #1d4ed8;">(<?= priceDecimal($bCategory['subtotal'], $cart->currency_code); ?>)</strong></span>
@@ -164,7 +175,7 @@
                                                         </span>
                                                     </div>
                                                     <div style="padding: 4px 6px;">
-                                                        <?php foreach($bCategory['items'] as $bProd): ?>
+                                                        <?php foreach($catItems as $bProd): ?>
                                                             <div style="border-bottom: 1px dashed #f1f5f9; display: flex; justify-content: space-between; align-items: center; font-size: 11px; padding: 4px 2px;">
                                                                 <span style="max-width: 58%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #475569;" title="<?= esc($bProd->title); ?>">
                                                                     &bull; <?= esc($bProd->title); ?>
@@ -178,9 +189,9 @@
                                                 </div>
                                             <?php endforeach; ?>
                                         </div>
-                                    <?php elseif(!empty($cartItem->bundle_products)): ?>
+                                    <?php elseif(!empty($activeBundleProds)): ?>
                                         <div class="bundle-items-summary" style="margin-top: 6px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 8px;">
-                                            <?php foreach($cartItem->bundle_products as $bProd): ?>
+                                            <?php foreach($activeBundleProds as $bProd): ?>
                                                 <div style="border-bottom: 1px dashed #e2e8f0; display: flex; justify-content: space-between; align-items: center; font-size: 11px; padding: 4px 0;">
                                                     <span style="max-width: 58%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<?= esc($bProd->title); ?>">
                                                         &bull; <?= esc($bProd->title); ?>

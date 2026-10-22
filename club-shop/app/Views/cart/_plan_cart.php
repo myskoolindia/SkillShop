@@ -126,7 +126,11 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
 </style>
 
                                     <?php if (!empty($cart->items)):
-                                        foreach ($cart->items as $cartItem): ?>
+                                        foreach ($cart->items as $cartItem): 
+                                            if ((int)($cartItem->quantity ?? 0) <= 0) {
+                                                continue;
+                                            }
+                                        ?>
 
                                         <div class="item cart-item-card">
                                             <!-- Top Row -->
@@ -265,7 +269,7 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                                 <div class="bundle-items-container m-t-15 p-3" style="width:100%; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;">
                                                     <div class="d-flex justify-content-between align-items-center m-b-12 pb-2" style="border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
                                                         <strong style="color:#1e293b; font-size:14px; font-weight:700;">
-                                                            <i class="fa fa-cubes text-primary m-r-1"></i> <?= esc($cartItem->product_title); ?> Contents (<?= count($cartItem->bundle_products ?? []); ?>)
+                                                            <i class="fa fa-cubes text-primary m-r-1"></i> <?= esc($cartItem->product_title); ?> Contents (<?= count(array_filter($cartItem->bundle_products ?? [], function($p) { return (int)($p->quantity ?? 0) > 0; })); ?>)
                                                         </strong>
                                                         <div class="d-flex align-items-center" style="gap:6px;">
                                                             <span style="font-size:12.5px; color:#64748b; font-weight:600;">Total:</span>
@@ -282,13 +286,13 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                                         });
                                                     ?>
                                                         <?php foreach ($displayBundleCats as $bIdx => $bCategory): 
-                                                            $catItems = $bCategory['items'] ?? [];
+                                                            $catItems = array_values(array_filter($bCategory['items'] ?? [], function($a) {
+                                                                return (int)($a->quantity ?? 0) > 0;
+                                                            }));
+                                                            if (empty($catItems)) {
+                                                                continue;
+                                                            }
                                                             usort($catItems, function($a, $b) {
-                                                                $aChecked = empty($a->is_optional) || ($a->quantity > 0) ? 1 : 0;
-                                                                $bChecked = empty($b->is_optional) || ($b->quantity > 0) ? 1 : 0;
-                                                                if ($aChecked !== $bChecked) {
-                                                                    return $bChecked - $aChecked;
-                                                                }
                                                                 return strcasecmp($a->title ?? '', $b->title ?? '');
                                                             });
                                                             $planCartCatId = 'plan_cart_cat_' . $cartItem->id . '_' . ($bCategory['id'] ?? $bIdx);
@@ -300,7 +304,7 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                                                         <i class="fa fa-chevron-down cart-cat-chevron text-muted collapsed" style="font-size:11px; transition: transform 0.2s ease;"></i>
                                                                         <span><i class="fa fa-folder-open" style="color:#4f46e5;"></i> <?= esc($bCategory['name']); ?></span>
                                                                         <strong class="cart-cat-price-parenthesis" style="color:#1d4ed8; font-weight:800; font-size:13.5px;">(<?= priceDecimal($bCategory['subtotal'], $cart->currency_code); ?>)</strong>
-                                                                        <span class="badge badge-secondary" style="font-size:11px; background:#e2e8f0; color:#475569; font-weight:600; padding:3px 8px; border-radius:12px;"><?= count($bCategory['items']); ?> items / <?= $bCategory['total_units']; ?> units</span>
+                                                                        <span class="badge badge-secondary" style="font-size:11px; background:#e2e8f0; color:#475569; font-weight:600; padding:3px 8px; border-radius:12px;"><?= count($catItems); ?> items / <?= $bCategory['total_units']; ?> units</span>
                                                                     </div>
                                                                     <div>
                                                                         <a href="<?= esc($cartItem->product_url); ?>?cart_item_id=<?= $cartItem->id; ?>&return=<?= esc(base_url($planKey . '-cart')); ?>&bundle_cat=<?= esc($bCatKey); ?>#tab_bundle_contents" class="btn btn-sm btn-outline-primary" style="font-size: 12px; padding: 3px 10px; border-radius: 4px; font-weight: 600;" onclick="event.stopPropagation();" title="Customize <?= esc($bCategory['name']); ?>">
@@ -321,15 +325,17 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                                                         </thead>
                                                                         <tbody>
                                                                             <?php foreach ($catItems as $bProd): 
+                                                                                if ((int)($bProd->quantity ?? 0) <= 0) {
+                                                                                    continue;
+                                                                                }
                                                                                 $isOpt = !empty($bProd->is_optional);
-                                                                                $isItemChecked = !$isOpt || ($bProd->quantity > 0);
                                                                             ?>
-                                                                                <tr style="border-bottom:1px solid #f8fafc;" class="<?= (!$isItemChecked) ? 'bundle-row-disabled' : ''; ?>">
+                                                                                <tr style="border-bottom:1px solid #f8fafc;">
                                                                                     <td class="text-center" style="padding:8px 6px; vertical-align:middle;">
                                                                                         <?php if (!$isOpt): ?>
                                                                                             <input type="checkbox" class="cart-item-select-chk" checked disabled title="Mandatory item (included by default)">
                                                                                         <?php else: ?>
-                                                                                            <input type="checkbox" class="cart-item-select-chk" <?= ($bProd->quantity > 0) ? 'checked' : ''; ?> disabled title="Optional item">
+                                                                                            <input type="checkbox" class="cart-item-select-chk" checked disabled title="Optional item">
                                                                                         <?php endif; ?>
                                                                                     </td>
                                                                                     <td style="padding:8px 12px; vertical-align:middle;">
@@ -358,7 +364,12 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                                             </div>
                                                         <?php endforeach; ?>
 
-                                                    <?php else: ?>
+                                                    <?php else: 
+                                                        $flatBundleProds = array_values(array_filter($cartItem->bundle_products ?? [], function($p) {
+                                                            return (int)($p->quantity ?? 0) > 0;
+                                                        }));
+                                                        if (!empty($flatBundleProds)):
+                                                    ?>
                                                         <div class="table-responsive">
                                                             <table class="table table-sm table-borderless m-b-0" style="font-size:13px; width:100%;">
                                                                 <thead>
@@ -371,16 +382,18 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
-                                                                    <?php foreach ($cartItem->bundle_products as $bProd): 
+                                                                    <?php foreach ($flatBundleProds as $bProd): 
+                                                                        if ((int)($bProd->quantity ?? 0) <= 0) {
+                                                                            continue;
+                                                                        }
                                                                         $isOpt = !empty($bProd->is_optional);
-                                                                        $isItemChecked = !$isOpt || ($bProd->quantity > 0);
                                                                     ?>
-                                                                        <tr style="border-bottom:1px solid #edf2f7;" class="<?= (!$isItemChecked) ? 'bundle-row-disabled' : ''; ?>">
+                                                                        <tr style="border-bottom:1px solid #edf2f7;">
                                                                             <td class="text-center" style="padding:8px 6px; vertical-align:middle;">
                                                                                 <?php if (!$isOpt): ?>
                                                                                     <input type="checkbox" class="cart-item-select-chk" checked disabled title="Mandatory item (included by default)">
                                                                                 <?php else: ?>
-                                                                                    <input type="checkbox" class="cart-item-select-chk" <?= ($bProd->quantity > 0) ? 'checked' : ''; ?> disabled title="Optional item">
+                                                                                    <input type="checkbox" class="cart-item-select-chk" checked disabled title="Optional item">
                                                                                 <?php endif; ?>
                                                                             </td>
                                                                             <td style="padding:8px 10px; vertical-align:middle;">
@@ -406,6 +419,7 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                                                 </tbody>
                                                             </table>
                                                         </div>
+                                                    <?php endif; ?>
                                                     <?php endif; ?>
                                                 </div>
 

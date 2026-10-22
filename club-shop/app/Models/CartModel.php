@@ -253,7 +253,7 @@ class CartModel extends BaseModel
         foreach ($cart->items as $key => $cartItem) {
             $product = getActiveProduct($cartItem->product_id);
 
-            if (empty($product)) {
+            if (empty($product) || (int)($cartItem->quantity ?? 0) <= 0) {
                 $this->removeCartItem($cartItem->id);
                 unset($cart->items[$key]);
                 continue;
@@ -400,6 +400,9 @@ class CartModel extends BaseModel
 
                 $bundleCategories = [];
                 foreach ($bundleProducts as $bProd) {
+                    if ((int)($bProd->quantity ?? 0) <= 0) {
+                        continue;
+                    }
                     $cKey = $bProd->category_id ?: 0;
                     if (!isset($bundleCategories[$cKey])) {
                         $bundleCategories[$cKey] = [
@@ -434,7 +437,9 @@ class CartModel extends BaseModel
                 unset($bCat);
 
                 $cartItem->bundle_summary = $bundleSummary;
-                $cartItem->bundle_products = $bundleProducts;
+                $cartItem->bundle_products = array_values(array_filter($bundleProducts, function($p) {
+                    return (int)($p->quantity ?? 0) > 0;
+                }));
                 $cartItem->bundle_categories = array_values($bundleCategories);
             }
 
