@@ -1502,9 +1502,7 @@ function buildRow(catName, comps, theme, productUrl, isOpenByDefault){
     totalQ += q;
     totalV += Number(c.unit_price) * q;
   });
-  var subtitle = totalQ > 0
-    ? rupee(totalV) + ' · ' + totalQ + ' unit' + (totalQ !== 1 ? 's' : '')
-    : comps.length + ' item' + (comps.length !== 1 ? 's' : '') + ' (optional)';
+  var subtitle = comps.length + ' item' + (comps.length !== 1 ? 's' : '');
 
   var itemRows = comps.map(function(c){
     var qty    = c.is_optional ? 0 : Number(c.required_quantity || 0);
@@ -1534,10 +1532,6 @@ function buildRow(catName, comps, theme, productUrl, isOpenByDefault){
         +'<div style="font-size:13px;font-weight:600;color:#1e293b;line-height:1.3;">'+esc(c.title)+opt+'</div>'
         +(c.sku?'<div style="font-size:10.5px;color:#94a3b8;font-family:monospace;margin-top:2px;">'+esc(c.sku)+'</div>':'')
       +'</div>'
-      +'<div style="text-align:right;flex-shrink:0;">'
-        +'<div style="font-size:12.5px;font-weight:700;color:'+(qty===0?'#94a3b8':theme.dotColor)+';">'+(qty===0?'—':rupee(line))+'</div>'
-        +'<div style="font-size:10.5px;color:#94a3b8;">'+(qty===0?'0 (optional)':qty+' × '+rupee(c.unit_price))+'</div>'
-      +'</div>'
     +'</div>';
   }).join('');
 
@@ -1562,10 +1556,6 @@ function buildRow(catName, comps, theme, productUrl, isOpenByDefault){
     +'</button>'
     +'<div class="sks-body" style="'+initialMaxHeight+'overflow:hidden;transition:max-height .35s ease;">'
       +itemRows
-      +(totalQ>0?'<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f8fafc;border-top:1px solid #e2e8f0;">'
-          +'<span style="font-size:11.5px;font-weight:700;color:#64748b;">'+comps.length+' item'+(comps.length!==1?'s':'')+' · '+totalQ+' units</span>'
-          +'<span style="font-size:13.5px;font-weight:800;color:'+theme.dotColor+';">'+rupee(totalV)+'</span>'
-        +'</div>':'')
     +'</div>'
   +'</div>';
 }
@@ -1625,6 +1615,8 @@ Promise.all([
   var product    = res[0].data;
   var allCats    = res[1].data || [];
   var components = product.bundle_components || [];
+  // Exclude optional items — only mandatory components are listed.
+  components = components.filter(function(c){ return !c.is_optional; });
   if(!components.length) throw new Error('empty bundle');
 
   // Store globally so the enquiry form can build a quotation
