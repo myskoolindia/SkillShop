@@ -295,12 +295,26 @@ class BundleModel extends BaseModel
             $origPrice = 0.0;
             $unitPrice = 0.0;
             $isDiscountActive = isStoreDiscountActive();
+            $isMarkupActive = isStoreMarkupActive();
 
             if ($row->price_override !== null) {
                 $overrideVal = (float)$row->price_override;
-                $origPrice = $overrideVal;
-                $overrideDiscountRate = 0.0;
+                $item->base_price_override = $overrideVal;
 
+                // 1. Apply markup if store markup is active
+                $componentMarkupRate = 0.0;
+                if ($isMarkupActive) {
+                    $componentMarkupRate = getProductMarkupRate($prod);
+                }
+
+                $markedPrice = $overrideVal;
+                if ($componentMarkupRate > 0 && $overrideVal > 0) {
+                    $markedPrice = calculateMarkupPrice($overrideVal, $componentMarkupRate);
+                }
+                $origPrice = $markedPrice;
+
+                // 2. Apply discount if store discount is active
+                $overrideDiscountRate = 0.0;
                 if ($isDiscountActive) {
                     $catDisc = !empty($prod->category_id) ? getCategoryDiscountRate($prod->category_id) : null;
                     if ($catDisc !== null) {
@@ -312,33 +326,38 @@ class BundleModel extends BaseModel
 
                 if ($overrideDiscountRate > 0) {
                     $discountAmt = round($overrideVal * ($overrideDiscountRate / 100), 2);
-                    $unitPrice = max(0, round($overrideVal - $discountAmt, 2));
+                    $unitPrice = max(0, round($markedPrice - $discountAmt, 2));
                 } else {
-                    $unitPrice = $overrideVal;
+                    $unitPrice = $markedPrice;
                 }
-                $item->base_price_override = $overrideVal;
+
                 $item->price_override = $row->price_override;
+                $item->markup_rate = $componentMarkupRate;
+                $item->discount_rate = $overrideDiscountRate;
                 $childDiscountRate = $overrideDiscountRate;
-            } elseif ($variant && $variant->price_discounted > 0 && $isDiscountActive) {
-                $origPrice = (float)($variant->price > 0 ? $variant->price : $variant->price_discounted);
-                $unitPrice = (float)$variant->price_discounted;
-                $item->price_override = null;
-                $childDiscountRate = getProductDiscountRate($prod);
             } elseif ($variant && $variant->price > 0) {
-                $origPrice = (float)$variant->price;
+                $baseVariantPrice = (float)$variant->price;
+                $variantMarkupRate = $isMarkupActive ? getProductMarkupRate($prod) : 0.0;
+                $markedVariantPrice = ($variantMarkupRate > 0) ? calculateMarkupPrice($baseVariantPrice, $variantMarkupRate) : $baseVariantPrice;
+                $origPrice = $markedVariantPrice;
+
                 $childDiscountRate = $isDiscountActive ? getProductDiscountRate($prod) : 0.0;
                 if ($childDiscountRate > 0) {
-                    $discountAmt = round($origPrice * ($childDiscountRate / 100), 2);
-                    $unitPrice = max(0, round($origPrice - $discountAmt, 2));
+                    $discountAmt = round($baseVariantPrice * ($childDiscountRate / 100), 2);
+                    $unitPrice = max(0, round($markedVariantPrice - $discountAmt, 2));
                 } else {
-                    $unitPrice = $origPrice;
+                    $unitPrice = $markedVariantPrice;
                 }
                 $item->price_override = null;
+                $item->markup_rate = $variantMarkupRate;
+                $item->discount_rate = $childDiscountRate;
             } else {
                 $origPrice = (float)($prod->price > 0 ? $prod->price : $prod->base_price);
                 $unitPrice = (float)(($isDiscountActive && $prod->price_discounted > 0) ? $prod->price_discounted : $prod->price);
                 $item->price_override = null;
                 $childDiscountRate = $isDiscountActive ? getProductDiscountRate($prod) : 0.0;
+                $item->markup_rate = $prod->markup_rate ?? ($isMarkupActive ? getProductMarkupRate($prod) : 0.0);
+                $item->discount_rate = $childDiscountRate;
             }
 
             $item->price = $origPrice;
