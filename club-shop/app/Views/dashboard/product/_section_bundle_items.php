@@ -173,8 +173,36 @@ $discountRate = !empty($product->bundle_discount_rate) ? $product->bundle_discou
 </div>
 
 <!-- Modal: Add Product / Variant Live Search & Multi-Select -->
+<style>
+#modalAddBundleItem .modal-dialog {
+    width: 95% !important;
+    max-width: 1400px !important;
+    margin: 20px auto !important;
+}
+#modalAddBundleItem .modal-body {
+    max-height: none !important;
+    overflow: visible !important;
+}
+#bundle_search_results {
+    max-height: none !important;
+    overflow: visible !important;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 0;
+    margin-top: 10px;
+    background: #fff;
+}
+.bundle-search-table {
+    width: 100% !important;
+    margin-bottom: 0 !important;
+    table-layout: auto;
+}
+.bundle-search-table th, .bundle-search-table td {
+    vertical-align: middle !important;
+}
+</style>
 <div class="modal fade" id="modalAddBundleItem" tabindex="-1" role="dialog" aria-labelledby="modalAddBundleItemLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document" style="max-width: 1200px;">
+    <div class="modal-dialog modal-xl" role="document" style="width: 95% !important; max-width: 1400px !important; margin: 20px auto !important;">
         <div class="modal-content">
             <div class="modal-header d-flex justify-content-between align-items-center">
                 <h5 class="modal-title" id="modalAddBundleItemLabel">
@@ -248,8 +276,8 @@ $discountRate = !empty($product->bundle_discount_rate) ? $product->bundle_discou
                 <!-- Feedback Alert Container -->
                 <div id="bundle_modal_feedback" style="display:none; margin-top:8px;"></div>
 
-                <!-- Search Results List with Single Row Table -->
-                <div id="bundle_search_results" style="max-height: 480px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 6px; padding: 0; margin-top: 10px; background: #fff;">
+                <!-- Search Results List with Single Row Table (Wide & No Scrollbar) -->
+                <div id="bundle_search_results">
                     <div class="text-muted text-center py-3"><i class="fa fa-spinner fa-spin"></i> Loading products...</div>
                 </div>
             </div>
@@ -430,8 +458,8 @@ function renderBundleSearchResultsList(query) {
     if (isNaN(defaultBatchQty) || defaultBatchQty < 0) defaultBatchQty = 1;
     var defaultBatchOpt = $('#batch_bundle_item_is_optional').is(':checked');
 
-    var html = '<div class="table-responsive" style="margin-bottom:0;">';
-    html += '<table class="table table-hover table-bordered table-striped" style="margin-bottom:0; background:#fff; font-size:12px;">';
+    var html = '<div style="margin-bottom:0; overflow:visible;">';
+    html += '<table class="table table-hover table-bordered table-striped bundle-search-table" style="margin-bottom:0; background:#fff; font-size:12px; width:100%;">';
     html += '<thead>';
     html += '<tr class="active" style="color:#475569; font-weight:bold; font-size:11.5px; text-transform:uppercase; letter-spacing:0.4px;">';
     html += '<th style="width:36px; text-align:center; vertical-align:middle;">#</th>';
