@@ -601,7 +601,17 @@ class SettingsModel extends BaseModel
         if (empty(inputPost('commission'))) {
             $data['commission_rate'] = 0;
         }
-        return $this->builderPaymentSettings->where('id', 1)->update($data);
+        $res = $this->builderPaymentSettings->where('id', 1)->update($data);
+        if (function_exists('setContextValue')) {
+            $updated = $this->builderPaymentSettings->where('id', 1)->get()->getRow();
+            if ($updated) {
+                setContextValue('paymentSettings', $updated);
+            }
+        }
+        if (function_exists('resetCacheData')) {
+            resetCacheData();
+        }
+        return $res;
     }
 
     //update additional invoice information

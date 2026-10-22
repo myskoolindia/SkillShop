@@ -1128,14 +1128,23 @@ if (!function_exists('getGlobalDiscountRate')) {
     function getGlobalDiscountRate()
     {
         $settings = getContextValue('paymentSettings');
-        if (!empty($settings)) {
-            if (isset($settings->seller_discount_status) && (int)$settings->seller_discount_status === 0) {
-                return 0.0;
+        if (!empty($settings) && isset($settings->seller_discount_status)) {
+            if ((int)$settings->seller_discount_status === 1) {
+                return (float)($settings->seller_discount_rate ?? 0);
             }
-            if (isset($settings->seller_discount_rate) && $settings->seller_discount_rate !== null) {
-                return (float)$settings->seller_discount_rate;
-            }
+            return 0.0;
         }
+
+        // Direct DB fallback if not in cached context
+        try {
+            $db = \Config\Database::connect();
+            $row = $db->table('payment_settings')->select('seller_discount_status, seller_discount_rate')->where('id', 1)->get()->getRow();
+            if (!empty($row) && (int)$row->seller_discount_status === 1) {
+                return (float)$row->seller_discount_rate;
+            }
+        } catch (\Exception $e) {
+        }
+
         return 0.0;
     }
 }
@@ -1193,10 +1202,14 @@ if (!function_exists('getProductDiscountRate')) {
                 return (float)$catDiscount;
             }
         }
+        $globalDiscount = getGlobalDiscountRate();
+        if ($globalDiscount > 0) {
+            return (float)$globalDiscount;
+        }
         if (is_object($product) && isset($product->discount_rate) && (float)$product->discount_rate > 0) {
             return (float)$product->discount_rate;
         }
-        return getGlobalDiscountRate();
+        return 0.0;
     }
 }
 
@@ -1275,17 +1288,16 @@ if (!function_exists('applyProductMarkup')) {
                 $product->discount_rate = (int)round($catDiscount);
                 $product->price_discounted = calculateDiscountPrice($product->price, $catDiscount);
             }
+        } elseif ($globalDiscount > 0 && !empty($product->price) && (float)$product->price > 0) {
+            // Apply global store discount to default categories
+            $product->discount_rate = (int)round($globalDiscount);
+            $product->price_discounted = calculateDiscountPrice($product->price, $globalDiscount);
         } else {
-            // Default category: inherits global store discount or seller's existing discount
+            // No category exception and no global discount: fall back to product's own original seller discount
             if (!empty($product->base_price_discounted) && (float)$product->base_price_discounted < (float)$product->base_price && (float)$product->base_price_discounted > 0) {
-                // Product had a seller discount
                 if (!empty($product->price) && !empty($product->price_discounted) && (float)$product->price_discounted < (float)$product->price) {
                     $product->discount_rate = intval((( (float)$product->price - (float)$product->price_discounted ) * 100) / (float)$product->price);
                 }
-            } elseif ($globalDiscount > 0 && !empty($product->price) && (float)$product->price > 0) {
-                // Apply global store discount
-                $product->discount_rate = (int)round($globalDiscount);
-                $product->price_discounted = calculateDiscountPrice($product->price, $globalDiscount);
             } else {
                 $product->price_discounted = $product->price;
                 $product->discount_rate = 0;
