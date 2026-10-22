@@ -184,7 +184,8 @@ class BundleModel extends BaseModel
             }
 
             foreach ($productsResult as $prod) {
-                $prod = applyProductMarkup($prod);
+                $prod->base_price = (float)($prod->price ?? 0);
+                $prod->base_price_discounted = (float)($prod->price_discounted ?? 0);
                 // Get main image
                 $img = $this->db->table('images')->where('product_id', $prod->id)->orderBy('is_main', 'DESC')->get()->getRow();
                 $prod->image_small = !empty($img) ? getProductImageURL($img, 'image_small') : getProductMainImage($prod->id, 'image_small');
@@ -204,18 +205,6 @@ class BundleModel extends BaseModel
                 ->getResultObject();
 
             foreach ($variantsResult as $variant) {
-                if ($variant && !empty($variant->product_id) && isset($productsMap[$variant->product_id])) {
-                    $markupRate = $productsMap[$variant->product_id]->markup_rate ?? 0;
-                    if ($markupRate > 0) {
-                        if (!empty($variant->price) && (float)$variant->price > 0) {
-                            $variant->price = calculateMarkupPrice($variant->price, $markupRate);
-                        }
-                        if (!empty($variant->price_discounted) && (float)$variant->price_discounted > 0) {
-                            $variant->price_discounted = calculateMarkupPrice($variant->price_discounted, $markupRate);
-                        }
-                    }
-                }
-
                 // Fetch variant value titles
                 $variantValues = $this->db->table('product_option_variant_values povv')
                     ->select('pov.value_name_translations')
@@ -247,18 +236,6 @@ class BundleModel extends BaseModel
                 ->getResultObject();
 
             foreach ($allVariantsResult as $av) {
-                if (!empty($av->product_id) && isset($productsMap[$av->product_id])) {
-                    $markupRate = $productsMap[$av->product_id]->markup_rate ?? 0;
-                    if ($markupRate > 0) {
-                        if (!empty($av->price) && (float)$av->price > 0) {
-                            $av->price = calculateMarkupPrice($av->price, $markupRate);
-                        }
-                        if (!empty($av->price_discounted) && (float)$av->price_discounted > 0) {
-                            $av->price_discounted = calculateMarkupPrice($av->price_discounted, $markupRate);
-                        }
-                    }
-                }
-
                 // Fetch variant value labels
                 $variantValues = $this->db->table('product_option_variant_values povv')
                     ->select('pov2.value_name_translations')
@@ -315,16 +292,10 @@ class BundleModel extends BaseModel
 
             // Pricing
             if ($row->price_override !== null) {
-                $markupRate = $prod->markup_rate ?? getProductMarkupRate($prod);
                 $overrideVal = (float)$row->price_override;
                 $item->base_price_override = $overrideVal;
-                if ($markupRate > 0) {
-                    $item->unit_price = calculateMarkupPrice($overrideVal, $markupRate);
-                    $item->price_override = (string)$item->unit_price;
-                } else {
-                    $item->unit_price = $overrideVal;
-                    $item->price_override = $row->price_override;
-                }
+                $item->unit_price = $overrideVal;
+                $item->price_override = $row->price_override;
             } elseif ($variant && $variant->price_discounted > 0) {
                 $item->unit_price = (float)$variant->price_discounted;
                 $item->price_override = null;

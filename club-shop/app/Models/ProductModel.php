@@ -140,7 +140,7 @@ class ProductModel extends BaseModel
     //edit product details
     public function editProductDetails($id)
     {
-        $product = $this->getProduct($id);
+        $product = $this->builder->where('products.id', clrNum($id))->get()->getRow();
         if (empty($product)) {
             return false;
         }
@@ -985,7 +985,7 @@ class ProductModel extends BaseModel
     public function getVendorProductsPaginated($userId, $listType, $perPage, $offset)
     {
         $this->filterUserProducts($listType, $userId);
-        return applyProductMarkup($this->builder->limit($perPage, $offset)->get()->getResult());
+        return $this->builder->limit($perPage, $offset)->get()->getResult();
     }
 
 

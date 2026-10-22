@@ -48,12 +48,10 @@
                 $thousandsSep = ($defaultCurrency->currency_format == 'european') ? '.' : ',';
                 $decimalSep   = ($defaultCurrency->currency_format == 'european') ? ',' : '.';
                 $spaceMoneySymbol = $defaultCurrency->space_money_symbol;
-                $markupRate = getProductMarkupRate($product);
                 ?>
 
                 <div id="price_input_container" class="form-group"
                      data-commission-rate="<?= $commissionRate; ?>"
-                     data-markup-rate="<?= $markupRate; ?>"
                      data-currency-symbol="<?= $defaultCurrency->symbol; ?>"
                      data-symbol-direction="<?= $defaultCurrency->symbol_direction; ?>"
                      data-thousands-separator="<?= $thousandsSep; ?>"
@@ -111,26 +109,7 @@
                                 <strong><?= trans("discount_rate"); ?>:&nbsp;&nbsp;</strong>
                                 <b id="span_discount_rate" class="earned-price"><?= $product->discount_rate; ?>%</b>
                             </p>
-                            <?php if ($markupRate > 0): ?>
-                                <p class="calculated-price">
-                                    <strong><?= trans("seller_markup"); ?>:&nbsp;&nbsp;</strong>
-                                    <b class="earned-price"><?= $markupRate; ?>%</b>
-                                </p>
-                                <p class="calculated-price">
-                                    <strong><?= trans("store_listing_price"); ?>:&nbsp;&nbsp;</strong>
-                                    <b id="span_store_listing_price" class="earned-price text-success" style="font-size: 15px;">
-                                        <?php
-                                        $listingPrice = 0;
-                                        if (!empty($product->price)) {
-                                            $finalBase = ($product->discount_rate == 0) ? $product->price : ((!empty($product->price_discounted) && $product->price_discounted > 0) ? $product->price_discounted : $product->price);
-                                            $listingPrice = calculateMarkupPrice($finalBase, $markupRate);
-                                        }
-                                        echo esc(priceFormatted($listingPrice, $defaultCurrency->code, true));
-                                        ?>
-                                    </b>
-                                    <small class="text-muted" style="display: block; margin-top: 4px; font-weight: normal;"><?= trans("seller_markup_exp"); ?></small>
-                                </p>
-                            <?php endif; ?>
+
                             <p class="calculated-price">
                                 <strong><?= trans("commission_rate"); ?>:&nbsp;&nbsp;</strong>
                                 <b class="earned-price"><?= $commissionRate; ?>%</b>
@@ -253,7 +232,6 @@ if ($product->listing_type == 'sell_on_site' || $product->listing_type == 'licen
         $(document).ready(function() {
             const $container = $('#price_input_container');
             const commissionRate = parseFloat($container.attr('data-commission-rate')) || 0;
-            const markupRate = parseFloat($container.attr('data-markup-rate')) || 0;
             const currencySymbol = $container.attr('data-currency-symbol') || '$';
             const symbolDirection = $container.attr('data-symbol-direction') || 'left';
             const thousandsSep = $container.attr('data-thousands-separator') || ',';
@@ -290,13 +268,6 @@ if ($product->listing_type == 'sell_on_site' || $product->listing_type == 'licen
                     finalPrice = discountedPrice;
                     discountRate = Math.round(((price - discountedPrice) / price) * 100);
                 }
-
-                // Calculate Store Listing Price with Markup
-                let storeListingPrice = finalPrice;
-                if (markupRate > 0) {
-                    storeListingPrice = finalPrice * (1 + (markupRate / 100));
-                }
-                $('#span_store_listing_price').text(formatMoney(storeListingPrice));
 
                 // Calculate Earnings
                 let commissionAmount = (finalPrice * commissionRate) / 100;

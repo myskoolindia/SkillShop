@@ -1306,7 +1306,7 @@ class AjaxController extends BaseController
 
                 $variants = [];
                 try {
-                    $loadedVariants = $productOptionsModel->loadVariantsForProduct($p->id, true);
+                    $loadedVariants = $productOptionsModel->loadVariantsForProduct($p->id, false);
                     if (!empty($loadedVariants)) {
                         foreach ($loadedVariants as $v) {
                             $vPrice = (float)($v['price_discounted'] > 0 ? $v['price_discounted'] : ($v['price'] > 0 ? $v['price'] : $p->price_discounted));
