@@ -192,6 +192,16 @@ $discountRate = !empty($product->bundle_discount_rate) ? $product->bundle_discou
     margin-top: 10px;
     background: #fff;
 }
+#modalAddBundleItem .modal-footer {
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 12px 20px !important;
+}
+#modalAddBundleItem .modal-footer button {
+    margin: 0 !important;
+}
 .bundle-search-table {
     width: 100% !important;
     margin-bottom: 0 !important;
@@ -281,13 +291,11 @@ $discountRate = !empty($product->bundle_discount_rate) ? $product->bundle_discou
                     <div class="text-muted text-center py-3"><i class="fa fa-spinner fa-spin"></i> Loading products...</div>
                 </div>
             </div>
-            <div class="modal-footer d-flex justify-content-between align-items-center">
-                <div>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-                <div>
-                    <button type="button" class="btn btn-success" id="btn_modal_footer_batch_add" style="display:none;" onclick="addSelectedBundleProducts();"><i class="fa fa-plus-circle"></i> Add Selected Items</button>
-                </div>
+            <div class="modal-footer" style="display:flex; justify-content:flex-end; align-items:center; gap:10px;">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success font-weight-bold" id="btn_modal_footer_batch_add" style="display:none;" onclick="addSelectedBundleProducts();">
+                    <i class="fa fa-plus-circle"></i> Add Selected Items
+                </button>
             </div>
         </div>
     </div>
