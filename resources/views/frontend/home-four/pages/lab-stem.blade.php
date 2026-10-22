@@ -4029,22 +4029,59 @@ function closeRow(row){
   row.dataset.open='0';
 }
 
-function buildRow(catName, comps, theme, productUrl, isOpenByDefault){
-  var icon  = getIcon(catName);
-  var rowId = 'sks-r-'+Math.random().toString(36).slice(2,8);
-  var totalQ=0, totalV=0;
-  comps.forEach(function(c){
-    var q = c.is_optional ? 0 : Number(c.required_quantity || 0);
-    totalQ += q;
-    totalV += Number(c.unit_price) * q;
-  });
-  var subtitle = totalQ > 0
-    ? rupee(totalV) + ' · ' + totalQ + ' unit' + (totalQ !== 1 ? 's' : '')
-    : comps.length + ' item' + (comps.length !== 1 ? 's' : '') + ' (optional)';
+function cleanTitle(title, catName, parentName){
+  if(!title) return '';
+  var t = String(title).trim();
 
-  var itemRows = comps.map(function(c){
-    var qty    = c.is_optional ? 0 : Number(c.required_quantity || 0);
-    var line   = Number(c.unit_price) * qty;
+  // If there's an en-dash, em-dash, or hyphen separating category from item
+  // e.g. "Agriculture & Gardening – Basic Kit" -> "Basic Kit"
+  var dashMatch = t.match(/^(.*?)\s*[-–—]\s*(.+)$/);
+  if(dashMatch){
+    var prefix = dashMatch[1].trim().toLowerCase();
+    var suffix = dashMatch[2].trim();
+
+    var names = [catName, parentName].filter(Boolean);
+    for(var i=0; i<names.length; i++){
+      var nLower = names[i].toLowerCase().trim();
+      var nClean = nLower.replace(/[^a-z0-9]/g, '');
+      var pClean = prefix.replace(/[^a-z0-9]/g, '');
+
+      if(nClean === pClean || pClean.indexOf(nClean) !== -1 || nClean.indexOf(pClean) !== -1){
+        return suffix;
+      }
+      var nWords = nLower.split(/[^a-z0-9]+/).filter(function(w){ return w.length > 2 && w !== 'and'; });
+      var pWords = prefix.split(/[^a-z0-9]+/).filter(function(w){ return w.length > 2 && w !== 'and'; });
+      var hasOverlap = nWords.some(function(w){ return pWords.some(function(pw){ return pw.indexOf(w) !== -1 || w.indexOf(pw) !== -1; }); });
+      if(hasOverlap){
+        return suffix;
+      }
+    }
+  }
+
+  // Fallback direct prefix removal
+  var names = [catName, parentName].filter(Boolean);
+  names.forEach(function(n){
+    if(n.indexOf('&') !== -1) names.push(n.replace(/&/g, 'and'));
+    if(n.toLowerCase().indexOf('and') !== -1) names.push(n.replace(/\band\b/gi, '&'));
+  });
+  names.sort(function(a,b){ return b.length - a.length; });
+  for(var j=0; j<names.length; j++){
+    var n = names[j].trim();
+    if(!n || n.length < 2) continue;
+    var escN = n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    var re = new RegExp('^' + escN + '\\s*([-–—:]|\\s)\\s*', 'i');
+    if(re.test(t)){
+      t = t.replace(re, '').trim();
+      break;
+    }
+  }
+  t = t.replace(/^[-–—:]\s*/, '').replace(/\s{2,}/g, ' ').trim();
+  return t || title;
+}
+
+function buildItemRows(comps, catName, parentName, theme){
+  var hoverBg = (theme && theme.hoverBg) ? theme.hoverBg : '#f8fafc';
+  return comps.map(function(c){
     var opt    = c.is_optional
       ? '<span style="margin-left:5px;padding:1px 5px;border-radius:3px;background:#fef3c7;color:#92400e;border:1px solid #fde68a;font-size:9px;font-weight:700;">optional</span>'
       : '';
@@ -4064,18 +4101,24 @@ function buildRow(catName, comps, theme, productUrl, isOpenByDefault){
       : '<span style="width:36px;height:36px;border-radius:6px;background:#f1f5f9;border:1px solid #e2e8f0;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;">'
           +'<i class="fa-solid fa-cube" style="color:#cbd5e1;font-size:12px;"></i></span>';
 
-    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #f1f5f9;">'
+    var displayTitle = cleanTitle(c.title, catName, parentName);
+
+    return '<div class="sks-item-row" onmouseenter="this.style.background=\''+hoverBg+'\'" onmouseleave="this.style.background=\'#fff\'" '
+        +'style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #f1f5f9;background:#fff;transition:background .15s;">'
       +img
       +'<div style="flex:1;min-width:0;">'
-        +'<div style="font-size:13px;font-weight:600;color:#1e293b;line-height:1.3;">'+esc(c.title)+opt+'</div>'
+        +'<div style="font-size:13px;font-weight:600;color:#1e293b;line-height:1.3;">'+esc(displayTitle)+opt+'</div>'
         +(c.sku?'<div style="font-size:10.5px;color:#94a3b8;font-family:monospace;margin-top:2px;">'+esc(c.sku)+'</div>':'')
-      +'</div>'
-      +'<div style="text-align:right;flex-shrink:0;">'
-        +'<div style="font-size:12.5px;font-weight:700;color:'+(qty===0?'#94a3b8':theme.dotColor)+';">'+(qty===0?'—':rupee(line))+'</div>'
-        +'<div style="font-size:10.5px;color:#94a3b8;">'+(qty===0?'0 (optional)':qty+' × '+rupee(c.unit_price))+'</div>'
       +'</div>'
     +'</div>';
   }).join('');
+}
+
+function buildRow(catName, comps, theme, productUrl, isOpenByDefault, parentName){
+  var icon  = getIcon(catName);
+  var rowId = 'sks-r-'+Math.random().toString(36).slice(2,8);
+  var subtitle = comps.length + ' item' + (comps.length !== 1 ? 's' : '');
+  var itemRows = buildItemRows(comps, catName, parentName, theme);
 
   var initialOpen = isOpenByDefault ? '1' : '0';
   var initialMaxHeight = isOpenByDefault ? 'max-height:800px;' : 'max-height:0;';
@@ -4098,10 +4141,6 @@ function buildRow(catName, comps, theme, productUrl, isOpenByDefault){
     +'</button>'
     +'<div class="sks-body" style="'+initialMaxHeight+'overflow:hidden;transition:max-height .35s ease;">'
       +itemRows
-      +(totalQ>0?'<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f8fafc;border-top:1px solid #e2e8f0;">'
-          +'<span style="font-size:11.5px;font-weight:700;color:#64748b;">'+comps.length+' item'+(comps.length!==1?'s':'')+' · '+totalQ+' units</span>'
-          +'<span style="font-size:13.5px;font-weight:800;color:'+theme.dotColor+';">'+rupee(totalV)+'</span>'
-        +'</div>':'')
     +'</div>'
   +'</div>';
 }
@@ -4130,16 +4169,35 @@ function buildBox(parentName, parentId, subGroups, theme, productUrl, isCenter){
     +(theme.shadow?'box-shadow:0 8px 24px rgba(0,0,0,.08);':'');
 
   var catNames = Object.keys(subGroups);
+  var totalBoxComps = 0;
+  catNames.forEach(function(cn){ totalBoxComps += subGroups[cn].length; });
 
-  var hdr = '<div style="background:'+theme.hdrBg+';padding:13px 18px;display:flex;align-items:center;gap:10px;">'
-    +'<i class="fa-solid '+getIcon(parentName)+'" style="color:#fff;font-size:16px;"></i>'
-    +'<span style="font-weight:700;color:#fff;font-size:15.5px;">'+esc(parentName)+'</span>'
+  var hdr = '<div style="background:'+theme.hdrBg+';padding:13px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;">'
+    +'<div style="display:flex;align-items:center;gap:10px;min-width:0;">'
+      +'<i class="fa-solid '+getIcon(parentName)+'" style="color:#fff;font-size:16px;flex-shrink:0;"></i>'
+      +'<span style="font-weight:700;color:#fff;font-size:15.5px;line-height:1.2;">'+esc(parentName)+'</span>'
+    +'</div>'
+    +'<span style="font-size:11px;font-weight:700;color:rgba(255,255,255,.9);background:rgba(255,255,255,.18);padding:3px 9px;border-radius:12px;white-space:nowrap;flex-shrink:0;">'
+      +totalBoxComps+' item'+(totalBoxComps!==1?'s':'')
     +'</span>'
   +'</div>';
 
-  var rows = '<div data-sks-rows>'
-    + catNames.map(function(cn, idx){ return buildRow(cn, subGroups[cn], theme, productUrl, idx === 0); }).join('')
-  + '</div>';
+  var cleanParent = (parentName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  var isSingleDuplicateGroup = (catNames.length === 1) && (
+    (catNames[0] || '').toLowerCase().replace(/[^a-z0-9]/g, '') === cleanParent ||
+    (catNames[0] || '').toLowerCase().trim() === 'general'
+  );
+
+  var rows;
+  if(isSingleDuplicateGroup){
+    rows = '<div data-sks-rows>'
+      + buildItemRows(subGroups[catNames[0]], catNames[0], parentName, theme)
+    + '</div>';
+  } else {
+    rows = '<div data-sks-rows>'
+      + catNames.map(function(cn, idx){ return buildRow(cn, subGroups[cn], theme, productUrl, idx === 0, parentName); }).join('')
+    + '</div>';
+  }
 
   el.innerHTML = hdr + rows;
   bootHover(el);
@@ -4161,6 +4219,8 @@ Promise.all([
   var product    = res[0].data;
   var allCats    = res[1].data || [];
   var components = product.bundle_components || [];
+  // Exclude optional items — only mandatory components are listed.
+  components = components.filter(function(c){ return !c.is_optional; });
   if(!components.length) throw new Error('empty bundle');
 
   // Store globally so the enquiry form can build a quotation
@@ -4227,155 +4287,54 @@ Promise.all([
   });
 
   (function(){
-    var GAP = 16;
-    var current = 0;
+    // Arrange the category boxes as separate horizontal divs side by side
+    // (no sliding carousel). They wrap responsively and share equal width.
     var boxes = Array.prototype.slice.call(boxesEl.children);
     var total = boxes.length;
-    var prevBtn = document.getElementById('sks-box-prev');
-    var nextBtn = document.getElementById('sks-box-next');
-    var dotsContainer = document.getElementById('sks-dots');
-    var viewport = document.getElementById('sks-carousel-viewport');
 
-    function getVisibleCount(){
-      var w = window.innerWidth;
-      if (w < 640) return 1;
-      if (w < 1024) return Math.min(2, total);
-      return Math.min(3, total);
-    }
+    // Lay out #sks-boxes as a responsive wrapping flex row, no transform.
+    boxesEl.style.transform = 'none';
+    boxesEl.style.transition = 'none';
+    boxesEl.style.display = 'flex';
+    boxesEl.style.flexWrap = 'wrap';
+    boxesEl.style.justifyContent = 'center';
+    boxesEl.style.gap = '16px';
 
-    function getContainerW(){
-      var w = 0;
-      if (viewport && viewport.clientWidth > 0) {
-        w = viewport.clientWidth;
-      } else if (contentEl && contentEl.clientWidth > 0) {
-        w = contentEl.clientWidth;
-      } else if (boxesEl.parentElement && boxesEl.parentElement.clientWidth > 0) {
-        w = boxesEl.parentElement.clientWidth;
-      } else {
-        w = window.innerWidth - 32;
-      }
-      return w;
-    }
+    // Remove the carousel viewport clipping so all boxes are visible.
+    var vp = document.getElementById('sks-carousel-viewport');
+    if (vp) { vp.style.overflow = 'visible'; }
 
-    function getCardW(){
-      var visible = getVisibleCount();
-      var containerW = getContainerW();
-      var totalGap = GAP * (visible - 1);
-      var w = Math.floor((containerW - totalGap) / visible);
-      return Math.max(240, w);
-    }
-
+    // Give each box an equal, responsive width (3 per row on desktop,
+    // 2 on tablet, 1 on mobile) while allowing wrap.
     function applyWidths(){
-      var w = getCardW();
+      var perRow = 3;
+      var w = window.innerWidth;
+      if (w < 640) perRow = 1;
+      else if (w < 1024) perRow = Math.min(2, total);
+      else perRow = Math.min(3, total);
+      var basis = 'calc((100% - ' + (16 * (perRow - 1)) + 'px) / ' + perRow + ')';
       boxes.forEach(function(b){
-        b.style.width     = w + 'px';
-        b.style.minWidth  = w + 'px';
-        b.style.maxWidth  = w + 'px';
-        b.style.flex      = '0 0 ' + w + 'px';
+        b.style.flex     = '1 1 ' + basis;
+        b.style.maxWidth = basis;
+        b.style.minWidth = '240px';
+        b.style.width    = '';
       });
     }
-
-    function renderDots(){
-      if (!dotsContainer) return;
-      dotsContainer.innerHTML = '';
-      var visible = getVisibleCount();
-      var maxIdx = Math.max(0, total - visible);
-      var dotCount = maxIdx + 1;
-      if (dotCount <= 1) {
-        dotsContainer.style.display = 'none';
-        return;
-      }
-      dotsContainer.style.display = 'flex';
-      for (var i = 0; i < dotCount; i++) {
-        var dot = document.createElement('span');
-        dot.className = 'sks-dot' + (i === current ? ' active' : '');
-        dot.setAttribute('data-idx', i);
-        dot.addEventListener('click', (function(idx){
-          return function(){ go(idx); };
-        })(i));
-        dotsContainer.appendChild(dot);
-      }
-    }
-
-    function updateDots(){
-      if (!dotsContainer) return;
-      var dots = dotsContainer.querySelectorAll('.sks-dot');
-      dots.forEach(function(d, i){
-        if (i === current) {
-          d.classList.add('active');
-        } else {
-          d.classList.remove('active');
-        }
-      });
-    }
-
-    function go(idx){
-      var visible = getVisibleCount();
-      var maxIdx = Math.max(0, total - visible);
-      if (maxIdx === 0) {
-        current = 0;
-      } else if (idx > maxIdx) {
-        current = 0; // Infinite loop wrap-around
-      } else if (idx < 0) {
-        current = maxIdx; // Infinite loop wrap-around to end
-      } else {
-        current = idx;
-      }
-
-      var w = getCardW();
-      boxesEl.style.transform = 'translateX(-' + (current * (w + GAP)) + 'px)';
-      updateDots();
-    }
-
-    requestAnimationFrame(function(){
-      applyWidths();
-      renderDots();
-      go(0);
-    });
-
-    if (prevBtn) {
-      prevBtn.addEventListener('click', function(){ go(current - 1); });
-    }
-    if (nextBtn) {
-      nextBtn.addEventListener('click', function(){ go(current + 1); });
-    }
-
-    // Touch & swipe support for mobile
-    var touchStartX = 0;
-    var touchEndX = 0;
-    var touchStartY = 0;
-    var touchEndY = 0;
-
-    if (viewport) {
-      viewport.addEventListener('touchstart', function(e){
-        touchStartX = e.changedTouches[0].screenX;
-        touchStartY = e.changedTouches[0].screenY;
-      }, {passive: true});
-
-      viewport.addEventListener('touchend', function(e){
-        touchEndX = e.changedTouches[0].screenX;
-        touchEndY = e.changedTouches[0].screenY;
-        var diffX = touchStartX - touchEndX;
-        var diffY = touchStartY - touchEndY;
-        if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
-          if (diffX > 0) {
-            go(current + 1); // Swiped left -> next
-          } else {
-            go(current - 1); // Swiped right -> prev
-          }
-        }
-      }, {passive: true});
-    }
+    applyWidths();
 
     var resizeTimer;
     window.addEventListener('resize', function(){
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(function(){
-        applyWidths();
-        renderDots();
-        go(current);
-      }, 80);
+      resizeTimer = setTimeout(applyWidths, 80);
     });
+
+    // Hide now-unused carousel controls.
+    var prevBtn = document.getElementById('sks-box-prev');
+    var nextBtn = document.getElementById('sks-box-next');
+    var dotsContainer = document.getElementById('sks-dots');
+    if (prevBtn) prevBtn.style.display = 'none';
+    if (nextBtn) nextBtn.style.display = 'none';
+    if (dotsContainer) dotsContainer.style.display = 'none';
   })();
 })
 .catch(function(e){
