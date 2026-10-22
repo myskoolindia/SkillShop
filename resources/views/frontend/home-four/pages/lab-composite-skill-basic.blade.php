@@ -737,7 +737,7 @@
         <span>★</span> Turnkey Implementation
       </div>
       <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
-        What's included in the <span class="text-brand-orange">Complete setup</span>
+        What's included in the <span class="text-brand-orange">Complete Setup</span>
       </h2>
       <p class="mt-3 text-slate-500 text-sm sm:text-base">
         One dedicated partner, one transparent contract, and complete accountability for continuous learning.
@@ -781,6 +781,13 @@
           'pillClasses' => 'bg-amber-100 text-amber-700',
           'title' => 'Compliance Documentation',
           'desc'  => 'Ready-to-present NEP 2020 and CBSE skill-lab audit dossiers prepared for your school inspection committee and trustees.',
+        ],
+        [
+          'img'   => 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=900&q=80',
+          'pill'  => 'Future-Ready Skills',
+          'pillClasses' => 'bg-orange-100 text-amber-700',
+          'title' => 'Digital Lab',
+          'desc'  => 'Empowers schools with digital learning solutions for coding, programming, software-based education, and LMS platforms. Our solutions enable interactive learning, build digital skills, and prepare students for a technology-driven future.',
         ],
       ];
       @endphp
