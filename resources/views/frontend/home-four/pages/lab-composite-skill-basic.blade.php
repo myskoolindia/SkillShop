@@ -200,12 +200,12 @@
         </div>
 
         <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-brand-navy leading-[1.15] tracking-tight">
-          BASIC COMPOSITE<br>
+          COMPOSITE
           <span class="text-brand-orange">SKILL LAB</span>
         </h1>
 
         <p class="text-base sm:text-lg text-slate-700 leading-relaxed font-medium">
-          Create a dedicated space for hands-on skill education with the <strong class="text-brand-navy font-bold">Skillvation Basic Composite Skill Lab</strong> — a practical, school-ready solution designed around the Composite Skill Lab requirement issued by CBSE.
+          Create a dedicated space for hands-on skill education with the <strong class="text-brand-navy font-bold">Skillvation Standard Composite Skill Lab</strong> — a practical, school-ready solution designed around the Composite Skill Lab requirement issued by CBSE.
         </p>
 
         <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
@@ -371,7 +371,7 @@
         Complete Solution
       </div>
       <h2 class="text-3xl sm:text-4xl font-extrabold text-brand-navy">
-        SKILLVATION BASIC PACKAGE
+        SKILLVATION STANDARD PACKAGE
       </h2>
       <p class="text-base sm:text-lg text-brand-orange font-bold">
         <!-- Designed to Meet the CBSE Composite Skill Lab Requirement -->
@@ -728,6 +728,83 @@
 </section> -->
 
 {{-- =====================================================================
+     WHAT'S INCLUDED
+     ===================================================================== --}}
+<section class="py-16 lg:py-24 bg-white" id="program">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-3xl mx-auto mb-12">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-orange/10 text-brand-orange text-xs font-bold uppercase tracking-wider mb-3">
+        <span>★</span> Turnkey Implementation
+      </div>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
+        What's included in the <span class="text-brand-orange">Complete setup</span>
+      </h2>
+      <p class="mt-3 text-slate-500 text-sm sm:text-base">
+        One dedicated partner, one transparent contract, and complete accountability for continuous learning.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+      @php
+      $whatsIncluded = [
+        [
+          'img'   => 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=600&q=80',
+          'pill'  => 'Hardware & Furniture',
+          'pillClasses' => 'bg-violet-100 text-violet-700',
+          'title' => 'Lab Hardware & Workstations',
+          'desc'  => 'Robotics kits, AI/data stations, electronics benches, and coding pods ergonomically sized to your classroom footprint.',
+        ],
+        [
+          'img'   => 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=600&q=80',
+          'pill'  => 'Academics & Pedagogy',
+          'pillClasses' => 'bg-pink-100 text-pink-700',
+          'title' => 'CBSE Curriculum Mapping',
+          'desc'  => 'Every project is mapped to specific CBSE syllabus units (Grades VI–XII) so lab sessions reinforce regular classroom theory.',
+        ],
+        [
+          'img'   => 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=600&q=80',
+          'pill'  => 'Faculty Empowerment',
+          'pillClasses' => 'bg-orange-100 text-orange-700',
+          'title' => 'Teacher Training & Certification',
+          'desc'  => 'Your existing faculty are empowered and certified to facilitate practical sessions independently with no recurring vendor reliance.',
+        ],
+        [
+          'img'   => 'https://images.unsplash.com/photo-1621905251918-48416bd8575a?auto=format&fit=crop&w=600&q=80',
+          'pill'  => 'Care & Spares',
+          'pillClasses' => 'bg-teal-100 text-teal-700',
+          'title' => 'Annual Maintenance & Support',
+          'desc'  => 'Routine hardware servicing, continuous software updates, replacement spares, and a dedicated support helpline.',
+        ],
+        [
+          'img'   => asset('frontend/img/skillbox/compliance_documentation.jpg'),
+          'pill'  => 'Regulatory Readiness',
+          'pillClasses' => 'bg-amber-100 text-amber-700',
+          'title' => 'Compliance Documentation',
+          'desc'  => 'Ready-to-present NEP 2020 and CBSE skill-lab audit dossiers prepared for your school inspection committee and trustees.',
+        ],
+      ];
+      @endphp
+
+      @foreach($whatsIncluded as $f)
+      <div class="group bg-white rounded-2xl border-2 border-slate-100 overflow-hidden shadow-sm hover:shadow-xl hover:border-violet-200 hover:-translate-y-1.5 transition-all duration-300 flex flex-col">
+        <div class="h-48 overflow-hidden bg-slate-100">
+          <img src="{{ $f['img'] }}" alt="{{ $f['title'] }}" loading="lazy"
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        </div>
+        <div class="p-6 flex-1 flex flex-col">
+          <span class="inline-block w-fit text-[0.7rem] font-extrabold uppercase tracking-wider px-3 py-1 rounded-md mb-3 {{ $f['pillClasses'] }}">
+            {{ $f['pill'] }}
+          </span>
+          <h3 class="text-lg font-extrabold text-brand-navy mb-2">{{ $f['title'] }}</h3>
+          <p class="text-sm text-slate-600 leading-relaxed m-0">{{ $f['desc'] }}</p>
+        </div>
+      </div>
+      @endforeach
+    </div>
+  </div>
+</section>
+
+{{-- =====================================================================
      7. DYNAMIC KIT EXPLORER (Live Category & Component Inventory)
      ===================================================================== --}}
 <section class="py-16 lg:py-20 bg-white" id="skill-sectors-section">
@@ -738,10 +815,10 @@
         Basic package
       </div>
       <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
-        Explore Components in the Basic Skill Lab Kit
+        Skill Components in the Standard Package
       </h2>
       <p class="mt-3 text-slate-500 text-sm sm:text-base">
-        Browse the curated equipment, activity items, and consumable resources included in the Skillvation Basic Package.
+        Browse the curated equipment, activity items, and consumable resources included in the Skillvation Standard Package.
       </p>
     </div>
 
@@ -1221,35 +1298,6 @@
   </div>
 </section>
 
-{{-- =====================================================================
-     12. OTHER LABS
-     ===================================================================== --}}
-<section class="py-16 bg-slate-50 border-t border-slate-200">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="text-center mb-10">
-      <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy mb-2">Explore Our Innovation Labs</h2>
-      <p class="text-slate-500 text-sm">Comprehensive hands-on STEM &amp; Skill solutions for modern schools.</p>
-    </div>
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-      @foreach([
-        [route('labs.composite-skill-advance'),        'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=500&q=80', 'Advance Package', 'Early childhood exploration & creativity'],
-        [route('labs.composite-skill-premium'), 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=500&q=80', 'Premium Package', 'Hands-on robotics, coding & AI experiments'],
-        [route('labs.stem'),        'https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?auto=format&fit=crop&w=500&q=80', 'Skillvation Lab', 'Electronics, IoT & project-based learning'],
-      ] as [$url, $img, $name, $desc])
-      <a href="{{ $url }}" class="group flex flex-col gap-3 p-4 rounded-2xl border border-slate-200 hover:border-brand-orange hover:shadow-lg transition-all bg-white">
-        <div class="aspect-[4/3] rounded-xl overflow-hidden bg-slate-100">
-          <img src="{{ $img }}" alt="{{ $name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-        </div>
-        <div>
-          <p class="font-bold text-brand-navy group-hover:text-brand-orange transition-colors text-sm">{{ $name }}</p>
-          <p class="text-xs text-slate-500 mt-0.5">{{ $desc }}</p>
-        </div>
-      </a>
-      @endforeach
-    </div>
-  </div>
-</section>
-
 @endsection
 
 @push('scripts')
@@ -1636,155 +1684,54 @@ Promise.all([
   });
 
   (function(){
-    var GAP = 16;
-    var current = 0;
+    // Arrange the category boxes as separate horizontal divs side by side
+    // (no sliding carousel). They wrap responsively and share equal width.
     var boxes = Array.prototype.slice.call(boxesEl.children);
     var total = boxes.length;
-    var prevBtn = document.getElementById('sks-box-prev');
-    var nextBtn = document.getElementById('sks-box-next');
-    var dotsContainer = document.getElementById('sks-dots');
-    var viewport = document.getElementById('sks-carousel-viewport');
 
-    function getVisibleCount(){
-      var w = window.innerWidth;
-      if (w < 640) return 1;
-      if (w < 1024) return Math.min(2, total);
-      return Math.min(3, total);
-    }
+    // Lay out #sks-boxes as a responsive wrapping flex row, no transform.
+    boxesEl.style.transform = 'none';
+    boxesEl.style.transition = 'none';
+    boxesEl.style.display = 'flex';
+    boxesEl.style.flexWrap = 'wrap';
+    boxesEl.style.justifyContent = 'center';
+    boxesEl.style.gap = '16px';
 
-    function getContainerW(){
-      var w = 0;
-      if (viewport && viewport.clientWidth > 0) {
-        w = viewport.clientWidth;
-      } else if (contentEl && contentEl.clientWidth > 0) {
-        w = contentEl.clientWidth;
-      } else if (boxesEl.parentElement && boxesEl.parentElement.clientWidth > 0) {
-        w = boxesEl.parentElement.clientWidth;
-      } else {
-        w = window.innerWidth - 32;
-      }
-      return w;
-    }
+    // Remove the carousel viewport clipping so all boxes are visible.
+    var vp = document.getElementById('sks-carousel-viewport');
+    if (vp) { vp.style.overflow = 'visible'; }
 
-    function getCardW(){
-      var visible = getVisibleCount();
-      var containerW = getContainerW();
-      var totalGap = GAP * (visible - 1);
-      var w = Math.floor((containerW - totalGap) / visible);
-      return Math.max(240, w);
-    }
-
+    // Give each box an equal, responsive width (3 per row on desktop,
+    // 2 on tablet, 1 on mobile) while allowing wrap.
     function applyWidths(){
-      var w = getCardW();
+      var perRow = 3;
+      var w = window.innerWidth;
+      if (w < 640) perRow = 1;
+      else if (w < 1024) perRow = Math.min(2, total);
+      else perRow = Math.min(3, total);
+      var basis = 'calc((100% - ' + (16 * (perRow - 1)) + 'px) / ' + perRow + ')';
       boxes.forEach(function(b){
-        b.style.width     = w + 'px';
-        b.style.minWidth  = w + 'px';
-        b.style.maxWidth  = w + 'px';
-        b.style.flex      = '0 0 ' + w + 'px';
+        b.style.flex     = '1 1 ' + basis;
+        b.style.maxWidth = basis;
+        b.style.minWidth = '240px';
+        b.style.width    = '';
       });
     }
-
-    function renderDots(){
-      if (!dotsContainer) return;
-      dotsContainer.innerHTML = '';
-      var visible = getVisibleCount();
-      var maxIdx = Math.max(0, total - visible);
-      var dotCount = maxIdx + 1;
-      if (dotCount <= 1) {
-        dotsContainer.style.display = 'none';
-        return;
-      }
-      dotsContainer.style.display = 'flex';
-      for (var i = 0; i < dotCount; i++) {
-        var dot = document.createElement('span');
-        dot.className = 'sks-dot' + (i === current ? ' active' : '');
-        dot.setAttribute('data-idx', i);
-        dot.addEventListener('click', (function(idx){
-          return function(){ go(idx); };
-        })(i));
-        dotsContainer.appendChild(dot);
-      }
-    }
-
-    function updateDots(){
-      if (!dotsContainer) return;
-      var dots = dotsContainer.querySelectorAll('.sks-dot');
-      dots.forEach(function(d, i){
-        if (i === current) {
-          d.classList.add('active');
-        } else {
-          d.classList.remove('active');
-        }
-      });
-    }
-
-    function go(idx){
-      var visible = getVisibleCount();
-      var maxIdx = Math.max(0, total - visible);
-      if (maxIdx === 0) {
-        current = 0;
-      } else if (idx > maxIdx) {
-        current = 0; // Infinite loop wrap-around
-      } else if (idx < 0) {
-        current = maxIdx; // Infinite loop wrap-around to end
-      } else {
-        current = idx;
-      }
-
-      var w = getCardW();
-      boxesEl.style.transform = 'translateX(-' + (current * (w + GAP)) + 'px)';
-      updateDots();
-    }
-
-    requestAnimationFrame(function(){
-      applyWidths();
-      renderDots();
-      go(0);
-    });
-
-    if (prevBtn) {
-      prevBtn.addEventListener('click', function(){ go(current - 1); });
-    }
-    if (nextBtn) {
-      nextBtn.addEventListener('click', function(){ go(current + 1); });
-    }
-
-    // Touch & swipe support for mobile
-    var touchStartX = 0;
-    var touchEndX = 0;
-    var touchStartY = 0;
-    var touchEndY = 0;
-
-    if (viewport) {
-      viewport.addEventListener('touchstart', function(e){
-        touchStartX = e.changedTouches[0].screenX;
-        touchStartY = e.changedTouches[0].screenY;
-      }, {passive: true});
-
-      viewport.addEventListener('touchend', function(e){
-        touchEndX = e.changedTouches[0].screenX;
-        touchEndY = e.changedTouches[0].screenY;
-        var diffX = touchStartX - touchEndX;
-        var diffY = touchStartY - touchEndY;
-        if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
-          if (diffX > 0) {
-            go(current + 1); // Swiped left -> next
-          } else {
-            go(current - 1); // Swiped right -> prev
-          }
-        }
-      }, {passive: true});
-    }
+    applyWidths();
 
     var resizeTimer;
     window.addEventListener('resize', function(){
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(function(){
-        applyWidths();
-        renderDots();
-        go(current);
-      }, 80);
+      resizeTimer = setTimeout(applyWidths, 80);
     });
+
+    // Hide now-unused carousel controls.
+    var prevBtn = document.getElementById('sks-box-prev');
+    var nextBtn = document.getElementById('sks-box-next');
+    var dotsContainer = document.getElementById('sks-dots');
+    if (prevBtn) prevBtn.style.display = 'none';
+    if (nextBtn) nextBtn.style.display = 'none';
+    if (dotsContainer) dotsContainer.style.display = 'none';
   })();
 })
 .catch(function(e){
