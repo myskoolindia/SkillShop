@@ -1274,7 +1274,7 @@
           <div class="vl-faq-card">
             <div class="vl-faq-card__q">How is teacher training conducted?</div>
             <div class="vl-faq-card__divider"></div>
-            <div class="vl-faq-card__a">We conduct an intensive 3 to 5-day on-site training certification for your science and computer faculty, backed by video tutorials, lesson plans, and scheduled term refreshers.</div>
+            <div class="vl-faq-card__a">We conduct an intensive 25hrs training with certification both online and offline (our branch) for your faculty</div>
           </div>
           <div class="vl-faq-card">
             <div class="vl-faq-card__q">What happens after installation — are we supported?</div>
