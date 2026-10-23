@@ -3162,6 +3162,90 @@
   </div>
 </section>
 
+{{-- =====================================================================
+     WHAT'S INCLUDED (Turnkey Implementation) — copied from Composite Skill Basic
+     ===================================================================== --}}
+<section class="py-16 lg:py-24 bg-white" id="program">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-3xl mx-auto mb-12">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-orange/10 text-brand-orange text-xs font-bold uppercase tracking-wider mb-3">
+        <span>★</span> Turnkey Implementation
+      </div>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
+        What's included in the <span class="text-brand-orange">Complete Setup</span>
+      </h2>
+      <p class="mt-3 text-slate-500 text-sm sm:text-base">
+        One dedicated partner, one transparent contract, and complete accountability for continuous learning.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+      @php
+      $whatsIncluded = [
+        [
+          'img'   => 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=600&q=80',
+          'pill'  => 'Hardware & Furniture',
+          'pillClasses' => 'bg-violet-100 text-violet-700',
+          'title' => 'Lab Hardware & Workstations',
+          'desc'  => 'Robotics kits, AI/data stations, electronics benches, and coding pods ergonomically sized to your classroom footprint.',
+        ],
+        [
+          'img'   => 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=600&q=80',
+          'pill'  => 'Academics & Pedagogy',
+          'pillClasses' => 'bg-pink-100 text-pink-700',
+          'title' => 'CBSE Curriculum Mapping',
+          'desc'  => 'Every project is mapped to specific CBSE syllabus units (Grades VI–XII) so lab sessions reinforce regular classroom theory.',
+        ],
+        [
+          'img'   => 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=600&q=80',
+          'pill'  => 'Faculty Empowerment',
+          'pillClasses' => 'bg-orange-100 text-orange-700',
+          'title' => 'Teacher Training & Certification',
+          'desc'  => 'Your existing faculty are empowered and certified to facilitate practical sessions independently with no recurring vendor reliance.',
+        ],
+        [
+          'img'   => 'https://images.unsplash.com/photo-1621905251918-48416bd8575a?auto=format&fit=crop&w=600&q=80',
+          'pill'  => 'Care & Spares',
+          'pillClasses' => 'bg-teal-100 text-teal-700',
+          'title' => 'Annual Maintenance & Support',
+          'desc'  => 'Routine hardware servicing, continuous software updates, replacement spares, and a dedicated support helpline.',
+        ],
+        [
+          'img'   => asset('frontend/img/skillbox/compliance_documentation.jpg'),
+          'pill'  => 'Regulatory Readiness',
+          'pillClasses' => 'bg-amber-100 text-amber-700',
+          'title' => 'Compliance Documentation',
+          'desc'  => 'Ready-to-present NEP 2020 and CBSE skill-lab audit dossiers prepared for your school inspection committee and trustees.',
+        ],
+        [
+          'img'   => 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=900&q=80',
+          'pill'  => 'Future-Ready Skills',
+          'pillClasses' => 'bg-orange-100 text-amber-700',
+          'title' => 'Digital Lab',
+          'desc'  => 'Empowers schools with digital learning solutions for coding, programming, software-based education, and LMS platforms. Our solutions enable interactive learning, build digital skills, and prepare students for a technology-driven future.',
+        ],
+      ];
+      @endphp
+
+      @foreach($whatsIncluded as $f)
+      <div class="group bg-white rounded-2xl border-2 border-slate-100 overflow-hidden shadow-sm hover:shadow-xl hover:border-violet-200 hover:-translate-y-1.5 transition-all duration-300 flex flex-col">
+        <div class="h-48 overflow-hidden bg-slate-100">
+          <img src="{{ $f['img'] }}" alt="{{ $f['title'] }}" loading="lazy"
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        </div>
+        <div class="p-6 flex-1 flex flex-col">
+          <span class="inline-block w-fit text-[0.7rem] font-extrabold uppercase tracking-wider px-3 py-1 rounded-md mb-3 {{ $f['pillClasses'] }}">
+            {{ $f['pill'] }}
+          </span>
+          <h3 class="text-lg font-extrabold text-brand-navy mb-2">{{ $f['title'] }}</h3>
+          <p class="text-sm text-slate-600 leading-relaxed m-0">{{ $f['desc'] }}</p>
+        </div>
+      </div>
+      @endforeach
+    </div>
+  </div>
+</section>
+
   <!-- ==================== PRICING PLANS & CUSTOM PACKAGE BUILDER ==================== -->
   <section class="vl-section bg-peach" id="plans">
     <div class="vidyalab-wrap">
@@ -3741,36 +3825,6 @@
       @endforeach
     </div>
 
-  </div>
-</section>
-
-<!-- =====================================================================
-     OTHER LABS
-     ===================================================================== -->
-<section class="py-16 bg-white">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="text-center mb-10">
-      <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy mb-2">Explore Our Innovation Labs</h2>
-      <p class="text-slate-500 text-sm">Comprehensive hands-on STEM &amp; Skill solutions for modern schools.</p>
-    </div>
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-      @foreach([
-        [route('labs.composite-skill-basic'), 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=500&q=80', 'Basic Package', 'Hands-on robotics, coding & AI experiments'],
-        [route('labs.composite-skill-advance'),'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=500&q=80', 'Advanced Package', 'Electronics, IoT & project-based learning'],
-        [route('labs.composite-skill-premium'), 'https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?auto=format&fit=crop&w=500&q=80', 'Premium Package', 'Early childhood exploration & creativity'],
-      ] as [$url, $img, $name, $desc])
-      
-      <a href="{{ $url }}" class="group flex flex-col gap-3 p-4 rounded-2xl border border-slate-200 hover:border-brand-orange hover:shadow-lg transition-all duration-200 bg-white">
-        <div class="aspect-[4/3] rounded-xl overflow-hidden bg-slate-100">
-          <img src="{{ $img }}" alt="{{ $name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-        </div>
-        <div>
-          <p class="font-bold text-brand-navy group-hover:text-brand-orange transition-colors text-sm">{!! $name !!}</p>
-          <p class="text-xs text-slate-500 mt-0.5">{!! $desc !!}</p>
-        </div>
-      </a>
-      @endforeach
-    </div>
   </div>
 </section>
 
