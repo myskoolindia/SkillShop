@@ -3049,7 +3049,7 @@
     <!-- Stats -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mt-14 lg:mt-20">
       <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-6 text-center shadow-sm">
-        <div class="text-3xl lg:text-4xl font-black text-brand-navy mb-1">11+</div>
+        <div class="text-3xl lg:text-4xl font-black text-brand-navy mb-1">16</div>
         <div class="text-xs lg:text-sm font-semibold text-slate-600">Skill Learning Domains</div>
       </div>
       <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-6 text-center shadow-sm">
@@ -3058,7 +3058,7 @@
       </div>
       <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-6 text-center shadow-sm">
         <div class="text-3xl lg:text-4xl font-black text-brand-navy mb-1">ICSE &amp; State</div>
-        <div class="text-xs lg:text-sm font-semibold text-slate-600">Board Aligned</div>
+        <div class="text-xs lg:text-sm font-semibold text-slate-600">Board</div>
       </div>
     </div>
   </div>
@@ -3125,19 +3125,20 @@
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold uppercase tracking-wider">
         What the Lab Can Bring
       </div>
-      <h2 class="text-3xl sm:text-4xl font-extrabold text-brand-navy">11 Skill Learning Domains</h2>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-brand-navy">16 Skill Learning Domains</h2>
       <p class="text-base text-slate-600">The lab can be configured to bring together any combination of these skill learning areas.</p>
     </div>
 
     @php
     $domains = [
-      ['fa-robot',         'bg-emerald-100','text-emerald-600','Robotics & Coding',          'Hands-on robotics kits, coding platforms, and engineering challenges.'],
+      ['fa-robot',         'bg-emerald-100','text-emerald-600','Robotics',          'Hands-on robotics kits, coding platforms, and engineering challenges.'],
+      ['fa-robot',         'bg-emerald-100','text-emerald-600','Coding',          'Hands-on robotics kits, coding platforms, and engineering challenges.'],
       ['fa-brain',         'bg-blue-100',   'text-blue-600',   'Artificial Intelligence',     'Introductory AI concepts, tools, and real-world application projects.'],
-      ['fa-flask',         'bg-purple-100', 'text-purple-600', 'STEM & Science Exploration',  'Physics, chemistry, biology experiments and science-based project learning.'],
-      ['fa-bolt',          'bg-yellow-100', 'text-yellow-600', 'Electronics & Tinkering',     'Breadboards, circuits, components, and electronics prototyping tools.'],
+      ['fa-flask',         'bg-purple-100', 'text-purple-600', 'Appareals',  'Physics, chemistry, biology experiments and science-based project learning.'],
+      ['fa-bolt',          'bg-yellow-100', 'text-yellow-600', 'Electronics & Communication',     'Breadboards, circuits, components, and electronics prototyping tools.'],
       ['fa-lightbulb',     'bg-orange-100', 'text-orange-600', 'Design Thinking',             'Structured design challenges, prototyping, and creative problem-solving.'],
-      ['fa-calculator',    'bg-cyan-100',   'text-cyan-600',   'Mathematics & Financial Literacy','Applied maths, data tools, and real-world financial literacy programmes.'],
-      ['fa-paint-brush',   'bg-pink-100',   'text-pink-600',   'Art, Craft & Handicrafts',    'Creative art projects, traditional crafts, and design-based skill activities.'],
+      ['fa-calculator',    'bg-cyan-100',   'text-cyan-600',   'Agriculture & Gardening','Applied maths, data tools, and real-world financial literacy programmes.'],
+      ['fa-leaf',          'bg-pink-100',   'text-pink-600',   'Healthcare',    'Creative art projects, traditional crafts, and design-based skill activities.'],
       ['fa-bullhorn',      'bg-red-100',    'text-red-600',    'Media & Communication',        'Storytelling, content creation, public speaking, and media literacy.'],
       ['fa-laptop-code',   'bg-indigo-100', 'text-indigo-600', 'Digital Skills',              'Digital literacy, productivity tools, internet safety, and basic computing.'],
       ['fa-heart',         'bg-rose-100',   'text-rose-600',   'Life Skills',                 'Communication, collaboration, emotional intelligence, and leadership.'],
@@ -3209,13 +3210,6 @@
           'pillClasses' => 'bg-teal-100 text-teal-700',
           'title' => 'Annual Maintenance & Support',
           'desc'  => 'Routine hardware servicing, continuous software updates, replacement spares, and a dedicated support helpline.',
-        ],
-        [
-          'img'   => asset('frontend/img/skillbox/compliance_documentation.jpg'),
-          'pill'  => 'Regulatory Readiness',
-          'pillClasses' => 'bg-amber-100 text-amber-700',
-          'title' => 'Compliance Documentation',
-          'desc'  => 'Ready-to-present NEP 2020 and CBSE skill-lab audit dossiers prepared for your school inspection committee and trustees.',
         ],
         [
           'img'   => 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=900&q=80',

@@ -39,4 +39,10 @@ return [
         'template_name'  => env('WABA_TEMPLATE_NAME', ''),
     ],
 
+    // "Design My Lab" external session API
+    'labdesign' => [
+        'base_url' => env('LABDESIGN_API_BASE', 'http://192.168.88.13:8787'),
+        'api_key'  => env('LABDESIGN_API_KEY', ''),
+    ],
+
 ];

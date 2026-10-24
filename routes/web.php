@@ -501,6 +501,10 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
     Route::post('phone-otp/send',   [PhoneOtpController::class, 'send'])->name('phone.otp.send');
     Route::post('phone-otp/verify', [PhoneOtpController::class, 'verify'])->name('phone.otp.verify');
 
+    /** Design My Lab (external session API) */
+    Route::post('lab-design/start',             [\App\Http\Controllers\Frontend\LabDesignController::class, 'start'])->name('lab-design.start');
+    Route::get('lab-design/result/{sessionId}', [\App\Http\Controllers\Frontend\LabDesignController::class, 'result'])->name('lab-design.result');
+
     /** Custom pages */
     Route::get('page/{slug}', [HomePageController::class, 'customPage'])->name('custom-page');
 
