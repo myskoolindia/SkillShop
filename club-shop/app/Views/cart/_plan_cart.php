@@ -37,6 +37,11 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                         You are checking out the <strong><?= esc($planLabel) ?></strong> plan. Review your items below.
                     </span>
                 </div>
+                <?php $labDesignNotice = session()->getFlashdata('lab_design_notice'); if (!empty($labDesignNotice)): ?>
+                    <div style="margin:-12px 0 24px; padding:12px 18px; border-radius:10px; background:#eff6ff; border:1px solid #bfdbfe; color:#1e3a8a; font-size:14px; font-weight:600;">
+                        <i class="fa fa-pencil-square-o"></i>&nbsp; <?= esc($labDesignNotice) ?>
+                    </div>
+                <?php endif; ?>
 
                 <?php if (!empty($cart) && !empty($cart->items)): ?>
                     <div class="shopping-cart">

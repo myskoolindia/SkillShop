@@ -729,6 +729,7 @@ if (!empty($languages)) {
         //cart
         $routes->get($key . $csrt->cart, 'CartController::cart');
         $routes->get($key . 'basic-cart', 'CartController::basicCart');
+        $routes->get($key . 'lab-design-cart', 'CartController::labDesignCart');
         $routes->get($key . 'advance-cart', 'CartController::advanceCart');
         $routes->get($key . 'premium-cart', 'CartController::premiumCart');
         $routes->get($key . 'skillvation-cart', 'CartController::skilllabCart');

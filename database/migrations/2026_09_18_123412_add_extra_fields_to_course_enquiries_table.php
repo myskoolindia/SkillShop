@@ -9,10 +9,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('course_enquiries', function (Blueprint $table) {
-            $table->string('designation')->nullable()->after('name');
-            $table->string('city')->nullable()->after('school');
-            $table->text('address')->nullable()->after('city');
-            $table->string('source')->nullable()->after('status'); // which page the enquiry came from
+            // Fresh installations already receive these columns in the create-table migration.
+            if (!Schema::hasColumn('course_enquiries', 'designation')) {
+                $table->string('designation')->nullable()->after('name');
+            }
+            if (!Schema::hasColumn('course_enquiries', 'city')) {
+                $table->string('city')->nullable()->after('school');
+            }
+            if (!Schema::hasColumn('course_enquiries', 'address')) {
+                $table->text('address')->nullable()->after('city');
+            }
+            if (!Schema::hasColumn('course_enquiries', 'source')) {
+                $table->string('source')->nullable()->after('status');
+            }
         });
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-if (strpos($_SERVER['REQUEST_URI'], '/index.php') !== false) {
+if (strpos($_SERVER['REQUEST_URI'] ?? '', '/index.php') !== false) {
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'];
     $uri = str_replace('/index.php', '', $_SERVER['REQUEST_URI']);

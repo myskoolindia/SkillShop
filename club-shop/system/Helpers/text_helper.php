@@ -434,7 +434,7 @@ function getUserSession()
     }
 
     $domain = get_root_domain();
-    $prc = trim(env('PURCHASE_CODE'));
+    $prc = trim((string) env('PURCHASE_CODE', ''));
 
     // If not IP address and not whitelisted domain hash
     if (!filter_var($domain, FILTER_VALIDATE_IP)

@@ -160,6 +160,111 @@ class CartController extends BaseController
     }
 
     /**
+     * Design My Lab: load a Kalpana quotation into the matching plan cart.
+     * The quotation is fetched server-side by its (unguessable) session ID, so the browser cannot alter
+     * the items; prices always come from this shop. Lab components become the bundle's quantities,
+     * other shop products are separate cart lines, and MySkool courses are listed as not sold here.
+     * The lab matches the quotation exactly: the bundle's usual minimums are not applied to it.
+     */
+    public function labDesignCart()
+    {
+        $sessionId = (string)inputGet('session');
+        if (!preg_match('/^[0-9a-f-]{36}$/', $sessionId)) {
+            return redirect()->to(base_url('basic-cart'));
+        }
+        $plans = [
+            'basic'    => ['cart' => 'basic-cart',   'slug' => 'cbse-composite-skill-lab-basic-68',    'id' => 68],
+            'advanced' => ['cart' => 'advance-cart', 'slug' => 'cbse-composite-skill-lab-advanced-72', 'id' => 72],
+            'premium'  => ['cart' => 'premium-cart', 'slug' => 'cbse-composite-skill-lab-premium-73',  'id' => 73],
+        ];
+        // Reloading (or the popup's redirect racing the "Go to cart now" click) must not add the quotation twice,
+        // but the notice is shown again.
+        // A budget option chosen in Kalpana continues straight to checkout.
+        $checkout = inputGet('next') === 'checkout';
+        $applied = helperGetSession('lab_design_applied') ?: [];
+        if (isset($applied[$sessionId]['cart'])) {
+            session()->setFlashdata('lab_design_notice', $applied[$sessionId]['notice']);
+            return redirect()->to($checkout ? generateUrl('cart', 'payment_method') : base_url($applied[$sessionId]['cart']));
+        }
+
+        $baseUrl = rtrim((string)env('kalpana.baseURL'), '/');
+        $apiKey = (string)env('kalpana.apiKey');
+        $data = null;
+        if ($baseUrl !== '' && $apiKey !== '') {
+            try {
+                $response = \Config\Services::curlrequest(['timeout' => 20, 'http_errors' => false])
+                    ->get($baseUrl . '/api/v1/sessions/' . rawurlencode($sessionId) . '/result', ['headers' => ['Authorization' => 'Bearer ' . $apiKey, 'Accept' => 'application/json']]);
+                if ($response->getStatusCode() === 200) {
+                    $data = json_decode($response->getBody(), true);
+                }
+            } catch (\Throwable $e) {
+                log_message('error', '[LabDesignCart] ' . $e->getMessage());
+            }
+        }
+        if (empty($data) || ($data['status'] ?? '') !== 'ready' || empty($data['quotation']['lines'])) {
+            session()->setFlashdata('lab_design_notice', 'Your designed lab could not be loaded. Please try Design My Lab again.');
+            return redirect()->to(base_url('basic-cart'));
+        }
+
+        $plan = $plans[strtolower((string)($data['plan']['tier'] ?? ''))] ?? $plans['basic'];
+        $labProduct = $this->productModel->getProductBySlug($plan['slug']) ?: $this->productModel->getActiveProduct($plan['id']);
+        $this->syncSelectedLabCart($labProduct);
+
+        $quantities = [];
+        $courses = [];
+        foreach ($data['quotation']['lines'] as $line) {
+            $qty = max(0, min(99999, (int)($line['quantity'] ?? 0)));
+            if (preg_match('/^sv-(\d+)$/', (string)($line['productId'] ?? ''), $m)) {
+                $quantities[(int)$m[1]] = ($quantities[(int)$m[1]] ?? 0) + $qty;
+            } elseif (($line['kind'] ?? '') === 'course') {
+                $courses[] = (string)($line['name'] ?? 'Course');
+            }
+        }
+
+        // Bundle components take the quotation's quantities; components it did not choose are set to zero,
+        // including required ones (the "designed" marker makes the cart keep these quantities).
+        $bundleItems = [];
+        $components = !empty($labProduct) ? (new \App\Models\BundleModel())->getBundleComponents((int)$labProduct->id, true) : [];
+        foreach ($components as $component) {
+            $pid = (int)$component->component_product_id;
+            $bundleItems[] = ['comp_id' => (int)$component->id, 'product_id' => $pid, 'variant_id' => $component->variant_id, 'qty' => $quantities[$pid] ?? 0, 'designed' => 1];
+            unset($quantities[$pid]);
+        }
+        if (!empty($bundleItems)) {
+            $labItemId = null;
+            foreach ($this->cartModel->getCart()->items ?? [] as $item) {
+                if ((int)$item->product_id === (int)$labProduct->id) {
+                    $labItemId = $item->id;
+                    break;
+                }
+            }
+            $this->cartModel->addToCart($labProduct, 1, null, [], $bundleItems, $labItemId);
+        }
+
+        $skipped = [];
+        foreach ($quantities as $pid => $qty) {
+            $product = $this->productModel->getActiveProduct($pid);
+            if (!empty($product) && $product->status == 1 && $qty > 0) {
+                $this->cartModel->addToCart($product, $qty);
+            } elseif ($qty > 0) {
+                $skipped[] = '#' . $pid;
+            }
+        }
+
+        $notice = 'Your designed lab from Kalpana has been added to the cart.';
+        if (!empty($courses)) {
+            $notice .= ' Courses are not sold in the shop and were not added: ' . implode(', ', $courses) . '.';
+        }
+        if (!empty($skipped)) {
+            $notice .= ' Unavailable products were skipped: ' . implode(', ', $skipped) . '.';
+        }
+        $applied[$sessionId] = ['cart' => $plan['cart'], 'notice' => $notice];
+        helperSetSession('lab_design_applied', $applied);
+        session()->setFlashdata('lab_design_notice', $notice);
+        return redirect()->to($checkout ? generateUrl('cart', 'payment_method') : base_url($plan['cart']));
+    }
+
+    /**
      * Advance Cart
      */
     public function advanceCart()

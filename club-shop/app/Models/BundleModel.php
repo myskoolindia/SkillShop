@@ -362,6 +362,9 @@ class BundleModel extends BaseModel
 
             $item->price = $origPrice;
             $item->unit_price = $unitPrice;
+            // The product's own price, ignoring the bundle override; used for labs designed in Kalpana.
+            $item->standalone_price = (float)($prod->price > 0 ? $prod->price : $prod->base_price);
+            $item->standalone_unit_price = (float)(($isDiscountActive && $prod->price_discounted > 0) ? $prod->price_discounted : $prod->price);
             $item->discount_rate = $childDiscountRate;
             $item->has_discount = ($origPrice > $unitPrice);
             $item->total_price = $item->unit_price * $item->required_quantity;

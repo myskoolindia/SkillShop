@@ -22,7 +22,7 @@ class DemoModeMiddleware
                 'login', 'register', 'user-register', 'user-login',
                 'user-verification', 'logout', 'admin.login',
                 'admin.store-login', 'admin.logout','add-to-cart',
-                'student.get-file-info'
+                'student.get-file-info', 'lab-design.start'
             ];
             $allNotAllowedGetRoutes = [
                 'checkout.index',

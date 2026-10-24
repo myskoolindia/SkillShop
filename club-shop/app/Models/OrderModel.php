@@ -161,6 +161,7 @@ class OrderModel extends BaseModel
 
         $this->addInvoice($orderId);
         $this->addOrderEmail($orderId);
+        \App\Libraries\RoboQuestUnlocks::syncOrderSafely($orderId);
 
         return $orderId;
     }
@@ -404,6 +405,7 @@ class OrderModel extends BaseModel
                 }
                 //add invoice
                 $this->addInvoice($order->id);
+                \App\Libraries\RoboQuestUnlocks::syncOrderSafely($order->id);
             }
         }
     }
@@ -708,6 +710,7 @@ class OrderModel extends BaseModel
                 ];
                 if ($this->builderOrderItems->where('id', $orderProduct->id)->update($data)) {
                     $this->builder->where('id', $orderProduct->order_id)->update(['payment_status' => 'payment_received']);
+                    \App\Libraries\RoboQuestUnlocks::syncOrderSafely($orderProduct->order_id);
                 }
                 return true;
             }
@@ -1013,7 +1016,9 @@ class OrderModel extends BaseModel
                     'updated_at' => date('Y-m-d H:i:s')
                 ];
                 if ($this->builderOrderItems->where('order_id', $orderId)->update($data)) {
-                    return $this->builder->where('id', $orderId)->update(['status' => 2, 'updated_at' => date('Y-m-d H:i:s')]);
+                    $updated = $this->builder->where('id', $orderId)->update(['status' => 2, 'updated_at' => date('Y-m-d H:i:s')]);
+                    \App\Libraries\RoboQuestUnlocks::syncOrderSafely($orderId);
+                    return $updated;
                 }
             }
         }

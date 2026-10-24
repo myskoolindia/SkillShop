@@ -903,10 +903,17 @@
 
       {{-- Design My Lab modal --}}
       <div id="dml-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(11,37,69,.55);align-items:center;justify-content:center;padding:16px;">
-        <div style="background:#fff;border-radius:16px;max-width:760px;width:100%;max-height:88vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);">
+        <div id="dml-box" style="background:#fff;border-radius:16px;max-width:760px;width:100%;max-height:88vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);display:flex;flex-direction:column;">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid #eef1f6;position:sticky;top:0;background:#fff;">
             <strong style="font-size:16px;color:#0b2545;"><i class="fa-solid fa-pen-ruler" style="color:#2563eb;"></i>&nbsp; Design My Lab</strong>
             <button type="button" id="dml-close" style="background:none;border:none;font-size:20px;color:#64748b;cursor:pointer;line-height:1;">&times;</button>
+          </div>
+          <div id="dml-ready" style="display:none;align-items:center;justify-content:space-between;gap:12px;padding:10px 22px;background:#ecfdf5;border-bottom:1px solid #a7f3d0;font-size:13px;color:#065f46;font-weight:600;">
+            <span><i class="fa-solid fa-circle-check" style="color:#22c55e;"></i>&nbsp; Your lab quotation is ready. Taking you to your cart…</span>
+            <a id="dml-go-cart" href="#" style="padding:7px 14px;border-radius:8px;background:#065f46;color:#fff;font-size:12px;font-weight:700;text-decoration:none;">Go to cart now</a>
+          </div>
+          <div id="dml-frame-wrap" style="display:none;flex:1;min-height:0;">
+            <iframe id="dml-frame" title="Design My Lab" style="width:100%;height:100%;border:0;display:block;" allow="microphone"></iframe>
           </div>
           <div id="dml-body" style="padding:22px;">
             {{-- content injected by JS --}}
@@ -1868,109 +1875,76 @@ Promise.all([
   var closeBtn= document.getElementById('dml-close');
   if(!openBtn || !modal || !body) return;
 
+  var box       = document.getElementById('dml-box');
+  var frameWrap = document.getElementById('dml-frame-wrap');
+  var frame     = document.getElementById('dml-frame');
+  var readyBar  = document.getElementById('dml-ready');
+  var goCart    = document.getElementById('dml-go-cart');
+  var CART_URL  = '{{ url("/club-shop/lab-design-cart") }}';
+
   function openModal(){ modal.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
-  function closeModal(){ modal.style.display = 'none'; document.body.style.overflow = ''; }
+  function closeModal(){ modal.style.display = 'none'; document.body.style.overflow = ''; activeSession = null; }
+  // Kalpana runs inside the modal; the modal widens while it is shown.
+  function showFrame(url){
+    box.style.maxWidth = '1200px'; box.style.height = '88vh'; box.style.overflow = 'hidden';
+    frame.src = url; frameWrap.style.display = 'block'; body.style.display = 'none';
+  }
+  function showBody(){
+    box.style.maxWidth = '760px'; box.style.height = ''; box.style.overflow = 'auto';
+    frameWrap.style.display = 'none'; readyBar.style.display = 'none'; body.style.display = 'block';
+  }
+  function resetModal(){ frame.src = 'about:blank'; showBody(); }
+
   if(closeBtn) closeBtn.addEventListener('click', closeModal);
-  modal.addEventListener('click', function(e){ if(e.target === modal) closeModal(); });
+  // A stray backdrop click must not discard a design in progress; use the × button instead.
+  modal.addEventListener('click', function(e){ if(e.target === modal && frameWrap.style.display === 'none') closeModal(); });
 
   function setBody(html){ body.innerHTML = html; }
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 
   var POLL_INTERVAL = 4000;   // 4s between polls
   var MAX_POLLS     = 150;    // ~10 minutes
-  var curLaunchUrl  = '';
 
-  function money(v, unit){
-    if (v === null || v === undefined || v === '') return '';
-    var n = Number(v);
-    if (isNaN(n)) return esc(v);
-    if ((unit || '').toLowerCase() === 'minor') n = n / 100; // minor units -> major
-    return '₹' + n.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  }
+  // Choosing a budget option in Kalpana goes straight to checkout with that plan.
+  window.addEventListener('message', function(e){
+    var d = e.data || {};
+    if (!activeSession || d.type !== 'kalpana:checkout' || d.sessionId !== activeSession) return;
+    try { if (e.origin !== new URL(frame.src).origin) return; } catch (err) { return; }
+    window.location.href = CART_URL + '?session=' + encodeURIComponent(activeSession) + '&next=checkout';
+  });
 
-  function renderQuotation(data){
-    var unit = data.amountUnit || '';
-    var quotation = data.quotation || {};
-    var plan = data.plan || null;
-    // Try the common shapes for line items.
-    var items = quotation.items || quotation.lineItems || quotation.lines
-             || (plan && (plan.items || plan.products)) || [];
-    var grand = quotation.grandTotal || quotation.total || quotation.totalAmount || null;
-
-    var html = '<p style="font-size:13px;color:#475569;margin:0 0 12px;">Your designed lab quotation:</p>';
-
-    if (Array.isArray(items) && items.length){
-      html += '<div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">'
-           +  '<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 14px;background:#1e1b4b;color:#fff;font-size:12px;font-weight:700;">'
-           +  '<span>Item</span><span>Amount</span></div>';
-      items.forEach(function(it, i){
-        var title = it.title || it.name || it.item || it.label || ('Item ' + (i+1));
-        var qty   = it.qty || it.quantity || it.required_quantity || '';
-        var amt   = it.total || it.totalAmount || it.amount || it.price || it.unit_price || '';
-        html += '<div style="display:flex;justify-content:space-between;gap:12px;padding:10px 14px;'+(i%2?'background:#f8fafc;':'')+'">'
-             +  '<span style="font-size:13px;color:#1e293b;font-weight:600;">'+esc(title)+(qty?(' <span style="color:#94a3b8;font-weight:500;">× '+esc(qty)+'</span>'):'')+'</span>'
-             +  '<span style="font-size:13px;color:#2563eb;font-weight:700;white-space:nowrap;">'+money(amt, unit)+'</span>'
-             +  '</div>';
-      });
-      if (grand !== null){
-        html += '<div style="display:flex;justify-content:space-between;gap:12px;padding:11px 14px;background:#1e1b4b;color:#fff;">'
-             +  '<span style="font-size:13px;font-weight:800;">Grand Total</span>'
-             +  '<span style="font-size:14px;font-weight:800;color:#fbbf24;">'+money(grand, unit)+'</span></div>';
-      }
-      html += '</div>';
-    } else {
-      // No parsed line items — show the raw quotation/plan for transparency.
-      html += '<pre style="background:#0b2545;color:#e2e8f0;padding:14px;border-radius:10px;font-size:12px;overflow:auto;max-height:420px;white-space:pre-wrap;">'
-           +  esc(JSON.stringify({plan: plan, quotation: quotation}, null, 2)) + '</pre>';
-    }
-    html += '<p style="font-size:11px;color:#94a3b8;margin:12px 0 0;"><i class="fa-solid fa-circle-check" style="color:#22c55e;"></i> Saved.</p>';
-    setBody(html);
-  }
-
-  function waitingBody(attempt){
-    var reopen = curLaunchUrl
-      ? '<p style="margin:14px 0 0;"><a href="'+esc(curLaunchUrl)+'" target="_blank" rel="noopener" style="font-size:12px;color:#2563eb;font-weight:700;text-decoration:underline;">Reopen design workspace</a></p>'
-      : '';
-    setBody('<div style="text-align:center;padding:26px;color:#475569;">'
-      + '<i class="fa-solid fa-circle-notch fa-spin" style="font-size:22px;color:#2563eb;"></i>'
-      + '<p style="margin-top:12px;font-size:13px;font-weight:600;">Design workspace opened in a new tab.</p>'
-      + '<p style="margin-top:4px;font-size:12px;color:#94a3b8;">Complete your lab there — your quotation will appear here automatically once it\'s ready.</p>'
-      + reopen
-      + '</div>');
-  }
-
+  // Polls while the designer is open in the modal; stops when the modal closes or a new session starts.
+  var activeSession = null;
   function pollResult(sessionId, attempt){
     attempt = attempt || 0;
+    if (sessionId !== activeSession || modal.style.display === 'none') return;
+    function retry(){
+      if (attempt < MAX_POLLS){ setTimeout(function(){ pollResult(sessionId, attempt+1); }, POLL_INTERVAL); }
+    }
     fetch(RESULT_URL + '/' + encodeURIComponent(sessionId), {headers:{'Accept':'application/json'}})
       .then(function(r){ return r.json(); })
       .then(function(res){
+        if (sessionId !== activeSession) return;
         if (res && res.result === 1 && res.data){
-          renderQuotation(res.data);               // status === ready
-        } else if (res && res.pending && attempt < MAX_POLLS){
-          waitingBody(attempt);
-          setTimeout(function(){ pollResult(sessionId, attempt+1); }, POLL_INTERVAL);
-        } else if (attempt >= MAX_POLLS){
-          setBody('<div style="text-align:center;padding:30px;color:#b45309;"><i class="fa-solid fa-clock" style="font-size:22px;"></i><p style="margin-top:12px;font-size:13px;">Still not ready. You can keep the workspace tab open and reopen this later.</p></div>');
+          // status === ready — load the quotation into the shop cart (club-shop fetches it from Kalpana itself).
+          var cartUrl = CART_URL + '?session=' + encodeURIComponent(sessionId);
+          goCart.href = cartUrl;
+          readyBar.style.display = 'flex';
+          setTimeout(function(){ if (sessionId === activeSession) window.location.href = cartUrl; }, 1500);
+        } else if (res && res.pending){
+          retry();
         } else {
-          setBody('<div style="text-align:center;padding:30px;color:#b91c1c;"><i class="fa-solid fa-triangle-exclamation" style="font-size:22px;"></i><p style="margin-top:12px;font-size:13px;">'+esc((res&&res.message)||'Could not load the design result.')+'</p></div>');
+          console.warn('[Design My Lab]', (res && res.message) || 'Could not load the design result.');
         }
       })
-      .catch(function(){
-        // transient network blip — retry a few times
-        if (attempt < MAX_POLLS){ setTimeout(function(){ pollResult(sessionId, attempt+1); }, POLL_INTERVAL); }
-        else { setBody('<div style="text-align:center;padding:30px;color:#b91c1c;">Network error while fetching the result.</div>'); }
-      });
+      .catch(retry); // transient network blip
   }
 
   openBtn.addEventListener('click', function(){
     var dropdownMenu = document.getElementById('sks-customise-menu');
     if(dropdownMenu) dropdownMenu.style.display = 'none';
-    curLaunchUrl = '';
-
-    // Pre-open a tab synchronously (inside the click) so pop-up blockers allow it;
-    // we set its location once the launchUrl is known.
-    var win = window.open('', '_blank');
-
+    activeSession = null;
+    resetModal();
     openModal();
     setBody('<div style="text-align:center;padding:30px;color:#475569;"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:22px;color:#2563eb;"></i><p style="margin-top:12px;font-size:13px;">Starting your design session…</p></div>');
 
@@ -1982,20 +1956,14 @@ Promise.all([
     .then(function(r){ return r.json(); })
     .then(function(res){
       if(!res || res.result !== 1 || !res.session_id || !res.launch_url){
-        if (win) win.close();
         setBody('<div style="text-align:center;padding:30px;color:#b91c1c;"><i class="fa-solid fa-triangle-exclamation" style="font-size:22px;"></i><p style="margin-top:12px;font-size:13px;">'+esc((res&&res.message)||'Could not start the design session.')+'</p></div>');
         return;
       }
-      curLaunchUrl = res.launch_url;
-      // Open the launchUrl in the new tab.
-      if (win) { win.location.href = res.launch_url; }
-      else { window.open(res.launch_url, '_blank'); } // fallback if pre-open was blocked
-
-      waitingBody(0);
+      activeSession = res.session_id;
+      showFrame(res.launch_url);
       pollResult(res.session_id, 0);
     })
     .catch(function(){
-      if (win) win.close();
       setBody('<div style="text-align:center;padding:30px;color:#b91c1c;">Network error while starting the session.</div>');
     });
   });

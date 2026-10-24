@@ -261,6 +261,7 @@ class EarningsModel extends BaseModel
                     $this->db->table('digital_sales')->where('id', $digitalSale->id)->delete();
                 }
             }
+            \App\Libraries\RoboQuestUnlocks::syncOrderSafely($orderProduct->order_id);
         }
     }
 

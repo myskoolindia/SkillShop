@@ -305,7 +305,8 @@ class CartModel extends BaseModel
 
                         $p = getActiveProduct($pid);
                         if ($p) {
-                            $unitPrice = $compObj ? (float)$compObj->unit_price : (isset($b['unit_price']) ? (float)$b['unit_price'] : (float)($p->price_discounted > 0 ? $p->price_discounted : $p->price));
+                            $designed = !empty($b['designed']) && $compObj;
+                            $unitPrice = $designed ? (float)$compObj->standalone_unit_price : ($compObj ? (float)$compObj->unit_price : (isset($b['unit_price']) ? (float)$b['unit_price'] : (float)($p->price_discounted > 0 ? $p->price_discounted : $p->price)));
                             if ($this->paymentSettings->currency_converter == 1 && !empty($cart->currency_code) && !empty($cart->currency_exchange_rate)) {
                                 $unitPrice = convertCurrencyByExchangeRate($unitPrice, $cart->currency_exchange_rate);
                             }
@@ -323,7 +324,7 @@ class CartModel extends BaseModel
                                 }
                             }
 
-                            $origChildPrice = (!empty($compObj->price) && (float)$compObj->price > 0) ? (float)$compObj->price : ((isset($b['original_price']) && (float)$b['original_price'] > 0) ? (float)$b['original_price'] : ((float)($p->price > 0 ? $p->price : $unitPrice)));
+                            $origChildPrice = $designed ? (float)$compObj->standalone_price : ((!empty($compObj->price) && (float)$compObj->price > 0) ? (float)$compObj->price : ((isset($b['original_price']) && (float)$b['original_price'] > 0) ? (float)$b['original_price'] : ((float)($p->price > 0 ? $p->price : $unitPrice))));
                             if ($this->paymentSettings->currency_converter == 1 && !empty($cart->currency_code) && !empty($cart->currency_exchange_rate)) {
                                 $origChildPrice = convertCurrencyByExchangeRate($origChildPrice, $cart->currency_exchange_rate);
                             }
@@ -522,7 +523,7 @@ class CartModel extends BaseModel
 
                     $bUnitPrice = 0.0;
                     if ($cObj) {
-                        $bUnitPrice = (float)$cObj->unit_price;
+                        $bUnitPrice = !empty($bItem['designed']) ? (float)$cObj->standalone_unit_price : (float)$cObj->unit_price;
                     } elseif ($bPid > 0) {
                         $bP = getActiveProduct($bPid);
                         if ($bP && $bP->status == 1) {
@@ -530,13 +531,18 @@ class CartModel extends BaseModel
                         }
                     }
                     $bundleTotal += ($bUnitPrice * $bQty);
-                    $bundleItems[] = [
+                    $entry = [
                         'comp_id'    => (int)($bItem['comp_id'] ?? ($cObj->id ?? 0)),
                         'product_id' => $bPid,
                         'variant_id' => $bVarId,
                         'qty'        => $bQty,
                         'unit_price' => $bUnitPrice
                     ];
+                    // Quantities designed in Kalpana are taken as-is (see syncCartItem).
+                    if (!empty($bItem['designed'])) {
+                        $entry['designed'] = 1;
+                    }
+                    $bundleItems[] = $entry;
                 }
             }
         } elseif ($isBundle) {
@@ -768,18 +774,20 @@ class CartModel extends BaseModel
 
                     $prevSelection = $userSelections['c_' . $cId] ?? ($userSelections['p_' . $pId . '_' . (int)$vId] ?? ($userSelections['p_' . $pId] ?? null));
 
-                    if ($isOpt) {
-                        $cQty = isset($prevSelection['qty']) ? (int)$prevSelection['qty'] : 0;
+                    $designed = !empty($prevSelection['designed']);
+                    if ($isOpt || $designed) {
+                        $cQty = isset($prevSelection['qty']) ? max(0, (int)$prevSelection['qty']) : 0;
                     } else {
                         $reqQty = max(1, (int)$c->required_quantity);
                         $cQty = (isset($prevSelection['qty']) && (int)$prevSelection['qty'] >= $reqQty) ? (int)$prevSelection['qty'] : $reqQty;
                     }
 
                     // Authoritative unit price from BundleModel (includes price_override and markup)
-                    $cUnitPrice = (float)$c->unit_price;
-                    $cOrigPrice = (!empty($c->price) && (float)$c->price > 0) ? (float)$c->price : $cUnitPrice;
+                    // Kalpana-designed labs use each product's own price, as quoted in Kalpana.
+                    $cUnitPrice = $designed ? (float)$c->standalone_unit_price : (float)$c->unit_price;
+                    $cOrigPrice = $designed ? (float)$c->standalone_price : ((!empty($c->price) && (float)$c->price > 0) ? (float)$c->price : $cUnitPrice);
 
-                    $syncedBundleItems[] = [
+                    $synced = [
                         'comp_id'        => $cId,
                         'product_id'     => $pId,
                         'variant_id'     => $vId,
@@ -787,6 +795,10 @@ class CartModel extends BaseModel
                         'unit_price'     => $cUnitPrice,
                         'original_price' => $cOrigPrice
                     ];
+                    if ($designed) {
+                        $synced['designed'] = 1;
+                    }
+                    $syncedBundleItems[] = $synced;
 
                     if ($cQty > 0) {
                         $bundleTotal += ($cUnitPrice * $cQty);

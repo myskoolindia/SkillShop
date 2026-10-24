@@ -76,6 +76,7 @@ class OrderAdminModel extends BaseModel
 
             $this->builderOrderItems->where('id', $product->id)->update($updateData);
         }
+        \App\Libraries\RoboQuestUnlocks::syncOrderSafely($orderId);
 
         return true;
     }
@@ -95,7 +96,9 @@ class OrderAdminModel extends BaseModel
             } else {
                 $data['is_approved'] = 0;
             }
-            return $this->builderOrderItems->where('id', $orderProduct->id)->update($data);
+            $updated = $this->builderOrderItems->where('id', $orderProduct->id)->update($data);
+            \App\Libraries\RoboQuestUnlocks::syncOrderSafely($orderProduct->order_id);
+            return $updated;
         }
         return false;
     }
@@ -154,7 +157,9 @@ class OrderAdminModel extends BaseModel
                 'order_status' => 'completed',
                 'updated_at' => date('Y-m-d H:i:s')
             ];
-            return $this->builderOrderItems->where('id', $orderProduct->id)->update($data);
+            $updated = $this->builderOrderItems->where('id', $orderProduct->id)->update($data);
+            \App\Libraries\RoboQuestUnlocks::syncOrderSafely($orderProduct->order_id);
+            return $updated;
         }
         return false;
     }

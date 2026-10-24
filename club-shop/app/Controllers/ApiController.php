@@ -774,6 +774,8 @@ class ApiController extends BaseController
             ]);
         }
 
+        \App\Libraries\RoboQuestUnlocks::syncOrderSafely($orderId);
+
         // ── Build response ────────────────────────────────────────
         return $this->json([
             'status'         => 'success',
