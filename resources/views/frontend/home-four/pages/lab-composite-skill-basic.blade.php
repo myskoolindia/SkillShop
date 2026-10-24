@@ -871,10 +871,29 @@
           <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Adjust quantities, add optional modules or custom skill domains to match your school's exact requirements.</p>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:10px;">
-          <a id="sks-btn-customise" href="#cta-section"
-             style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
-            <i class="fa-solid fa-sliders" style="font-size:11px;"></i> Customise This Lab
-          </a>
+          {{-- Customise This Lab — dropdown with two options --}}
+          <div style="position:relative;" id="sks-customise-wrap">
+            <button type="button" id="sks-customise-toggle"
+               style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
+              <i class="fa-solid fa-sliders" style="font-size:11px;"></i> Customise This Lab
+              <i class="fa-solid fa-chevron-down" style="font-size:10px;margin-left:2px;"></i>
+            </button>
+            <div id="sks-customise-menu"
+                 style="display:none;position:absolute;right:0;bottom:calc(100% + 8px);min-width:230px;background:#fff;border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);overflow:hidden;z-index:50;">
+              <a id="sks-opt-cart" href="{{ url('/club-shop/basic-cart') }}"
+                 style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;border-bottom:1px solid #eef1f6;transition:background .15s;"
+                 onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
+                <i class="fa-solid fa-cart-shopping" style="color:#f4742b;width:16px;"></i>
+                <span>Buy Standard Basic Lab</span>
+              </a>
+              <a id="sks-opt-design" href="{{ url('/club-shop/skillvation-cart') }}"
+                 style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;transition:background .15s;"
+                 onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
+                <i class="fa-solid fa-pen-ruler" style="color:#2563eb;width:16px;"></i>
+                <span>Design My Lab</span>
+              </a>
+            </div>
+          </div>
           <a id="" href="#cta-section"
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
             <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
@@ -1733,8 +1752,8 @@ Promise.all([
 
   if(countEl) countEl.textContent = totalCats;
   if(itemsEl) itemsEl.textContent = totalItems;
-  var btnC=document.getElementById('sks-btn-customise'), btnP=document.getElementById('sks-btn-product');
-  if(btnC) btnC.href = customiseUrl;
+  var btnCart=document.getElementById('sks-opt-cart'), btnP=document.getElementById('sks-btn-product');
+  if(btnCart) btnCart.href = customiseUrl; // standard basic lab cart
   if(btnP) btnP.href = productUrl;
 
   // Unhide content container BEFORE building cards and measuring layout
@@ -1806,6 +1825,23 @@ Promise.all([
   if(loadEl) loadEl.classList.add('hidden');
   if(errEl) errEl.classList.remove('hidden');
 });
+
+// ── "Customise This Lab" dropdown toggle ──────────────────────────
+(function(){
+  var toggle = document.getElementById('sks-customise-toggle');
+  var menu   = document.getElementById('sks-customise-menu');
+  if(!toggle || !menu) return;
+  toggle.addEventListener('click', function(e){
+    e.stopPropagation();
+    menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+  });
+  document.addEventListener('click', function(e){
+    if(!menu.contains(e.target) && e.target !== toggle){ menu.style.display = 'none'; }
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){ menu.style.display = 'none'; }
+  });
+})();
 
 })();
 </script>
