@@ -208,6 +208,10 @@ class CartController extends BaseController
 
         $plan = $plans[strtolower((string)($data['plan']['tier'] ?? ''))] ?? $plans['basic'];
         $labProduct = $this->productModel->getProductBySlug($plan['slug']) ?: $this->productModel->getActiveProduct($plan['id']);
+        // The cart becomes exactly the reviewed Kalpana design: items from an earlier design or plan are removed.
+        foreach ($this->cartModel->getCart()->items ?? [] as $item) {
+            $this->cartModel->removeCartItem($item->id);
+        }
         $this->syncSelectedLabCart($labProduct);
 
         $quantities = [];

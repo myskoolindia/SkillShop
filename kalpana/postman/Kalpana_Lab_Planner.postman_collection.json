@@ -1,0 +1,312 @@
+{
+  "info": {
+    "name": "Kalpana \u00b7 Standalone Lab Planner",
+    "description": "Standalone planner requests for the explicitly labeled sample catalog. Start Kalpana in sample/demo mode for these fixed example skill IDs. For the live catalog and external systems use Kalpana_Integration.postman_collection.json, which reads current IDs from /api/v1/options. No RoboQuest account or server is required.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "labBaseUrl",
+      "value": "http://localhost:8787"
+    },
+    {
+      "key": "labConversationToken",
+      "value": ""
+    },
+    {
+      "key": "labQuoteId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Read board and course options",
+      "request": {
+        "method": "GET",
+        "url": "{{labBaseUrl}}/api/lab-planner/options",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{labConversationToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create lab conversation",
+      "request": {
+        "method": "POST",
+        "url": "{{labBaseUrl}}/api/conversations",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\",()=>pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"labConversationToken\",pm.response.json().token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create CBSE planning recommendation",
+      "request": {
+        "method": "POST",
+        "url": "{{labBaseUrl}}/api/lab-planner/recommend",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{labConversationToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"board\": \"CBSE\",\n  \"setup\": \"infrastructure_materials\",\n  \"layout\": \"single\",\n  \"rooms\": [\n    {\n      \"areaSqFt\": 600\n    }\n  ],\n  \"classes\": [\n    6,\n    7,\n    8,\n    9,\n    10\n  ],\n  \"totalStudents\": 120,\n  \"batchSize\": 30,\n  \"skillIds\": [\n    \"horticulture\",\n    \"robotics-electronics\",\n    \"financial-literacy\"\n  ],\n  \"budgetMinor\": 10000000\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"Manual review required\",()=>pm.expect(pm.response.json().assessment.status).to.eql(\"manual_review_required\")); pm.test(\"Sample total\",()=>pm.expect(pm.response.json().quote.total).to.eql(9750000)); pm.collectionVariables.set(\"labQuoteId\",pm.response.json().quote.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Submit reviewed request (no payment)",
+      "request": {
+        "method": "POST",
+        "url": "{{labBaseUrl}}/api/orders",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{labConversationToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quoteId\": \"{{labQuoteId}}\",\n  \"customer\": {\n    \"name\": \"Lab Test Buyer\",\n    \"email\": \"buyer@example.test\"\n  },\n  \"confirm\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\",()=>pm.response.to.have.status(201));",
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Compare materials-only scope",
+      "request": {
+        "method": "POST",
+        "url": "{{labBaseUrl}}/api/lab-planner/recommend",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{labConversationToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"board\": \"CBSE\",\n  \"setup\": \"materials_only\",\n  \"layout\": \"single\",\n  \"rooms\": [\n    {\n      \"areaSqFt\": 600\n    }\n  ],\n  \"classes\": [\n    6,\n    7,\n    8,\n    9,\n    10\n  ],\n  \"totalStudents\": 120,\n  \"batchSize\": 30,\n  \"skillIds\": [\n    \"horticulture\",\n    \"robotics-electronics\",\n    \"financial-literacy\"\n  ],\n  \"budgetMinor\": 10000000\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"Fit-out excluded\",()=>pm.expect(pm.response.json().quote.total).to.eql(6750000));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Detect undersized CBSE room",
+      "request": {
+        "method": "POST",
+        "url": "{{labBaseUrl}}/api/lab-planner/recommend",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{labConversationToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"board\": \"CBSE\",\n  \"setup\": \"infrastructure_materials\",\n  \"layout\": \"single\",\n  \"rooms\": [\n    {\n      \"areaSqFt\": 399\n    }\n  ],\n  \"classes\": [\n    6,\n    7,\n    8,\n    9,\n    10\n  ],\n  \"totalStudents\": 120,\n  \"batchSize\": 30,\n  \"skillIds\": [\n    \"horticulture\",\n    \"robotics-electronics\",\n    \"financial-literacy\"\n  ],\n  \"budgetMinor\": 10000000\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"Gaps block purchase\",()=>pm.expect(pm.response.json().quote.purchasable).to.eql(false));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Non-CBSE objectives and flexible space",
+      "request": {
+        "method": "POST",
+        "url": "{{labBaseUrl}}/api/lab-planner/recommend",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{labConversationToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"board\": \"ICSE\",\n  \"setup\": \"infrastructure_materials\",\n  \"layout\": \"single\",\n  \"rooms\": [\n    {\n      \"areaSqFt\": 250\n    }\n  ],\n  \"classes\": [\n    6,\n    7,\n    8,\n    9,\n    10\n  ],\n  \"totalStudents\": 120,\n  \"batchSize\": 30,\n  \"skillIds\": [\n    \"robotics-electronics\"\n  ],\n  \"budgetMinor\": 10000000,\n  \"goals\": \"Introduce hands-on electronics in our existing school space.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"CBSE room checks not applied\",()=>pm.expect(pm.response.json().assessment.status).to.eql(\"manual_review_required\"));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

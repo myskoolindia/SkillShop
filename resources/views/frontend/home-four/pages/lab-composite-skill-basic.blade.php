@@ -909,7 +909,7 @@
             <button type="button" id="dml-close" style="background:none;border:none;font-size:20px;color:#64748b;cursor:pointer;line-height:1;">&times;</button>
           </div>
           <div id="dml-ready" style="display:none;align-items:center;justify-content:space-between;gap:12px;padding:10px 22px;background:#ecfdf5;border-bottom:1px solid #a7f3d0;font-size:13px;color:#065f46;font-weight:600;">
-            <span><i class="fa-solid fa-circle-check" style="color:#22c55e;"></i>&nbsp; Your lab quotation is ready. Taking you to your cart…</span>
+            <span><i class="fa-solid fa-circle-check" style="color:#22c55e;"></i>&nbsp; Your lab is confirmed. Taking you to your cart…</span>
             <a id="dml-go-cart" href="#" style="padding:7px 14px;border-radius:8px;background:#065f46;color:#fff;font-size:12px;font-weight:700;text-decoration:none;">Go to cart now</a>
           </div>
           <div id="dml-frame-wrap" style="display:none;flex:1;min-height:0;">
@@ -1367,7 +1367,8 @@
 
     // ── Build quotation from loaded bundle components ──────────
     var quotEl = document.getElementById('planQuotation');
-    if (quotEl && window._sksComponents && window._sksComponents.length) {
+    // A design attached from Kalpana keeps its own itemized quotation.
+    if (quotEl && !form.dataset.kalpana && window._sksComponents && window._sksComponents.length) {
       var rows = window._sksComponents
         .filter(function(c){ return !c.is_optional && Number(c.required_quantity) > 0; })
         .map(function(c){
@@ -1902,42 +1903,70 @@ Promise.all([
   function setBody(html){ body.innerHTML = html; }
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 
-  var POLL_INTERVAL = 4000;   // 4s between polls
-  var MAX_POLLS     = 150;    // ~10 minutes
-
-  // Choosing a budget option in Kalpana goes straight to checkout with that plan.
+  // Kalpana interviews the visitor and only reports back once they confirm:
+  // "kalpana:quote" fills this page's proposal form with the design; "kalpana:cart"/"kalpana:checkout" open
+  // the shop cart or checkout. The confirmed design is fetched (and saved) through the lab-design result first.
+  var activeSession = null;
   window.addEventListener('message', function(e){
     var d = e.data || {};
-    if (!activeSession || d.type !== 'kalpana:checkout' || d.sessionId !== activeSession) return;
+    if (!activeSession || d.sessionId !== activeSession || ['kalpana:quote', 'kalpana:cart', 'kalpana:checkout'].indexOf(d.type) < 0) return;
     try { if (e.origin !== new URL(frame.src).origin) return; } catch (err) { return; }
-    window.location.href = CART_URL + '?session=' + encodeURIComponent(activeSession) + '&next=checkout';
+    var sessionId = activeSession;
+    var result = fetch(RESULT_URL + '/' + encodeURIComponent(sessionId), {headers:{'Accept':'application/json'}}).then(function(r){ return r.json(); });
+    if (d.type === 'kalpana:quote') {
+      result.then(function(res){
+        if (!res || res.result !== 1 || !res.data) throw new Error((res && res.message) || 'not ready');
+        attachDesign(res.data, sessionId);
+        closeModal();
+        var target = document.getElementById('cta-section');
+        if (target) target.scrollIntoView({behavior: 'smooth', block: 'start'});
+        setTimeout(function(){ var school = document.querySelector('#planEnquiryForm [name="school"]'); if (school) school.focus({preventScroll: true}); }, 700);
+      }).catch(function(){ alert('Your design could not be attached. Please try Request quotation again.'); });
+      return;
+    }
+    var url = CART_URL + '?session=' + encodeURIComponent(sessionId) + (d.type === 'kalpana:checkout' ? '&next=checkout' : '');
+    goCart.href = url;
+    readyBar.style.display = 'flex';
+    var go = function(){ window.location.href = url; };
+    result.then(go, go);
   });
 
-  // Polls while the designer is open in the modal; stops when the modal closes or a new session starts.
-  var activeSession = null;
-  function pollResult(sessionId, attempt){
-    attempt = attempt || 0;
-    if (sessionId !== activeSession || modal.style.display === 'none') return;
-    function retry(){
-      if (attempt < MAX_POLLS){ setTimeout(function(){ pollResult(sessionId, attempt+1); }, POLL_INTERVAL); }
+  // Fills the "Get Your Skill Lab Proposal" form with a confirmed Kalpana design: a readable summary in the
+  // message box and the itemized quotation (sent to the team with the enquiry).
+  var ROMAN = {6:'VI',7:'VII',8:'VIII',9:'IX',10:'X',11:'XI',12:'XII'};
+  var SCOPE = {infrastructure_materials:'Complete lab (room fit-out + materials)', materials_only:'Materials only', existing_room:'Existing lab room'};
+  function inr(minor){ return '₹' + (Number(minor || 0) / 100).toLocaleString('en-IN', {maximumFractionDigits: 2}); }
+  function attachDesign(data, sessionId){
+    var form = document.getElementById('planEnquiryForm');
+    if (!form) return;
+    var plan = data.plan || {}, quote = data.quotation || {}, profile = plan.profile || {}, lines = quote.lines || [];
+    var gst = Math.round((quote.total || 0) * (plan.gstBasisPoints || 0) / 10000);
+    var classes = (profile.classes || []).map(function(c){ return ROMAN[c] || c; });
+    var areas = (plan.requiredItems || []).filter(function(item){ return / · (Basic|Advanced|Premium)$/.test(item.name); }).map(function(item){ return item.name.replace(' · ', ' (') + ')'; });
+    var summary = [
+      'Lab designed with Kalpana (reference ' + String(sessionId).slice(0, 8) + ')',
+      [profile.board, classes.length ? 'Classes ' + classes[0] + (classes.length > 1 ? '–' + classes[classes.length - 1] : '') : '', profile.totalStudents ? profile.totalStudents + ' students' : '', (profile.rooms || []).map(function(r){ return r.areaSqFt + ' sq ft'; }).join(' + '), SCOPE[profile.setup] || ''].filter(Boolean).join(' · '),
+      'Overall level: ' + (plan.tier ? plan.tier.charAt(0).toUpperCase() + plan.tier.slice(1) : '—') + (areas.length ? ' · Skill areas: ' + areas.join(', ') : ''),
+      'Products: ' + lines.map(function(l){ return l.name + ' × ' + l.quantity; }).join('; '),
+      'Estimated total: ' + inr(quote.total) + (gst ? ' + GST ' + inr(gst) + ' = ' + inr(quote.total + gst) : '')
+    ].join('\n');
+    var set = function(selector, value){ var el = form.querySelector(selector); if (el) el.value = value; };
+    set('[name="address"]', summary);
+    set('[name="message"]', 'Request Detailed Proposal');
+    set('#planTitle', 'Kalpana custom lab – ' + (plan.title || 'designed lab'));
+    set('#planQuotation', JSON.stringify({
+      source: 'kalpana', session_id: sessionId, gst_estimate: gst / 100,
+      selected_components: lines.map(function(l){ return { title: l.name, category: l.kind === 'course' ? 'MySkool course' : (l.name.split(' – ')[1] ? l.name.split(' – ')[0] : 'Lab essentials'), qty: l.quantity, unit_price: l.unitAmount / 100, subtotal: l.lineAmount / 100 }; })
+    }));
+    form.dataset.kalpana = sessionId;
+    var note = document.getElementById('kalpanaAttached');
+    if (!note) {
+      note = document.createElement('div'); note.id = 'kalpanaAttached';
+      note.style.cssText = 'margin:0 0 16px;padding:12px 14px;border-radius:12px;background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;font-size:13px;line-height:1.6;';
+      form.parentNode.insertBefore(note, form);
     }
-    fetch(RESULT_URL + '/' + encodeURIComponent(sessionId), {headers:{'Accept':'application/json'}})
-      .then(function(r){ return r.json(); })
-      .then(function(res){
-        if (sessionId !== activeSession) return;
-        if (res && res.result === 1 && res.data){
-          // status === ready — load the quotation into the shop cart (club-shop fetches it from Kalpana itself).
-          var cartUrl = CART_URL + '?session=' + encodeURIComponent(sessionId);
-          goCart.href = cartUrl;
-          readyBar.style.display = 'flex';
-          setTimeout(function(){ if (sessionId === activeSession) window.location.href = cartUrl; }, 1500);
-        } else if (res && res.pending){
-          retry();
-        } else {
-          console.warn('[Design My Lab]', (res && res.message) || 'Could not load the design result.');
-        }
-      })
-      .catch(retry); // transient network blip
+    note.innerHTML = '<strong><i class="fa-solid fa-circle-check"></i>&nbsp; Your Kalpana design is attached</strong><br>' + esc(lines.length + ' products · estimated ' + inr(quote.total + gst) + (gst ? ' incl. GST' : '')) + '. Add your details below and request the quotation. <a href="#" id="kalpanaReopen" style="color:#047857;font-weight:700;text-decoration:underline;">Change the design</a>';
+    document.getElementById('kalpanaReopen').onclick = function(ev){ ev.preventDefault(); openBtn.click(); };
   }
 
   openBtn.addEventListener('click', function(){
@@ -1961,7 +1990,6 @@ Promise.all([
       }
       activeSession = res.session_id;
       showFrame(res.launch_url);
-      pollResult(res.session_id, 0);
     })
     .catch(function(){
       setBody('<div style="text-align:center;padding:30px;color:#b91c1c;">Network error while starting the session.</div>');

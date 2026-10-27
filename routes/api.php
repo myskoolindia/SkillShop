@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\PurchaseApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +17,31 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+/*
+|--------------------------------------------------------------------------
+| Post-purchase APIs
+|--------------------------------------------------------------------------
+| Token-authenticated endpoints that expose what the purchase flow creates
+| after a successful payment: orders, order items, and course enrollments.
+| Obtain a token via POST /api/login, then send it as: Authorization: Bearer <token>
+*/
+Route::post('/login', [PurchaseApiController::class, 'login']);
+
+Route::get('/verticals', [PurchaseApiController::class, 'verticals']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    // Course purchases (Skill2Skool / Upskill 4 Teacher / TTT courses)
+    Route::get('/my-orders', [PurchaseApiController::class, 'myOrders']);
+    Route::get('/orders/{invoice_id}', [PurchaseApiController::class, 'orderDetail']);
+    Route::get('/my-enrollments', [PurchaseApiController::class, 'myEnrollments']);
+    Route::get('/my-purchases/summary', [PurchaseApiController::class, 'summary']);
+
+    // Unified + per-vertical post-purchase APIs (covers all six verticals)
+    Route::get('/purchases', [PurchaseApiController::class, 'purchases']);       // ?vertical=<key>
+    Route::get('/shop-orders', [PurchaseApiController::class, 'shopOrders']);     // club-shop physical
+    Route::get('/lab-enquiries', [PurchaseApiController::class, 'labEnquiries']); // composite / skillvation lab
 });
 
 Route::get('/collab-courses', function (\Illuminate\Http\Request $request) {

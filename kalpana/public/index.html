@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kalpana — Find your right fit</title><link rel="stylesheet" href="styles.css"><script src="paths.js" defer></script><script src="voice.js" defer></script><script src="mascot.js" defer></script><script src="diagrams.js" defer></script><script src="app.js" defer></script></head>
+<body>
+<div class="workspace">
+  <aside class="sidebar">
+    <a href="./" class="brand"><span class="brand-mark">k<span>✦</span></span><span>kalpana<small>YOUR PACKAGE ADVISOR</small></span></a>
+    <button class="new-chat" id="new-chat"><span>＋</span> New conversation</button>
+    <div class="side-label">YOUR WORKSPACE</div><div class="nav-item active"><span>✧</span> Package studio <span class="nav-dot"></span></div>
+    <a class="nav-item" href="lab-planner">◇ Make Your Own Lab</a><div class="side-guide"><span class="side-label">FROM IDEA TO THE RIGHT FIT</span><ol><li><span>01</span><div><strong>Tell me what you need</strong><p>Your goals, learners, and budget.</p></div></li><li><span>02</span><div><strong>Make it yours</strong><p>Compare packages and add-ons.</p></div></li><li><span>03</span><div><strong>Review your selection</strong><p>See every item before proceeding.</p></div></li></ol></div>
+    <div class="sidebar-bottom"><span class="tiny-orb">✦</span><strong>A little guidance.<br>A better decision.</strong><p>Recommendations grounded in the approved product documents.</p><a href="admin">Manage documents ↗</a></div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div><span class="breadcrumb">Workspace /</span> Package studio</div><div class="topbar-right"><div id="mini-mascot" class="mini-mascot" hidden></div><div class="status-badge" id="mode">Connecting…</div></div></header>
+    <div class="notice" id="notice" role="status" hidden></div>
+    <div class="studio">
+      <section class="conversation">
+        <div id="welcome" class="welcome"><div id="mascot" class="mascot-slot large"></div><div id="mascot-bubble" class="mascot-bubble center" role="status" aria-live="polite"></div><div class="eyebrow">A LITTLE IMAGINATION. THE RIGHT COMBINATION.</div><h1>Big plans.<br><span>Your kind of package.</span></h1><p>I’m Kalpana. Tell me, or just say, what you’re building.<br>I’ll understand your needs, compare every valid combination and shortlist the best fit.</p><div class="suggestions"><button data-prompt="I have a budget of INR 30,000 for 30 students. I need robotics and offline access."><span>↗</span> Robotics on a budget<small>Explore a classroom package</small></button><button data-prompt="Compare coding packages for 60 students under INR 50,000."><span>↗</span> Find my right fit<small>Compare options for my learners</small></button><button data-prompt="What is included in the teacher training, and can I add AI activities?"><span>↗</span> Make it a little more me<small>Explore features and add-ons</small></button></div><div class="trust-line"><span>✓ Approved product sources</span><span>✓ Transparent calculations</span></div></div>
+        <div id="messages" class="messages" aria-live="polite" aria-label="Conversation"></div>
+        <div class="composer-area"><div id="error" class="error" role="alert" hidden></div><form id="chat-form" class="composer"><label for="message" class="sr-only">Ask Kalpana about products and packages</label><textarea id="message" rows="2" maxlength="4000" placeholder="Tell me your idea, your budget, or what you’d like to change…" required></textarea><div class="composer-bottom"><span>✧ Type or speak. Kalpana picks up budget, learners and needs automatically.</span><div class="composer-actions"><button type="button" id="mic" class="mic-button" aria-label="Speak to Kalpana" aria-pressed="false" hidden>●</button><button id="send" type="submit" aria-label="Send message">↑</button></div></div></form><p class="composer-note">Review your quote before confirming. Kalpana never makes a purchase on your behalf.</p></div>
+      </section>
+      <aside class="selection"><div class="selection-heading"><div class="eyebrow">BUILT AROUND YOU</div><h2>Your shortlist <span id="shortlist-count">0</span></h2></div>
+        <div class="understood-panel"><h3>What Kalpana understood</h3><div id="understood-chips" class="chips"><span class="chip ghost">Mention your budget, learners and goals in the conversation. I’ll pick them up here.</span></div><details class="adjust"><summary>Adjust manually</summary><form id="requirements" class="requirements"><label>Total budget <span id="currency-label">INR</span><input id="budget" type="number" min="0.01" max="100000000" step="0.01" placeholder="e.g. 30,000"></label><label>Number of learners<input id="learners" type="number" min="1" max="100000" step="1" placeholder="e.g. 30"></label><button type="submit" class="secondary-button">Update recommendations ↗</button></form></details></div>
+        <div id="shortlist" class="shortlist"><div class="empty-shortlist"><span>◇</span><strong>A good fit starts with you.</strong><p>Share a few details and your package options will appear here.</p></div></div>
+        <div class="source-footer"><span>▤</span><p>Every quote references approved sources and shows its catalog revision.</p></div>
+      </aside>
+    </div>
+  </main>
+</div>
+<dialog id="quote-dialog"><div class="dialog-top"><div><div class="eyebrow">YOUR SELECTION</div><h2 id="dialog-title">Review your package</h2></div><button id="close-dialog" class="icon-button" aria-label="Close review">×</button></div><div id="quote-detail"></div><form id="purchase-form"><label>Your name<input name="name" autocomplete="name" maxlength="100" required></label><label>Email address<input name="email" type="email" autocomplete="email" maxlength="200" required></label><p id="purchase-note" class="muted"></p><label class="check-label"><input name="confirm" type="checkbox" required> I have reviewed the package, total, and purchase terms.</label><button id="purchase-button" class="primary-button" type="submit">Submit purchase request</button><p id="purchase-error" class="error" role="alert" hidden></p></form><div id="order-result" role="status" hidden></div></dialog>
+</body></html>

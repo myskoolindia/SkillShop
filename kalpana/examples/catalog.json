@@ -1,0 +1,263 @@
+{
+  "revision": "demo-v2-labs",
+  "title": "Learning programs \u00b7 sample catalog",
+  "demo": true,
+  "currency": "INR",
+  "taxBasisPoints": 0,
+  "deliveryAmount": 0,
+  "validUntil": "2027-12-31T23:59:59Z",
+  "documents": [
+    {
+      "id": "demo-products",
+      "title": "Sample product guide",
+      "content": "# Sample learning products \u2014 DEMO ONLY\n\nSource ID: demo-products\nRevision: demo-v1\nThese are fictional examples for testing Kalpana. They are not RoboQuest offers.\n\n**Digital Foundations** provides offline digital coding activities for up to 30 learners per package. It includes coding and offline access.\n\n**Robotics Classroom** includes digital activities, robotics content and teacher training for up to 30 learners per package. It includes coding, robotics, offline access and teacher training.\n\n**Complete Innovation Lab** includes coding, robotics, AI, offline access and teacher training for up to 60 learners per package.\n\nOptional add-ons are teacher training and AI activities. AI activities are compatible with Robotics Classroom. A user may increase package quantity; fixed core package components cannot be removed.\n"
+    },
+    {
+      "id": "demo-pricing",
+      "title": "Sample price sheet",
+      "content": "# Sample pricing \u2014 DEMO ONLY\n\nSource ID: demo-pricing\nRevision: demo-v1\nAll amounts below are fictional, in INR, and apply to one-time package purchases only. Demo tax is configured as zero; this is not a statement about applicable taxes.\n\nDigital Foundations: INR 12,000 per package, capacity 30 learners.\nRobotics Classroom: INR 25,000 per package, capacity 30 learners.\nComplete Innovation Lab: INR 45,000 per package, capacity 60 learners.\nTeacher training add-on: INR 5,000 per selected package unit.\nAI activities add-on: INR 6,000 per selected package unit.\nNo discretionary discounts. Delivery charge is zero in this demo. A new catalog revision invalidates old quotes for new checkout attempts. Quotes expire after 30 minutes.\n"
+    },
+    {
+      "id": "demo-lab-guide-v1",
+      "title": "Sample lab materials and pricing guide",
+      "content": "# Lab planner \u2014 fictional demonstration catalog\n\n\n## Make Your Own Lab \u2014 SAMPLE SCOPE\n\nThe sample planner offers horticulture/plant care (life forms), robotics/electronics (machines & materials), and financial literacy/enterprise (human services). These are illustrative category mappings for planning, not proof of official course approval. Review age appropriateness, curriculum, tools, consumables and supervision with the school.\n\nEach shared station supports two learners. Materials are reusable across scheduled batches. A two-room plan with both class groups active provisions stations in each room. Horticulture requires a water/drainage review. Materials-only and existing-room setups exclude fit-out. The infrastructure option includes a room-level allowance, not a final construction or electrical-work offer.\n\n\n## Lab planning sample prices \u2014 DEMO ONLY\n\nOne-time prices in INR, all fictional: shared station foundation 1,500 per station; horticulture materials 800 per station; robotics/electronics materials 1,800 per station; financial literacy/enterprise materials 400 per station; room fit-out allowance 30,000 per active room; optional AI extension 600 per station. Two learners share a station. These sample allowances are not market estimates or a commercial offer.\n"
+    }
+  ],
+  "products": [
+    {
+      "id": "digital-foundations",
+      "name": "Digital Foundations",
+      "kind": "package",
+      "unitAmount": 1200000,
+      "capacity": 30,
+      "features": [
+        "coding",
+        "offline"
+      ],
+      "sourceIds": [
+        "demo-products",
+        "demo-pricing"
+      ],
+      "active": true
+    },
+    {
+      "id": "robotics-classroom",
+      "name": "Robotics Classroom",
+      "kind": "package",
+      "unitAmount": 2500000,
+      "capacity": 30,
+      "features": [
+        "coding",
+        "robotics",
+        "offline",
+        "training"
+      ],
+      "sourceIds": [
+        "demo-products",
+        "demo-pricing"
+      ],
+      "active": true
+    },
+    {
+      "id": "innovation-lab",
+      "name": "Complete Innovation Lab",
+      "kind": "package",
+      "unitAmount": 4500000,
+      "capacity": 60,
+      "features": [
+        "coding",
+        "robotics",
+        "ai",
+        "offline",
+        "training"
+      ],
+      "sourceIds": [
+        "demo-products",
+        "demo-pricing"
+      ],
+      "active": true
+    },
+    {
+      "id": "teacher-training",
+      "name": "Teacher training",
+      "kind": "addon",
+      "unitAmount": 500000,
+      "features": [
+        "training"
+      ],
+      "compatibleWith": [
+        "digital-foundations",
+        "robotics-classroom",
+        "innovation-lab"
+      ],
+      "sourceIds": [
+        "demo-products",
+        "demo-pricing"
+      ],
+      "active": true
+    },
+    {
+      "id": "ai-activities",
+      "name": "AI activities",
+      "kind": "addon",
+      "unitAmount": 600000,
+      "features": [
+        "ai"
+      ],
+      "compatibleWith": [
+        "robotics-classroom"
+      ],
+      "sourceIds": [
+        "demo-products",
+        "demo-pricing"
+      ],
+      "active": true
+    },
+    {
+      "id": "lab-station-foundation",
+      "name": "Shared skill-lab station foundation",
+      "kind": "package",
+      "unitAmount": 150000,
+      "capacity": 2,
+      "features": [
+        "skill-lab"
+      ],
+      "sourceIds": [
+        "demo-lab-guide-v1"
+      ],
+      "active": true,
+      "salesChannel": "lab_planner"
+    },
+    {
+      "id": "horticulture-materials",
+      "name": "Horticulture materials",
+      "kind": "addon",
+      "unitAmount": 80000,
+      "features": [
+        "life-forms"
+      ],
+      "compatibleWith": [
+        "lab-station-foundation"
+      ],
+      "sourceIds": [
+        "demo-lab-guide-v1"
+      ],
+      "active": true,
+      "salesChannel": "lab_planner"
+    },
+    {
+      "id": "robotics-materials",
+      "name": "Robotics & electronics materials",
+      "kind": "addon",
+      "unitAmount": 180000,
+      "features": [
+        "machines-materials"
+      ],
+      "compatibleWith": [
+        "lab-station-foundation"
+      ],
+      "sourceIds": [
+        "demo-lab-guide-v1"
+      ],
+      "active": true,
+      "salesChannel": "lab_planner"
+    },
+    {
+      "id": "financial-literacy-materials",
+      "name": "Financial literacy materials",
+      "kind": "addon",
+      "unitAmount": 40000,
+      "features": [
+        "human-services"
+      ],
+      "compatibleWith": [
+        "lab-station-foundation"
+      ],
+      "sourceIds": [
+        "demo-lab-guide-v1"
+      ],
+      "active": true,
+      "salesChannel": "lab_planner"
+    },
+    {
+      "id": "lab-room-fitout",
+      "name": "Room fit-out allowance",
+      "kind": "addon",
+      "unitAmount": 3000000,
+      "features": [
+        "room-fitout"
+      ],
+      "compatibleWith": [
+        "lab-station-foundation"
+      ],
+      "sourceIds": [
+        "demo-lab-guide-v1"
+      ],
+      "active": true,
+      "salesChannel": "lab_planner"
+    },
+    {
+      "id": "lab-ai-upgrade",
+      "name": "AI extension activities",
+      "kind": "addon",
+      "unitAmount": 60000,
+      "features": [
+        "ai"
+      ],
+      "compatibleWith": [
+        "lab-station-foundation"
+      ],
+      "sourceIds": [
+        "demo-lab-guide-v1"
+      ],
+      "active": true,
+      "salesChannel": "lab_planner"
+    }
+  ],
+  "labPlanner": {
+    "coreProductId": "lab-station-foundation",
+    "studentsPerStation": 2,
+    "infrastructureProductId": "lab-room-fitout",
+    "optionalProductIds": [
+      "lab-ai-upgrade"
+    ],
+    "skills": [
+      {
+        "id": "horticulture",
+        "label": "Horticulture & plant care",
+        "category": "life_forms",
+        "productId": "horticulture-materials",
+        "needsWater": true,
+        "items": [
+          "Hand tools and seed trays",
+          "Planting medium and sample seeds",
+          "Activity worksheets"
+        ]
+      },
+      {
+        "id": "robotics-electronics",
+        "label": "Robotics & electronics",
+        "category": "machines_materials",
+        "productId": "robotics-materials",
+        "needsWater": false,
+        "items": [
+          "Low-voltage controller and sensor set",
+          "Wiring and safe assembly tools",
+          "Coding and electronics activities"
+        ]
+      },
+      {
+        "id": "financial-literacy",
+        "label": "Financial literacy & enterprise",
+        "category": "human_services",
+        "productId": "financial-literacy-materials",
+        "needsWater": false,
+        "items": [
+          "Transaction and budgeting activity cards",
+          "Enterprise role-play materials",
+          "Facilitator worksheets"
+        ]
+      }
+    ]
+  }
+}

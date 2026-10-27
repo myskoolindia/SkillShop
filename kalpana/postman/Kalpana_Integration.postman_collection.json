@@ -1,0 +1,323 @@
+{
+  "info": {
+    "name": "Kalpana \u00b7 Standalone integration v1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Create a separate key for each consuming backend. Set baseUrl and adminToken. Run options before direct generation to use current skill IDs. Open launchUrl in a browser for the button flow. Keys stay server-side. Amounts are integer minor units. See docs/INTEGRATION.md."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8787",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "integrationKey",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "clientId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sessionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "launchUrl",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "planRequest",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 \u00b7 Administrator creates integration key (returned once)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/admin/integrations",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"External system \\u00b7 Postman\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Client created\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) { const d = pm.response.json(); pm.collectionVariables.set(\"integrationKey\", d.apiKey); pm.collectionVariables.set(\"clientId\", d.client.id); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 \u00b7 Current options and live course IDs",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/options",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{integrationKey}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Options available\", () => pm.response.to.have.status(200));",
+              "if (pm.response.code === 200) { const d = pm.response.json(); const skills = d.categories.map(c => d.skills.find(s => s.category === c.id)?.id).filter(Boolean); const profile = {board:\"CBSE\",setup:\"infrastructure_materials\",layout:\"single\",rooms:[{areaSqFt:600}],classes:[6,7,8,9,10],totalStudents:120,batchSize:30,skillIds:skills,tier:\"premium\",budgetMinor:null,goals:\"School skill lab\",readiness:{},optionalProductIds:[],courses:[]}; pm.collectionVariables.set(\"planRequest\",JSON.stringify({reference:\"postman-direct\",profile},null,2)); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 \u00b7 Create button launch session",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/sessions",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{integrationKey}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"reference\": \"postman-button\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Launch created\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) { const d = pm.response.json(); pm.collectionVariables.set(\"sessionId\", d.sessionId); pm.collectionVariables.set(\"launchUrl\", d.launchUrl); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 \u00b7 Session output JSON (pending until plan generated in launch URL)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/sessions/{{sessionId}}/result",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{integrationKey}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"JSON result\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 \u00b7 Generate plan directly as JSON (uses current options)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/plans",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{integrationKey}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{{planRequest}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Plan generated\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) { const d = pm.response.json(); pm.collectionVariables.set(\"sessionId\",d.sessionId); pm.collectionVariables.set(\"launchUrl\",d.launchUrl); pm.test(\"Full quotation available\", () => {pm.expect(d.status).to.eql(\"ready\");pm.expect(d.quotation.total).to.be.a(\"number\");}); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 \u00b7 Full plan and quotation JSON",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/sessions/{{sessionId}}/result",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{integrationKey}}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "07 \u00b7 Itemized quotation JSON only",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/sessions/{{sessionId}}/quote",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{integrationKey}}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "08 \u00b7 Administrator lists integrations (no raw keys)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/admin/integrations",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Optional \u00b7 Revoke this integration and expire its sessions",
+      "item": [
+        {
+          "name": "Revoke integration",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/admin/integrations/{{clientId}}/revoke",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

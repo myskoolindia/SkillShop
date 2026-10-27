@@ -9,6 +9,13 @@
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
+    # Kalpana (./kalpana, the Design My Lab planner) runs as its own service on 127.0.0.1:8787 and is
+    # served under /kalpana/. Needs mod_proxy + mod_proxy_http (or use ProxyPass in the vhost instead).
+    <IfModule mod_proxy.c>
+        RewriteRule ^kalpana$ /kalpana/ [R=301,L]
+        RewriteRule ^kalpana/(.*)$ http://127.0.0.1:8787/$1 [P,L]
+    </IfModule>
+
     # Pass /club-shop requests directly to Apache alias — do NOT send to Laravel
     RewriteRule ^club-shop(/.*)?$ - [L]
 

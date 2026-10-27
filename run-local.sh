@@ -22,14 +22,20 @@ printf '%s\n' "$$" > .local/run/web.pid
 club_pid=$!
 sleep 1
 if ! kill -0 "$club_pid" 2>/dev/null; then echo "Club Shop could not start; check .local/logs/club-shop.log" >&2; exit 1; fi
+# Kalpana (the Design My Lab planner, ./kalpana) runs alongside and is served at /kalpana/.
+kalpana/run.sh > .local/logs/kalpana.log 2>&1 &
+kalpana_pid=$!
+sleep 1
+if ! kill -0 "$kalpana_pid" 2>/dev/null; then echo "Kalpana could not start (Design My Lab is unavailable); check .local/logs/kalpana.log" >&2; kalpana_pid=""; fi
 web_pid=""
 cleanup() {
   if [ -n "$web_pid" ]; then kill "$web_pid" 2>/dev/null || true; fi
+  if [ -n "$kalpana_pid" ]; then kill "$kalpana_pid" 2>/dev/null || true; fi
   kill "$club_pid" 2>/dev/null || true
 }
 trap cleanup EXIT
 trap 'exit 0' INT TERM
 .local/bin/php -S 127.0.0.1:8081 -t public scripts/local-router.php &
 web_pid=$!
-printf "%s\n" "SkillShop: http://localhost:8081" "Club Shop: http://localhost:8081/club-shop/"
+printf "%s\n" "SkillShop: http://localhost:8081" "Club Shop: http://localhost:8081/club-shop/" "Kalpana:   http://localhost:8081/kalpana/lab-planner"
 wait "$web_pid"
