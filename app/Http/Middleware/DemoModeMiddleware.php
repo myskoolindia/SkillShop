@@ -19,7 +19,7 @@ class DemoModeMiddleware
         if (strtoupper(config('app.app_mode')) !== 'LIVE') {
             // Define an array of routes that are allowed in non-LIVE mode
             $allowedRoutes = [
-                'login', 'register', 'user-register', 'user-login',
+                'login', 'register', 'user-register', 'user-login', 'roboquest.signin.store',
                 'user-verification', 'logout', 'admin.login',
                 'admin.store-login', 'admin.logout','add-to-cart',
                 'student.get-file-info', 'lab-design.start'

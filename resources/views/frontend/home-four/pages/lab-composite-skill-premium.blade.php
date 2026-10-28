@@ -1555,7 +1555,7 @@ Promise.all([
   allCats.forEach(function(c){ tree[c.id]=c; });
 
   var productUrl   = product.url || (BASE+'/'+product.slug);
-  var customiseUrl = (BASE+'/premium-cart') || productUrl;
+  var customiseUrl = '{{ url("/sso/shop") }}?target=%2Fpremium-cart';
 
   var groups   = {};
   var usedCats = {};

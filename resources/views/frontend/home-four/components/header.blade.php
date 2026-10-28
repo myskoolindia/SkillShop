@@ -3,7 +3,6 @@
         return menuGetBySlug('nav-menu');
     });
     $setting = Cache::get('setting');
-
     // Image map for known child menu links — keyed by the link path
     $childImageMap = [
         '/'                 => ['image' => asset('designs/img/logo.png'),              'desc' => 'Back to homepage'],

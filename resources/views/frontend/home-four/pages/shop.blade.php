@@ -1183,9 +1183,16 @@
       emptyState.classList.add('hidden');
 
       try {
-        const res = await fetch('/api/shop-products');
+        const res = await fetch('/api/shop-products?per_page=100');
+        if (!res.ok) throw new Error('Unable to load the student shop');
         const json = await res.json();
-        allProducts = json.data || [];
+        const pages = Math.min(Number(json.pagination?.pages || json.last_page || 1), 20);
+        const remaining = await Promise.all(Array.from({length: Math.max(0, pages - 1)}, async (_, i) => {
+          const response = await fetch('/api/shop-products?per_page=100&page=' + (i + 2));
+          if (!response.ok) throw new Error('Unable to load another product page');
+          return response.json();
+        }));
+        allProducts = [...new Map([...(json.data || []), ...remaining.flatMap(page => page.data || [])].map(item => [item.id, item])).values()];
         applyFilters();
       } catch (err) {
         console.error('Error fetching products:', err);
@@ -1246,6 +1253,7 @@
       // Render Cards
       productsGrid.innerHTML = paginatedItems.map(item => {
         const id = item.id;
+        const detailKey = encodeURIComponent(item.slug || String(id)).replace(/'/g, '%27');
         const title = item.title || item.course_name || 'Activity Kit';
         const price = Number(item.price || 0);
         const discounted = Number(item.price_discounted || price);
@@ -1256,7 +1264,7 @@
 
         return `
           <div class="skillbox-card">
-            <div class="skillbox-card__img-box" onclick="window.location.href='/ProductDetails/${id}'">
+            <div class="skillbox-card__img-box" onclick="window.location.href='/ProductDetails/${detailKey}'">
               <img src="${image}" alt="${title}" class="skillbox-card__img" loading="lazy" onerror="this.onerror=null;this.src='https://pedaskills.com/static/media/skillBoxImg.54ef565f4b0836600035.png';" />
               <button 
                 class="skillbox-card__wish-btn ${isWishlisted ? 'active' : ''}" 
@@ -1267,7 +1275,7 @@
               </button>
             </div>
 
-            <div class="skillbox-card__body" onclick="window.location.href='/ProductDetails/${id}'" style="cursor: pointer;">
+            <div class="skillbox-card__body" onclick="window.location.href='/ProductDetails/${detailKey}'" style="cursor: pointer;">
               <h3 class="skillbox-card__title" title="${title}">${title}</h3>
               
               <div class="skillbox-card__stars">

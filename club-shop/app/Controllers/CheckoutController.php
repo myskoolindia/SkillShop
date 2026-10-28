@@ -1288,6 +1288,15 @@ class CheckoutController extends BaseController
             return redirect()->to(langBaseUrl());
         }
 
+        $session=session();
+        $return=\App\Libraries\RoboquestPaymentReturn::destination($data['order'],[
+            'auth_user_id'=>$session->get('auth_user_id'),
+            'roboquest_shop_user_id'=>$session->get('roboquest_shop_user_id'),
+            'roboquest_shop_role'=>$session->get('roboquest_shop_role'),
+            'roboquest_shop_role_expires'=>$session->get('roboquest_shop_role_expires'),
+        ],mainAppUrl('roboquest/open'));
+        if($return)return redirect()->to($return)->setHeader('Cache-Control','no-store')->setHeader('Referrer-Policy','no-referrer');
+
         echo view('partials/_header', $data);
         echo view('cart/order_completed', $data);
         echo view('partials/_footer');

@@ -1,6 +1,13 @@
 @extends('frontend.student-dashboard.layouts.master')
 
 @section('dashboard-contents')
+    <section class="alert alert-primary" style="margin:20px 0">
+        <strong>Learn in your school’s RoboQuest</strong>
+        <p>Open purchased courses, assignments and platform learning events.</p>
+        <a class="btn btn-primary" href="{{ route('roboquest.launch') }}">Open RoboQuest</a>
+        @if(userAuth()?->role === 'school')<a class="btn btn-outline-primary" href="{{ route('roboquest.settings') }}">School connection</a>@endif
+    </section>
+
     @if (instructorStatus() == 'pending')
         <div class="alert alert-primary d-flex align-items-center" role="alert">
             <svg 0 16 xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"

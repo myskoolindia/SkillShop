@@ -124,6 +124,7 @@
                 <div class="col-xl-6 col-lg-8">
                     <div class="singUp-wrap">
                         <div class="text-center mb-4">
+                            <p style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center"><a href="{{ route('roboquest.signin', ['role'=>'teacher']) }}">{{ __('Teacher login') }}</a><a href="{{ route('roboquest.signin', ['role'=>'student']) }}">{{ __('Student login') }}</a><a href="{{ route('roboquest.signin', ['role'=>'school']) }}">{{ __('School Admin login') }}</a></p>
                             <h2 class="title mb-2">{{ __('Welcome back!') }}</h2>
                             <p class="text-muted">{{ __('Log in to your School, Teacher, or Student account') }}</p>
                         </div>

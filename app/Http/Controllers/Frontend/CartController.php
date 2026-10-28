@@ -156,18 +156,6 @@ class CartController extends Controller {
             ->first();
 
         if (!$course) {
-            $course = Course::where('id', $api_course_id)
-                ->where('status', 'active')
-                ->first();
-        }
-
-        if (!$course) {
-            $course = Course::where('slug', $api_course_id)
-                ->where('status', 'active')
-                ->first();
-        }
-
-        if (!$course) {
             return response(['status' => 'error', 'message' => 'Course not found.']);
         }
 

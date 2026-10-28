@@ -549,7 +549,8 @@ class AuthController extends BaseController
 
         list($payloadEncoded, $signature) = $parts;
 
-        $secretKey = env('SSO_SECRET_KEY', 'sk_sso_a9f83e2b17c64d85a109ecf3821094ba723e80d91fca475b83017a4c9b2f6e18');
+        $secretKey = env('SSO_SECRET_KEY');
+        if (!is_string($secretKey) || strlen($secretKey) < 32) return $this->response->setStatusCode(503)->setBody('Shop sign-in is not configured.');
         $expectedSignature = hash_hmac('sha256', $payloadEncoded, $secretKey);
 
         if (!hash_equals($expectedSignature, $signature)) {
@@ -573,12 +574,18 @@ class AuthController extends BaseController
             return redirect()->to(langBaseUrl());
         }
 
+        if (!in_array($payload['role'] ?? '', ['school','teacher','admin','vendor'], true)) {
+            return $this->response->setStatusCode(403)->setBody('The lab shop is for schools and teachers only.');
+        }
         $user = $this->authModel->loginWithSso($payload);
 
         if (!$user) {
             return redirect()->to(langBaseUrl());
         }
 
+        $this->session->set('roboquest_shop_role', $payload['role']);
+        $this->session->set('roboquest_shop_user_id', (int)$user->id);
+        $this->session->set('roboquest_shop_role_expires', time() + 10800);
         // Determine target redirect
         $target = trim($payload['target'] ?? '');
         if (!empty($target)) {
@@ -633,9 +640,10 @@ class AuthController extends BaseController
             'nonce'      => bin2hex(random_bytes(8)),
         ];
 
-        $secretKey = env('SSO_SECRET_KEY', 'sk_sso_a9f83e2b17c64d85a109ecf3821094ba723e80d91fca475b83017a4c9b2f6e18');
+        $secretKey = env('SSO_SECRET_KEY');
         $payloadJson = json_encode($payload, JSON_UNESCAPED_SLASHES);
         $payloadEncoded = rtrim(strtr(base64_encode($payloadJson), '+/', '-_'), '=');
+        if (!is_string($secretKey) || strlen($secretKey) < 32) return $this->response->setStatusCode(503)->setBody('Shop sign-in is not configured.');
         $signature = hash_hmac('sha256', $payloadEncoded, $secretKey);
         $token = $payloadEncoded . '.' . $signature;
 

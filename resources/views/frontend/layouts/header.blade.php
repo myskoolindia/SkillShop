@@ -22,6 +22,20 @@
         unset($m);
     }
 
+    // Navigation follows the same verified audience rules as the backend.
+    $shopRole = auth()->user()?->role;
+    $allowedShopLink = function ($link) use ($shopRole) {
+        if (!$shopRole) return true;
+        $path = strtolower('/' . ltrim(parse_url($link, PHP_URL_PATH) ?: '', '/'));
+        if (in_array($path, ['/shop','/skillbox'])) return $shopRole === 'student';
+        if (preg_match('~^/labs(?:/|$)~', $path)) return in_array($shopRole, ['school','teacher']);
+        return true;
+    };
+    $nav_menu = array_values(array_filter(array_map(function ($menu) use ($allowedShopLink) {
+        if (!empty($menu['child'])) $menu['child'] = array_values(array_filter($menu['child'], fn($child) => $allowedShopLink($child['link'] ?? '')));
+        return $menu;
+    }, is_array($nav_menu) ? $nav_menu : ($nav_menu?->toArray() ?? [])), fn($menu) => $allowedShopLink($menu['link'] ?? '')));
+
     $categories = \Modules\Course\app\Models\CourseCategory::with('translation')
         ->where('status', 1)
         ->whereNull('parent_id')

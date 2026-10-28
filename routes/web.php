@@ -60,6 +60,13 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
             default      => redirect()->route('student.dashboard'),
         };
     })->middleware('auth')->name('dashboard');
+    Route::get('/roboquest/sign-in', [\App\Http\Controllers\Frontend\RoboquestController::class,'signIn'])->name('roboquest.signin');
+    Route::post('/roboquest/sign-in', [\App\Http\Controllers\Auth\AuthenticatedSessionController::class,'store'])->middleware('throttle:10,1')->name('roboquest.signin.store');
+    Route::middleware(['auth','verified'])->group(function () {
+        Route::get('/school/roboquest', [\App\Http\Controllers\Frontend\RoboquestController::class,'settings'])->name('roboquest.settings');
+        Route::post('/school/roboquest', [\App\Http\Controllers\Frontend\RoboquestController::class,'save'])->name('roboquest.settings.save');
+        Route::get('/roboquest/open', [\App\Http\Controllers\Frontend\RoboquestController::class,'launch'])->name('roboquest.launch');
+    });
     Route::get('set-currency', [HomePageController::class, 'setCurrency'])->name('set-currency');
 
     Route::get('/', function () {
@@ -158,10 +165,11 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
     });
 
     Route::get('/api/product-details/{id}', function ($id) {
-        $rawUrl = env('SHOP_API_BASE_URL');
+        $rawUrl = env('STUDENT_SHOP_API_BASE_URL', 'https://test.myskill.club/api');
         $baseUrl = rtrim($rawUrl, '/') . '/';
         try {
-            $response = \Illuminate\Support\Facades\Http::timeout(5)->get("{$baseUrl}products/{$id}");
+            $productPath = ctype_digit((string)$id) ? "products/" . rawurlencode($id) : "products/slug/" . rawurlencode($id);
+            $response = \Illuminate\Support\Facades\Http::timeout(5)->get($baseUrl . $productPath);
             if ($response->successful()) {
                 return response()->json($response->json());
             }
@@ -175,7 +183,7 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
     });
 
     Route::get('/api/shop-categories', function () {
-        $rawUrl = env('SHOP_API_BASE_URL');
+        $rawUrl = env('STUDENT_SHOP_API_BASE_URL', 'https://test.myskill.club/api');
         $baseUrl = rtrim($rawUrl, '/') . '/';
         try {
             $response = \Illuminate\Support\Facades\Http::timeout(5)->get("{$baseUrl}categories");
@@ -192,7 +200,7 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
     });
 
     Route::get('/api/shop-products', function (\Illuminate\Http\Request $request) {
-        $rawUrl = env('SHOP_API_BASE_URL');
+        $rawUrl = env('STUDENT_SHOP_API_BASE_URL', 'https://test.myskill.club/api');
         $baseUrl = rtrim($rawUrl, '/') . '/';
         $categoryId = $request->get('category_id');
         $search = strtolower(trim((string)$request->get('search', '')));

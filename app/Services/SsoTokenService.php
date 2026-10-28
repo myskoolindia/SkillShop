@@ -13,6 +13,7 @@ class SsoTokenService
     public static function generateShopSsoUrl(User $user, ?string $target = null): string
     {
         $secretKey = config('sso.secret_key');
+        abort_unless(is_string($secretKey) && strlen($secretKey) >= 32,503,'Shop sign-in is not configured.');
         $shopUrl = rtrim(config('sso.shop_url', url('/club-shop')), '/');
 
         $nameParts = explode(' ', trim($user->name ?? ''), 2);

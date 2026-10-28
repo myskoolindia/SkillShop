@@ -162,7 +162,7 @@ if (!function_exists('dashboardUrl')) {
 if (!function_exists('mainAppUrl')) {
     function mainAppUrl(string $path = ''): string
     {
-        $mainUrl = env('MAIN_APP_URL') ?: env('LMS_URL');
+        $mainUrl = env('MAIN_APP_URL') ?: env('MAIN_PORTAL_URL') ?: env('LMS_URL');
         if (empty($mainUrl)) {
             $baseUrl = rtrim(base_url(), '/');
             if (str_ends_with($baseUrl, '/club-shop')) {

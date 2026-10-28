@@ -1,6 +1,13 @@
 @extends('frontend.school-dashboard.layouts.master')
 
 @section('dashboard-contents')
+    <section class="alert alert-primary" style="margin:20px 0">
+        <strong>Learn in your school’s RoboQuest</strong>
+        <p>Open purchased courses, assignments and platform learning events.</p>
+        <a class="btn btn-primary" href="{{ route('roboquest.launch') }}">Open RoboQuest</a>
+        @if(userAuth()?->role === 'school')<a class="btn btn-outline-primary" href="{{ route('roboquest.settings') }}">School connection</a>@endif
+    </section>
+
     <div class="dashboard__content-wrap dashboard__content-wrap-two mb-60">
         <div class="dashboard__content-title">
             <h4 class="title">{{ __('School Dashboard') }}</h4>

@@ -30,6 +30,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $roboquest = $request->routeIs('roboquest.signin.store');
         $setting = Cache::get('setting');
 
         $rules = [
@@ -38,6 +39,7 @@ class AuthenticatedSessionController extends Controller
             'g-recaptcha-response' => ($setting && $setting->recaptcha_status == 'active') ? ['required', new CustomRecaptcha()] : 'nullable',
         ];
 
+        if ($roboquest) $rules['account_role'] = 'required|in:teacher,student,school';
         $customMessages = [
             'login.required'    => __('Email or mobile number is required'),
             'password.required' => __('Password is required'),
@@ -66,6 +68,9 @@ class AuthenticatedSessionController extends Controller
             $notification = __('Invalid credentials. Please check your email/mobile and password.');
             throw ValidationException::withMessages(['login' => $notification]);
         }
+        if ($roboquest && $user->role !== $request->input('account_role')) {
+            throw ValidationException::withMessages(['login'=>__('This account does not match the selected sign-in option. Choose your account type and try again.')]);
+        }
 
         // Check if user active
         if ($user->status != UserStatus::ACTIVE->value && $user->status !== 'active') {
@@ -83,6 +88,11 @@ class AuthenticatedSessionController extends Controller
 
         // Authenticate user
         Auth::guard('web')->login($user, (bool)$request->remember);
+        $request->session()->regenerate();
+        if ($roboquest) {
+            $request->session()->forget('url.intended');
+            return redirect()->route('roboquest.launch');
+        }
 
         // Redirect user to dashboard based on role
         $notification = __('Logged in successfully.');

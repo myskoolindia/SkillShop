@@ -25,6 +25,8 @@ class SsoBridgeController extends Controller
 
         $user = Auth::user();
         $target = $request->query('target', '');
+        $merchantDashboard = $user->role === 'vendor' && in_array($target,['dashboard','/dashboard']);
+        abort_unless(in_array($user->role, ['school','teacher','admin']) || $merchantDashboard,403,'The lab shop is for schools and teachers.');
 
         // If user has admin role in Laravel and target is admin or empty, allow direct shop admin access
         if ($user->role === 'admin' && empty($target) && $request->has('admin')) {
@@ -56,6 +58,7 @@ class SsoBridgeController extends Controller
         list($payloadEncoded, $signature) = $parts;
 
         $secretKey = config('sso.secret_key');
+        abort_unless(is_string($secretKey) && strlen($secretKey) >= 32,503,'Shop sign-in is not configured.');
         $expectedSignature = hash_hmac('sha256', $payloadEncoded, $secretKey);
 
         if (!hash_equals($expectedSignature, $signature)) {

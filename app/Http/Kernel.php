@@ -39,6 +39,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\DemoModeMiddleware::class,
             \App\Http\Middleware\SetLocaleMiddleware::class,
             \App\Http\Middleware\XssSanitization::class,
+            \App\Http\Middleware\ShopAudience::class,
         ],
 
         'api' => [

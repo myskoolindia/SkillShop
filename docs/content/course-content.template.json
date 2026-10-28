@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "courses": [
+    {
+      "course_id": 0,
+      "external_course_id": 0,
+      "chapters": [
+        {
+          "title": "Replace with chapter title",
+          "status": "inactive",
+          "lessons": [
+            {
+              "title": "Replace with lesson title",
+              "text": "",
+              "materials": "",
+              "video_url": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

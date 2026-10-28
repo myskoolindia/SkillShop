@@ -6,10 +6,10 @@ Start both apps from the SkillShop directory:
 ./run-local.sh
 ```
 
-- Portal: http://localhost:8081/
-- Product browsing: http://localhost:8081/shop
-- Full Club Shop: http://localhost:8081/club-shop/
-- Club Shop catalog API: http://localhost:8081/club-shop/api/products
+- Portal: http://localhost:8083/
+- Product browsing: http://localhost:8083/shop
+- Full Club Shop: http://localhost:8083/club-shop/
+- Club Shop catalog API: http://localhost:8083/club-shop/api/products
 
 The local launcher uses the existing project-local PHP 8.1 runtime, MySQL server on loopback port 33307, and two PHP workers. The worker on port 8082 handles Laravel's internal shop API requests, avoiding a single-worker nested HTTP deadlock. Both web listeners are loopback-only. Stop the launcher with Ctrl+C; the local database process remains available.
 
@@ -46,3 +46,7 @@ With the apps running:
 ```
 
 This performs read-only checks of page delivery, sign-in forms, private-file blocking, all catalog pages, product prices against the restored database, product details, and portal-to-shop API requests. It does not test a purchase or contact a payment provider.
+
+## RoboQuest school handoff
+
+The portal defaults to port 8083; set SKILLVATION_PORT to override the launcher port. See [school commerce setup](../RoboQuest_Learning_Lab/docs/SCHOOL_COMMERCE.md) for per-school keys, one-time launch, paid course assignment, test accounts and platform-owned Zoom events. Apply the new RoboQuest connection migration explicitly when updating a restored database. The local demo fixture is separate from real purchases and never charges a payment provider.

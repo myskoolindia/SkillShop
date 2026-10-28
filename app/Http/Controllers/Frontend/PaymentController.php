@@ -476,6 +476,18 @@ class PaymentController extends Controller
         $paymentDetails = Session::get('payment_details');
         $gateway_charge = Session::get('gateway_charge_in_usd');
 
+        // This route is a continuation of a verified gateway session, not proof of payment by itself.
+        if (!$gateway_name || !$transaction || !Session::has('payable_amount')) {
+            return redirect()->route('order-fail');
+        }
+        $existing = Order::where('buyer_id', userAuth()->id)->where('payment_method', $gateway_name)
+            ->where('transaction_id', $transaction)->where('payment_status', 'paid')->exists();
+        if ($existing) {
+            $launch = userAuth()->role === 'school' ? app(\App\Services\RoboquestService::class)->launch(userAuth()) : null;
+            if($launch)return redirect()->away($launch)->withHeaders(['Referrer-Policy'=>'no-referrer','Cache-Control'=>'no-store']);
+            return redirect()->route(userAuth()->role==='school'?'roboquest.settings':'order-success');
+        }
+
         if (in_array($gateway_name, ['Razorpay', 'Stripe'])) {
             $allCurrencyCodes = BasicPaymentSupportedCurrenyListEnum::getStripeSupportedCurrencies();
 
@@ -597,6 +609,12 @@ class PaymentController extends Controller
         $notification = trans('Payment Success.');
         $notification = ['messege' => $notification, 'alert-type' => 'success'];
 
+        // Entitlements have been persisted. Pending/failed payments never enter this handoff.
+        if ($user->role === 'school') {
+            $launch = app(\App\Services\RoboquestService::class)->launch($user);
+            if ($launch) return redirect()->away($launch)->withHeaders(['Referrer-Policy'=>'no-referrer','Cache-Control'=>'no-store']);
+            return redirect()->route('roboquest.settings')->with('roboquest_saved', false);
+        }
         return redirect()->route('order-success')->with($notification);
     }
 

@@ -451,6 +451,7 @@ class AuthModel extends BaseModel
     //logout
     public function logout()
     {
+        $this->session->remove(['roboquest_shop_role','roboquest_shop_user_id','roboquest_shop_role_expires']);
         $this->session->remove('auth_user_id');
         $this->session->remove('auth_token');
     }

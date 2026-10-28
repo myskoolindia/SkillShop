@@ -3327,10 +3327,7 @@
                   <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Adjust quantities, add optional modules or custom skill domains to match your school's exact requirements.</p>
                 </div>
                 <div style="display:flex;flex-wrap:wrap;gap:10px;">
-                  <a id="sks-btn-customise" href="#cta-section"
-                     style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
-                    <i class="fa-solid fa-sliders" style="font-size:11px;"></i> Customise This Lab
-                  </a>
+                  @include('frontend.home-four.partials.skillvation-lab-customisation')
                   <a href="#planEnquiryForm"
                      style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
                     <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
@@ -4278,7 +4275,7 @@ Promise.all([
   allCats.forEach(function(c){ tree[c.id]=c; });
 
   var productUrl   = product.url || (BASE+'/'+product.slug);
-  var customiseUrl = (BASE+'/skillvation-cart') || productUrl;
+  var customiseUrl = '{{ url("/sso/shop") }}?target=%2Fskillvation-cart';
 
   var groups   = {};
   var usedCats = {};
@@ -4317,7 +4314,7 @@ Promise.all([
 
   if(countEl) countEl.textContent = totalCats;
   if(itemsEl) itemsEl.textContent = totalItems;
-  var btnC=document.getElementById('sks-btn-customise'), btnP=document.getElementById('sks-btn-product');
+  var btnC=document.getElementById('sks-opt-cart'), btnP=document.getElementById('sks-btn-product');
   if(btnC) btnC.href = customiseUrl;
   if(btnP) btnP.href = productUrl;
 

@@ -14,7 +14,7 @@ class ShopApiService
      */
     public static function getBaseUrl(): string
     {
-        $raw = env('SHOP_API_BASE_URL');
+        $raw = env('STUDENT_SHOP_API_BASE_URL', 'https://test.myskill.club/api');
         $raw = rtrim($raw, '/');
         // If raw already ends with /api, use it; otherwise append /api
         if (preg_match('#/api$#i', $raw)) {
@@ -28,14 +28,12 @@ class ShopApiService
      */
     public static function getAuthToken(): ?string
     {
-        $cacheKey = 'shop_api_bearer_token';
-        if (Cache::has($cacheKey)) {
-            return Cache::get($cacheKey);
-        }
-
         $baseUrl = self::getBaseUrl();
-        $email = 'sales@myskill.club';
-        $password = 'myskool@gmail.com';
+        $email = env('STUDENT_SHOP_API_EMAIL');
+        $password = env('STUDENT_SHOP_API_PASSWORD');
+        if (!$email || !$password) return null;
+        $cacheKey = 'student_shop_api_token_' . hash('sha256', $baseUrl . '|' . $email);
+        if (Cache::has($cacheKey)) return Cache::get($cacheKey);
 
         try {
             $response = Http::timeout(10)->post($baseUrl . '/login', [

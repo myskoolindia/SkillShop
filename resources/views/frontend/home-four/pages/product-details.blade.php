@@ -815,7 +815,8 @@
   (function() {
     'use strict';
 
-    const productId = "{{ $id }}";
+    const productLookup = @json($id);
+    let productId = productLookup;
     let productData = null;
     let quantity = 1;
     let selectedAddressType = 'Home';
@@ -1051,11 +1052,12 @@
     // Load Product Data
     async function loadProductDetails() {
       try {
-        const res = await fetch(`/api/product-details/${productId}`);
+        const res = await fetch(`/api/product-details/${encodeURIComponent(productLookup)}`);
         const json = await res.json();
         
         if (json && json.data) {
           productData = json.data;
+          productId = productData.id;
           renderProduct(productData);
           loadSimilarProducts(productData.category_id || (productData.category ? productData.category.id : null));
         } else {
@@ -1152,6 +1154,7 @@
         if (items.length > 0) {
           similarProductsGrid.innerHTML = items.map(item => {
             const id = item.id;
+            const detailKey = encodeURIComponent(item.slug || String(id)).replace(/'/g, '%27');
             const title = item.title || item.course_name || 'Activity Kit';
             const price = Number(item.price || 0);
             const discounted = Number(item.price_discounted || price);
@@ -1159,10 +1162,10 @@
 
             return `
               <div class="rel-card">
-                <div class="rel-card__img-box" onclick="window.location.href='/ProductDetails/${id}'">
+                <div class="rel-card__img-box" onclick="window.location.href='/ProductDetails/${detailKey}'">
                   <img src="${img}" alt="${title}" class="rel-card__img" loading="lazy" onerror="this.src='https://pedaskills.com/static/media/skillBoxImg.54ef565f4b0836600035.png';" />
                 </div>
-                <div class="p-4 flex flex-col flex-grow bg-white cursor-pointer" onclick="window.location.href='/ProductDetails/${id}'">
+                <div class="p-4 flex flex-col flex-grow bg-white cursor-pointer" onclick="window.location.href='/ProductDetails/${detailKey}'">
                   <h4 class="text-sm font-semibold text-slate-800 line-clamp-2 mb-2">${title}</h4>
                   <div class="flex items-center justify-between mt-auto pt-2 border-t border-slate-100">
                     <span class="text-base font-bold text-slate-900">₹ ${discounted.toLocaleString('en-IN')}</span>
