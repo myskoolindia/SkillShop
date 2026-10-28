@@ -2,6 +2,17 @@
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kalpana — Find your right fit</title><link rel="stylesheet" href="styles.css"><script src="paths.js" defer></script><script src="voice.js" defer></script><script src="mascot.js" defer></script><script src="diagrams.js" defer></script><script src="app.js" defer></script></head>
 <body>
+<script>
+  // Host embeds may pass ?scope=<id> to isolate (and thus reset) the chat session.
+  // paths.js reads document.body.dataset.sessionScope to build the sessionStorage key,
+  // so a unique scope yields a fresh conversation. Runs before the deferred paths.js.
+  (function () {
+    try {
+      var s = new URLSearchParams(location.search).get('scope');
+      if (s) document.body.dataset.sessionScope = s.replace(/[^a-zA-Z0-9_.-]/g, '').slice(0, 64);
+    } catch (e) {}
+  })();
+</script>
 <div class="workspace">
   <aside class="sidebar">
     <a href="./" class="brand"><span class="brand-mark">k<span>✦</span></span><span>kalpana<small>YOUR PACKAGE ADVISOR</small></span></a>
