@@ -41,8 +41,9 @@ return [
 
     // "Design My Lab" external session API
     'labdesign' => [
-        'base_url' => env('LABDESIGN_API_BASE', 'http://192.168.88.13:8787'),
+        'base_url' => env('LABDESIGN_API_BASE', 'https://kalpana.skillvation.com'),
         'api_key'  => env('LABDESIGN_API_KEY', ''),
     ],
 
+    'roboquest'=>['platform_key'=>env('ROBOQUEST_PLATFORM_KEY','')],
 ];

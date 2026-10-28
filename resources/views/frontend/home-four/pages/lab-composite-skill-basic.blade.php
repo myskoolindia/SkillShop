@@ -880,7 +880,7 @@
             </button>
             <div id="sks-customise-menu"
                  style="display:none;position:absolute;right:0;bottom:calc(100% + 8px);min-width:230px;background:#fff;border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);overflow:hidden;z-index:50;">
-              <a id="sks-opt-cart" href="{{ url('/club-shop/basic-cart') }}"
+              <a id="sks-opt-cart" href="{{ url('/sso/shop') }}?target=%2Fbasic-cart"
                  style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;border-bottom:1px solid #eef1f6;transition:background .15s;"
                  onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
                 <i class="fa-solid fa-cart-shopping" style="color:#f4742b;width:16px;"></i>
@@ -1180,19 +1180,12 @@
               </div>
               <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Request Type *</label>
-                <select name="message" id="planRequestType" required class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all">
+                <select name="message" required class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all">
                   <option value="Request Detailed Proposal">Request detailed proposal</option>
                   <option value="Book a Skill Lab Visit">Book a Skill Lab Visit</option>
                   <option value="Schedule a Demo with Academic Team">Schedule a Demo with Academic Team</option>
                 </select>
               </div>
-            </div>
-
-            {{-- Demo date & time — shown only for "Book a Skill Lab Visit" / "Schedule a Demo" --}}
-            <div id="planDemoDateWrap" style="display:none;">
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Preferred Demo Date &amp; Time *</label>
-              <input type="datetime-local" name="demo_date" id="planDemoDate" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
-              <p class="text-xs text-slate-400 mt-1">Pick a date and time that suits you; our team will confirm.</p>
             </div>
 
             <div>
@@ -1369,33 +1362,8 @@
   if (srcEl) srcEl.value = form.dataset.source  || '';
   if (ttlEl) ttlEl.value = form.dataset.title   || '';
 
-  // ── Show the demo date/time picker only for Visit / Demo request types ──
-  var reqTypeEl   = document.getElementById('planRequestType');
-  var demoWrap    = document.getElementById('planDemoDateWrap');
-  var demoDateEl  = document.getElementById('planDemoDate');
-  function needsDemoDate(v){ v = (v || '').toLowerCase(); return v.indexOf('visit') > -1 || v.indexOf('demo') > -1 || v.indexOf('walkthrough') > -1; }
-  function toggleDemoDate(){
-    var show = reqTypeEl && needsDemoDate(reqTypeEl.value);
-    if (demoWrap)   demoWrap.style.display = show ? 'block' : 'none';
-    if (demoDateEl) {
-      demoDateEl.required = !!show;
-      if (!show) demoDateEl.value = '';
-      // Don't allow past date/time
-      if (show) { var now = new Date(Date.now() - new Date().getTimezoneOffset()*60000); demoDateEl.min = now.toISOString().slice(0,16); }
-    }
-  }
-  if (reqTypeEl) { reqTypeEl.addEventListener('change', toggleDemoDate); toggleDemoDate(); }
-
   form.addEventListener('submit', function (e) {
     e.preventDefault();
-
-    // Guard: demo date required for Visit / Demo requests
-    if (reqTypeEl && needsDemoDate(reqTypeEl.value) && demoDateEl && !demoDateEl.value) {
-      demoDateEl.focus();
-      if (typeof toastr !== 'undefined') toastr.error('Please choose a preferred demo date and time.');
-      else alert('Please choose a preferred demo date and time.');
-      return;
-    }
 
     // ── Build quotation from loaded bundle components ──────────
     var quotEl = document.getElementById('planQuotation');
@@ -1766,7 +1734,7 @@ Promise.all([
   allCats.forEach(function(c){ tree[c.id]=c; });
 
   var productUrl   = product.url || (BASE+'/'+product.slug);
-  var customiseUrl = (BASE+'/basic-cart') || productUrl;
+  var customiseUrl = '{{ url("/sso/shop") }}?target=%2Fbasic-cart';
 
   var groups   = {};
   var usedCats = {};
@@ -1956,7 +1924,8 @@ Promise.all([
       }).catch(function(){ alert('Your design could not be attached. Please try Request quotation again.'); });
       return;
     }
-    var url = CART_URL + '?session=' + encodeURIComponent(sessionId) + (d.type === 'kalpana:checkout' ? '&next=checkout' : '');
+    var target = '/lab-design-cart?session=' + encodeURIComponent(sessionId) + (d.type === 'kalpana:checkout' ? '&next=checkout' : '');
+    var url = '{{ url("/sso/shop") }}?target=' + encodeURIComponent(target);
     goCart.href = url;
     readyBar.style.display = 'flex';
     var go = function(){ window.location.href = url; };

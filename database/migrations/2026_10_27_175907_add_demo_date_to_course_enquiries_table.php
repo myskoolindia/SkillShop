@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasColumn('course_enquiries', 'demo_date')) {
+            return;
+        }
+
         Schema::table('course_enquiries', function (Blueprint $table) {
             // Preferred demo date & time, set only when the enquiry is a
             // "Book a Skill Lab Visit" or "Schedule a Demo with Academic Team" request.

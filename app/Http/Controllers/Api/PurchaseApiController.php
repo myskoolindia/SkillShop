@@ -36,7 +36,6 @@ class PurchaseApiController extends Controller
 {
     /**
      * The six product verticals and how each is detected.
-     * `enquiry_sources` map to course_enquiries.source prefixes.
      */
     public const VERTICALS = [
         'skill2skool'          => 'Skill2Skool',
@@ -80,14 +79,13 @@ class PurchaseApiController extends Controller
             ], 403);
         }
 
-        // One token per login; drop old tokens for this device name if reused.
         $token = $user->createToken('api-token')->plainTextToken;
 
         return response()->json([
-            'status' => 'success',
-            'token'  => $token,
+            'status'     => 'success',
+            'token'      => $token,
             'token_type' => 'Bearer',
-            'user'   => [
+            'user'       => [
                 'id'    => $user->id,
                 'name'  => $user->name,
                 'email' => $user->email,
@@ -126,7 +124,6 @@ class PurchaseApiController extends Controller
 
     /**
      * Single order detail by invoice id, including purchased items.
-     * Scoped to the owner so one user can't read another's invoice.
      *
      * GET /api/orders/{invoice_id}
      */
@@ -249,8 +246,6 @@ class PurchaseApiController extends Controller
      * each tagged with its `vertical`. Optional ?vertical=<key> filter.
      *
      * GET /api/purchases?vertical=ttt
-     *
-     * Merges: Laravel course orders + club-shop orders + lab enquiries.
      */
     public function purchases(Request $request): JsonResponse
     {
@@ -265,7 +260,7 @@ class PurchaseApiController extends Controller
         }
 
         $items = collect()
-            ->merge($this->courseePurchases($user))
+            ->merge($this->coursePurchases($user))
             ->merge($this->shopPurchases($user))
             ->merge($this->labEnquiryPurchases($user));
 
@@ -276,11 +271,11 @@ class PurchaseApiController extends Controller
         $items = $items->sortByDesc('created_at')->values();
 
         return response()->json([
-            'status'   => 'success',
-            'filter'   => $filter,
-            'count'    => $items->count(),
+            'status'      => 'success',
+            'filter'      => $filter,
+            'count'       => $items->count(),
             'by_vertical' => $items->groupBy('vertical')->map->count(),
-            'data'     => $items,
+            'data'        => $items,
         ]);
     }
 
@@ -318,11 +313,7 @@ class PurchaseApiController extends Controller
     /* Per-source collectors (return a Collection of normalized purchases)  */
     /* -------------------------------------------------------------------- */
 
-    /**
-     * Laravel course purchases -> normalized, with vertical derived from the
-     * course title/category. Covers Skill2Skool, Upskill 4 Teacher, TTT courses.
-     */
-    private function courseePurchases(User $user)
+    private function coursePurchases(User $user)
     {
         return Order::where('buyer_id', $user->id)
             ->with(['orderItems.course'])
@@ -351,13 +342,8 @@ class PurchaseApiController extends Controller
             });
     }
 
-    /**
-     * club-shop physical product orders -> normalized. Covers Shop, plus
-     * physical TTT kits and lab hardware. Matched by the user's email.
-     */
     private function shopPurchases(User $user)
     {
-        // club-shop users table links to Skillvation accounts by email.
         $shopUserId = DB::connection('clubshop')->table('users')
             ->where('email', $user->email)
             ->value('id');
@@ -403,10 +389,6 @@ class PurchaseApiController extends Controller
         });
     }
 
-    /**
-     * Composite Skill Lab / Skillvation Lab enquiries that reached the
-     * proforma/invoice stage -> normalized. These are the lab "purchases".
-     */
     private function labEnquiryPurchases(User $user)
     {
         return DB::table('course_enquiries')
@@ -414,7 +396,7 @@ class PurchaseApiController extends Controller
             ->orderByDesc('id')
             ->get()
             ->map(function ($e) {
-                $hasInvoice = ! empty($e->invoice);
+                $hasInvoice  = ! empty($e->invoice);
                 $hasProforma = ! empty($e->proforma_invoice);
 
                 return [

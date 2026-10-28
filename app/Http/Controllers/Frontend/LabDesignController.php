@@ -22,6 +22,55 @@ class LabDesignController extends Controller
     }
 
     /**
+     * Rewrite a Kalpana launch URL so its scheme+host match our configured public base.
+     * Kalpana composes the URL from its own PUBLIC_URL, which can point at an internal/
+     * unreachable host (e.g. http://localhost:8083/kalpana/). We keep the path, query and
+     * fragment (session id + launch token) and only swap the origin to LABDESIGN_API_BASE.
+     */
+    private function normalizeLaunchUrl(?string $launchUrl): ?string
+    {
+        if (empty($launchUrl)) {
+            return $launchUrl;
+        }
+
+        $base = $this->baseUrl(); // e.g. https://kalpana.skillvation.com
+        if (empty($base)) {
+            return $launchUrl;
+        }
+
+        $b = parse_url($base);
+        $u = parse_url($launchUrl);
+        if (!$u || empty($b['host'])) {
+            return $launchUrl;
+        }
+
+        // If the launch URL already points at the configured host, leave it alone.
+        if (($u['host'] ?? null) === $b['host']) {
+            return $launchUrl;
+        }
+
+        $scheme = $b['scheme'] ?? 'https';
+        $host   = $b['host'];
+        $port   = isset($b['port']) ? ':' . $b['port'] : '';
+        $path   = $u['path'] ?? '/';
+        $query  = isset($u['query']) ? '?' . $u['query'] : '';
+        $frag   = isset($u['fragment']) ? '#' . $u['fragment'] : '';
+
+        // Kalpana now lives on its own domain, serving the planner at the root.
+        // Drop a legacy "/kalpana" path prefix from the old folder-under-path setup,
+        // unless the configured base itself includes that path.
+        $basePath = rtrim($b['path'] ?? '', '/');
+        if ($basePath === '' && preg_match('#^/kalpana(/|$)#', $path)) {
+            $path = preg_replace('#^/kalpana#', '', $path);
+            if ($path === '') {
+                $path = '/';
+            }
+        }
+
+        return $scheme . '://' . $host . $port . $path . $query . $frag;
+    }
+
+    /**
      * Start a "Design My Lab" session.
      * POST {base}/api/v1/sessions  { "reference": "<ref>" }
      * Returns the sessionId (+ any session URL) and persists a lab_designs row.
@@ -62,6 +111,11 @@ class LabDesignController extends Controller
             // Kalpana session API fields (with flexible fallbacks).
             $sessionId = $data['sessionId'] ?? $data['session_id'] ?? ($data['id'] ?? null);
             $launchUrl = $data['launchUrl'] ?? ($data['launch_url'] ?? ($data['url'] ?? null));
+
+            // Kalpana builds launchUrl from its own PUBLIC_URL, which may be wrong/unreachable
+            // (e.g. http://localhost:8083/kalpana/...). Rewrite host/scheme to our configured
+            // public base so the browser loads the iframe from the right origin.
+            $launchUrl = $this->normalizeLaunchUrl($launchUrl);
 
             $design = LabDesign::create([
                 'session_id'  => $sessionId,
