@@ -88,6 +88,7 @@ class CourseEnquiryController extends Controller
             'city'          => ['nullable', 'string', 'max:255'],
             'address'       => ['nullable', 'string', 'max:1000'],
             'message'       => ['nullable', 'string', 'max:2000'],
+            'demo_date'     => ['nullable', 'date'],
             'quotation'     => ['nullable', 'string'],
             'course_id'     => ['nullable'],
             'api_course_id' => ['nullable'],
@@ -95,10 +96,68 @@ class CourseEnquiryController extends Controller
             'source'        => ['nullable', 'string', 'max:100'],
         ]);
 
+        // ── Route by Request Type (the "Request Type *" dropdown posts as `message`) ──
+        //   "Request Detailed Proposal"            → proposal mail only
+        //   "Book a Skill Lab Visit"               → mail + LeadDemo demo (demo_type = branch visit)
+        //   "Schedule a Demo with Academic Team"   → mail + LeadDemo demo (demo_type = walkthrough)
+        $requestType = trim((string) ($validated['message'] ?? ''));
+        $demoType = match (true) {
+            stripos($requestType, 'visit') !== false      => 'branch visit',
+            stripos($requestType, 'demo') !== false
+                || stripos($requestType, 'walkthrough') !== false => 'walkthrough',
+            default                                        => null, // proposal only
+        };
+
+        // A demo date & time is required for the two demo request types.
+        if ($demoType !== null && empty($validated['demo_date'])) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Please choose a preferred demo date and time.',
+            ], 422);
+        }
+
+        // Normalize demo date; only keep it for demo/visit requests.
+        $demoDate = null;
+        if ($demoType !== null && !empty($validated['demo_date'])) {
+            $demoDate = \Carbon\Carbon::parse($validated['demo_date'])->format('Y-m-d H:i:s');
+        }
+        $validated['demo_date'] = $demoDate;
+
         $enquiry = CourseEnquiry::create($validated);
 
-        // ── Push to LeadDemo CRM (fire-and-forget) ────────────────
-        // $this->sendToLeadDemo($validated);
+        // Push to LeadDemo CRM only for the two demo request types (fire-and-forget).
+        if ($demoType !== null) {
+            $this->sendToLeadDemo($validated, $demoType, $demoDate);
+        }
+
+        // ── Build the proposal PDF once; reuse for both WhatsApp (URL) and email (bytes) ──
+        $proposalPdf = null;
+        try {
+            $proposalPdf = $this->buildAndSaveProposalPdf($validated, $enquiry->id);
+        } catch (\Throwable $e) {
+            Log::warning('[CourseEnquiry] PDF build failed: ' . $e->getMessage());
+        }
+
+        // ── WhatsApp (WabaConnect) proposal/enquiry confirmation + PDF — fire-and-forget ──
+        if (!empty($validated['phone'])) {
+            try {
+                $planInfoForWa = self::PLAN_MAP[$validated['source'] ?? ''] ?? null;
+                app(\App\Services\WabaOtpService::class)->sendProposal(
+                    $validated['phone'],
+                    [
+                        'name'         => $validated['name'],
+                        'package'      => $validated['course_title'] ?? ($planInfoForWa['label'] ?? 'Skill Lab'),
+                        'request_type' => $validated['message'] ?? '',
+                        'demo_date'    => $demoDate ? \Carbon\Carbon::parse($demoDate)->format('d M Y, h:i A') : '',
+                        'school'       => $validated['school'] ?? '',
+                    ],
+                    $proposalPdf['url']  ?? null,
+                    $proposalPdf['name'] ?? null
+                );
+            } catch (\Throwable $e) {
+                Log::warning('[CourseEnquiry] WhatsApp send failed: ' . $e->getMessage());
+            }
+        }
 
         try {
             self::setMailConfig();
@@ -161,6 +220,7 @@ class CourseEnquiryController extends Controller
                 '{{package}}'         => htmlspecialchars($packageName),
                 '{{source}}'          => htmlspecialchars($sourceLabel),
                 '{{request_type}}'    => htmlspecialchars($validated['message'] ?? '—'),
+                '{{demo_date}}'       => $demoDate ? \Carbon\Carbon::parse($demoDate)->format('d M Y, h:i A') : '—',
                 '{{address}}'         => htmlspecialchars($validated['address'] ?? '—'),
                 '{{date}}'            => now()->format('d M Y'),
                 '{{quotation_table}}' => $quotationHtml,
@@ -176,7 +236,7 @@ class CourseEnquiryController extends Controller
                 : "New Skill Lab Enquiry: {$packageName} – " . ($validated['school'] ?? 'School');
             $adminBody = ($adminTpl && !empty($adminTpl->message))
                 ? str_replace(array_keys($vars), array_values($vars), $adminTpl->message)
-                : "<p>New enquiry from <strong>{$validated['name']}</strong> ({$validated['school']})</p><p>Package: {$packageName}</p><p>Phone: {$validated['phone']}</p><p>Email: {$validated['email']}</p>{$quotationHtml}";
+                : "<p>New enquiry from <strong>{$validated['name']}</strong> ({$validated['school']})</p><p>Package: {$packageName}</p><p>Request Type: " . htmlspecialchars($validated['message'] ?? '—') . "</p>" . ($demoDate ? "<p>Preferred Demo Date &amp; Time: <strong>" . \Carbon\Carbon::parse($demoDate)->format('d M Y, h:i A') . "</strong></p>" : "") . "<p>Phone: {$validated['phone']}</p><p>Email: {$validated['email']}</p>{$quotationHtml}";
 
             Mail::to($adminEmail)->send(new DefaultMail(['subject' => $adminSubject], $adminBody));
 
@@ -189,11 +249,11 @@ class CourseEnquiryController extends Controller
                 ? str_replace(array_keys($vars), array_values($vars), $confirmTpl->message)
                 : "<p>Dear {$validated['name']},</p><p>Thank you for your interest in Skillvation. Please find attached your customized Proposal PDF.</p>{$quotationHtml}";
 
-            // Generate PDF with full proposal + dynamic bundle items
-            $pdfBytes  = $this->generateProposalPdf($validated, $packageName, $quotationData, $planInfo);
-            $pdfName   = 'Skillvation_Proposal_'
+            // Reuse the PDF already built above; fall back to regenerating if that failed.
+            $pdfBytes  = $proposalPdf['bytes'] ?? $this->generateProposalPdf($validated, $packageName, $quotationData, $planInfo);
+            $pdfName   = $proposalPdf['name'] ?? ('Skillvation_Proposal_'
                        . preg_replace('/[^A-Za-z0-9_]/', '_', $validated['school'] ?? 'School')
-                       . '.pdf';
+                       . '.pdf');
 
             Mail::to($validated['email'])
                 ->send(new DefaultMail(
@@ -461,6 +521,65 @@ class CourseEnquiryController extends Controller
     }
 
     // ──────────────────────────────────────────────────────────────
+    // Build the proposal PDF once and save it to public storage so it can
+    // be both attached to the email (bytes) and sent on WhatsApp (public URL).
+    // Returns ['bytes'=>string, 'url'=>string, 'name'=>string].
+    // ──────────────────────────────────────────────────────────────
+    private function buildAndSaveProposalPdf(array $data, int $enquiryId): array
+    {
+        $source      = $data['source'] ?? '';
+        $planInfo    = self::PLAN_MAP[$source] ?? null;
+        $packageName = $data['course_title'] ?? ($planInfo['label'] ?? ucwords(str_replace(['-', '_'], ' ', $source)));
+
+        // Prefer an attached custom quotation; otherwise fetch the club-shop bundle.
+        $quotationData = null;
+        if (!empty($data['quotation'])) {
+            $rawQ = is_string($data['quotation']) ? json_decode($data['quotation'], true) : $data['quotation'];
+            if (is_array($rawQ) && !empty($rawQ['selected_components'])) {
+                $items = [];
+                $grouped = [];
+                $grandTotal = 0;
+                foreach ($rawQ['selected_components'] as $c) {
+                    $qty   = (int) ($c['qty'] ?? 1);
+                    $price = (float) ($c['unit_price'] ?? 0);
+                    $total = (float) ($c['subtotal'] ?? ($price * $qty));
+                    $grandTotal += $total;
+                    $cat = $c['category'] ?? 'General';
+                    $items[] = ['cat' => $cat, 'qty' => $qty, 'price' => $price, 'total' => $total, 'item' => $c['title'] ?? 'Component'];
+                    $grouped[$cat] = ($grouped[$cat] ?? 0) + $total;
+                }
+                $quotationData = ['items' => $items, 'grouped' => $grouped, 'grand_total' => $grandTotal];
+            }
+        }
+        if (!$quotationData) {
+            $quotationData = $this->buildQuotationData($this->fetchBundleComponents($planInfo['slug'] ?? null));
+        }
+
+        $pdfBytes = $this->generateProposalPdf($data, $packageName, $quotationData, $planInfo);
+        $pdfName  = 'Skillvation_Proposal_' . preg_replace('/[^A-Za-z0-9_]/', '_', $data['school'] ?? 'School') . '.pdf';
+
+        // Save to the app's public disk and build the URL from the disk's own url()
+        // (this app remaps the 'public' disk to public/uploads/store).
+        $relativePath = 'proposals/proposal_' . $enquiryId . '.pdf';
+        $disk = \Illuminate\Support\Facades\Storage::disk('public');
+        $disk->put($relativePath, $pdfBytes);
+
+        // Disk url() returns a path like /uploads/store/proposals/<id>.pdf.
+        $path = $disk->url($relativePath);
+
+        // Prefix with a publicly reachable base so WhatsApp can fetch it
+        // (WhatsApp cannot reach a local-only host like pro.local). Falls back to APP_URL.
+        if (preg_match('#^https?://#i', $path)) {
+            $url = $path;
+        } else {
+            $base = rtrim(env('PROPOSAL_PDF_BASE_URL', config('app.url')), '/');
+            $url  = $base . '/' . ltrim($path, '/');
+        }
+
+        return ['bytes' => $pdfBytes, 'url' => $url, 'name' => $pdfName];
+    }
+
+    // ──────────────────────────────────────────────────────────────
     // Generate full A4 proposal PDF (docx content + bundle items)
     // ──────────────────────────────────────────────────────────────
     private function generateProposalPdf(array $data, string $packageName, array $quotationData, ?array $planInfo): string
@@ -474,6 +593,21 @@ class CourseEnquiryController extends Controller
         $address     = htmlspecialchars($data['address'] ?? '');
         $pkg         = htmlspecialchars($packageName);
         $date        = now()->format('d M Y');
+
+        // Company logo as a base64 data URI (dompdf has remote images disabled, so embed inline).
+        $logoImg = '';
+        try {
+            $logoSetting = Setting::where('key', 'logo')->value('value');
+            $logoPath    = $logoSetting ? public_path(ltrim($logoSetting, '/')) : '';
+            if ($logoPath && is_file($logoPath)) {
+                $ext  = strtolower(pathinfo($logoPath, PATHINFO_EXTENSION));
+                $mime = $ext === 'svg' ? 'image/svg+xml' : ($ext === 'jpg' || $ext === 'jpeg' ? 'image/jpeg' : 'image/png');
+                $logoImg = '<img src="data:' . $mime . ';base64,' . base64_encode(file_get_contents($logoPath))
+                         . '" alt="Logo" style="height:48px;max-width:220px;margin-bottom:10px;" />';
+            }
+        } catch (\Throwable $e) {
+            $logoImg = '';
+        }
 
         // Product page links
         $baseUrl     = url('/');
@@ -566,6 +700,7 @@ class CourseEnquiryController extends Controller
 <body>
 <div class="page">
   <div class="hdr">
+    ' . $logoImg . '
     <div class="hdr-title">PROPOSAL</div>
     <div class="hdr-sub">Establishment of Standard Composite Skill Lab</div>
     <div class="hdr-sub">A multi-domain, hands-on skill education space for Grades 6–10</div>
@@ -668,14 +803,15 @@ class CourseEnquiryController extends Controller
     // ──────────────────────────────────────────────────────────────
     // Push lead to LeadDemo CRM API
     // ──────────────────────────────────────────────────────────────
-    private function sendToLeadDemo(array $data): void
+    private function sendToLeadDemo(array $data, string $demoType = 'walkthrough', ?string $demoDate = null): void
     {
         $apiUrl = env('LEADDEMO_API_URL');
 
         if (empty($apiUrl)) return;
 
         try {
-            $source      = 'SV_WEBSITE';
+            // Use the enquiry's own source (set per lab page) so the CRM attributes the lead correctly.
+            $source      = $data['source'] ?? 'skillvation-lab';
             $planInfo    = self::PLAN_MAP[$source] ?? null;
             $packageName = $data['course_title'] ?? ($planInfo['label'] ?? ucwords(str_replace(['-','_'],' ',$source)));
 
@@ -695,17 +831,19 @@ class CourseEnquiryController extends Controller
             $payload = [
                 'first_name'    => $data['name'],
                 'phone_number'  => $data['phone'] ?? '',
-                'user'          => '',
+                'user'          => env('LEADDEMO_USER', ''),
                 'language'      => 'English',
                 'remarks'       => $remarks ?: ('Interested in ' . $packageName),
-                'demo_type'     => 'walkthrough',
-                'demo_date'     => now()->addHour()->format('Y-m-d H:i'),
+                'demo_type'     => $demoType,
+                'demo_date'     => $demoDate
+                    ? \Carbon\Carbon::parse($demoDate)->format('Y-m-d H:i')
+                    : now()->addHour()->format('Y-m-d H:i'),
                 'notes'         => $notes ?: $packageName,
-                'incharge_name' => $data['school'] ?? 'website',
+                'incharge_name' => env('LEADDEMO_INCHARGE', $data['school'] ?? 'website'),
                 'campaign'      => $packageName,
                 'designation'   => $data['designation'] ?? '',
                 'source'        => $source,
-                'assigned_to'   => 116 ?? 1,
+                'assigned_to'   => (int) env('LEADDEMO_ASSIGNED_TO', 116),
             ];
 
             $response = Http::timeout(8)
@@ -713,10 +851,11 @@ class CourseEnquiryController extends Controller
                 ->post($apiUrl, $payload);
 
             Log::info('[LeadDemo] Pushed lead', [
-                'status'   => $response->status(),
-                'phone'    => $data['phone'] ?? '',
-                'source'   => $source,
-                'response' => $response->json(),
+                'status'    => $response->status(),
+                'phone'     => $data['phone'] ?? '',
+                'source'    => $source,
+                'demo_type' => $demoType,
+                'response'  => $response->json(),
             ]);
 
         } catch (\Throwable $e) {

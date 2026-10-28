@@ -18,6 +18,7 @@ class CourseEnquiry extends Model
         'city',
         'address',
         'message',
+        'demo_date',
         'quotation',
         'proforma_invoice',
         'invoice',
