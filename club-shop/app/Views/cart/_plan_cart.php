@@ -544,9 +544,13 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                             } elseif ($generalSettings->guest_checkout == 1 && !$cart->has_digital_product) {
                                                 $showCheckoutBtn = true;
                                             }
-                                            if ($showCheckoutBtn): ?>
-                                                <a href="<?= generateUrl('cart', 'payment_method'); ?>" class="btn btn-block"><?= trans("continue_to_checkout"); ?></a>
-                                            <?php else: ?>
+                                            if ($showCheckoutBtn):
+                                                if ($cart->has_physical_product == true && $productSettings->marketplace_shipping == 1): ?>
+                                                    <a href="<?= generateUrl('cart', 'shipping'); ?>" class="btn btn-block"><?= trans("continue_to_checkout"); ?></a>
+                                                <?php else: ?>
+                                                    <a href="<?= generateUrl('cart', 'payment_method'); ?>" class="btn btn-block"><?= trans("continue_to_checkout"); ?></a>
+                                                <?php endif;
+                                            else: ?>
                                                 <a href="#" class="btn btn-block" data-toggle="modal" data-target="#loginModal"><?= trans("continue_to_checkout"); ?></a>
                                             <?php endif;
                                         endif; ?>
