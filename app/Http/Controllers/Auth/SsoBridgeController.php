@@ -40,7 +40,8 @@ class SsoBridgeController extends Controller
 
         $user = $webUser;
         $merchantDashboard = $user->role === 'vendor' && in_array($target, ['dashboard', '/dashboard']);
-        abort_unless(in_array($user->role, ['school', 'teacher', 'admin']) || $merchantDashboard, 403, 'The lab shop is for schools and teachers.');
+        $isTeacherMember = \App\Models\SchoolMember::where('user_id', $user->id)->where('role_in_school', 'teacher')->where('status', 'active')->exists();
+        abort_unless(in_array($user->role, ['school', 'teacher', 'instructor', 'admin']) || $isTeacherMember || $merchantDashboard, 403, 'The lab shop is for schools and teachers.');
 
         // If user has admin role in Laravel and target is admin or empty, allow direct shop admin access
         if ($user->role === 'admin' && empty($target) && $request->has('admin')) {

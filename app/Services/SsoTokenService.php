@@ -22,6 +22,13 @@ class SsoTokenService
         $lastName = $nameParts[1] ?? '';
 
         $role = ($user instanceof Admin) ? 'admin' : ($user->role ?? 'student');
+        if ($role === 'instructor') {
+            $role = 'teacher';
+        } elseif ($role === 'student' && !($user instanceof Admin) && isset($user->id)) {
+            if (\App\Models\SchoolMember::where('user_id', $user->id)->where('role_in_school', 'teacher')->where('status', 'active')->exists()) {
+                $role = 'teacher';
+            }
+        }
 
         $payload = [
             'uid'        => (string) $user->id,

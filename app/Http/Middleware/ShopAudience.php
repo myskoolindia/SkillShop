@@ -13,7 +13,9 @@ class ShopAudience {
             if ($request->expectsJson() || str_starts_with($path,'api/')) return response()->json(['message'=>'Sign in with the appropriate school, teacher or student account.'],401);
             return redirect()->guest(route('login',['redirect'=>$request->fullUrl()]));
         }
-        abort_unless($student ? $user->role === 'student' : in_array($user->role,['school','teacher']),403,$student?'The student shop is for students only.':'Lab shopping is for schools and teachers only.');
+        $isTeacherMember = \App\Models\SchoolMember::where('user_id', $user->id)->where('role_in_school', 'teacher')->where('status', 'active')->exists();
+        $isStaff = in_array($user->role, ['school', 'teacher', 'instructor', 'admin']) || $isTeacherMember;
+        abort_unless($student ? $user->role === 'student' : $isStaff, 403, $student ? 'The student shop is for students only.' : 'Lab shopping is for schools and teachers only.');
         return $next($request);
     }
 }

@@ -588,16 +588,21 @@ class AuthController extends BaseController
             return redirect()->to(langBaseUrl());
         }
 
-        if (!in_array($payload['role'] ?? '', ['school','teacher','admin','vendor'], true)) {
+        $ssoRole = $payload['role'] ?? '';
+        if ($ssoRole === 'instructor') {
+            $ssoRole = 'teacher';
+        }
+        if (!in_array($ssoRole, ['school','teacher','admin','vendor'], true)) {
             return $this->response->setStatusCode(403)->setBody('The lab shop is for schools and teachers only.');
         }
+        $payload['role'] = $ssoRole;
         $user = $this->authModel->loginWithSso($payload);
 
         if (!$user) {
             return redirect()->to(langBaseUrl());
         }
 
-        $this->session->set('roboquest_shop_role', $payload['role']);
+        $this->session->set('roboquest_shop_role', $ssoRole);
         $this->session->set('roboquest_shop_user_id', (int)$user->id);
         $this->session->set('roboquest_shop_role_expires', time() + 10800);
         // Determine target redirect
