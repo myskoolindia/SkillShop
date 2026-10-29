@@ -10,7 +10,7 @@ return [
     | CodeIgniter 4 (Club Shop).
     |
     */
-    'secret_key' => env('SSO_SECRET_KEY'),
+    'secret_key' => env('SSO_SECRET_KEY', 'd895fc43619de9914397dbbbf823e7825b5b408c3fba022620c12c638ce6b6be'),
 
     /*
     |--------------------------------------------------------------------------

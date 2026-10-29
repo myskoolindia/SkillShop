@@ -394,6 +394,9 @@
         btnVerify.disabled = true;
         btnVerify.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> {{ __("Logging in...") }}';
 
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectParam = urlParams.get('redirect');
+
         fetch('{{ route("auth.login-otp") }}', {
             method: 'POST',
             headers: {
@@ -403,7 +406,8 @@
             },
             body: JSON.stringify({
                 phone: phone,
-                otp: otp
+                otp: otp,
+                redirect: redirectParam || ''
             })
         })
         .then(res => res.json())
