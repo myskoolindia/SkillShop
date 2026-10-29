@@ -189,6 +189,9 @@
                         <div id="tab-password-content">
                             <form method="POST" action="{{ route('user-login') }}" class="account__form">
                                 @csrf
+                                @if(request()->filled('redirect') || old('redirect'))
+                                    <input type="hidden" name="redirect" value="{{ request('redirect', old('redirect')) }}">
+                                @endif
                                 <div class="form-grp">
                                     <label for="login-input">{{ __('Email Address or Mobile Number') }} <code>*</code></label>
                                     <input id="login-input" type="text" placeholder="{{ __('Enter email or WhatsApp mobile number') }}" value="{{ old('login') }}" name="login" required>

@@ -20,8 +20,12 @@ class AuthenticatedSessionController extends Controller
     /**
      * Display the login view.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
+        if ($request->filled('redirect')) {
+            session()->put('url.intended', $request->input('redirect'));
+        }
+
         return view('auth.login');
     }
 
@@ -98,7 +102,37 @@ class AuthenticatedSessionController extends Controller
         $notification = __('Logged in successfully.');
         $notification = ['messege' => $notification, 'alert-type' => 'success'];
 
-        $intendedUrl = session()->get('url.intended');
+        $intendedUrl = session()->pull('url.intended');
+
+        // Check redirect parameter in request or referer
+        if (!$intendedUrl && $request->filled('redirect')) {
+            $intendedUrl = $request->input('redirect');
+        }
+
+        if (!$intendedUrl && $request->headers->get('referer')) {
+            $referer = $request->headers->get('referer');
+            $parsedRef = parse_url($referer);
+            if (!empty($parsedRef['query'])) {
+                parse_str($parsedRef['query'], $queryParams);
+                if (!empty($queryParams['redirect'])) {
+                    $intendedUrl = $queryParams['redirect'];
+                }
+            }
+        }
+
+        // Validate intendedUrl is safe (same host or relative, no auth loops)
+        if ($intendedUrl) {
+            $parsed = parse_url($intendedUrl);
+            $host = $parsed['host'] ?? null;
+            $currentHost = $request->getHost();
+            $isSameHost = empty($host) || $host === $currentHost || in_array($host, ['localhost', '127.0.0.1'], true);
+            $isSafePath = !\Str::contains($intendedUrl, ['/admin', '/login', '/register', '/user-login', '/user-register']);
+
+            if ($isSameHost && $isSafePath) {
+                return redirect()->to($intendedUrl)->with($notification);
+            }
+        }
+
         if ($intendedUrl && \Str::contains($intendedUrl, '/admin')) {
             if ($user->role == 'instructor') return redirect()->route('instructor.dashboard');
             if ($user->role == 'school')     return redirect()->route('school.dashboard');
@@ -106,10 +140,6 @@ class AuthenticatedSessionController extends Controller
         }
 
         if ($user->role === 'vendor') {
-            if ($intendedUrl && !\Str::contains($intendedUrl, ['/login', '/register', '/admin'])) {
-                return redirect()->intended()->with($notification);
-            }
-            session()->forget('url.intended');
             $ssoUrl = \App\Services\SsoTokenService::generateShopSsoUrl($user, 'dashboard');
             return redirect()->away($ssoUrl)->with($notification);
         }
@@ -121,7 +151,7 @@ class AuthenticatedSessionController extends Controller
             default      => route('student.dashboard'),
         };
 
-        return redirect()->intended($defaultRoute)->with($notification);
+        return redirect()->to($defaultRoute)->with($notification);
     }
 
     /**

@@ -3,13 +3,27 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\RedirectResponse;
+use App\Models\SchoolMember;
+use App\Models\SchoolCourseAssignment;
+use Modules\Order\app\Models\Order;
+use Illuminate\View\View;
 
 class SchoolDashboardController extends Controller
 {
-    public function index(): RedirectResponse
+    public function index(): View
     {
-        // All school sign-in methods and dashboard links use the same secure handoff.
-        return redirect()->route('roboquest.launch');
+        $school = userAuth();
+
+        $totalTeachers = SchoolMember::where('school_id', $school->id)->teachers()->active()->count();
+        $totalStudents = SchoolMember::where('school_id', $school->id)->students()->active()->count();
+        $totalAssignments = SchoolCourseAssignment::where('school_id', $school->id)->active()->count();
+        $orders = Order::where('buyer_id', $school->id)->orderBy('id', 'desc')->take(10)->get();
+
+        return view('frontend.school-dashboard.index', compact(
+            'totalTeachers',
+            'totalStudents',
+            'totalAssignments',
+            'orders'
+        ));
     }
 }
