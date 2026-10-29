@@ -527,7 +527,21 @@ class AuthController extends BaseController
     public function logout()
     {
         $this->authModel->logout();
-        redirectToBackUrl();
+
+        $referer = $this->request->getServer('HTTP_REFERER');
+        if (!empty($referer)) {
+            $parsedBase = parse_url(base_url());
+            $parsedReferer = parse_url($referer);
+
+            if (isset($parsedReferer['host']) && $parsedReferer['host'] === ($parsedBase['host'] ?? '')) {
+                $path = $parsedReferer['path'] ?? '';
+                if (!preg_match('#/(logout|dashboard|settings|profile_edit)#i', $path)) {
+                    return redirect()->to($referer);
+                }
+            }
+        }
+
+        return redirect()->to(langBaseUrl());
     }
 
     /**

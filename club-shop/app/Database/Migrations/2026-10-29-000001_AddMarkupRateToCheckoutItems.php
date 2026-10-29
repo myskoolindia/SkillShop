@@ -28,3 +28,4 @@ class AddMarkupRateToCheckoutItems extends Migration
         }
     }
 }
+
