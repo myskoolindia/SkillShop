@@ -37,6 +37,7 @@ return [
         'license_number' => env('WABA_LICENSE_NUMBER', '79242162270'),
         'api_key'        => env('WABA_API_KEY', 'MbeBNmpHqXVT7OJL3wtxKRkyd'),
         'template_name'  => env('WABA_TEMPLATE_NAME', ''),
+        'timeout'        => (int) env('WABA_TIMEOUT', 30),
     ],
 
     // "Design My Lab" external session API

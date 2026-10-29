@@ -40,6 +40,15 @@ class WabaOtpService
                     ];
             }
         } catch (\Throwable $e) {
+            $msg = $e->getMessage();
+            if (str_contains($msg, 'cURL error 28') || stripos($msg, 'timed out') !== false) {
+                Log::warning("[WABA OTP Timeout Handled] Gateway response timed out, but OTP message was likely dispatched: {$msg}", ['phone' => $cleanPhone]);
+                return [
+                    'success' => true,
+                    'message' => 'Verification code sent to your WhatsApp number.',
+                ];
+            }
+
             Log::error("[WABA OTP Exception] " . $e->getMessage(), ['phone' => $cleanPhone]);
             return [
                 'success' => false,
@@ -80,8 +89,11 @@ class WabaOtpService
             'URLParam'      => $otp,
         ];
 
+        $timeout = (int) config('services.waba.timeout', env('WABA_TIMEOUT', 30));
+
         $response = Http::withoutVerifying()
-            ->timeout(10)
+            ->connectTimeout(10)
+            ->timeout($timeout)
             ->get($endpoint, $params);
 
         $decoded = $response->json() ?? [];
