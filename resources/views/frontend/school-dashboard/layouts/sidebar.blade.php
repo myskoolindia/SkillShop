@@ -29,6 +29,11 @@
                 <a href="{{ route('school.orders.index') }}">
                     <i class="flaticon-mortarboard"></i>{{ __('Order History') }}</a>
             </li>
+
+            <li class="{{ Route::is('roboquest.*') ? 'active' : '' }}">
+                <a href="{{ route('roboquest.settings') }}">
+                    <i class="flaticon-mortarboard"></i>{{ __('RoboQuest Lab') }}</a>
+            </li>
         </ul>
     </nav>
     <div class="dashboard__sidebar-title mt-30 mb-20">

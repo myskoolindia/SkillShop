@@ -18,15 +18,36 @@ class RoboquestController extends Controller {
     }
     public function save(Request $request) {
         abort_unless($request->user()->role === 'school', 403);
-        $data = $request->validate(['school_id'=>'required|regex:/^[A-Za-z0-9_-]{1,80}$/','base_url'=>'required|url|max:500','shared_key'=>'nullable|string|min:32|max:200']);
+        $data = $request->validate([
+            'school_id'  => 'required|regex:/^[A-Za-z0-9_-]{1,80}$/',
+            'base_url'   => 'required|url|max:500',
+            'shared_key' => 'nullable|string|min:32|max:200',
+        ]);
         $url = parse_url($data['base_url']);
-        abort_unless(!isset($url['user']) && !isset($url['pass']) && !isset($url['query']) && !isset($url['fragment']) && empty(trim($url['path'] ?? '', '/')), 422, 'Use the school server origin without a path or credentials.');
-        abort_unless(($url['scheme'] ?? '') === 'https' || (($url['scheme'] ?? '') === 'http' && in_array($url['host'] ?? '', ['localhost','127.0.0.1','[::1]'])), 422, 'Use HTTPS, or HTTP on localhost for testing.');
-        $connection = RoboquestConnection::firstOrNew(['school_user_id'=>$request->user()->id]);
-        abort_if(RoboquestConnection::where('school_id',$data['school_id'])->where('school_user_id','<>',$request->user()->id)->exists(), 422, 'School ID already connected.');
-        abort_unless($connection->exists || $request->filled('shared_key'),422,'Set the matching connection key for this school server.');
-        if (!$connection->exists || $request->filled('shared_key')) $connection->shared_key = $data['shared_key'] ?? bin2hex(random_bytes(32));
-        $connection->fill(['school_id'=>$data['school_id'],'base_url'=>rtrim($data['base_url'],'/')])->save();
+        if (isset($url['user']) || isset($url['pass']) || isset($url['query']) || isset($url['fragment']) || !empty(trim($url['path'] ?? '', '/'))) {
+            return back()->withInput()->withErrors(['base_url' => __('Use the school server origin without a path or credentials (e.g. https://digilab.skillvation.com).')]);
+        }
+        $scheme = $url['scheme'] ?? '';
+        $host = $url['host'] ?? '';
+        $isLocal = ($scheme === 'http' && in_array($host, ['localhost', '127.0.0.1', '[::1]']));
+        if ($scheme !== 'https' && !$isLocal) {
+            return back()->withInput()->withErrors(['base_url' => __('Use HTTPS (e.g. https://digilab.skillvation.com), or HTTP on localhost for testing.')]);
+        }
+        if (RoboquestConnection::where('school_id', $data['school_id'])->where('school_user_id', '<>', $request->user()->id)->exists()) {
+            return back()->withInput()->withErrors(['school_id' => __('School ID is already connected by another school.')]);
+        }
+        $connection = RoboquestConnection::firstOrNew(['school_user_id' => $request->user()->id]);
+        if (!$connection->exists && !$request->filled('shared_key')) {
+            return back()->withInput()->withErrors(['shared_key' => __('Set the matching connection key for this school server.')]);
+        }
+        if (!$connection->exists || $request->filled('shared_key')) {
+            $connection->shared_key = $data['shared_key'] ?? bin2hex(random_bytes(32));
+        }
+        $connection->fill([
+            'school_id' => $data['school_id'],
+            'base_url'  => rtrim($data['base_url'], '/'),
+        ])->save();
+
         return back()->with('roboquest_saved', true);
     }
     public function launch(Request $request, RoboquestService $service) {
