@@ -84,29 +84,80 @@ class AuthModel extends BaseModel
     public function authenticateWithLms(string $email, string $password)
     {
         try {
-            $lmsDbName = env('LMS_DB_DATABASE', 'u291565911_proskillvation');
-
-            // Check users table in LMS database
-            $query = $this->db->query("SELECT * FROM `{$lmsDbName}`.`users` WHERE `email` = ? OR `phone` = ? LIMIT 1", [
-                $email, $email
-            ]);
-            $row = $query ? $query->getRow() : null;
-
-            if ($row && !empty($row->password)) {
-                if (password_verify($password, $row->password)) {
-                    return $row;
+            $lmsDb = function_exists('getLaravelDb') ? getLaravelDb() : null;
+            if (!$lmsDb) {
+                try {
+                    $lmsDb = \Config\Database::connect('laravel', false);
+                } catch (\Throwable $e) {
+                    $lmsDb = null;
                 }
             }
 
-            // Also check admins table in LMS database
-            $adminQuery = $this->db->query("SELECT * FROM `{$lmsDbName}`.`admins` WHERE `email` = ? LIMIT 1", [
-                $email
-            ]);
-            $adminRow = $adminQuery ? $adminQuery->getRow() : null;
-            if ($adminRow && !empty($adminRow->password)) {
-                if (password_verify($password, $adminRow->password)) {
-                    $adminRow->role = 'admin';
-                    return $adminRow;
+            if ($lmsDb) {
+                // Check users table in LMS database
+                $row = $lmsDb->table('users')
+                    ->groupStart()
+                        ->where('email', $email)
+                        ->orWhere('phone', $email)
+                    ->groupEnd()
+                    ->limit(1)
+                    ->get()
+                    ->getRow();
+
+                if ($row && !empty($row->password)) {
+                    if (password_verify($password, $row->password)) {
+                        return $row;
+                    }
+                }
+
+                // Also check admins table in LMS database
+                $adminRow = $lmsDb->table('admins')
+                    ->where('email', $email)
+                    ->limit(1)
+                    ->get()
+                    ->getRow();
+
+                if ($adminRow && !empty($adminRow->password)) {
+                    if (password_verify($password, $adminRow->password)) {
+                        $adminRow->role = 'admin';
+                        return $adminRow;
+                    }
+                }
+
+                return null;
+            }
+
+            // Fallback: cross-database query on default connection if LMS database name is configured
+            $dbConfig = config('Database');
+            $lmsDbName = env('LARAVEL_DB_DATABASE')
+                ?: env('LMS_DB_DATABASE')
+                ?: ($dbConfig->laravel['database'] ?? null);
+
+            if (!empty($lmsDbName)) {
+                $escapedDb = '`' . str_replace('`', '``', $lmsDbName) . '`';
+
+                // Check users table in LMS database
+                $query = $this->db->query("SELECT * FROM {$escapedDb}.`users` WHERE `email` = ? OR `phone` = ? LIMIT 1", [
+                    $email, $email
+                ]);
+                $row = $query ? $query->getRow() : null;
+
+                if ($row && !empty($row->password)) {
+                    if (password_verify($password, $row->password)) {
+                        return $row;
+                    }
+                }
+
+                // Also check admins table in LMS database
+                $adminQuery = $this->db->query("SELECT * FROM {$escapedDb}.`admins` WHERE `email` = ? LIMIT 1", [
+                    $email
+                ]);
+                $adminRow = $adminQuery ? $adminQuery->getRow() : null;
+                if ($adminRow && !empty($adminRow->password)) {
+                    if (password_verify($password, $adminRow->password)) {
+                        $adminRow->role = 'admin';
+                        return $adminRow;
+                    }
                 }
             }
         } catch (\Throwable $e) {
