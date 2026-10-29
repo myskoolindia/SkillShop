@@ -791,7 +791,7 @@
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
             <i class="fa-solid fa-sliders" style="font-size:11px;"></i> Customise This Lab
           </a>
-          <a id="" href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section']) }}"
+          <a id="" href="#cta-section"
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
             <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
           </a>
@@ -1077,18 +1077,81 @@
               </p>
             </form>
           @else
-            <div class="text-center py-8 px-4 rounded-2xl bg-amber-50/70 border border-amber-200/80">
-                <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl">
-                    <i class="fa-solid fa-school-flag"></i>
-                </div>
-                <h4 class="text-base font-extrabold text-brand-navy mb-1">{{ __('School / Teacher Verification Required') }}</h4>
-                <p class="text-xs text-slate-600 max-w-md mx-auto mb-5 leading-relaxed">
-                    {{ __('Official lab equipment proposals and institutional pricing quotations are available exclusively to verified schools and educators.') }}
-                </p>
-                <a href="{{ route('login', ['redirect' => url()->current() . '#cta-section']) }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-navy hover:bg-brand-darknavy text-white text-xs font-bold shadow-md transition-all">
-                    <i class="fa-solid fa-right-to-bracket"></i> {{ __('Sign in to Request Proposal') }}
-                </a>
+            <div class="p-3.5 mb-4 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs text-blue-900 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-circle-info text-blue-600"></i>
+                <span>Already have a school account?</span>
+              </div>
+              <a href="{{ route('login', ['redirect' => url()->current() . '#cta-section']) }}" class="font-bold text-brand-navy hover:text-brand-orange underline whitespace-nowrap">
+                Sign in to 1-Click Request &rarr;
+              </a>
             </div>
+
+            <form class="space-y-4" id="planEnquiryForm" data-source="composite-skill-lab-advance" data-title="Skillvation Advance Composite Skill Lab – Enquiry">
+              <input type="hidden" name="source"       id="planSource">
+              <input type="hidden" name="course_title" id="planTitle">
+              <input type="hidden" name="quotation"    id="planQuotation">
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">School Name *</label>
+                <input type="text" name="school" required placeholder="e.g. Delhi Public School" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Contact Person *</label>
+                  <input type="text" name="name" required placeholder="Your full name" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Designation</label>
+                  <input type="text" name="designation" placeholder="e.g. Principal / Academic Director" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="sm:col-span-2">
+                  @include('frontend.home-four.partials._phone_otp', [
+                    'formId'       => 'planEnquiryForm',
+                    'phoneInputId' => 'plan_phone',
+                    'submitBtnId'  => 'planEnquiryBtn',
+                    'inputClass'   => 'w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm transition-all',
+                  ])
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Email Address *</label>
+                  <input type="email" name="email" required placeholder="principal@school.edu.in" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">City *</label>
+                  <input type="text" name="city" required placeholder="e.g. Mumbai, Maharashtra" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Request Type *</label>
+                  <select name="message" required class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all">
+                    <option value="Request a Detailed Package">Request a Detailed Package</option>
+                    <option value="Book a Skill Lab Visit">Book a Skill Lab Visit</option>
+                    <option value="Schedule a Demo with Academic Team">Schedule a Demo with Academic Team</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Message / Space Available</label>
+                <textarea name="address" rows="3" placeholder="Tell us about your space dimensions (e.g. 600 sq ft) or specific skill areas of interest..." class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all"></textarea>
+              </div>
+
+              <button type="submit" id="planEnquiryBtn" class="w-full py-4 rounded-xl bg-brand-orange hover:bg-brand-orangehover text-white text-sm font-bold shadow-lg shadow-brand-orange/20 transition-all duration-200">
+                Request Proposal
+              </button>
+
+              <p class="text-xs text-center text-slate-400 mt-2">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:-1px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Your information is confidential. No spam.
+              </p>
+            </form>
           @endauth
           </div>
 

@@ -3997,18 +3997,65 @@
       </div>
     </form>
     @else
-    <div style="text-align:center; padding:30px 20px; background:#fffbeb; border:1px solid #fef3c7; border-radius:16px; margin-bottom:16px;">
-      <div style="width:48px; height:48px; margin:0 auto 12px; border-radius:12px; background:#fef3c7; color:#b45309; display:flex; align-items:center; justify-content:center; font-size:22px;">
-        <i class="fa-solid fa-school-flag"></i>
-      </div>
-      <h4 style="font-size:16px; font-weight:800; color:#1e1b4b; margin:0 0 6px;">School / Teacher Verification Required</h4>
-      <p style="font-size:13px; color:#64748b; margin:0 0 18px; line-height:1.5;">
-        Custom lab proposals and itemized equipment specifications are available exclusively to verified schools and educators.
-      </p>
-      <a href="{{ route('login', ['redirect' => url()->current() . '#demo']) }}" style="display:inline-flex; align-items:center; gap:8px; padding:12px 24px; border-radius:10px; background:#1e1b4b; color:#fff; font-size:13px; font-weight:700; text-decoration:none;">
-        <i class="fa-solid fa-right-to-bracket"></i> Sign in to Request Proposal
-      </a>
+    <div style="padding:10px 14px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; margin-bottom:14px; font-size:12px; color:#1e3a8a; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+      <span>Already have a school account?</span>
+      <a href="{{ route('login', ['redirect' => url()->current() . '#demo']) }}" style="font-weight:700; color:#1e1b4b; text-decoration:underline; white-space:nowrap;">Sign in to 1-Click Request &rarr;</a>
     </div>
+
+    <form class="vl-form" id="customProposalForm" style="margin-top:0;">
+      <input type="hidden" name="course_title" id="cpFormTitle" value="Custom Composite Skill Lab Proposal">
+      <input type="hidden" name="source" value="composite-skill-custom-package">
+      <input type="hidden" name="quotation" id="cpFormQuotation" value="">
+      <input type="hidden" name="message" id="cpFormMessage" value="">
+
+      <div class="vl-form-grid-2">
+        <div class="vl-field">
+          <label for="cp_name">Your full name <span style="color:#ef4444;">*</span></label>
+          <input id="cp_name" name="name" type="text" placeholder="e.g. Dr. Sunita Rao" required>
+        </div>
+        <div class="vl-field">
+          <label for="cp_designation">Designation <span style="color:#ef4444;">*</span></label>
+          <input id="cp_designation" name="designation" type="text" placeholder="e.g. Principal / Academic Director" required>
+        </div>
+      </div>
+
+      <div class="vl-form-grid-2">
+        <div class="vl-field">
+          <label for="cp_school">School name <span style="color:#ef4444;">*</span></label>
+          <input id="cp_school" name="school" type="text" placeholder="e.g. Blossom International School" required>
+        </div>
+        <div class="vl-field">
+          <label for="cp_city">City <span style="color:#ef4444;">*</span></label>
+          <input id="cp_city" name="city" type="text" placeholder="e.g. Bengaluru / Pune" required>
+        </div>
+      </div>
+
+      <div class="vl-form-grid-2">
+        <div class="vl-field">
+          <label for="cp_phone">Phone / WhatsApp Number <span style="color:#ef4444;">*</span></label>
+          <input id="cp_phone" name="phone" type="tel" placeholder="+91 98765 43210" required>
+        </div>
+        <div class="vl-field">
+          <label for="cp_email">Email address <span style="color:#ef4444;">*</span></label>
+          <input id="cp_email" name="email" type="email" placeholder="e.g. principal@school.edu.in" required>
+        </div>
+      </div>
+
+      <div class="vl-field">
+        <label for="cp_address">School Campus Address or Specific Notes (Optional)</label>
+        <textarea id="cp_address" name="address" placeholder="Campus location, room dimensions, or specific requirements"></textarea>
+      </div>
+
+      <button type="submit" id="cpSubmitBtn" class="vl-form-submit-vibrant" style="width:100%;">
+        Send Me the Complete Custom Proposal
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" style="margin-left:8px;"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+      </button>
+
+      <div class="vl-form-note" style="margin-top:14px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" style="display:inline;vertical-align:-2px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        Your proposal is customized to your parameters. Direct callback within 1 working day.
+      </div>
+    </form>
     @endauth
 
     {{-- Success state --}}
