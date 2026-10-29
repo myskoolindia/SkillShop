@@ -101,6 +101,10 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
         return view('frontend.home-four.pages.lab-stem');
     })->name('labs.stem');
 
+    Route::get('/labs/skillvation', function () {
+        return view('frontend.home-four.pages.lab-skillvation');
+    })->name('labs.skillvation');
+
     Route::get('/labs/ecec', function () {
         return view('frontend.home-four.pages.lab-ecec');
     })->name('labs.ecec');
