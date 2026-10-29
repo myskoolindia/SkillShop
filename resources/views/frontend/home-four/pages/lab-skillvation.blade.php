@@ -3139,10 +3139,14 @@
       ['fa-lightbulb',     'bg-orange-100', 'text-orange-600', 'Design Thinking',             'Structured design challenges, prototyping, and creative problem-solving.'],
       ['fa-calculator',    'bg-cyan-100',   'text-cyan-600',   'Agriculture & Gardening','Applied maths, data tools, and real-world financial literacy programmes.'],
       ['fa-leaf',          'bg-pink-100',   'text-pink-600',   'Healthcare',    'Creative art projects, traditional crafts, and design-based skill activities.'],
-      ['fa-bullhorn',      'bg-red-100',    'text-red-600',    'Media & Communication',        'Storytelling, content creation, public speaking, and media literacy.'],
-      ['fa-laptop-code',   'bg-indigo-100', 'text-indigo-600', 'Digital Skills',              'Digital literacy, productivity tools, internet safety, and basic computing.'],
-      ['fa-heart',         'bg-rose-100',   'text-rose-600',   'Life Skills',                 'Communication, collaboration, emotional intelligence, and leadership.'],
-      ['fa-briefcase',     'bg-teal-100',   'text-teal-600',   'Vocational & Application Skills','Real-world vocational exposure and application-based skill development.'],
+      ['fa-bullhorn',      'bg-red-100',    'text-red-600',    'Makers Tool',        'Storytelling, content creation, public speaking, and media literacy.'],
+      ['fa-laptop-code',   'bg-indigo-100', 'text-indigo-600', 'Food Production',              'Digital literacy, productivity tools, internet safety, and basic computing.'],
+      ['fa-heart',         'bg-rose-100',   'text-rose-600',   'Beauty & Wellness',                 'Communication, collaboration, emotional intelligence, and leadership.'],
+      ['fa-briefcase',     'bg-teal-100',   'text-teal-600',   'Mass Media','Real-world vocational exposure and application-based skill development.'],
+      ['fa-robot',         'bg-emerald-100','text-emerald-600','Retail & Marketing',          'Hands-on robotics kits, coding platforms, and engineering challenges.'],
+      ['fa-robot',         'bg-emerald-100','text-emerald-600','Photography',          'Hands-on robotics kits, coding platforms, and engineering challenges.'],
+      ['fa-brain',         'bg-blue-100',   'text-blue-600',   'AR/VR',     'Introductory AI concepts, tools, and real-world application projects.'],
+      ['fa-flask',         'bg-purple-100', 'text-purple-600', 'Satelite & Rockets',  'Physics, chemistry, biology experiments and science-based project learning.'],
     ];
     @endphp
 
@@ -3254,7 +3258,7 @@
 
       @if(($setting->lab_customization_status ?? 'active') == 'active')
       {{-- Mode Switcher Tabs --}}
-      <div class="vl-pkg-toggle-wrapper">
+      <!-- <div class="vl-pkg-toggle-wrapper">
         <div class="vl-pkg-toggle-pill" role="tablist">
           <button type="button" class="vl-pkg-tab-btn active" id="tabFixedPlans" onclick="switchPackageTab('fixed')" role="tab" aria-selected="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
@@ -3265,7 +3269,7 @@
             <span>Custom Package Advisor</span>
           </button>
         </div>
-      </div>
+      </div> -->
       @endif
 
       {{-- VIEW 1: Standard Turnkey Packages --}}
