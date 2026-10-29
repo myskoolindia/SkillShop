@@ -3328,7 +3328,7 @@
                 </div>
                 <div style="display:flex;flex-wrap:wrap;gap:10px;">
                   @include('frontend.home-four.partials.skillvation-lab-customisation')
-                  <a href="#planEnquiryForm"
+                  <a href="{{ auth()->check() ? '#planEnquiryForm' : route('login', ['redirect' => url()->current() . '#planEnquiryForm']) }}"
                      style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
                     <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
                   </a>
@@ -3861,6 +3861,18 @@
           <h3 class="text-lg font-black text-brand-navy mb-1">Talk to Our Team</h3>
           <p class="text-xs text-slate-500 mb-6">Fill out the form and we'll reach out to explore the right Skillvation Lab for your school.</p>
 
+          @guest
+            <div class="p-4 mb-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-sm">
+                <div class="flex items-center gap-2 font-bold mb-1">
+                    <i class="fa-solid fa-lock text-amber-600"></i> {{ __('School / Teacher Verification Required') }}
+                </div>
+                <p class="mb-3 text-xs text-amber-800">{{ __('Please sign in with your verified school or teacher account to request a formal lab proposal.') }}</p>
+                <a href="{{ route('login', ['redirect' => url()->current() . '#planEnquiryForm']) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-navy text-white text-xs font-bold hover:bg-brand-navy/90 transition-all">
+                    <i class="fa-solid fa-right-to-bracket"></i> {{ __('Sign in to Request Proposal') }}
+                </a>
+            </div>
+          @endguest
+
           <form class="space-y-4" id="planEnquiryForm"
                 data-source="skillvation-lab-stem"
                 data-title="Skillvation Lab — Enquiry">
@@ -3871,6 +3883,7 @@
             <div>
               <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">School Name *</label>
               <input type="text" name="school" required placeholder="e.g. National Public School"
+                     value="{{ old('school', auth()->user()?->school_name ?? auth()->user()?->name) }}"
                      class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
             </div>
 
@@ -3878,6 +3891,7 @@
               <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Contact Person *</label>
                 <input type="text" name="name" required placeholder="Your full name"
+                       value="{{ old('name', auth()->user()?->name) }}"
                        class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
               </div>
               <div>
@@ -3899,6 +3913,7 @@
               <div class="sm:col-span-2">
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Email Address *</label>
                 <input type="email" name="email" required placeholder="principal@school.edu.in"
+                       value="{{ old('email', auth()->user()?->email) }}"
                        class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
               </div>
             </div>

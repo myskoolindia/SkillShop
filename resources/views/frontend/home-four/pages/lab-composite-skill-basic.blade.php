@@ -894,7 +894,7 @@
               </a>
             </div>
           </div>
-          <a id="" href="#cta-section"
+          <a id="sks-request-proposal-btn" href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section']) }}"
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
             <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
           </a>
@@ -1137,6 +1137,18 @@
             <p class="text-xs text-slate-500 mt-1">Fill out the form below to receive detailed equipment lists and layout plans.</p>
           </div>
 
+          @guest
+            <div class="p-4 mb-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-sm">
+                <div class="flex items-center gap-2 font-bold mb-1">
+                    <i class="fa-solid fa-lock text-amber-600"></i> {{ __('School / Teacher Verification Required') }}
+                </div>
+                <p class="mb-3 text-xs text-amber-800">{{ __('Please sign in with your verified school or teacher account to request a formal lab proposal and pricing quotation.') }}</p>
+                <a href="{{ route('login', ['redirect' => url()->current() . '#cta-section']) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-navy text-white text-xs font-bold hover:bg-brand-navy/90 transition-all">
+                    <i class="fa-solid fa-right-to-bracket"></i> {{ __('Sign in to Request Proposal') }}
+                </a>
+            </div>
+          @endguest
+
           <form class="space-y-4" id="planEnquiryForm" data-source="composite-skill-lab-basic" data-title="Standard Composite Skill Lab – Enquiry">
             <input type="hidden" name="source"       id="planSource">
             <input type="hidden" name="course_title" id="planTitle">
@@ -1144,13 +1156,13 @@
 
             <div>
               <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">School Name *</label>
-              <input type="text" name="school" required placeholder="e.g. Delhi Public School" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
+              <input type="text" name="school" required placeholder="e.g. Delhi Public School" value="{{ old('school', auth()->user()?->school_name ?? auth()->user()?->name) }}" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Contact Person *</label>
-                <input type="text" name="name" required placeholder="Your full name" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
+                <input type="text" name="name" required placeholder="Your full name" value="{{ old('name', auth()->user()?->name) }}" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
               </div>
               <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Designation</label>
@@ -1169,7 +1181,7 @@
               </div>
               <div class="sm:col-span-2">
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Email Address *</label>
-                <input type="email" name="email" required placeholder="principal@school.edu.in" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
+                <input type="email" name="email" required placeholder="principal@school.edu.in" value="{{ old('email', auth()->user()?->email) }}" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
               </div>
             </div>
 
@@ -1875,6 +1887,15 @@ Promise.all([
   var body    = document.getElementById('dml-body');
   var closeBtn= document.getElementById('dml-close');
   if(!openBtn || !modal || !body) return;
+
+  @guest
+  openBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    window.location.href = '{{ route("login", ["redirect" => url()->current()]) }}';
+  });
+  return;
+  @endguest
 
   var box       = document.getElementById('dml-box');
   var frameWrap = document.getElementById('dml-frame-wrap');

@@ -79,6 +79,17 @@ class CourseEnquiryController extends Controller
 
     public function store(Request $request)
     {
+        $source = (string) $request->input('source', '');
+        $isLabProposal = str_starts_with($source, 'composite-skill') || str_starts_with($source, 'skillvation-lab') || str_contains($source, 'lab');
+
+        if ($isLabProposal && !auth()->check()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => __('Please sign in with your verified school or teacher account to request a proposal.'),
+                'redirect' => route('login', ['redirect' => url()->previous() . '#planEnquiryForm']),
+            ], 401);
+        }
+
         $validated = $request->validate([
             'name'          => ['required', 'string', 'max:255'],
             'email'         => ['required', 'email', 'max:255'],

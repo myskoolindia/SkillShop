@@ -787,11 +787,11 @@
           <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Adjust quantities, add optional modules or custom skill domains to match your school's exact requirements.</p>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:10px;">
-          <a id="sks-btn-customise" href="#cta-section"
+          <a id="sks-btn-customise" href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section']) }}"
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
             <i class="fa-solid fa-sliders" style="font-size:11px;"></i> Customise This Lab
           </a>
-          <a id="" href="#cta-section"
+          <a id="" href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section']) }}"
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
             <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
           </a>

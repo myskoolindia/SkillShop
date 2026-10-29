@@ -6,7 +6,7 @@ class ShopAudience {
     public function handle(Request $request, Closure $next) {
         $path = strtolower(trim($request->path(), '/'));
         $student = in_array($path,['shop','skillbox']) || preg_match('~^(productdetails|product-details|api/shop-products|api/shop-categories|api/product-details|api/shop-orders)(/|$)~',$path);
-        $staff = preg_match('~^(labs(/|$)|basic-plan$|advance-plan$|premium-plan$|lab-design(/|$))~',$path);
+        $staff = preg_match('~^(lab-design(/|$))~', $path);
         if (!$student && !$staff) return $next($request);
         $user = $request->user();
         if (!$user) {

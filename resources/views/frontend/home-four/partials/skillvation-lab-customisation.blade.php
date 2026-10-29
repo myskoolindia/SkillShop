@@ -74,6 +74,15 @@
   var closeBtn= document.getElementById('dml-close');
   if(!openBtn || !modal || !body) return;
 
+  @guest
+  openBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    window.location.href = '{{ route("login", ["redirect" => url()->current()]) }}';
+  });
+  return;
+  @endguest
+
   var box       = document.getElementById('dml-box');
   var frameWrap = document.getElementById('dml-frame-wrap');
   var frame     = document.getElementById('dml-frame');
