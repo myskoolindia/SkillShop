@@ -19,18 +19,32 @@ class SsoBridgeController extends Controller
      */
     public function toShop(Request $request): RedirectResponse
     {
-        if (!Auth::check()) {
+        $admin = Auth::guard('admin')->user();
+        $webUser = Auth::guard('web')->user();
+
+        if (!$admin && !$webUser) {
+            if ($request->has('admin')) {
+                return redirect()->guest(route('admin.login', ['redirect' => $request->fullUrl()]));
+            }
             return redirect()->guest(route('login', ['redirect' => $request->fullUrl()]));
         }
 
-        $user = Auth::user();
         $target = $request->query('target', '');
-        $merchantDashboard = $user->role === 'vendor' && in_array($target,['dashboard','/dashboard']);
-        abort_unless(in_array($user->role, ['school','teacher','admin']) || $merchantDashboard,403,'The lab shop is for schools and teachers.');
+
+        // If authenticated via admin guard or requesting admin mode
+        if ($admin) {
+            $target = $target ?: 'admin';
+            $ssoUrl = SsoTokenService::generateShopSsoUrl($admin, $target);
+            return redirect()->away($ssoUrl);
+        }
+
+        $user = $webUser;
+        $merchantDashboard = $user->role === 'vendor' && in_array($target, ['dashboard', '/dashboard']);
+        abort_unless(in_array($user->role, ['school', 'teacher', 'admin']) || $merchantDashboard, 403, 'The lab shop is for schools and teachers.');
 
         // If user has admin role in Laravel and target is admin or empty, allow direct shop admin access
         if ($user->role === 'admin' && empty($target) && $request->has('admin')) {
-            $target = '/admin';
+            $target = 'admin';
         }
 
         $ssoUrl = SsoTokenService::generateShopSsoUrl($user, $target);

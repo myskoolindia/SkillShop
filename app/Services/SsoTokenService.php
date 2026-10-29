@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Admin;
 use App\Models\User;
 use Illuminate\Support\Str;
 
@@ -10,7 +11,7 @@ class SsoTokenService
     /**
      * Generate an SSO URL with signed token to seamlessly log in to Club Shop.
      */
-    public static function generateShopSsoUrl(User $user, ?string $target = null): string
+    public static function generateShopSsoUrl(mixed $user, ?string $target = null): string
     {
         $secretKey = config('sso.secret_key');
         abort_unless(is_string($secretKey) && strlen($secretKey) >= 32,503,'Shop sign-in is not configured.');
@@ -20,13 +21,15 @@ class SsoTokenService
         $firstName = $nameParts[0] ?? '';
         $lastName = $nameParts[1] ?? '';
 
+        $role = ($user instanceof Admin) ? 'admin' : ($user->role ?? 'student');
+
         $payload = [
             'uid'        => (string) $user->id,
             'email'      => (string) $user->email,
             'first_name' => $firstName,
             'last_name'  => $lastName,
             'phone'      => (string) ($user->phone ?? ''),
-            'role'       => (string) ($user->role ?? 'student'),
+            'role'       => (string) $role,
             'target'     => $target ?: '',
             'iat'        => time(),
             'nonce'      => Str::random(16),
