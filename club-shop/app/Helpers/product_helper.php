@@ -1326,21 +1326,26 @@ if (!function_exists('applyProductMarkup')) {
                 $product->price_discounted = $product->price;
                 $product->discount_rate = 0;
             } else {
-                // Custom category discount rate applied on base price
+                // Custom category discount rate applied on markup price
                 $product->discount_rate = (int)round($catDiscount);
-                $discountAmount = round($product->base_price * ($catDiscount / 100), 2);
+                $discountAmount = round($product->price * ($catDiscount / 100), 2);
                 $product->price_discounted = max(0, round($product->price - $discountAmount, 2));
             }
         } elseif ($globalDiscount > 0 && !empty($product->price) && (float)$product->price > 0) {
-            // Apply global store discount to default categories based on base price
+            // Apply global store discount to default categories based on markup price
             $product->discount_rate = (int)round($globalDiscount);
-            $discountAmount = round($product->base_price * ($globalDiscount / 100), 2);
+            $discountAmount = round($product->price * ($globalDiscount / 100), 2);
             $product->price_discounted = max(0, round($product->price - $discountAmount, 2));
         } else {
             // No category exception and no global discount: fall back to product's own original seller discount
             if (!empty($product->base_price_discounted) && (float)$product->base_price_discounted < (float)$product->base_price && (float)$product->base_price_discounted > 0) {
-                $sellerDiscountAmount = round((float)$product->base_price - (float)$product->base_price_discounted, 2);
-                $product->price_discounted = max(0, round((float)$product->price - $sellerDiscountAmount, 2));
+                if (!empty($product->discount_rate) && (float)$product->discount_rate > 0) {
+                    $discountAmount = round($product->price * ((float)$product->discount_rate / 100), 2);
+                    $product->price_discounted = max(0, round($product->price - $discountAmount, 2));
+                } else {
+                    $sellerDiscountAmount = round((float)$product->base_price - (float)$product->base_price_discounted, 2);
+                    $product->price_discounted = max(0, round((float)$product->price - $sellerDiscountAmount, 2));
+                }
                 if (!empty($product->price) && (float)$product->price > 0 && (float)$product->price_discounted < (float)$product->price) {
                     $product->discount_rate = (int)round((( (float)$product->price - (float)$product->price_discounted ) * 100) / (float)$product->price);
                 }

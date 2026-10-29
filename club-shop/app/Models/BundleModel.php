@@ -325,7 +325,7 @@ class BundleModel extends BaseModel
                 }
 
                 if ($overrideDiscountRate > 0) {
-                    $discountAmt = round($overrideVal * ($overrideDiscountRate / 100), 2);
+                    $discountAmt = round($markedPrice * ($overrideDiscountRate / 100), 2);
                     $unitPrice = max(0, round($markedPrice - $discountAmt, 2));
                 } else {
                     $unitPrice = $markedPrice;
@@ -343,7 +343,7 @@ class BundleModel extends BaseModel
 
                 $childDiscountRate = $isDiscountActive ? getProductDiscountRate($prod) : 0.0;
                 if ($childDiscountRate > 0) {
-                    $discountAmt = round($baseVariantPrice * ($childDiscountRate / 100), 2);
+                    $discountAmt = round($markedVariantPrice * ($childDiscountRate / 100), 2);
                     $unitPrice = max(0, round($markedVariantPrice - $discountAmt, 2));
                 } else {
                     $unitPrice = $markedVariantPrice;

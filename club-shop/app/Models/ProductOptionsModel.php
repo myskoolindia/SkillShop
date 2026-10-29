@@ -986,7 +986,7 @@ class ProductOptionsModel extends Model
         $v->price = $markedPrice;
 
         if ($discountRate > 0 && $markedPrice > 0) {
-            $discountAmount = round($basePrice * ($discountRate / 100), 2);
+            $discountAmount = round($markedPrice * ($discountRate / 100), 2);
             $v->price_discounted = max(0, round($markedPrice - $discountAmount, 2));
         } elseif ($baseDiscountedPrice > 0 && $baseDiscountedPrice < $basePrice) {
             $sellerDiscountAmount = round($basePrice - $baseDiscountedPrice, 2);
