@@ -2,18 +2,52 @@
 
 <?php $__env->startPush('styles'); ?>
 <style>
+  /* Compact Breadcrumb & Move Card Up */
+  .breadcrumb__bg {
+    padding: 20px 0 15px 0 !important;
+  }
+  .breadcrumb__content .title {
+    font-size: 26px !important;
+    margin-bottom: 2px !important;
+  }
+  .breadcrumb__content .breadcrumb {
+    font-size: 13px !important;
+    gap: 6px !important;
+  }
+  .breadcrumb__shape-wrap {
+    display: none !important;
+  }
+  .singUp-area.section-py-120 {
+    padding-top: 15px !important;
+    padding-bottom: 35px !important;
+  }
+  .singUp-wrap {
+    padding: 24px 32px 24px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  }
+  .singUp-wrap .title {
+    font-size: 26px !important;
+    margin-bottom: 4px !important;
+  }
+  .singUp-wrap p.text-muted {
+    margin-bottom: 14px !important;
+  }
+
   /* Responsive Container & Spacing */
   @media (max-width: 767.98px) {
+    .breadcrumb__bg {
+      padding: 16px 0 10px 0 !important;
+    }
     .singUp-area.section-py-120 {
-      padding-top: 40px !important;
-      padding-bottom: 50px !important;
+      padding-top: 12px !important;
+      padding-bottom: 30px !important;
     }
     .singUp-wrap {
-      padding: 24px 16px !important;
+      padding: 18px 14px !important;
       border-radius: 12px;
     }
     .singUp-wrap .title {
-      font-size: 24px !important;
+      font-size: 22px !important;
     }
   }
 
@@ -22,7 +56,7 @@
     background: #f1f5f9;
     border-radius: 10px;
     padding: 4px;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
     gap: 4px;
   }
   .auth-tab-btn {
@@ -138,10 +172,10 @@
             <div class="row justify-content-center">
                 <div class="col-xl-6 col-lg-8">
                     <div class="singUp-wrap">
-                        <div class="text-center mb-4">
-                            <p style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center"><a href="<?php echo e(route('roboquest.signin', ['role'=>'teacher'])); ?>"><?php echo e(__('Teacher login')); ?></a><a href="<?php echo e(route('roboquest.signin', ['role'=>'student'])); ?>"><?php echo e(__('Student login')); ?></a><a href="<?php echo e(route('roboquest.signin', ['role'=>'school'])); ?>"><?php echo e(__('School Admin login')); ?></a></p>
-                            <h2 class="title mb-2"><?php echo e(__('Welcome back!')); ?></h2>
-                            <p class="text-muted"><?php echo e(__('Log in to your School, Teacher, or Student account')); ?></p>
+                        <div class="text-center mb-3">
+                            <p style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-bottom:10px"><a href="<?php echo e(route('roboquest.signin', ['role'=>'teacher'])); ?>"><?php echo e(__('Teacher login')); ?></a><a href="<?php echo e(route('roboquest.signin', ['role'=>'student'])); ?>"><?php echo e(__('Student login')); ?></a><a href="<?php echo e(route('roboquest.signin', ['role'=>'school'])); ?>"><?php echo e(__('School Admin login')); ?></a></p>
+                            <h2 class="title mb-1"><?php echo e(__('Welcome back!')); ?></h2>
+                            <p class="text-muted mb-2"><?php echo e(__('Log in to your School, Teacher, or Student account')); ?></p>
                         </div>
 
                         
@@ -444,6 +478,9 @@
         btnVerify.disabled = true;
         btnVerify.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> <?php echo e(__("Logging in...")); ?>';
 
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectParam = urlParams.get('redirect');
+
         fetch('<?php echo e(route("auth.login-otp")); ?>', {
             method: 'POST',
             headers: {
@@ -453,7 +490,8 @@
             },
             body: JSON.stringify({
                 phone: phone,
-                otp: otp
+                otp: otp,
+                redirect: redirectParam || ''
             })
         })
         .then(res => res.json())
