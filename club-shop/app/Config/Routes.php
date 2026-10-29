@@ -231,7 +231,7 @@ $routes->post('forgot-password-post', 'AuthController::forgotPasswordPost');
 $routes->post('reset-password-post', 'AuthController::resetPasswordPost');
 $routes->post('register-post', 'AuthController::registerPost');
 $routes->get('confirm-account', 'AuthController::confirmAccount');
-$routes->match(['get', 'post'], 'logout', 'AuthController::logout');
+$routes->match(['GET', 'POST'], 'logout', 'AuthController::logout');
 $routes->get($rtAdmin . '/login', 'AuthController::adminLogin');
 $routes->post($rtAdmin . '/login-post', 'AuthController::adminLoginPost');
 //bidding

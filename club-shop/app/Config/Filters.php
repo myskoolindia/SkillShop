@@ -15,6 +15,17 @@ use CodeIgniter\Filters\SecureHeaders;
 
 class Filters extends BaseFilters
 {
+    public function __construct()
+    {
+        parent::__construct();
+
+        // If debugbar is explicitly disabled or in production environment, disable toolbar filter
+        $debugbar = env('DEBUGBAR_ENABLED');
+        if ($debugbar === false || $debugbar === 'false' || (defined('ENVIRONMENT') && ENVIRONMENT === 'production')) {
+            unset($this->globals['after']['toolbar']);
+        }
+    }
+
     /**
      * Configures aliases for Filter classes to
      * make reading things nicer and simpler.
@@ -88,7 +99,7 @@ class Filters extends BaseFilters
         'after' => [
             // 'honeypot',
             // 'secureheaders',
-            'toolbar' => ['except' => ['api/*']], // Debug Toolbar (skip for API)
+            'toolbar' => ['except' => ['api/*', 'admin', 'admin/*']], // Debug Toolbar (skip for API and Admin to avoid pace.js conflicts)
         ],
     ];
 

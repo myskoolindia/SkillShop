@@ -36,6 +36,8 @@ public/hot
 storage/*.key
 .env
 .env.*
+!.env.example
+!.env.sample
 .env.backup
 .env.production
 .phpunit.result.cache
@@ -57,6 +59,8 @@ auth.json
 # CodeIgniter 4 (club-shop)
 club-shop/.env
 club-shop/.env.*
+!club-shop/.env.example
+!club-shop/.env.sample
 # club-shop/.htaccess
 club-shop/app/Config/Database.php
 club-shop/writable/cache/*
