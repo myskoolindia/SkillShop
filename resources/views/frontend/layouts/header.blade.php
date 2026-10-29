@@ -36,10 +36,16 @@
         return $menu;
     }, is_array($nav_menu) ? $nav_menu : ($nav_menu?->toArray() ?? [])), fn($menu) => $allowedShopLink($menu['link'] ?? '')));
 
-    $categories = \Modules\Course\app\Models\CourseCategory::with('translation')
-        ->where('status', 1)
-        ->whereNull('parent_id')
-        ->get();
+    try {
+        $categories = Cache::remember('header_course_categories', 3600, function () {
+            return \Modules\Course\app\Models\CourseCategory::with('translation')
+                ->where('status', 1)
+                ->whereNull('parent_id')
+                ->get();
+        });
+    } catch (\Throwable $e) {
+        $categories = collect();
+    }
 
     // Image map for known child menu links
     $childImageMap = [
