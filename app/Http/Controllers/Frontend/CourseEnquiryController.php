@@ -90,6 +90,18 @@ class CourseEnquiryController extends Controller
             ], 401);
         }
 
+        if (auth()->check()) {
+            $user = auth()->user();
+            $request->merge([
+                'name'        => $request->input('name') ?: ($user->name ?? 'Verified Account'),
+                'email'       => $request->input('email') ?: $user->email,
+                'phone'       => $request->input('phone') ?: ($user->phone ?? ''),
+                'school'      => $request->input('school') ?: ($user->school_name ?? $user->name ?? ''),
+                'designation' => $request->input('designation') ?: ($user->job_title ?? ''),
+                'city'        => $request->input('city') ?: ($user->city ?? ''),
+            ]);
+        }
+
         $validated = $request->validate([
             'name'          => ['required', 'string', 'max:255'],
             'email'         => ['required', 'email', 'max:255'],

@@ -3863,84 +3863,90 @@
       <div class="lg:col-span-7">
         <div class="bg-white/95 rounded-3xl p-6 sm:p-8 shadow-xl border border-white/80">
           <h3 class="text-lg font-black text-brand-navy mb-1">Talk to Our Team</h3>
-          <p class="text-xs text-slate-500 mb-6">Fill out the form and we'll reach out to explore the right Skillvation Lab for your school.</p>
+          <p class="text-xs text-slate-500 mb-6">
+            @auth
+              Your verified school account details are attached below. Submit with 1 click.
+            @else
+              Sign in with your verified school account to request a formal lab proposal.
+            @endauth
+          </p>
 
-          <form class="space-y-4" id="planEnquiryForm"
-                data-source="skillvation-lab-stem"
-                data-title="Skillvation Lab — Enquiry">
-            <input type="hidden" name="source"       id="planSource">
-            <input type="hidden" name="course_title" id="planTitle">
-            <input type="hidden" name="quotation"    id="planQuotation">
-
-            <div>
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">School Name *</label>
-              <input type="text" name="school" required placeholder="e.g. National Public School"
-                     class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
+          <div id="planFormContainer">
+          @auth
+            <div class="bg-slate-50/90 rounded-2xl border border-slate-200 p-5 mb-5 space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-base">
+                    <i class="fa-solid fa-building-columns"></i>
+                  </div>
+                  <div>
+                    <div class="text-[11px] uppercase font-extrabold tracking-wider text-emerald-700">Verified School Account</div>
+                    <div class="text-sm font-bold text-brand-navy">{{ auth()->user()->school_name ?: auth()->user()->name }}</div>
+                  </div>
+                </div>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100/80 text-emerald-800">
+                  <i class="fa-solid fa-check text-[10px]"></i> Verified
+                </span>
+              </div>
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600 pt-3 border-t border-slate-200">
+                <div><span class="text-slate-400 font-medium">Contact:</span> <strong class="text-slate-700">{{ auth()->user()->name }}</strong></div>
+                <div><span class="text-slate-400 font-medium">Email:</span> <strong class="text-slate-700">{{ auth()->user()->email }}</strong></div>
+                @if(auth()->user()->phone)
+                  <div><span class="text-slate-400 font-medium">Phone:</span> <strong class="text-slate-700">{{ auth()->user()->phone }}</strong></div>
+                @endif
+                @if(auth()->user()->city)
+                  <div><span class="text-slate-400 font-medium">City:</span> <strong class="text-slate-700">{{ auth()->user()->city }}</strong></div>
+                @endif
+              </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form class="space-y-4" id="planEnquiryForm"
+                  data-source="skillvation-lab-stem"
+                  data-title="Skillvation Lab — Enquiry">
+              <input type="hidden" name="source"       id="planSource">
+              <input type="hidden" name="course_title" id="planTitle">
+              <input type="hidden" name="quotation"    id="planQuotation">
+              <input type="hidden" name="school"       value="{{ auth()->user()->school_name ?: auth()->user()->name }}">
+              <input type="hidden" name="name"         value="{{ auth()->user()->name }}">
+              <input type="hidden" name="email"        value="{{ auth()->user()->email }}">
+              <input type="hidden" name="phone"        value="{{ auth()->user()->phone }}">
+              <input type="hidden" name="designation"  value="{{ auth()->user()->job_title }}">
+              <input type="hidden" name="city"         value="{{ auth()->user()->city }}">
+              <input type="hidden" name="message"      value="Request Detailed Proposal">
+
               <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Contact Person *</label>
-                <input type="text" name="name" required placeholder="Your full name"
-                       class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Optional Notes / Requirements</label>
+                <textarea name="address" rows="3"
+                          placeholder="Tell us about your available space, grade levels, or specific skill areas of interest (optional)..."
+                          class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all"></textarea>
               </div>
-              <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Designation</label>
-                <input type="text" name="designation" placeholder="e.g. Principal / Coordinator"
-                       class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
-              </div>
+
+              <button type="submit" id="planEnquiryBtn"
+                      class="w-full py-4 rounded-xl bg-brand-orange hover:bg-brand-orangehover text-white text-sm font-bold shadow-lg shadow-brand-orange/20 transition-all duration-200 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-file-invoice"></i>
+                <span>Submit Proposal Request</span>
+              </button>
+
+              <p class="text-xs text-center text-slate-500 mt-2">
+                <i class="fa-solid fa-circle-check text-emerald-600"></i> Signed in as {{ auth()->user()->email }}. No form filling required.
+              </p>
+            </form>
+          @else
+            <div class="text-center py-8 px-4 rounded-2xl bg-amber-50/70 border border-amber-200/80">
+                <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl">
+                    <i class="fa-solid fa-school-flag"></i>
+                </div>
+                <h4 class="text-base font-extrabold text-brand-navy mb-1">{{ __('School / Teacher Verification Required') }}</h4>
+                <p class="text-xs text-slate-600 max-w-md mx-auto mb-5 leading-relaxed">
+                    {{ __('Official lab equipment proposals and institutional pricing quotations are available exclusively to verified schools and educators.') }}
+                </p>
+                <a href="{{ route('login', ['redirect' => url()->current() . '#demo']) }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-navy hover:bg-brand-darknavy text-white text-xs font-bold shadow-md transition-all">
+                    <i class="fa-solid fa-right-to-bracket"></i> {{ __('Sign in to Request Proposal') }}
+                </a>
             </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="sm:col-span-2">
-                @include('frontend.home-four.partials._phone_otp', [
-                  'formId'       => 'planEnquiryForm',
-                  'phoneInputId' => 'plan_phone',
-                  'submitBtnId'  => 'planEnquiryBtn',
-                  'inputClass'   => 'w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm transition-all',
-                ])
-              </div>
-              <div class="sm:col-span-2">
-                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Email Address *</label>
-                <input type="email" name="email" required placeholder="principal@school.edu.in"
-                       class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">City *</label>
-                <input type="text" name="city" required placeholder="e.g. Bengaluru, Mumbai"
-                       class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
-              </div>
-              <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">School Board</label>
-                <select name="message" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all">
-                  <option value="ICSE">ICSE</option>
-                  <option value="State Board">State Board</option>
-                  <option value="CBSE">CBSE</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Message / Requirements</label>
-              <textarea name="address" rows="3"
-                        placeholder="Tell us about your available space, grade levels, or specific skill areas of interest..."
-                        class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all"></textarea>
-            </div>
-
-            <button type="submit" id="planEnquiryBtn"
-                    class="w-full py-4 rounded-xl bg-brand-navy hover:bg-brand-darknavy text-white text-sm font-bold shadow-lg transition-all duration-200">
-              Submit Enquiry
-            </button>
-
-            <p class="text-xs text-center text-slate-400">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:-1px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              Your information is confidential. No spam.
-            </p>
-          </form>
+          @endauth
+          </div>
 
           <div id="planEnquirySuccess" style="display:none;" class="text-center py-8">
             <div class="text-5xl mb-4">🎉</div>
@@ -3980,8 +3986,18 @@
       body: new FormData(form),
     })
     .then(function (r) { return r.json(); })
-    .then(function () { form.style.display = 'none'; success.style.display = 'block'; })
-    .catch(function () { form.style.display = 'none'; success.style.display = 'block'; })
+    .then(function () {
+      var container = document.getElementById('planFormContainer');
+      if (container) container.style.display = 'none';
+      form.style.display = 'none';
+      success.style.display = 'block';
+    })
+    .catch(function () {
+      var container = document.getElementById('planFormContainer');
+      if (container) container.style.display = 'none';
+      form.style.display = 'none';
+      success.style.display = 'block';
+    })
     .finally(function () { btn.disabled = false; btn.textContent = orig; });
   });
 }());

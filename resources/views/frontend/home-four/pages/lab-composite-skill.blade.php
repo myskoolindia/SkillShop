@@ -3941,48 +3941,49 @@
     </div>
 
     {{-- Form --}}
+    @auth
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:16px; margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:36px; height:36px; border-radius:10px; background:#ecfdf5; color:#059669; display:flex; align-items:center; justify-content:center; font-size:16px;">
+            <i class="fa-solid fa-building-columns"></i>
+          </div>
+          <div>
+            <div style="font-size:11px; text-transform:uppercase; font-weight:800; color:#059669; letter-spacing:0.05em;">Verified School Account</div>
+            <div style="font-size:14px; font-weight:800; color:#0f172a;">{{ auth()->user()->school_name ?: auth()->user()->name }}</div>
+          </div>
+        </div>
+        <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; background:#d1fae5; color:#065f46;">
+          <i class="fa-solid fa-check" style="font-size:10px;"></i> Verified
+        </span>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:12px; color:#475569; padding-top:10px; border-top:1px solid #e2e8f0;">
+        <div><span style="color:#94a3b8;">Contact:</span> <strong>{{ auth()->user()->name }}</strong></div>
+        <div><span style="color:#94a3b8;">Email:</span> <strong>{{ auth()->user()->email }}</strong></div>
+        @if(auth()->user()->phone)
+          <div><span style="color:#94a3b8;">Phone:</span> <strong>{{ auth()->user()->phone }}</strong></div>
+        @endif
+        @if(auth()->user()->city)
+          <div><span style="color:#94a3b8;">City:</span> <strong>{{ auth()->user()->city }}</strong></div>
+        @endif
+      </div>
+    </div>
+
     <form class="vl-form" id="customProposalForm" style="margin-top:0;">
       <input type="hidden" name="course_title" id="cpFormTitle" value="Custom Composite Skill Lab Proposal">
       <input type="hidden" name="source" value="composite-skill-custom-package">
       <input type="hidden" name="quotation" id="cpFormQuotation" value="">
       <input type="hidden" name="message" id="cpFormMessage" value="">
-
-      <div class="vl-form-grid-2">
-        <div class="vl-field">
-          <label for="cp_name">Your full name <span style="color:#ef4444;">*</span></label>
-          <input id="cp_name" name="name" type="text" placeholder="e.g. Dr. Sunita Rao" required>
-        </div>
-        <div class="vl-field">
-          <label for="cp_designation">Designation <span style="color:#ef4444;">*</span></label>
-          <input id="cp_designation" name="designation" type="text" placeholder="e.g. Principal / Academic Director" required>
-        </div>
-      </div>
-
-      <div class="vl-form-grid-2">
-        <div class="vl-field">
-          <label for="cp_school">School name <span style="color:#ef4444;">*</span></label>
-          <input id="cp_school" name="school" type="text" placeholder="e.g. Blossom International School" required>
-        </div>
-        <div class="vl-field">
-          <label for="cp_city">City <span style="color:#ef4444;">*</span></label>
-          <input id="cp_city" name="city" type="text" placeholder="e.g. Bengaluru / Pune" required>
-        </div>
-      </div>
-
-      <div class="vl-form-grid-2">
-        <div class="vl-field">
-          <label for="cp_phone">Phone / WhatsApp Number <span style="color:#ef4444;">*</span></label>
-          <input id="cp_phone" name="phone" type="tel" placeholder="+91 98765 43210" required>
-        </div>
-        <div class="vl-field">
-          <label for="cp_email">Email address <span style="color:#ef4444;">*</span></label>
-          <input id="cp_email" name="email" type="email" placeholder="e.g. principal@school.edu.in" required>
-        </div>
-      </div>
+      <input type="hidden" name="school" value="{{ auth()->user()->school_name ?: auth()->user()->name }}">
+      <input type="hidden" name="name" value="{{ auth()->user()->name }}">
+      <input type="hidden" name="email" value="{{ auth()->user()->email }}">
+      <input type="hidden" name="phone" value="{{ auth()->user()->phone }}">
+      <input type="hidden" name="designation" value="{{ auth()->user()->job_title }}">
+      <input type="hidden" name="city" value="{{ auth()->user()->city }}">
 
       <div class="vl-field">
-        <label for="cp_address">School Campus Address or Specific Notes (Optional)</label>
-        <textarea id="cp_address" name="address" placeholder="Campus location, room dimensions, or specific requirements"></textarea>
+        <label for="cp_address">Specific Notes / Campus Space Details (Optional)</label>
+        <textarea id="cp_address" name="address" placeholder="Campus location, room dimensions, or specific requirements (optional)"></textarea>
       </div>
 
       <button type="submit" id="cpSubmitBtn" class="vl-form-submit-vibrant" style="width:100%;">
@@ -3990,11 +3991,25 @@
         <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" style="margin-left:8px;"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
       </button>
 
-      <div class="vl-form-note" style="margin-top:14px;">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" style="display:inline;vertical-align:-2px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-        Your proposal is customized to your parameters. Direct callback within 1 working day.
+      <div class="vl-form-note" style="margin-top:14px; text-align:center;">
+        <i class="fa-solid fa-circle-check" style="color:#059669;"></i>
+        Signed in as {{ auth()->user()->email }}. No form filling required.
       </div>
     </form>
+    @else
+    <div style="text-align:center; padding:30px 20px; background:#fffbeb; border:1px solid #fef3c7; border-radius:16px; margin-bottom:16px;">
+      <div style="width:48px; height:48px; margin:0 auto 12px; border-radius:12px; background:#fef3c7; color:#b45309; display:flex; align-items:center; justify-content:center; font-size:22px;">
+        <i class="fa-solid fa-school-flag"></i>
+      </div>
+      <h4 style="font-size:16px; font-weight:800; color:#1e1b4b; margin:0 0 6px;">School / Teacher Verification Required</h4>
+      <p style="font-size:13px; color:#64748b; margin:0 0 18px; line-height:1.5;">
+        Custom lab proposals and itemized equipment specifications are available exclusively to verified schools and educators.
+      </p>
+      <a href="{{ route('login', ['redirect' => url()->current() . '#demo']) }}" style="display:inline-flex; align-items:center; gap:8px; padding:12px 24px; border-radius:10px; background:#1e1b4b; color:#fff; font-size:13px; font-weight:700; text-decoration:none;">
+        <i class="fa-solid fa-right-to-bracket"></i> Sign in to Request Proposal
+      </a>
+    </div>
+    @endauth
 
     {{-- Success state --}}
     <div class="vl-confirm" id="cpConfirmMsg" style="display:none;">
