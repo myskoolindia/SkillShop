@@ -64,18 +64,33 @@ class OtpAuthController extends Controller
             }
         }
 
+        $isExistingUser = false;
+
         // If registration, check if phone already registered
         if ($type === 'registration') {
-            $exists = User::where('phone', $cleanPhone)
+            $existingUser = User::where('phone', $cleanPhone)
                 ->orWhere('phone', $rawPhone)
                 ->orWhere('phone', 'like', '%' . substr($cleanPhone, -10))
-                ->exists();
+                ->first();
 
-            if ($exists) {
-                return response()->json([
-                    'status'  => 'error',
-                    'message' => 'This mobile number is already registered. Please log in instead.',
-                ], 422);
+            if ($existingUser) {
+                if ($existingUser->status !== 'active') {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => 'Your account is currently inactive. Please contact support.',
+                    ], 403);
+                }
+
+                if ($existingUser->is_banned === 'yes') {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => 'Your account has been suspended.',
+                    ], 403);
+                }
+
+                // If user already exists, seamlessly send login OTP via WhatsApp so they can sign in directly!
+                $isExistingUser = true;
+                $type = 'login';
             }
         }
 
@@ -114,11 +129,16 @@ class OtpAuthController extends Controller
             ], 500);
         }
 
+        $message = $isExistingUser
+            ? 'Account already registered. WhatsApp login code sent — enter it below to sign in.'
+            : 'Verification code sent to your WhatsApp number.';
+
         return response()->json([
-            'status'   => 'success',
-            'message'  => 'Verification code sent to your WhatsApp number.',
-            'phone'    => $cleanPhone,
-            'mock_otp' => $res['mock_otp'] ?? null,
+            'status'           => 'success',
+            'is_existing_user' => $isExistingUser,
+            'message'          => $message,
+            'phone'            => $cleanPhone,
+            'mock_otp'         => $res['mock_otp'] ?? null,
         ]);
     }
 
@@ -194,7 +214,7 @@ class OtpAuthController extends Controller
         $otp        = trim($request->otp);
 
         $verification = PhoneVerification::where('phone', $cleanPhone)
-            ->where('type', 'login')
+            ->whereIn('type', ['login', 'registration'])
             ->where('verified_at', null)
             ->where('expires_at', '>', Carbon::now())
             ->latest('id')

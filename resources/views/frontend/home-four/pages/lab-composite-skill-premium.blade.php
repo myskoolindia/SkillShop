@@ -1077,14 +1077,20 @@
               </p>
             </form>
           @else
-            <div class="p-3.5 mb-4 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs text-blue-900 flex items-center justify-between gap-3">
+            <div class="p-3.5 mb-4 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs text-blue-900 flex items-center justify-between gap-3 flex-wrap">
               <div class="flex items-center gap-2">
                 <i class="fa-solid fa-circle-info text-blue-600"></i>
-                <span>Already have a school account?</span>
+                <span>School or educator?</span>
               </div>
-              <a href="{{ route('login', ['redirect' => url()->current() . '#cta-section']) }}" class="font-bold text-brand-navy hover:text-brand-orange underline whitespace-nowrap">
-                Sign in to 1-Click Request &rarr;
-              </a>
+              <div class="flex items-center gap-3">
+                <a href="{{ route('login', ['redirect' => url()->current() . '#cta-section']) }}" class="font-bold text-brand-navy hover:text-brand-orange underline whitespace-nowrap">
+                  Sign in &rarr;
+                </a>
+                <span class="text-blue-300">|</span>
+                <a href="{{ route('register', ['scope' => 'labs', 'redirect' => url()->current() . '#cta-section']) }}" class="font-bold text-brand-navy hover:text-brand-orange underline whitespace-nowrap">
+                  Register School / Teacher &rarr;
+                </a>
+              </div>
             </div>
 
             <form class="space-y-4" id="planEnquiryForm" data-source="composite-skill-lab-premium" data-title="Skillvation Premium Composite Skill Lab – Enquiry">

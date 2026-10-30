@@ -3997,9 +3997,13 @@
       </div>
     </form>
     @else
-    <div style="padding:10px 14px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; margin-bottom:14px; font-size:12px; color:#1e3a8a; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-      <span>Already have a school account?</span>
-      <a href="{{ route('login', ['redirect' => url()->current() . '#demo']) }}" style="font-weight:700; color:#1e1b4b; text-decoration:underline; white-space:nowrap;">Sign in to 1-Click Request &rarr;</a>
+    <div style="padding:10px 14px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; margin-bottom:14px; font-size:12px; color:#1e3a8a; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+      <span>School or educator?</span>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <a href="{{ route('login', ['redirect' => url()->current() . '#demo']) }}" style="font-weight:700; color:#1e1b4b; text-decoration:underline; white-space:nowrap;">Sign in &rarr;</a>
+        <span style="color:#93c5fd;">|</span>
+        <a href="{{ route('register', ['scope' => 'labs', 'redirect' => url()->current() . '#demo']) }}" style="font-weight:700; color:#1e1b4b; text-decoration:underline; white-space:nowrap;">Register School / Teacher &rarr;</a>
+      </div>
     </div>
 
     <form class="vl-form" id="customProposalForm" style="margin-top:0;">

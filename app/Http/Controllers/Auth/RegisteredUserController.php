@@ -30,9 +30,22 @@ class RegisteredUserController extends Controller
         $this->wabaService = $wabaService;
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
-        return view('auth.register');
+        if ($request->filled('redirect')) {
+            session()->put('url.intended', $request->input('redirect'));
+        }
+
+        $intended = $request->input('redirect')
+            ?: session()->get('url.intended')
+            ?: $request->headers->get('referer')
+            ?: '';
+
+        $isLabContext = $request->input('scope') === 'labs'
+            || in_array($request->input('role'), ['school', 'teacher'], true)
+            || \Str::contains(strtolower($intended), ['/labs', 'composite-skill', 'skillvation-lab', 'lab-stem', 'stem', 'ecec', 'ai-robotics']);
+
+        return view('auth.register', compact('isLabContext', 'intended'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -139,6 +152,35 @@ class RegisteredUserController extends Controller
         $notification = __('Account created successfully! Welcome to Skillvation.');
         $notification = ['messege' => $notification, 'alert-type' => 'success'];
 
+        $intendedUrl = session()->pull('url.intended');
+
+        if (!$intendedUrl && $request->filled('redirect')) {
+            $intendedUrl = $request->input('redirect');
+        }
+
+        if (!$intendedUrl && $request->headers->get('referer')) {
+            $referer = $request->headers->get('referer');
+            $parsedRef = parse_url($referer);
+            if (!empty($parsedRef['query'])) {
+                parse_str($parsedRef['query'], $queryParams);
+                if (!empty($queryParams['redirect'])) {
+                    $intendedUrl = $queryParams['redirect'];
+                }
+            }
+        }
+
+        if ($intendedUrl) {
+            $parsed = parse_url($intendedUrl);
+            $host = $parsed['host'] ?? null;
+            $currentHost = $request->getHost();
+            $isSameHost = empty($host) || $host === $currentHost || in_array($host, ['localhost', '127.0.0.1'], true);
+            $isSafePath = !\Str::contains($intendedUrl, ['/admin', '/login', '/register', '/user-login', '/user-register']);
+
+            if ($isSameHost && $isSafePath) {
+                return redirect()->to($intendedUrl)->with($notification);
+            }
+        }
+
         $defaultRoute = match ($user->role) {
             'school'     => route('school.dashboard'),
             'teacher'    => route('student.dashboard'),
@@ -146,7 +188,7 @@ class RegisteredUserController extends Controller
             default      => route('student.dashboard'),
         };
 
-        return redirect()->intended($defaultRoute)->with($notification);
+        return redirect()->to($defaultRoute)->with($notification);
     }
 
     public function custom_user_verification($token)

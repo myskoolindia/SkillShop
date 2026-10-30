@@ -206,6 +206,15 @@
 @endpush
 
 @section('contents')
+    @php
+        $reqRedirect = request('redirect', $intended ?? session('url.intended') ?? request()->headers->get('referer') ?? '');
+        $isLabContext = ($isLabContext ?? false)
+            || request('scope') === 'labs'
+            || in_array(request('role'), ['school', 'teacher'], true)
+            || \Illuminate\Support\Str::contains(strtolower($reqRedirect), ['/labs', 'composite-skill', 'skillvation-lab', 'lab-stem', 'stem', 'ecec', 'ai-robotics']);
+        $initialRole = request('role') === 'teacher' ? 'teacher' : 'school';
+    @endphp
+
     <!-- breadcrumb-area -->
     <x-frontend.breadcrumb :title="__('Create an Account')" :links="[['url' => route('home'), 'text' => __('Home')], ['url' => route('register'), 'text' => __('Register')]]" />
     <!-- breadcrumb-area-end -->
@@ -217,7 +226,11 @@
                     <div class="singUp-wrap">
                         <div class="text-center mb-3">
                             <h2 class="title mb-1">{{ __('Join Skillvation') }}</h2>
-                            <p class="text-muted mb-3">{{ __('Select your role and verify your WhatsApp number to get started') }}</p>
+                            @if($isLabContext)
+                                <p class="text-muted mb-3">{{ __('School & Educator registration for Skill & Composite Labs') }}</p>
+                            @else
+                                <p class="text-muted mb-3">{{ __('Select your role and verify your WhatsApp number to get started') }}</p>
+                            @endif
                         </div>
 
                         {{-- Step 1 & 2: Role Selection & WhatsApp Mobile Verification --}}
@@ -225,12 +238,19 @@
                             
                             {{-- 1. Role Selection --}}
                             <div class="mb-3">
-                                <label class="form-label font-weight-bold mb-2 d-block text-dark font-semibold">
-                                    <span class="reg-step-badge">1</span> {{ __('Select Account Type') }}
-                                </label>
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <label class="form-label font-weight-bold mb-0 text-dark font-semibold">
+                                        <span class="reg-step-badge">1</span> {{ __('Select Account Type') }}
+                                    </label>
+                                    @if($isLabContext)
+                                        <span class="badge rounded-pill px-3 py-1 font-weight-bold" style="font-size:11px; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;">
+                                            <i class="fas fa-flask mr-1"></i> {{ __('Labs: Schools & Teachers Only') }}
+                                        </span>
+                                    @endif
+                                </div>
                                 <div class="row g-2 g-sm-3">
-                                    <div class="col-4">
-                                        <div class="reg-role-card active" data-role="school" onclick="selectRole('school')">
+                                    <div class="{{ $isLabContext ? 'col-6' : 'col-4' }}">
+                                        <div class="reg-role-card {{ $initialRole === 'school' ? 'active' : '' }}" data-role="school" onclick="selectRole('school')">
                                             <div class="role-icon" style="background:#f3e8ff; color:#9333ea;">
                                                 <i class="fas fa-school"></i>
                                             </div>
@@ -238,8 +258,8 @@
                                             <div class="role-subtitle">{{ __('For institutions') }}</div>
                                         </div>
                                     </div>
-                                    <div class="col-4">
-                                        <div class="reg-role-card" data-role="teacher" onclick="selectRole('teacher')">
+                                    <div class="{{ $isLabContext ? 'col-6' : 'col-4' }}">
+                                        <div class="reg-role-card {{ $initialRole === 'teacher' ? 'active' : '' }}" data-role="teacher" onclick="selectRole('teacher')">
                                             <div class="role-icon" style="background:#fef3c7; color:#d97706;">
                                                 <i class="fas fa-chalkboard-teacher"></i>
                                             </div>
@@ -247,8 +267,9 @@
                                             <div class="role-subtitle">{{ __('For educators') }}</div>
                                         </div>
                                     </div>
+                                    @if(!$isLabContext)
                                     <div class="col-4">
-                                        <div class="reg-role-card" data-role="student" onclick="selectRole('student')">
+                                        <div class="reg-role-card {{ request('role') === 'student' ? 'active' : '' }}" data-role="student" onclick="selectRole('student')">
                                             <div class="role-icon" style="background:#e0f2fe; color:#0284c7;">
                                                 <i class="fas fa-user-graduate"></i>
                                             </div>
@@ -256,6 +277,7 @@
                                             <div class="role-subtitle">{{ __('For learners') }}</div>
                                         </div>
                                     </div>
+                                    @endif
                                 </div>
                             </div>
 
@@ -285,6 +307,10 @@
 
                             {{-- 3. OTP Enter Box (Initially Hidden) --}}
                             <div id="otp-input-container" class="p-3 p-sm-4 border rounded-3 bg-light mb-4" style="display:none;">
+                                <div id="otp-login-notice" class="alert alert-info py-2 px-3 small text-center mb-3" style="display:none; border-radius:8px; background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af;">
+                                    <i class="fas fa-info-circle mr-1"></i> <span id="otp-login-notice-text"></span>
+                                </div>
+
                                 <div class="text-center mb-3">
                                     <div class="waba-badge mb-2">
                                         <i class="fab fa-whatsapp"></i> {{ __('WhatsApp Verification') }}
@@ -323,6 +349,9 @@
 
                         </div>
 
+                        {{-- Hidden redirect field for OTP auto-login --}}
+                        <input type="hidden" id="reg-redirect-field" value="{{ request('redirect', $intended ?? '') }}">
+
                         {{-- Step 3: Registration Form (Shown after OTP verified) --}}
                         <div id="details-form-section" style="display:none;">
                             <div class="verified-phone-box">
@@ -341,6 +370,9 @@
                                 <input type="hidden" name="account_type" id="form-account-type" value="school">
                                 <input type="hidden" name="phone" id="form-phone" value="">
                                 <input type="hidden" name="phone_token" id="form-phone-token" value="">
+                                @if(request()->filled('redirect') || !empty($intended))
+                                    <input type="hidden" name="redirect" value="{{ request('redirect', $intended ?? '') }}">
+                                @endif
 
                                 {{-- School Specific Fields --}}
                                 <div id="school-details-fields" style="display:none;">
@@ -454,10 +486,11 @@
 
 @push('scripts')
 <script>
-    let selectedRole = 'school';
+    let selectedRole = '{{ $initialRole }}';
     let verifiedPhone = '';
     let verifiedPhoneToken = '';
     let countdownInterval = null;
+    let isExistingUser = false;
 
     function selectRole(role) {
         selectedRole = role;
@@ -475,7 +508,10 @@
         // Switch role specific fields
         document.getElementById('school-details-fields').style.display = role === 'school' ? 'block' : 'none';
         document.getElementById('teacher-details-fields').style.display = role === 'teacher' ? 'block' : 'none';
-        document.getElementById('student-details-fields').style.display = role === 'student' ? 'block' : 'none';
+        const studentFields = document.getElementById('student-details-fields');
+        if (studentFields) {
+            studentFields.style.display = role === 'student' ? 'block' : 'none';
+        }
     }
 
     function handleSendOtp() {
@@ -512,11 +548,28 @@
             btnSend.innerHTML = '<i class="fab fa-whatsapp mr-2"></i> {{ __("Send WhatsApp Verification Code") }}';
 
             if (data.status === 'success') {
+                isExistingUser = !!data.is_existing_user;
                 document.getElementById('display-phone').textContent = '+91 ' + phoneInput;
                 document.getElementById('phone-input-container').style.display = 'none';
                 document.getElementById('otp-input-container').style.display = 'block';
-                document.getElementById('otp-1').focus();
 
+                const loginNotice = document.getElementById('otp-login-notice');
+                const loginNoticeText = document.getElementById('otp-login-notice-text');
+                const verifyBtn = document.getElementById('btn-verify-otp');
+                if (isExistingUser) {
+                    if (loginNotice && loginNoticeText) {
+                        loginNoticeText.textContent = data.message || '{{ __("This mobile number is already registered. Enter the WhatsApp code below to sign in directly.") }}';
+                        loginNotice.style.display = 'block';
+                    }
+                    if (verifyBtn) {
+                        verifyBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> {{ __("Verify & Sign In") }}';
+                    }
+                } else {
+                    if (loginNotice) loginNotice.style.display = 'none';
+                    if (verifyBtn) verifyBtn.innerHTML = '{{ __("Verify & Continue") }}';
+                }
+
+                document.getElementById('otp-1').focus();
                 startResendTimer();
 
                 if (data.mock_otp) {
@@ -550,6 +603,45 @@
         if (otp.length !== 6) {
             otpErr.textContent = '{{ __("Please enter all 6 digits of the OTP code.") }}';
             otpErr.style.display = 'block';
+            return;
+        }
+
+        if (isExistingUser) {
+            btnVerify.disabled = true;
+            btnVerify.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> {{ __("Signing in...") }}';
+            const redirectUrl = document.getElementById('reg-redirect-field')?.value || '';
+
+            fetch('{{ route("auth.login-otp") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    phone: phoneInput,
+                    otp: otp,
+                    redirect: redirectUrl
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                btnVerify.disabled = false;
+                btnVerify.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> {{ __("Verify & Sign In") }}';
+
+                if (data.status === 'success') {
+                    window.location.href = data.redirect_url || '{{ route("home") }}';
+                } else {
+                    otpErr.textContent = data.message || '{{ __("Invalid OTP code.") }}';
+                    otpErr.style.display = 'block';
+                }
+            })
+            .catch(err => {
+                btnVerify.disabled = false;
+                btnVerify.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> {{ __("Verify & Sign In") }}';
+                otpErr.textContent = '{{ __("Sign-in error. Please try again.") }}';
+                otpErr.style.display = 'block';
+            });
             return;
         }
 
@@ -603,6 +695,12 @@
 
     function resetPhoneStep() {
         clearInterval(countdownInterval);
+        isExistingUser = false;
+        const loginNotice = document.getElementById('otp-login-notice');
+        if (loginNotice) loginNotice.style.display = 'none';
+        const verifyBtn = document.getElementById('btn-verify-otp');
+        if (verifyBtn) verifyBtn.innerHTML = '{{ __("Verify & Continue") }}';
+
         document.getElementById('otp-input-container').style.display = 'none';
         document.getElementById('phone-input-container').style.display = 'block';
         for (let i = 1; i <= 6; i++) {
@@ -648,9 +746,11 @@
         const urlParams = new URLSearchParams(window.location.search);
         const urlRole = urlParams.get('role');
         const oldRole = "{{ old('role', '') }}";
-        const initialRole = (['school', 'teacher', 'student'].includes(urlRole)) 
+        const isLabContext = {{ $isLabContext ? 'true' : 'false' }};
+        const allowedRoles = isLabContext ? ['school', 'teacher'] : ['school', 'teacher', 'student'];
+        let initialRole = allowedRoles.includes(urlRole) 
             ? urlRole 
-            : ((['school', 'teacher', 'student'].includes(oldRole)) ? oldRole : 'student');
+            : (allowedRoles.includes(oldRole) ? oldRole : '{{ $initialRole }}');
         selectRole(initialRole);
 
         const otpInputs = [1, 2, 3, 4, 5, 6].map(i => document.getElementById('otp-' + i)).filter(Boolean);
