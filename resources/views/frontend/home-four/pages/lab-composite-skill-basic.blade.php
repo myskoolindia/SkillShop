@@ -1289,13 +1289,17 @@
             <h3 class="text-xl font-black text-brand-navy mb-2">Proposal Sent!</h3>
             <p class="text-sm text-slate-600 mb-4">Your customized proposal has been sent to your email and WhatsApp.</p>
             <div id="planWaBox" style="display:none;" class="flex items-center justify-center gap-3 flex-wrap mt-3">
+              <a id="planPdfBtn" href="#" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-navy hover:bg-brand-navy/90 text-white font-bold text-sm shadow-md transition-all">
+                <i class="fa-solid fa-file-pdf text-lg"></i>
+                <span>View Proposal</span>
+              </a>
+              <a id="planBuyBtn" href="#" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm shadow-md transition-all" style="display:none;">
+                <i class="fa-solid fa-cart-shopping text-lg"></i>
+                <span>Buy Now</span>
+              </a>
               <a id="planWaBtn" href="#" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-all">
                 <i class="fa-brands fa-whatsapp text-lg"></i>
                 <span>Open in WhatsApp</span>
-              </a>
-              <a id="planPdfBtn" href="#" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-navy hover:bg-brand-navy/90 text-white font-bold text-sm shadow-md transition-all">
-                <i class="fa-solid fa-file-pdf text-lg"></i>
-                <span>Download PDF</span>
               </a>
             </div>
           </div>
@@ -1494,13 +1498,15 @@
       if (container) container.style.display = 'none';
       form.style.display    = 'none';
       success.style.display = 'block';
-      if (resp && (resp.whatsapp_url || resp.pdf_url)) {
+      if (resp && (resp.whatsapp_url || resp.pdf_url || resp.cart_url)) {
         var waBox = document.getElementById('planWaBox');
         var waBtn = document.getElementById('planWaBtn');
         var pdfBtn = document.getElementById('planPdfBtn');
+        var buyBtn = document.getElementById('planBuyBtn');
         if (waBox) waBox.style.display = 'flex';
-        if (waBtn && resp.whatsapp_url) { waBtn.href = resp.whatsapp_url; waBtn.style.display = 'inline-flex'; }
         if (pdfBtn && resp.pdf_url) { pdfBtn.href = resp.pdf_url; pdfBtn.style.display = 'inline-flex'; }
+        if (buyBtn && resp.cart_url) { buyBtn.href = resp.cart_url; buyBtn.style.display = 'inline-flex'; }
+        if (waBtn && resp.whatsapp_url) { waBtn.href = resp.whatsapp_url; waBtn.style.display = 'inline-flex'; }
       }
     })
     .catch(function () {

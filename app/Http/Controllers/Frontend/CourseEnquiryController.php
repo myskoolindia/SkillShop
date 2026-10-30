@@ -392,6 +392,7 @@ class CourseEnquiryController extends Controller
             if (!empty($validated['phone'])) {
                 try {
                     $wabaService = app(\App\Services\WabaOtpService::class);
+                    $effectiveCartUrl = $cartLink ?: ($productLink ?: url('/club-shop'));
                     $waPayload = [
                         'name'               => $validated['name'],
                         'school'             => $validated['school'] ?? 'School',
@@ -399,6 +400,7 @@ class CourseEnquiryController extends Controller
                         'total'              => $quotationData['grand_total'] ?? 0,
                         'pdf_url'            => $pdfPublicUrl,
                         'product_url'        => $productLink ?: url('/labs'),
+                        'cart_url'           => $effectiveCartUrl,
                         'is_skillvation_lab' => $isSkillvationLab,
                     ];
                     $whatsappUrl = $wabaService->generateWhatsAppShareUrl($validated['phone'], $waPayload);
@@ -420,6 +422,7 @@ class CourseEnquiryController extends Controller
             'message'      => 'Enquiry submitted successfully. Proposal has been sent to your email and WhatsApp.',
             'pdf_url'      => $pdfPublicUrl ?? null,
             'whatsapp_url' => $whatsappUrl ?? null,
+            'cart_url'     => $cartLink ?: ($productLink ?: url('/club-shop')),
         ]);
     }
 
@@ -691,6 +694,7 @@ class CourseEnquiryController extends Controller
         if (!empty($data['phone'])) {
             try {
                 $wabaService = app(\App\Services\WabaOtpService::class);
+                $effectiveCartUrl = $cartLink ?: ($productLink ?: url('/club-shop'));
                 $waPayload = [
                     'name'               => $data['name'] ?? '',
                     'school'             => $data['school'] ?? 'School',
@@ -698,6 +702,7 @@ class CourseEnquiryController extends Controller
                     'total'              => $quotationData['grand_total'] ?? 0,
                     'pdf_url'            => $pdfPublicUrl,
                     'product_url'        => $productLink ?: url('/labs'),
+                    'cart_url'           => $effectiveCartUrl,
                     'is_skillvation_lab' => $isSkillvationLab,
                 ];
                 $wabaService->sendProposalMessage($data['phone'], $waPayload);

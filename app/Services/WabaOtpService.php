@@ -77,7 +77,7 @@ class WabaOtpService
         $package       = $data['package'] ?? 'Skill Lab';
         $total         = !empty($data['total']) ? ('₹' . number_format((float) $data['total'], 2)) : '';
         $pdfUrl        = $data['pdf_url'] ?? '';
-        $productUrl    = $data['product_url'] ?? url('/labs');
+        $cartUrl       = $data['cart_url'] ?? $productUrl;
         $isSkillvation = !empty($data['is_skillvation_lab']);
 
         $labType = $isSkillvation ? 'Skillvation Lab (STEM, Robotics & AI)' : 'CBSE Composite Skill Lab';
@@ -88,8 +88,8 @@ class WabaOtpService
             . "Thank you for requesting a proposal for *{$school}*.\n\n"
             . "📋 *Package:* {$package}"
             . $totalLine . "\n\n"
-            . "📄 *Download Proposal PDF:*\n{$pdfUrl}\n\n"
-            . "🛒 *View Details in Club Shop:*\n{$productUrl}\n\n"
+            . "📄 *View Proposal:*\n{$pdfUrl}\n\n"
+            . "🛒 *Buy Now:*\n{$cartUrl}\n\n"
             . "Our academic coordinator will reach out shortly to assist with campus space planning and setup.\n\n"
             . "_Skillvation — MySkool Learning Private Limited_";
 
@@ -99,7 +99,7 @@ class WabaOtpService
                     return $this->sendProposalViaWabaConnect($cleanPhone, $message, $pdfUrl, $package, $data);
 
                 case 'meta':
-                    return $this->sendProposalViaMeta($cleanPhone, $message, $pdfUrl);
+                    return $this->sendProposalViaMeta($cleanPhone, $message, $pdfUrl, $data);
 
                 case 'mock':
                 default:
@@ -131,7 +131,7 @@ class WabaOtpService
         $package       = $data['package'] ?? 'Skill Lab';
         $total         = !empty($data['total']) ? ('₹' . number_format((float) $data['total'], 2)) : '';
         $pdfUrl        = $data['pdf_url'] ?? '';
-        $productUrl    = $data['product_url'] ?? url('/labs');
+        $cartUrl       = $data['cart_url'] ?? $productUrl;
         $isSkillvation = !empty($data['is_skillvation_lab']);
 
         $labType = $isSkillvation ? 'Skillvation Lab (STEM, Robotics & AI)' : 'CBSE Composite Skill Lab';
@@ -142,8 +142,8 @@ class WabaOtpService
             . "Your proposal for *{$school}* has been prepared:\n\n"
             . "📋 *Package:* {$package}"
             . $totalLine . "\n\n"
-            . "📄 *Proposal PDF Link:*\n{$pdfUrl}\n\n"
-            . "🛒 *View Details in Club Shop:*\n{$productUrl}\n\n"
+            . "📄 *View Proposal:*\n{$pdfUrl}\n\n"
+            . "🛒 *Buy Now:*\n{$cartUrl}\n\n"
             . "_Skillvation — MySkool Learning Private Limited_";
 
         return "https://api.whatsapp.com/send?phone={$cleanPhone}&text=" . rawurlencode($message);
@@ -223,7 +223,7 @@ class WabaOtpService
     /**
      * Dispatch proposal message through Meta Cloud API.
      */
-    protected function sendProposalViaMeta(string $phone, string $message, string $pdfUrl): array
+    protected function sendProposalViaMeta(string $phone, string $message, string $pdfUrl, array $data = []): array
     {
         $phoneNumberId = config('services.waba.phone_number_id', env('WABA_PHONE_NUMBER_ID'));
         $token         = config('services.waba.api_token', env('WABA_API_TOKEN'));
@@ -234,6 +234,57 @@ class WabaOtpService
         }
 
         $url = "https://graph.facebook.com/v18.0/{$phoneNumberId}/messages";
+
+        // If PDF URL is present, attempt an interactive CTA URL button
+        if (!empty($pdfUrl)) {
+            $name    = $data['name']    ?? 'Representative';
+            $school  = $data['school']  ?? 'Institution';
+            $package = $data['package'] ?? 'Skill Lab';
+            $total   = !empty($data['total']) ? ('₹' . number_format((float) $data['total'], 2)) : '';
+            $header  = !empty($data['is_skillvation_lab']) ? 'Skillvation Lab Proposal' : 'Composite Skill Lab Proposal';
+
+            $bodyText = "Dear {$name},\n\nYour proposal for *{$school}* ({$package}) is ready."
+                . ($total ? "\n\nTotal Estimate: *{$total}*" : "")
+                . "\n\nTap below to view your proposal:";
+
+            $ctaPayload = [
+                'messaging_product' => 'whatsapp',
+                'to'                => $phone,
+                'type'              => 'interactive',
+                'interactive'       => [
+                    'type'   => 'cta_url',
+                    'header' => [
+                        'type' => 'text',
+                        'text' => $header,
+                    ],
+                    'body' => [
+                        'text' => $bodyText,
+                    ],
+                    'footer' => [
+                        'text' => 'Skillvation — MySkool Learning',
+                    ],
+                    'action' => [
+                        'name'       => 'cta_url',
+                        'parameters' => [
+                            'display_text' => 'View Proposal',
+                            'url'          => $pdfUrl,
+                        ],
+                    ],
+                ],
+            ];
+
+            try {
+                $response = Http::withToken($token)->timeout(8)->post($url, $ctaPayload);
+                if ($response->successful()) {
+                    return [
+                        'success' => true,
+                        'message' => 'Proposal CTA button sent via WhatsApp.',
+                    ];
+                }
+            } catch (\Throwable $e) {
+                Log::warning('[Meta Interactive CTA Error] ' . $e->getMessage());
+            }
+        }
 
         $payload = [
             'messaging_product' => 'whatsapp',
