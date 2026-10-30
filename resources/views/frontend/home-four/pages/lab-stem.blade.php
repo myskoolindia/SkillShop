@@ -4755,10 +4755,11 @@ Promise.all([
         }
 
         // Update hidden form fields for submission
+        const titleVal = `Skillvation Lab — ${recommendedTierName} (₹${state.budget.toFixed(2)}L, ${state.students} Students)`;
         const cpFormTitle = document.getElementById('cpFormTitle');
-        if (cpFormTitle) {
-          cpFormTitle.value = `Custom Composite Lab: ${recommendedTierName} (₹${state.budget.toFixed(2)}L, ${state.students} Students)`;
-        }
+        if (cpFormTitle) cpFormTitle.value = titleVal;
+        const planTitle = document.getElementById('planTitle');
+        if (planTitle) planTitle.value = titleVal;
 
         const quotationData = {
           recommended_tier: recommendedTierName,
@@ -4775,10 +4776,12 @@ Promise.all([
 
         const cpFormQuotation = document.getElementById('cpFormQuotation');
         if (cpFormQuotation) cpFormQuotation.value = JSON.stringify(quotationData);
+        const planQuotation = document.getElementById('planQuotation');
+        if (planQuotation) planQuotation.value = JSON.stringify(quotationData);
 
         const cpFormMessage = document.getElementById('cpFormMessage');
         if (cpFormMessage) {
-          cpFormMessage.value = `Custom Composite Skill Lab Configurator Request:
+          cpFormMessage.value = `Skillvation Lab Configurator Request:
       Budget: ₹${state.budget.toFixed(2)} Lakh (${state.category} Tier)
       Students: ${state.students}
       Grades: ${state.grades.join(', ') || 'All Grades'}
