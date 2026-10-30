@@ -253,9 +253,9 @@
                                             <thead>
                                             <tr>
                                                 <th scope="col"><?= trans("product"); ?></th>
-                                                <th scope="col"><?= trans("total"); ?></th>
-                                                <th scope="col"><?= trans("updated"); ?></th>
-                                                <th scope="col"><?= trans("status"); ?></th>
+                                                <th scope="col" style="text-align: right; width: 15%;"><?= trans("total"); ?></th>
+                                                <th scope="col" style="text-align: center; width: 15%;"><?= trans("updated"); ?></th>
+                                                <th scope="col" style="text-align: center; width: 15%;"><?= trans("status"); ?></th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -333,13 +333,13 @@
                                                                 </div>
                                                             </div>
                                                         </td>
-                                                        <td>
+                                                        <td style="width: 15%; text-align: right; vertical-align: top;">
                                                             <strong class="font-size-15"><?= priceFormatted($item->product_total_price, $item->product_currency); ?></strong>
                                                         </td>
-                                                        <td style="width: 15%;">
+                                                        <td style="width: 15%; text-align: center; vertical-align: top;">
                                                             <?= timeAgo($item->updated_at); ?>
                                                         </td>
-                                                        <td style="width: 10%">
+                                                        <td style="width: 15%; text-align: center; vertical-align: top;">
                                                             <strong class="no-wrap"><?= trans($item->order_status) ?></strong>
                                                             <?php if ($item->order_status == 'completed'):
                                                                 if ($item->product_type == 'digital'):
@@ -394,75 +394,99 @@
                                                         </td>
                                                     </tr>
                                                     <?php 
+                                                    /* ── Bundle / Package Contents Full-Width Row ────────── */
                                                     if (!empty($item->is_bundle) && !empty($item->bundle_items)):
-                                                    $bundleItems = json_decode($item->bundle_items, true);
-                                                    if (is_array($bundleItems)):
-                                                        
-                                                        foreach ($bundleItems as $bundle):
-                                                            $activeProduct = getActiveProduct($bundle['product_id']);
-                                                            
-                                                            if (empty($activeProduct)) {
-                                                                continue;
+                                                        $_biRaw = is_string($item->bundle_items)
+                                                            ? json_decode($item->bundle_items, true)
+                                                            : $item->bundle_items;
+                                                        if (!empty($_biRaw) && is_array($_biRaw)):
+                                                            $_biIds = [];
+                                                            foreach ($_biRaw as $_bi) {
+                                                                if ((int)($_bi['qty'] ?? 0) > 0 && !empty($_bi['product_id'])) {
+                                                                    $_biIds[] = (int)$_bi['product_id'];
+                                                                }
                                                             }
-                                                            $productUrlB = generateProductUrl($activeProduct);
-                                                            $qtyB = (int) $bundle['qty'];
-                                                    ?>
-                                                        <tr>
-                                                            <td style="width: 50%">
-                                                                <div class="table-item-product">
-                                                                    <div class="left">
-                                                                        <div class="product-image-box product-image-box-sm">
-                                                                            <a href="<?= esc($productUrlB); ?>" target="_blank">
-                                                                                <img src="<?= getOrderImageUrl($activeProduct->image_cache, $activeProduct->id); ?>" data-src="<?= getOrderImageUrl($activeProduct->image_cache, $activeProduct->id); ?>" alt="" class="lazyload img-responsive post-image">
-                                                                            </a>
+                                                            $_biMap = [];
+                                                            if (!empty($_biIds)) {
+                                                                $_biIdsStr = implode(',', $_biIds);
+                                                                $_db = \Config\Database::connect();
+                                                                $_biRows = $_db->query("
+                                                                    SELECT p.id, pd.title, p.sku, p.slug, cl.name AS category_name
+                                                                    FROM products p
+                                                                    LEFT JOIN product_details pd
+                                                                           ON pd.product_id = p.id AND pd.lang_id = 1
+                                                                    LEFT JOIN categories cat ON cat.id = p.category_id
+                                                                    LEFT JOIN category_lang cl
+                                                                           ON cl.category_id = cat.id AND cl.lang_id = 1
+                                                                    WHERE p.id IN ({$_biIdsStr})
+                                                                ")->getResult();
+                                                                foreach ($_biRows as $_r) {
+                                                                    $_biMap[(int)$_r->id] = $_r;
+                                                                }
+                                                            }
+                                                            $_biByCategory = [];
+                                                            foreach ($_biRaw as $_bi) {
+                                                                $_qty = (int)($_bi['qty'] ?? 0);
+                                                                if ($_qty <= 0) continue;
+                                                                $_pid  = (int)($_bi['product_id'] ?? 0);
+                                                                $_pRow = $_biMap[$_pid] ?? null;
+                                                                $_cat  = $_pRow ? (string)($_pRow->category_name ?? 'General') : 'General';
+                                                                $_biByCategory[$_cat][] = [
+                                                                    'title'  => $_pRow ? (string)($_pRow->title ?? '—') : '—',
+                                                                    'sku'    => $_pRow ? (string)($_pRow->sku   ?? '')  : '',
+                                                                    'slug'   => $_pRow ? (string)($_pRow->slug  ?? '')  : '',
+                                                                    'qty'    => $_qty,
+                                                                    'unit'   => (float)($_bi['unit_price'] ?? 0),
+                                                                    'cur'    => $item->product_currency ?? 'INR',
+                                                                ];
+                                                            }
+                                                            if (!empty($_biByCategory)): ?>
+                                                                <tr style="background-color: #f8fafc;">
+                                                                    <td colspan="4" style="padding: 16px 20px 20px 20px; border-top: none; border-bottom: 2px solid #e2e8f0;">
+                                                                        <div style="font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 10px;">
+                                                                            &#128230; Package Contents (Included Components)
                                                                         </div>
-                                                                    </div>
-                                                                    <div class="right">
-                                                                        <div class="m-b-10">
-                                                                            <div class="badge badge-info-light">
-                                                                                <?php $seller = getUser($item->seller_id);
-                                                                                if (!empty($seller)): ?>
-                                                                                    <?= trans("seller"); ?>:&nbsp;<a href="<?= generateProfileUrl($seller->slug); ?>"><?= esc(getUsername($seller)); ?></a>
-                                                                                <?php endif; ?>
+                                                                        <?php foreach ($_biByCategory as $_catName => $_catItems): ?>
+                                                                            <div style="margin-bottom: 14px;">
+                                                                                <div style="font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 5px;">
+                                                                                    <?= esc($_catName); ?>
+                                                                                </div>
+                                                                                <table class="table table-sm" style="width: 100%; font-size: 13px; border-collapse: collapse; background: #ffffff; border: 1px solid #e2e8f0; margin-bottom: 0;">
+                                                                                    <thead>
+                                                                                        <tr style="background: #f1f5f9; color: #334155;">
+                                                                                            <th style="padding: 7px 12px; text-align: left; border: 1px solid #e2e8f0; font-weight: 600; width: 44%;">Item</th>
+                                                                                            <th style="padding: 7px 12px; text-align: left; border: 1px solid #e2e8f0; font-weight: 600; width: 22%;">SKU</th>
+                                                                                            <th style="padding: 7px 12px; text-align: center; border: 1px solid #e2e8f0; font-weight: 600; width: 10%;">Qty</th>
+                                                                                            <th style="padding: 7px 12px; text-align: right; border: 1px solid #e2e8f0; font-weight: 600; width: 12%;">Unit Price</th>
+                                                                                            <th style="padding: 7px 12px; text-align: right; border: 1px solid #e2e8f0; font-weight: 600; width: 12%;">Total</th>
+                                                                                        </tr>
+                                                                                    </thead>
+                                                                                    <tbody>
+                                                                                    <?php foreach ($_catItems as $_ci):
+                                                                                        $_pUrl = !empty($_ci['slug']) ? generateProductUrlBySlug($_ci['slug']) : ''; ?>
+                                                                                        <tr>
+                                                                                            <td style="padding: 7px 12px; border: 1px solid #e2e8f0; font-weight: 500;">
+                                                                                                <?php if (!empty($_pUrl)): ?>
+                                                                                                    <a href="<?= esc($_pUrl); ?>" target="_blank" style="color: #2563eb; text-decoration: none;"><?= esc($_ci['title']); ?></a>
+                                                                                                <?php else: ?>
+                                                                                                    <?= esc($_ci['title']); ?>
+                                                                                                <?php endif; ?>
+                                                                                            </td>
+                                                                                            <td style="padding: 7px 12px; border: 1px solid #e2e8f0; font-family: monospace; font-size: 12px; color: #64748b;"><?= esc($_ci['sku']); ?></td>
+                                                                                            <td style="padding: 7px 12px; border: 1px solid #e2e8f0; text-align: center; color: #334155;"><?= $_ci['qty']; ?></td>
+                                                                                            <td style="padding: 7px 12px; border: 1px solid #e2e8f0; text-align: right; white-space: nowrap; color: #475569;"><?= priceFormatted($_ci['unit'], $_ci['cur']); ?></td>
+                                                                                            <td style="padding: 7px 12px; border: 1px solid #e2e8f0; text-align: right; white-space: nowrap; font-weight: 600; color: #0f172a;"><?= priceFormatted($_ci['unit'] * $_ci['qty'], $_ci['cur']); ?></td>
+                                                                                        </tr>
+                                                                                    <?php endforeach; ?>
+                                                                                    </tbody>
+                                                                                </table>
                                                                             </div>
-                                                                        </div>
-                                                                        <div class="m-b-10">
-                                                                            <a href="<?= esc($productUrlB); ?>" target="_blank" class="table-product-title font-600"><?= esc($activeProduct->title); ?></a>
-                                                                            <div class="item">
-                                                                                <?= formatCartOptionsSummary($item->product_options_snapshot, $activeLang->short_form, true, '<br>'); ?>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="product-variant-info m-b-15">
-                                                                            <!-- <div class="item">
-                                                                                <strong class="info-left"><?//= trans("sku"); ?>:</strong>&nbsp;<?//= $activeProduct->sku; ?>
-                                                                            </div> -->
-                                                                            <?php if (!empty($activeProduct->product_vat) && $activeProduct->product_vat > 0):
-                                                                                $delivState = !empty($shipping->sState) ? $shipping->sState : (!empty($shipping->bState) ? $shipping->bState : null);
-                                                                                $itemGst = calculateGstDetails($activeProduct->product_vat_rate, $item->product_vat, $item->seller_id, $delivState);
-                                                                                if ($itemGst['is_interstate']): ?>
-                                                                                    <div class="item">
-                                                                                        <strong class="info-left"><?= trans("igst"); ?>:</strong>&nbsp;<?= $itemGst['igst_rate']; ?>%&nbsp;(<?= priceFormatted($itemGst['igst_amount'], $item->product_currency); ?>)
-                                                                                    </div>
-                                                                                <?php else: ?>
-                                                                                    <div class="item">
-                                                                                        <strong class="info-left"><?= trans("cgst"); ?>:</strong>&nbsp;<?= $itemGst['cgst_rate']; ?>%&nbsp;(<?= priceFormatted($itemGst['cgst_amount'], $item->product_currency); ?>)&nbsp;|&nbsp;<strong class="info-left"><?= trans("sgst"); ?>:</strong>&nbsp;<?= $itemGst['sgst_rate']; ?>%&nbsp;(<?= priceFormatted($itemGst['sgst_amount'], $item->product_currency); ?>)
-                                                                                    </div>
-                                                                                <?php endif; ?>
-                                                                            <?php endif; ?>
-                                                                            <div class="item">
-                                                                                <strong class="info-left"><?= trans("quantity"); ?>:</strong>&nbsp;<?= $qtyB; ?>
-                                                                            </div>
-                                                                            <div class="item">
-                                                                                <strong class="info-left"><?= trans("price"); ?>:</strong>&nbsp;<?= priceFormatted($activeProduct->price_discounted ?: $activeProduct->price, $activeProduct->currency); ?>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    <?php endforeach; ?>
-                                                    <?php endif; ?>
-                                                    <?php endif; ?>
+                                                                        <?php endforeach; ?>
+                                                                    </td>
+                                                                </tr>
+                                                            <?php endif;
+                                                        endif;
+                                                    endif; ?>
                                                     <?php if ($item->product_type == 'physical'): ?>
                                                     <tr class="tr-shipping">
                                                         <td colspan="4">
@@ -571,12 +595,12 @@
                                             </div>
                                         <?php endif; ?>
                                         <?php if ($order->coupon_discount > 0): ?>
-                                            <div class="row row-details">
-                                                <div class="col-xs-12 col-sm-6 col-left">
-                                                    <strong><?= trans("coupon"); ?>&nbsp;&nbsp;[<?= esc($order->coupon_code); ?>]</strong>
+                                            <div class="row">
+                                                <div class="col-6 col-left">
+                                                    <?= trans("coupon"); ?>&nbsp;&nbsp;[<?= esc($order->coupon_code); ?>]
                                                 </div>
-                                                <div class="col-xs-12 col-sm-6 col-right text-right">
-                                                    <strong class="font-right">-&nbsp;<?= priceFormatted($order->coupon_discount, $order->price_currency); ?></strong>
+                                                <div class="col-6 col-right">
+                                                    <strong>-&nbsp;<?= priceFormatted($order->coupon_discount, $order->price_currency); ?></strong>
                                                 </div>
                                             </div>
                                         <?php endif;
