@@ -54,6 +54,16 @@ class Handler extends ExceptionHandler
             return $exception->render($request);
         }
 
+        // If CSRF token expired on logout or user is already logged out, gracefully redirect to login
+        if ($exception instanceof \Illuminate\Session\TokenMismatchException) {
+            if ($request->is('logout') || $request->is('admin/logout') || !auth()->check()) {
+                return redirect()->route('login')->with([
+                    'messege' => __('Your session had expired. You have been logged out.'),
+                    'alert-type' => 'info',
+                ]);
+            }
+        }
+
         return parent::render($request, $exception);
     }
 }
