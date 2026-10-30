@@ -28,3 +28,4 @@ class AddAttachmentPathToEmailQueue extends Migration
         }
     }
 }
+
