@@ -33,11 +33,25 @@ class EmailModel extends BaseModel
      */
     public function addToEmailQueue($data)
     {
-        if (empty($data['email_priority'])) {
-            $data['email_priority'] = 2; // Default priority
+        try {
+            if (empty($data['email_priority'])) {
+                $data['email_priority'] = 2; // Default priority
+            }
+            $data['created_at'] = date('Y-m-d H:i:s');
+            if (isset($data['attachment_path'])) {
+                if (empty($data['attachment_path'])) {
+                    unset($data['attachment_path']);
+                } else {
+                    $fields = $this->db->getFieldNames('email_queue');
+                    if (!in_array('attachment_path', $fields, true)) {
+                        unset($data['attachment_path']);
+                    }
+                }
+            }
+            $this->builder->insert($data);
+        } catch (\Throwable $e) {
+            log_message('error', '[EmailModel] addToEmailQueue error: ' . $e->getMessage());
         }
-        $data['created_at'] = date('Y-m-d H:i:s');
-        $this->builder->insert($data);
     }
 
     /**

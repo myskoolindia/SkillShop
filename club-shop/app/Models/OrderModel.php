@@ -159,9 +159,23 @@ class OrderModel extends BaseModel
             return false;
         }
 
-        $this->addInvoice($orderId);
-        $this->addOrderEmail($orderId);
-        \App\Libraries\RoboQuestUnlocks::syncOrderSafely($orderId);
+        try {
+            $this->addInvoice($orderId);
+        } catch (\Throwable $e) {
+            log_message('error', '[OrderModel] addInvoice failed: ' . $e->getMessage());
+        }
+
+        try {
+            $this->addOrderEmail($orderId);
+        } catch (\Throwable $e) {
+            log_message('error', '[OrderModel] addOrderEmail failed: ' . $e->getMessage());
+        }
+
+        try {
+            \App\Libraries\RoboQuestUnlocks::syncOrderSafely($orderId);
+        } catch (\Throwable $e) {
+            log_message('error', '[OrderModel] syncOrderSafely failed: ' . $e->getMessage());
+        }
 
         return $orderId;
     }
@@ -1062,14 +1076,34 @@ class OrderModel extends BaseModel
             $orderProducts = $this->getOrderItems($orderId);
             $invoiceItems  = unserializeData($invoice->invoice_items);
 
+            $title = trans("invoice") . " #" . $order->order_number;
+
             /* Render the existing invoice HTML view */
             $html = view('invoice/invoice', [
-                'order'         => $order,
-                'invoice'       => $invoice,
-                'invoiceItems'  => $invoiceItems,
-                'orderProducts' => $orderProducts,
+                'title'           => $title,
+                'description'     => $title,
+                'keywords'        => $title,
+                'activeLang'      => $this->activeLang ?? getActiveLang(),
+                'baseSettings'    => $this->settings ?? getBaseSettings(),
+                'paymentSettings' => $this->paymentSettings ?? getPaymentSettings(),
                 'generalSettings' => $this->generalSettings,
+                'order'           => $order,
+                'invoice'         => $invoice,
+                'invoiceItems'    => $invoiceItems,
+                'orderProducts'   => $orderProducts,
             ]);
+
+            /* Autoload dompdf if not already loaded */
+            if (!class_exists('\Dompdf\Dompdf')) {
+                $rootAutoload = dirname(FCPATH) . '/vendor/autoload.php';
+                if (file_exists($rootAutoload)) {
+                    require_once $rootAutoload;
+                }
+            }
+            if (!class_exists('\Dompdf\Dompdf')) {
+                log_message('warning', '[OrderModel] Dompdf not installed; skipping PDF invoice generation.');
+                return null;
+            }
 
             /* Generate PDF with dompdf */
             $options = new \Dompdf\Options();
@@ -1100,52 +1134,62 @@ class OrderModel extends BaseModel
     //build order email
     public function addOrderEmail($orderId)
     {
-        if (getEmailOptionStatus($this->generalSettings, 'new_order') == 1) {
-            $order = $this->getOrder($orderId);
-            if (!empty($order)) {
-                $orderProducts = $this->getOrderItems($order->id);
-                $shipping = unserializeData($order->shipping);
+        try {
+            if (getEmailOptionStatus($this->generalSettings, 'new_order') == 1) {
+                $order = $this->getOrder($orderId);
                 if (!empty($order)) {
-                    //send to buyer
-                    $to = '';
-                    if (!empty($shipping)) {
-                        $to = $shipping->sEmail;
-                    }
-                    if ($order->buyer_type == 'registered') {
-                        $user = getUser($order->buyer_id);
-                        if (!empty($user)) {
-                            $to = $user->email;
+                    $orderProducts = $this->getOrderItems($order->id);
+                    $shipping = unserializeData($order->shipping);
+                    if (!empty($order)) {
+                        //send to buyer
+                        $to = '';
+                        if (!empty($shipping)) {
+                            $to = $shipping->sEmail;
                         }
-                    }
-                    $emailData = [
-                        'email_type'      => 'new_order',
-                        'email_address'   => $to,
-                        'email_subject'   => trans("email_text_thank_for_order"),
-                        'email_data'      => serialize(['orderId' => $order->id]),
-                        'template_path'   => 'email/new_order',
-                        'attachment_path' => $this->generateInvoicePdf($order->id),
-                    ];
-                    addToEmailQueue($emailData);
-                    //send to sellers
-                    if (!empty($orderProducts)) {
-                        $sentArray = array();
-                        foreach ($orderProducts as $orderProduct) {
-                            $seller = getUser($orderProduct->seller_id);
-                            if (!empty($seller) && !in_array($seller->id, $sentArray)) {
-                                $emailData = [
-                                    'email_type' => 'new_order_seller',
-                                    'email_address' => $seller->email,
-                                    'email_subject' => trans("you_have_new_order"),
-                                    'email_data' => serialize(['orderId' => $order->id, 'sellerId' => $seller->id]),
-                                    'template_path' => 'email/new_order_seller'
-                                ];
-                                addToEmailQueue($emailData);
-                                array_push($sentArray, $seller->id);
+                        if ($order->buyer_type == 'registered') {
+                            $user = getUser($order->buyer_id);
+                            if (!empty($user)) {
+                                $to = $user->email;
+                            }
+                        }
+                        $invoicePdf = null;
+                        try {
+                            $invoicePdf = $this->generateInvoicePdf($order->id);
+                        } catch (\Throwable $e) {
+                            log_message('error', '[OrderModel] generateInvoicePdf failed: ' . $e->getMessage());
+                        }
+                        $emailData = [
+                            'email_type'      => 'new_order',
+                            'email_address'   => $to,
+                            'email_subject'   => trans("email_text_thank_for_order"),
+                            'email_data'      => serialize(['orderId' => $order->id]),
+                            'template_path'   => 'email/new_order',
+                            'attachment_path' => $invoicePdf,
+                        ];
+                        addToEmailQueue($emailData);
+                        //send to sellers
+                        if (!empty($orderProducts)) {
+                            $sentArray = array();
+                            foreach ($orderProducts as $orderProduct) {
+                                $seller = getUser($orderProduct->seller_id);
+                                if (!empty($seller) && !in_array($seller->id, $sentArray)) {
+                                    $emailData = [
+                                        'email_type' => 'new_order_seller',
+                                        'email_address' => $seller->email,
+                                        'email_subject' => trans("you_have_new_order"),
+                                        'email_data' => serialize(['orderId' => $order->id, 'sellerId' => $seller->id]),
+                                        'template_path' => 'email/new_order_seller'
+                                    ];
+                                    addToEmailQueue($emailData);
+                                    array_push($sentArray, $seller->id);
+                                }
                             }
                         }
                     }
                 }
             }
+        } catch (\Throwable $e) {
+            log_message('error', '[OrderModel] addOrderEmail failed: ' . $e->getMessage());
         }
     }
 }

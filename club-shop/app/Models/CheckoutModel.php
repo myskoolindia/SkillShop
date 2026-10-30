@@ -508,7 +508,13 @@ class CheckoutModel extends BaseModel
 
         if ($this->db->transStatus() === false) {
             log_message('error', 'OrderCheckout failed for checkout token: ' . $checkout->checkout_token);
-            return $this->errorCheckoutResponse(trans("msg_payment_database_error"));
+            $existingOrder = $this->db->table('orders')->where('checkout_token', $checkout->checkout_token)->get()->getRow();
+            if (!empty($existingOrder)) {
+                $this->updateCheckoutStatus($checkout->id, self::STATUS_PAID);
+                $order = $existingOrder;
+            } else {
+                return $this->errorCheckoutResponse(trans("msg_payment_database_error"));
+            }
         }
 
         //clear cart

@@ -21,6 +21,7 @@ class BaseModel extends Model
     public function __construct()
     {
         parent::__construct();
+        helper(['text', 'security', 'app', 'product']);
         $this->request = \Config\Services::request();
         $this->session = \Config\Services::session();
         $this->activeLanguages = getContextValue('languages');
