@@ -16,7 +16,7 @@
                                     </p>
 
                                     <h2 class="title">1.&nbsp;&nbsp;<?= trans("shipping_information"); ?></h2>
-                                    <form action="<?= base_url('Cart/shippingPost'); ?>" method="post" id="form-guest-shipping" class="validate-form">
+                                    <form action="<?= base_url('Cart/shippingPost'); ?>" method="post" id="form_express_checkout" class="validate-form">
                                         <?= csrf_field(); ?>
                                         <div class="row">
                                             <div class="col-12 cart-form-shipping-address">
@@ -200,13 +200,81 @@
                                                 </div>
                                             </div>
                                         </div>
+                                    
+                                    <!-- SECTION 3: Payment Method -->
+                                    <div class="tab-checkout tab-checkout-open" style="background:#fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-top: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                                        <h2 class="title m-b-15" style="font-size: 17px; font-weight: 700; color: #1e293b;">
+                                            <span class="badge badge-primary mr-2" style="font-size: 13px; border-radius: 50%; width: 24px; height: 24px; line-height: 18px; display: inline-flex; align-items: center; justify-content: center; background-color: #2563eb;">2</span>
+                                            <?= trans("payment_method"); ?>
+                                        </h2>
+
+                                        <div class="cart-options-list">
+                                            <?php 
+                                            $gateways = getActivePaymentGateways();
+                                            $idx = 0;
+                                            if (!empty($gateways)):
+                                                foreach ($gateways as $gateway): ?>
+                                                    <div class="option-card <?= $idx == 0 ? 'is-selected' : ''; ?>" style="border-radius: 8px; margin-bottom: 10px; cursor: pointer;">
+                                                        <div class="custom-control custom-radio">
+                                                            <input type="radio" name="payment_option" value="<?= esc($gateway->name_key); ?>" id="option_gateway_<?= $gateway->id; ?>" class="custom-control-input option-radio" <?= $idx == 0 ? 'checked' : ''; ?> required>
+                                                            <label class="custom-control-label" for="option_gateway_<?= $gateway->id; ?>"></label>
+                                                        </div>
+                                                        <div class="option-details">
+                                                            <div class="method-name" style="font-weight: 700; font-size: 15px; color: #0f172a;"><?= esc($gateway->name); ?></div>
+                                                            <div class="method-desc" style="font-size: 12px; color: #64748b; margin-top: 2px;">
+                                                                <?= $gateway->name_key == 'razorpay' ? 'Cards (Visa, Mastercard, RuPay), UPI (Google Pay, PhonePe, Paytm), Netbanking' : ''; ?>
+                                                            </div>
+                                                        </div>
+                                                        <div class="payment-logos">
+                                                            <?php $logos = @explode(',', $gateway->logos);
+                                                            if (!empty($logos) && countItems($logos) > 0):
+                                                                foreach ($logos as $logo): ?>
+                                                                    <img src="<?= base_url('assets/img/payment/' . esc(trim($logo ?? '')) . '.svg'); ?>" alt="<?= esc(trim($logo ?? '')); ?>" height="22" style="max-height: 22px; margin-left: 5px;">
+                                                                <?php endforeach;
+                                                            endif; ?>
+                                                        </div>
+                                                    </div>
+                                                    <?php $idx++;
+                                                endforeach;
+                                            endif; ?>
+
+                                            <?php if (!empty($paymentSettings->bank_transfer_enabled)): ?>
+                                                <div class="option-card" style="border-radius: 8px; margin-bottom: 10px; cursor: pointer;">
+                                                    <div class="custom-control custom-radio">
+                                                        <input type="radio" name="payment_option" value="bank_transfer" id="option_bank_transfer" class="custom-control-input option-radio" <?= $idx == 0 ? 'checked' : ''; ?> required>
+                                                        <label class="custom-control-label" for="option_bank_transfer"></label>
+                                                    </div>
+                                                    <div class="option-details">
+                                                        <div class="method-name" style="font-weight: 700; font-size: 15px; color: #0f172a;"><?= trans("bank_transfer"); ?></div>
+                                                        <div class="method-desc" style="font-size: 12px; color: #64748b; margin-top: 2px;"><?= trans("bank_transfer_exp"); ?></div>
+                                                    </div>
+                                                </div>
+                                                <?php $idx++;
+                                            endif; ?>
+                                        </div>
+
+                                        <div class="form-group m-t-20 m-b-0">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input" name="terms" id="checkbox_terms" checked required>
+                                                <label for="checkbox_terms" class="custom-control-label" style="font-size: 13px; color: #475569; cursor: pointer;">
+                                                    <?= trans("terms_conditions_exp"); ?>&nbsp;
+                                                    <?php $pageTerms = getPageByDefaultName('terms_conditions', selectedLangId());
+                                                    if (!empty($pageTerms)): ?>
+                                                        <a href="<?= generateUrl($pageTerms->page_default_name); ?>" class="link-terms" target="_blank" style="color: #2563eb; font-weight: 600; text-decoration: underline;"><?= esc($pageTerms->title); ?></a>
+                                                    <?php endif; ?>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <!-- Mobile Confirm Button -->
+                                        <div class="form-group m-t-25 m-b-0 d-block d-lg-none">
+                                            <button type="button" class="btn btn-lg btn-block btn-express-confirm-trigger" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; font-weight: 700; font-size: 16px; border-radius: 8px; padding: 14px 20px; border: none; box-shadow: 0 4px 14px rgba(37,99,235,0.3);">
+                                                <i class="fa fa-lock mr-2"></i> Confirm and Pay &mdash; <?= priceDecimal(!empty($cart->totals->shipping_cost) ? $cart->totals->total : $cart->totals->total_before_shipping, $cart->currency_code); ?>
+                                            </button>
+                                        </div>
+                                    </div>
+
                                     </form>
-                                </div>
-                                <div class="tab-checkout tab-checkout-closed-bordered">
-                                    <h2 class="title">2.&nbsp;&nbsp;<?= trans("payment_method"); ?></h2>
-                                </div>
-                                <div class="tab-checkout tab-checkout-closed-bordered border-top-0">
-                                    <h2 class="title">3.&nbsp;&nbsp;<?= trans("payment"); ?></h2>
                                 </div>
                             </div>
                         </div>
@@ -226,3 +294,125 @@
         });
     </script>
 <?php endif; ?>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    $(document).on('click', '.btn-express-confirm-trigger', function (e) {
+        e.preventDefault();
+
+        var $btn = $(this);
+        var $allBtns = $('.btn-express-confirm-trigger');
+
+        if ($('#checkbox_terms').length && !$('#checkbox_terms').is(':checked')) {
+            Swal.fire({ text: 'Please accept the Terms and Conditions to proceed.', icon: 'warning', confirmButtonText: 'OK' });
+            return false;
+        }
+
+        var formData = $('#form_express_checkout').serialize();
+        var selectedPayment = $('input[name="payment_option"]:checked').val() || 'razorpay';
+        formData += '&payment_method=' + encodeURIComponent(selectedPayment);
+
+        var origHtml = $btn.html();
+        $allBtns.prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-2"></i> Initializing Payment...');
+
+        function resetButtons() {
+            $allBtns.prop('disabled', false).html(origHtml);
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: '<?= base_url("cart/express-checkout-confirm"); ?>',
+            data: formData,
+            dataType: 'json',
+            success: function (res) {
+                if (!res) {
+                    resetButtons();
+                    Swal.fire({ text: 'Unexpected server response. Please try again.', icon: 'error', confirmButtonText: 'OK' });
+                    return;
+                }
+
+                if (res.status === 'error') {
+                    resetButtons();
+                    Swal.fire({ text: res.message || 'An error occurred.', icon: 'error', confirmButtonText: 'OK' });
+                    return;
+                }
+
+                if (res.status === 'success') {
+                    $allBtns.html('<i class="fa fa-check mr-2"></i> Order Placed! Redirecting...');
+                    window.location.href = res.redirectUrl;
+                    return;
+                }
+
+                if (res.status === 'razorpay') {
+                    $allBtns.html('<i class="fa fa-credit-card mr-2"></i> Processing in Razorpay...');
+
+                    if (typeof Razorpay === 'undefined') {
+                        resetButtons();
+                        Swal.fire({ text: 'Razorpay SDK could not be loaded.', icon: 'error', confirmButtonText: 'OK' });
+                        return;
+                    }
+
+                    var rzpOptions = {
+                        key: res.key,
+                        amount: res.amount,
+                        currency: res.currency,
+                        name: res.name,
+                        description: res.description,
+                        image: res.image,
+                        order_id: res.orderId,
+                        prefill: {
+                            name: res.customer.name,
+                            email: res.customer.email,
+                            contact: res.customer.contact
+                        },
+                        notes: { checkout_token: res.checkoutToken },
+                        theme: { color: "#2563eb" },
+                        handler: function (razorpayResponse) {
+                            $allBtns.html('<i class="fa fa-spinner fa-spin mr-2"></i> Finalizing Order...');
+
+                            var verifyData = {
+                                razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+                                razorpay_order_id: razorpayResponse.razorpay_order_id,
+                                razorpay_signature: razorpayResponse.razorpay_signature,
+                                checkout_token: res.checkoutToken,
+                                '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+                            };
+
+                            $.ajax({
+                                type: 'POST',
+                                url: res.paymentPostUrl,
+                                data: verifyData,
+                                dataType: 'json',
+                                success: function (verifyRes) {
+                                    if (verifyRes && verifyRes.status == 1 && verifyRes.redirectUrl) {
+                                        window.location.href = verifyRes.redirectUrl;
+                                    } else {
+                                        window.location.href = '<?= generateUrl("order-completed"); ?>/' + res.checkoutToken;
+                                    }
+                                },
+                                error: function () {
+                                    resetButtons();
+                                    Swal.fire({ text: 'Payment verification failed. Please contact support.', icon: 'error', confirmButtonText: 'OK' });
+                                }
+                            });
+                        },
+                        modal: {
+                            ondismiss: function () { resetButtons(); }
+                        }
+                    };
+
+                    var rzp = new Razorpay(rzpOptions);
+                    rzp.on('payment.failed', function (failRes) {
+                        resetButtons();
+                        Swal.fire({ text: failRes.error ? (failRes.error.description || failRes.error.reason) : 'Payment failed.', icon: 'error', confirmButtonText: 'OK' });
+                    });
+                    rzp.open();
+                }
+            },
+            error: function (xhr) {
+                resetButtons();
+                var errMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'A communication error occurred.';
+                Swal.fire({ text: errMsg, icon: 'error', confirmButtonText: 'OK' });
+            }
+        });
+    });
+</script>

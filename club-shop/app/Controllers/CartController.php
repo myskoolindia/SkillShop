@@ -959,6 +959,20 @@ class CartController extends BaseController
             $data['cartSellerIds'] = helperGetSession('mds_array_cart_seller_ids');
         }
 
+        // Express Checkout: Pass active payment methods and gateways
+        $data['gateways'] = getActivePaymentGateways();
+        $data['paymentSettings'] = $this->paymentSettings;
+        $data['vendorCashOnDelivery'] = 0;
+        foreach ($cart->items as $item) {
+            $vendor = getUser($item->seller_id);
+            if (!empty($vendor) && $vendor->cash_on_delivery == 1 && $vendor->commission_debt < $this->paymentSettings->cash_on_delivery_debt_limit) {
+                $data['vendorCashOnDelivery'] = 1;
+            }
+        }
+        $data['selectedPaymentOption'] = !empty($cart->payment_method) ? $cart->payment_method : 'razorpay';
+        $locationModel = new \App\Models\LocationModel();
+        $data['activeCountries'] = $locationModel->getActiveCountries();
+
         $data['cart'] = $cart;
 
         echo view('partials/_header', $data);
@@ -1053,7 +1067,21 @@ class CartController extends BaseController
                 $payWithBalance->currency = $cart->currency_code;
             }
 
-            $data['cart'] = $cart;
+            // Express Checkout: Pass active payment methods and gateways
+        $data['gateways'] = getActivePaymentGateways();
+        $data['paymentSettings'] = $this->paymentSettings;
+        $data['vendorCashOnDelivery'] = 0;
+        foreach ($cart->items as $item) {
+            $vendor = getUser($item->seller_id);
+            if (!empty($vendor) && $vendor->cash_on_delivery == 1 && $vendor->commission_debt < $this->paymentSettings->cash_on_delivery_debt_limit) {
+                $data['vendorCashOnDelivery'] = 1;
+            }
+        }
+        $data['selectedPaymentOption'] = !empty($cart->payment_method) ? $cart->payment_method : 'razorpay';
+        $locationModel = new \App\Models\LocationModel();
+        $data['activeCountries'] = $locationModel->getActiveCountries();
+
+        $data['cart'] = $cart;
 
         } elseif ($checkoutType == 'service') {
             $data['servicePayment'] = $servicePayment;
@@ -1412,5 +1440,191 @@ class CartController extends BaseController
             $data['htmlContent'] = view('cart/_shipping_methods', $vars);
         }
         return jsonResponse($data);
+    }
+
+    /**
+     * Single-Page Express Checkout Confirmation Endpoint
+     * Handles address, delivery method, and payment method in one unified step.
+     */
+    public function expressCheckoutConfirm()
+    {
+        // 1. Cart Validation
+        $cart = $this->cartModel->getCart(true, true);
+        if (empty($cart) || empty($cart->is_valid) || empty($cart->items)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => trans("msg_cart_error") ?: 'Your shopping cart is empty or invalid.'
+            ]);
+        }
+
+        // 2. Address Validation
+        $shippingAddressId = (int)$this->request->getPost('shipping_address_id');
+        $useSameAddressForBilling = (int)($this->request->getPost('use_same_address_for_billing') ?? 1);
+        $billingAddressId = $useSameAddressForBilling ? $shippingAddressId : (int)$this->request->getPost('billing_address_id');
+
+        if (authCheck()) {
+            if ($shippingAddressId <= 0) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Please select or add a delivery address to proceed.'
+                ]);
+            }
+            $profileModel = new ProfileModel();
+            $sAddr = $profileModel->getShippingAddress($shippingAddressId);
+            if (empty($sAddr) || $sAddr->user_id != user()->id) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'The selected delivery address is invalid. Please choose a valid address.'
+                ]);
+            }
+        } else {
+            $firstName = cleanStr($this->request->getPost('shipping_first_name'));
+            $email = cleanStr($this->request->getPost('shipping_email'));
+            $address = cleanStr($this->request->getPost('shipping_address'));
+            $stateId = (int)$this->request->getPost('shipping_state_id');
+            if (empty($firstName) || empty($email) || empty($address) || empty($stateId)) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Please fill in all required shipping address fields.'
+                ]);
+            }
+        }
+
+        // 3. Save Shipping Data & Shipping Cost
+        $cartRaw = $this->cartModel->fetchRawCartData();
+        if (!empty($cartRaw)) {
+            $this->cartModel->setShippingData($cartRaw);
+
+            // Auto-populate first available shipping method for sellers if not in POST
+            $cartCurrent = $this->cartModel->getCart();
+            if (!empty($cartCurrent) && !empty($cartCurrent->items)) {
+                $shippingData = !empty($cartCurrent->shipping_data) ? safeJsonDecode($cartCurrent->shipping_data) : null;
+                $stateId = !empty($shippingData->shippingStateId) ? $shippingData->shippingStateId : null;
+                $shippingModel = new ShippingModel();
+                $shippingMethodsArray = $shippingModel->getSellerShippingMethodsArray($cartCurrent->items, $stateId, $cartCurrent->currency_code);
+                $cartSellerIds = $this->cartModel->getCartSellerIds($cartCurrent->items);
+                if (!empty($cartSellerIds)) {
+                    foreach ($cartSellerIds as $sellerId) {
+                        if (empty($this->request->getPost('shipping_method_' . $sellerId))) {
+                            foreach ($shippingMethodsArray as $sm) {
+                                if ($sm->shop_id == $sellerId && !empty($sm->methods)) {
+                                    $_POST['shipping_method_' . $sellerId] = $sm->methods[0]->id;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            $this->cartModel->setShippingCost($cartRaw);
+        }
+
+        // 4. Set Payment Method
+        $paymentMethod = cleanStr($this->request->getPost('payment_method') ?: 'razorpay');
+        $this->cartModel->setCartPaymentMethod($cart->id, $paymentMethod);
+
+        // 5. Re-fetch cart with updated shipping and payment data
+        $cart = $this->cartModel->getCart(true, true);
+
+        // 6. Create Checkout Session
+        helperDeleteSession('mds_service_payment');
+        $checkout = $this->checkoutModel->createCheckout($cart, null, true);
+        if (empty($checkout) || empty($checkout->checkout_token)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Unable to initialize checkout session. Please refresh and try again.'
+            ]);
+        }
+
+        // 7. Route to Payment Gateway Handler
+        if ($paymentMethod === 'razorpay') {
+            $paymentGateway = getPaymentGateway('razorpay');
+            if (empty($paymentGateway) || empty($paymentGateway->status)) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Razorpay payment gateway is currently unavailable.'
+                ]);
+            }
+
+            try {
+                $razorpay = new Razorpay($paymentGateway);
+                $totalAmountInSubunits = (int)round($checkout->grand_total * 100);
+                $orderData = [
+                    'receipt'  => $checkout->checkout_token,
+                    'amount'   => $totalAmountInSubunits,
+                    'currency' => $checkout->currency_code,
+                    'notes'    => ['checkout_token' => $checkout->checkout_token]
+                ];
+                $razorpayOrderId = $razorpay->createOrder($orderData);
+                if (empty($razorpayOrderId)) {
+                    return $this->response->setJSON([
+                        'status' => 'error',
+                        'message' => 'Could not initiate Razorpay order. Please verify payment credentials.'
+                    ]);
+                }
+
+                $customerData = getCartCustomerData($checkout);
+
+                return $this->response->setJSON([
+                    'status'         => 'razorpay',
+                    'key'            => $paymentGateway->public_key,
+                    'amount'         => $totalAmountInSubunits,
+                    'currency'       => $checkout->currency_code,
+                    'name'           => $this->generalSettings->application_name,
+                    'description'    => 'Order #' . $checkout->checkout_token,
+                    'image'          => getLogoEmail(),
+                    'orderId'        => $razorpayOrderId,
+                    'checkoutToken'  => $checkout->checkout_token,
+                    'customer'       => [
+                        'name'    => trim(($customerData->first_name ?? '') . ' ' . ($customerData->last_name ?? '')),
+                        'email'   => $customerData->email ?? '',
+                        'contact' => $customerData->phone_number ?? ''
+                    ],
+                    'paymentPostUrl' => generateUrl('checkout/complete-razorpay-payment')
+                ]);
+            } catch (\Throwable $e) {
+                log_message('error', '[ExpressCheckout] Razorpay init error: ' . $e->getMessage());
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Razorpay communication error: ' . $e->getMessage()
+                ]);
+            }
+        } elseif ($paymentMethod === 'cash_on_delivery') {
+            $transaction = (object)[
+                'payment_id'     => 'COD-' . generateToken(),
+                'status_text'    => 'pending_payment',
+                'status'         => 1,
+                'payment_method' => 'cash_on_delivery',
+            ];
+            $result = $this->checkoutModel->handleProductCheckout($checkout, $transaction);
+            return $this->response->setJSON([
+                'status'      => 'success',
+                'redirectUrl' => $result['redirectUrl'] ?? (generateUrl('order-completed') . '/' . $checkout->checkout_token)
+            ]);
+        } elseif ($paymentMethod === 'bank_transfer') {
+            $transaction = (object)[
+                'payment_id'     => 'BANK-' . generateToken(),
+                'status_text'    => 'awaiting_payment',
+                'status'         => 1,
+                'payment_method' => 'bank_transfer',
+            ];
+            $result = $this->checkoutModel->handleProductCheckout($checkout, $transaction);
+            return $this->response->setJSON([
+                'status'      => 'success',
+                'redirectUrl' => $result['redirectUrl'] ?? (generateUrl('order-completed') . '/' . $checkout->checkout_token)
+            ]);
+        } elseif ($paymentMethod === 'wallet_balance') {
+            $result = $this->checkoutModel->handleWalletPayment($checkout);
+            return $this->response->setJSON([
+                'status'      => 'success',
+                'redirectUrl' => $result['redirectUrl'] ?? (generateUrl('order-completed') . '/' . $checkout->checkout_token)
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Unsupported payment method selected.'
+        ]);
     }
 }

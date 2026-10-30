@@ -82,7 +82,7 @@ else: ?>
     endif; ?>
 
     <?php if ($showButton == true): ?>
-        <div class="row">
+        <div class="row" style="display:none !important;">
             <div class="col-12 m-t-30 text-right">
                 <button type="submit" name="submit" value="update" class="btn btn-lg btn-custom btn-cart-shipping"><?= trans("continue_to_payment_method") ?>&nbsp;&nbsp;<i class="icon-arrow-right m-0"></i></button>
             </div>
@@ -102,13 +102,13 @@ endif; ?>
         </div>
     </div>
 
-    <div class="form-group m-t-60 text-right">
+    <div class="form-group m-t-60 text-right" style="display:none !important;">
         <button type="button" id="btnShowCartShippingError" class="btn btn-lg btn-custom btn-cart-shipping"><?= trans("continue_to_payment_method") ?>&nbsp;&nbsp;<i class="icon-arrow-right m-0"></i></button>
     </div>
 <?php endif; ?>
 
 
-<div class="row">
+<div class="row" style="display:none !important;">
     <div class="col-12 m-t-30">
         <a href="<?= generateUrl('cart'); ?>" class="link-underlined link-return-cart"><&nbsp;<?= trans("return_to_cart"); ?></a>
     </div>

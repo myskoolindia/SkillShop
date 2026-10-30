@@ -244,6 +244,7 @@ $routes->post('cart/add-to-cart', 'CartController::addToCart');
 $routes->post('add-to-cart-quote', 'CartController::addToCartQuote');
 $routes->post('cart/update-quantity', 'CartController::updateCartItemQuantity');
 $routes->post('cart/payment-method-post', 'CartController::paymentMethodPost');
+$routes->post('cart/express-checkout-confirm', 'CartController::expressCheckoutConfirm');
 $routes->post('cart/coupon-code-post', 'CartController::couponCodePost');
 
 $routes->post('cart/add-to-cart-bundle', 'CartController::addToCartBundle');
