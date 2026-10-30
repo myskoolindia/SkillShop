@@ -25,8 +25,12 @@ class AuthController extends BaseController
         if (authCheck()) {
             $response['result'] = 1;
             $user = user();
-            if ($user && isVendor($user)) {
+            $sessionRole = session('roboquest_shop_role');
+            $isSchoolOrMember = (int)($user->role_id ?? 0) === 3 || in_array($sessionRole, ['school', 'teacher', 'student'], true);
+            if ($user && isVendor($user) && !$isSchoolOrMember && (int)$user->role_id === 2) {
                 $response['redirect'] = dashboardUrl();
+            } else {
+                $response['redirect'] = langBaseUrl();
             }
             return jsonResponse($response);
         }
@@ -45,8 +49,16 @@ class AuthController extends BaseController
         if ($this->authModel->login()) {
             $response['result'] = 1;
             $user = user();
-            if ($user && isVendor($user)) {
+            $sessionRole = session('roboquest_shop_role');
+            $isSchoolOrMember = (int)($user->role_id ?? 0) === 3 || in_array($sessionRole, ['school', 'teacher', 'student'], true);
+            if ($user && isVendor($user) && !$isSchoolOrMember && (int)$user->role_id === 2) {
                 $response['redirect'] = dashboardUrl();
+            } else {
+                $redirectUrl = inputPost('redirect_url');
+                if (empty($redirectUrl) || str_contains($redirectUrl, 'login') || str_contains($redirectUrl, 'dashboard')) {
+                    $redirectUrl = langBaseUrl();
+                }
+                $response['redirect'] = $redirectUrl;
             }
         } else {
             $response['response'] = view('partials/_messages');
@@ -63,9 +75,11 @@ class AuthController extends BaseController
     {
         if (authCheck()) {
             $user = user();
+            $sessionRole = session('roboquest_shop_role');
+            $isSchoolOrMember = (int)($user->role_id ?? 0) === 3 || in_array($sessionRole, ['school', 'teacher', 'student'], true);
             if ($user && hasPermission('admin_panel', $user)) {
                 return redirect()->to(adminUrl());
-            } elseif ($user && isVendor($user)) {
+            } elseif ($user && isVendor($user) && !$isSchoolOrMember && (int)$user->role_id === 2) {
                 return redirect()->to(dashboardUrl());
             }
             return redirect()->to(langBaseUrl());
@@ -98,9 +112,11 @@ class AuthController extends BaseController
             }
             if ($authModel->login()) {
                 $loggedUser = user();
+                $sessionRole = session('roboquest_shop_role');
+                $isSchoolOrMember = (int)($loggedUser->role_id ?? 0) === 3 || in_array($sessionRole, ['school', 'teacher', 'student'], true);
                 if ($loggedUser && hasPermission('admin_panel', $loggedUser)) {
                     return redirect()->to(adminUrl());
-                } elseif ($loggedUser && isVendor($loggedUser)) {
+                } elseif ($loggedUser && isVendor($loggedUser) && !$isSchoolOrMember && (int)$loggedUser->role_id === 2) {
                     return redirect()->to(dashboardUrl());
                 }
                 return redirect()->to(langBaseUrl());
@@ -608,10 +624,16 @@ class AuthController extends BaseController
         // Determine target redirect
         $target = trim($payload['target'] ?? '');
         if (!empty($target)) {
-            if (str_starts_with($target, 'http://') || str_starts_with($target, 'https://')) {
-                return redirect()->to($target);
+            // For school, teacher, student users: club shop is not a seller login and has no seller dashboard
+            if (in_array($ssoRole, ['school', 'teacher', 'student'], true) && in_array(ltrim($target, '/'), ['dashboard', 'dashboard/add-product', 'dashboard/products'])) {
+                $target = '';
             }
-            return redirect()->to(base_url(ltrim($target, '/')));
+            if (!empty($target)) {
+                if (str_starts_with($target, 'http://') || str_starts_with($target, 'https://')) {
+                    return redirect()->to($target);
+                }
+                return redirect()->to(base_url(ltrim($target, '/')));
+            }
         }
 
         // If user is admin in shop and role is admin, redirect to admin panel

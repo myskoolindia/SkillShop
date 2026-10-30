@@ -301,16 +301,29 @@ if (!function_exists('isVendor')) {
             $user = user();
         }
         if (!empty($user)) {
-            if ($user->role_id == 1) {
+            // Super Admin can access vendor features
+            if ((int)$user->role_id === 1) {
                 return true;
             }
+
+            // Normal users (Member role_id = 3) and school/teacher users are never vendors
+            if ((int)$user->role_id === 3) {
+                return false;
+            }
+
+            $sessionRole = session('roboquest_shop_role');
+            if (in_array($sessionRole, ['school', 'teacher', 'student'], true)) {
+                return false;
+            }
+
+            // Explicit vendor role or vendor permission
+            if ((int)$user->role_id === 2 || hasPermission('vendor', $user) || hasPermission('products', $user)) {
+                return true;
+            }
+
             if (getContextValue('generalSettings')->multi_vendor_system == 1) {
                 if (getContextValue('generalSettings')->vendor_verification_system != 1) {
-                    return true;
-                } else {
-                    if (hasPermission('vendor', $user)) {
-                        return true;
-                    }
+                    return (int)$user->role_id === 2;
                 }
             }
         }

@@ -21,7 +21,19 @@
 </a>
 </li>
 <?php endif;
-if (isVendor() && !empty($profileMenuDash)): ?>
+if (session('roboquest_shop_role') === 'school'): ?>
+<li>
+<a href="<?= ssoMainUrl('school/dashboard'); ?>" style="color: #4f46e5; font-weight: 600;">
+<div class="icon">
+<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+  <polyline points="9 22 9 12 15 12 15 22"/>
+</svg>
+</div><?= 'Skillvation School Portal'; ?>
+</a>
+</li>
+<?php endif;
+if (isVendor() && !empty($profileMenuDash) && (int)user()->role_id !== 3 && session('roboquest_shop_role') !== 'school'): ?>
 <li>
 <a href="<?= dashboardUrl(); ?>">
 <div class="icon">

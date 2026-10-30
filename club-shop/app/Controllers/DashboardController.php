@@ -42,6 +42,14 @@ class DashboardController extends BaseController
         if (!authCheck()) {
             redirectToUrl(langBaseUrl());
         }
+
+        $sessionRole = session('roboquest_shop_role');
+        $user = user();
+        if ((int)($user->role_id ?? 0) === 3 || in_array($sessionRole, ['school', 'teacher', 'student'], true)) {
+            // Normal user (Member) / school user has no seller dashboard
+            redirectToUrl(langBaseUrl());
+        }
+
         if (!isVendor() && !hasPermission('products')) {
             if ($this->generalSettings->membership_plans_system == 1) {
                 redirectToUrl(generateUrl('start_selling'));

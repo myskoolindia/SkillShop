@@ -48,6 +48,11 @@ class SsoBridgeController extends Controller
             $target = 'admin';
         }
 
+        // For school users, club shop is never seller login - do not route to dashboard
+        if ($user->role === 'school' && in_array(ltrim($target, '/'), ['dashboard', 'dashboard/add-product', 'dashboard/products'])) {
+            $target = '';
+        }
+
         $ssoUrl = SsoTokenService::generateShopSsoUrl($user, $target);
 
         return redirect()->away($ssoUrl);

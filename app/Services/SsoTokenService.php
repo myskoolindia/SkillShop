@@ -30,6 +30,11 @@ class SsoTokenService
             }
         }
 
+        // For school users, target must never be seller dashboard
+        if ($role === 'school' && in_array(ltrim($target ?? '', '/'), ['dashboard', 'dashboard/add-product', 'dashboard/products'])) {
+            $target = '';
+        }
+
         $payload = [
             'uid'        => (string) $user->id,
             'email'      => (string) $user->email,

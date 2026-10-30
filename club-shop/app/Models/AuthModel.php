@@ -323,8 +323,16 @@ class AuthModel extends BaseModel
             $username = $this->generateUniqueUsername($displayName);
             $slug = $this->generateUniqueSlug($username);
 
-            $isAdmin = !empty($ssoUser['role']) && $ssoUser['role'] === 'admin';
-            $roleId = $isAdmin ? 1 : (($this->generalSettings->vendor_verification_system != 1) ? 2 : 3);
+            $isAdmin  = !empty($ssoUser['role']) && $ssoUser['role'] === 'admin';
+            $isVendor = !empty($ssoUser['role']) && $ssoUser['role'] === 'vendor';
+            // School, teacher, student are normal users without seller dashboard (role_id = 3 Member)
+            if ($isAdmin) {
+                $roleId = 1;
+            } elseif ($isVendor) {
+                $roleId = 2;
+            } else {
+                $roleId = 3;
+            }
 
             $data = [
                 'email' => $ssoUser['email'],
@@ -353,6 +361,11 @@ class AuthModel extends BaseModel
             }
             if (!empty($ssoUser['role']) && $ssoUser['role'] === 'admin' && (int)$user->role_id !== 1) {
                 $updates['role_id'] = 1;
+            } elseif (!empty($ssoUser['role']) && in_array($ssoUser['role'], ['school', 'teacher', 'student'], true)) {
+                // Ensure school user is normal Member (role_id = 3), never seller/vendor (role_id = 2)
+                if ((int)$user->role_id !== 3 && (int)$user->role_id !== 1) {
+                    $updates['role_id'] = 3;
+                }
             }
             $this->builder->where('id', $user->id)->update($updates);
             $user = $this->getUserByEmail($ssoUser['email']);
