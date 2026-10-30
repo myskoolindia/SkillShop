@@ -32,8 +32,19 @@ if (session('roboquest_shop_role') === 'school'): ?>
 </div><?= 'Skillvation School Portal'; ?>
 </a>
 </li>
+<?php elseif (session('roboquest_shop_role') === 'teacher'): ?>
+<li>
+<a href="<?= ssoMainUrl('student/dashboard'); ?>" style="color: #4f46e5; font-weight: 600;">
+<div class="icon">
+<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+  <polyline points="9 22 9 12 15 12 15 22"/>
+</svg>
+</div><?= 'Skillvation Teacher Portal'; ?>
+</a>
+</li>
 <?php endif;
-if (isVendor() && !empty($profileMenuDash) && (int)user()->role_id !== 3 && session('roboquest_shop_role') !== 'school'): ?>
+if (isVendor() && !empty($profileMenuDash) && (int)user()->role_id !== 3 && !in_array(session('roboquest_shop_role'), ['school', 'teacher'], true)): ?>
 <li>
 <a href="<?= dashboardUrl(); ?>">
 <div class="icon">
@@ -45,7 +56,7 @@ if (isVendor() && !empty($profileMenuDash) && (int)user()->role_id !== 3 && sess
 </li>
 <?php endif; ?>
 <li>
-<a href="<?= generateProfileUrl(user()->slug); ?>">
+<a href="<?= isVendor(user()) && (int)user()->role_id === 2 ? generateProfileUrl(user()->slug) : generateUrl('settings'); ?>">
 <div class="icon">
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="19" height="19" color="#666666" fill="none">
 <path d="M6.57757 15.4816C5.1628 16.324 1.45336 18.0441 3.71266 20.1966C4.81631 21.248 6.04549 22 7.59087 22H16.4091C17.9545 22 19.1837 21.248 20.2873 20.1966C22.5466 18.0441 18.8372 16.324 17.4224 15.4816C14.1048 13.5061 9.89519 13.5061 6.57757 15.4816Z" stroke="#666666" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>

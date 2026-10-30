@@ -202,10 +202,17 @@ endif; ?>
                                                 <li><a href="javascript:;" data-toggle="modal" data-target="#loginModal"><?= trans("login") ?? "Sign in"; ?></a></li>
                                                 <li><a href="<?= generateUrl('register'); ?>"><?= trans("register") ?? "Sign Up"; ?></a></li>
                                             <?php else: ?>
-                                                <li><a href="<?= dashboardUrl(); ?>"><?= trans("dashboard") ?? "Dashboard"; ?></a></li>
-                                                <li><a href="<?= dashboardUrl('orders'); ?>"><?= trans("orders") ?? "My Orders"; ?></a></li>
+                                                <?php if (session('roboquest_shop_role') === 'school'): ?>
+                                                    <li><a href="<?= ssoMainUrl('school/dashboard'); ?>" style="color:#4f46e5;font-weight:600;"><i class="icon-dashboard mr-1"></i> <?= 'School Portal'; ?></a></li>
+                                                <?php elseif (session('roboquest_shop_role') === 'teacher'): ?>
+                                                    <li><a href="<?= ssoMainUrl('student/dashboard'); ?>" style="color:#4f46e5;font-weight:600;"><i class="icon-dashboard mr-1"></i> <?= 'Teacher Portal'; ?></a></li>
+                                                <?php endif; ?>
+                                                <?php if (isVendor() && (int)user()->role_id === 2 && !in_array(session('roboquest_shop_role'), ['school', 'teacher'], true)): ?>
+                                                    <li><a href="<?= dashboardUrl(); ?>"><?= trans("dashboard") ?? "Seller Dashboard"; ?></a></li>
+                                                <?php endif; ?>
+                                                <li><a href="<?= generateUrl('orders'); ?>"><?= trans("orders") ?? "My Orders"; ?></a></li>
                                                 <li><a href="<?= generateUrl('wishlist'); ?>"><?= trans("wishlist") ?? "Wishlist"; ?></a></li>
-                                                <li><a href="<?= generateUrl('profile_edit'); ?>"><?= trans("profile") ?? "Profile Settings"; ?></a></li>
+                                                <li><a href="<?= generateUrl('settings'); ?>"><?= trans("profile") ?? "Profile Settings"; ?></a></li>
                                                 <li><a href="<?= base_url('logout'); ?>" class="text-danger"><?= trans("logout") ?? "Logout"; ?></a></li>
                                             <?php endif; ?>
                                         </ul>
@@ -255,7 +262,11 @@ endif; ?>
                                     <a href="javascript:;" data-toggle="modal" data-target="#loginModal" class="btn btn-primary btn-sm mr-2"><?= trans("login"); ?></a>
                                     <a href="<?= generateUrl('register'); ?>" class="btn btn-outline-primary btn-sm"><?= trans("register"); ?></a>
                                 <?php else: ?>
-                                    <a href="<?= dashboardUrl(); ?>" class="btn btn-primary btn-sm"><?= trans("dashboard"); ?></a>
+                                    <?php if (isVendor() && (int)user()->role_id === 2 && !in_array(session('roboquest_shop_role'), ['school', 'teacher'], true)): ?>
+                                        <a href="<?= dashboardUrl(); ?>" class="btn btn-primary btn-sm"><?= trans("dashboard"); ?></a>
+                                    <?php else: ?>
+                                        <a href="<?= generateUrl('orders'); ?>" class="btn btn-primary btn-sm mr-2"><?= trans("orders") ?? "My Orders"; ?></a>
+                                    <?php endif; ?>
                                     <a href="<?= base_url('logout'); ?>" class="btn btn-danger btn-sm ml-2"><?= trans("logout"); ?></a>
                                 <?php endif; ?>
                             </div>

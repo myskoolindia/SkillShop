@@ -32,6 +32,10 @@ class ProfileController extends BaseController
         }
         $data['isTranslatable'] = true;
 
+        if (authCheck() && user()->id == $data['user']->id && !isVendor($data['user'])) {
+            return redirect()->to(generateUrl('settings'));
+        }
+
         if (isVendor($data['user'])) {
             $data = setPageMeta(getUsername($data['user']), $data);
             $data['showOgTags'] = true;
