@@ -325,16 +325,39 @@
                 </div>
             <?php endif; ?>
 
-            <!-- Single-Page Express Confirm and Pay Button -->
+            <!-- Single-Page Express Confirm and Pay Button (Right Side Only) -->
             <div class="express-checkout-action-box" style="margin-top: 18px;">
-                <button type="button" class="btn btn-lg btn-block btn-express-confirm-trigger" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; font-weight: 700; font-size: 16px; border-radius: 8px; padding: 13px 18px; border: none; box-shadow: 0 4px 14px rgba(37,99,235,0.28); transition: all 0.2s ease; cursor: pointer; width: 100%;">
+                <button type="button" class="btn btn-lg btn-block btn-express-confirm-trigger" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; font-weight: 700; font-size: 16px; border-radius: 8px; padding: 14px 18px; border: none; box-shadow: 0 4px 14px rgba(37,99,235,0.28); transition: all 0.2s ease; cursor: pointer; width: 100%;">
                     <i class="fa fa-lock" style="margin-right: 6px;"></i> Confirm and Pay &mdash; <?= priceDecimal(!empty($cart->totals->shipping_cost) ? $cart->totals->total : $cart->totals->total_before_shipping, $cart->currency_code); ?>
                 </button>
-                <div style="text-align: center; margin-top: 9px; font-size: 11.5px; color: #64748b; display: flex; align-items: center; justify-content: center; gap: 5px;">
+
+                <!-- Accept Terms below the button -->
+                <div style="margin-top: 12px; margin-bottom: 10px;">
+                    <div class="custom-control custom-checkbox" style="display: flex; align-items: flex-start; justify-content: center;">
+                        <input type="checkbox" class="custom-control-input" name="terms" id="checkbox_terms" checked required>
+                        <label for="checkbox_terms" class="custom-control-label" style="font-size: 12px; color: #475569; cursor: pointer; line-height: 1.35; padding-left: 6px;">
+                            <?= trans("terms_conditions_exp"); ?>&nbsp;
+                            <?php $pageTerms = getPageByDefaultName('terms_conditions', selectedLangId());
+                            if (!empty($pageTerms)): ?>
+                                <a href="<?= generateUrl($pageTerms->page_default_name); ?>" class="link-terms" target="_blank" style="color: #2563eb; font-weight: 600; text-decoration: underline;"><?= esc($pageTerms->title); ?></a>
+                            <?php endif; ?>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 6px; font-size: 11.5px; color: #64748b; display: flex; align-items: center; justify-content: center; gap: 5px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="#16a34a" viewBox="0 0 16 16">
                         <path d="M8 0c-.69 0-1.843.265-2.928.56-1.11.3-2.229.655-2.887.87a1.54 1.54 0 0 0-1.044 1.262c-.596 4.477.787 7.795 2.464 9.99a11.777 11.777 0 0 0 3.945 3.09c.148.077.309.12.47.12s.322-.043.47-.12a11.777 11.777 0 0 0 3.945-3.09c1.677-2.195 3.06-5.513 2.464-9.99a1.54 1.54 0 0 0-1.044-1.263 62.467 62.467 0 0 0-2.887-.87C9.843.266 8.69 0 8 0zm2.146 5.146a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 7.793l2.646-2.647z"/>
                     </svg>
                     <span>256-Bit SSL Encrypted &bull; 100% Safe Checkout</span>
+                </div>
+
+                <div style="text-align: center; margin-top: 8px;">
+                    <img src="<?= base_url('assets/img/payment/visa.svg'); ?>" alt="Visa" height="18" style="margin: 0 3px;">
+                    <img src="<?= base_url('assets/img/payment/mastercard.svg'); ?>" alt="Mastercard" height="18" style="margin: 0 3px;">
+                    <img src="<?= base_url('assets/img/payment/rupay.svg'); ?>" alt="RuPay" height="18" style="margin: 0 3px;">
+                    <img src="<?= base_url('assets/img/payment/maestro.svg'); ?>" alt="Maestro" height="18" style="margin: 0 3px;">
+                    <img src="<?= base_url('assets/img/payment/razorpay.svg'); ?>" alt="Razorpay" height="18" style="margin: 0 3px;">
                 </div>
             </div>
         </div>

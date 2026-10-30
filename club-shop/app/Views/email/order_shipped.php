@@ -30,21 +30,24 @@
                                         </p>
                                     <?php endif; ?>
                                     <h3 style="margin-bottom: 10px;font-size: 16px;font-weight: 600;border-bottom: 1px solid #d1d1d1;padding-bottom: 5px; margin-top: 45px;"><?= trans("shipped_product"); ?></h3>
-                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="text-align: left" class="table-products">
-                                        <tr>
-                                            <th style="padding: 10px 0; border-bottom: 2px solid #ddd;"><?= trans("product"); ?></th>
-                                            <th style="padding: 10px 0; border-bottom: 2px solid #ddd;"><?= trans("unit_price"); ?></th>
-                                            <th style="padding: 10px 0; border-bottom: 2px solid #ddd;"><?= trans("quantity"); ?></th>
-                                            <th style="padding: 10px 0; border-bottom: 2px solid #ddd;"><?= trans("vat"); ?></th>
-                                            <th style="padding: 10px 0; border-bottom: 2px solid #ddd;"><?= trans("total"); ?></th>
-                                        </tr>
+                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; margin-top: 15px;" class="table-products">
+                                        <thead>
+                                            <tr>
+                                                <th style="padding: 10px 8px; border-bottom: 2px solid #ddd; text-align: left; font-size: 13px; font-weight: 600; width: 42%;"><?= trans("product"); ?></th>
+                                                <th style="padding: 10px 8px; border-bottom: 2px solid #ddd; text-align: right; font-size: 13px; font-weight: 600; width: 15%; white-space: nowrap;"><?= trans("unit_price"); ?></th>
+                                                <th style="padding: 10px 8px; border-bottom: 2px solid #ddd; text-align: center; font-size: 13px; font-weight: 600; width: 10%; white-space: nowrap;"><?= trans("quantity"); ?></th>
+                                                <th style="padding: 10px 8px; border-bottom: 2px solid #ddd; text-align: right; font-size: 13px; font-weight: 600; width: 18%; white-space: nowrap;"><?= trans("vat"); ?></th>
+                                                <th style="padding: 10px 8px; border-bottom: 2px solid #ddd; text-align: right; font-size: 13px; font-weight: 600; width: 15%; white-space: nowrap;"><?= trans("total"); ?></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
                                         <?php if (!empty($orderProduct)): ?>
                                             <tr>
-                                                <td style="width: 40%; padding: 12px 2px; border-bottom: 1px solid #ddd;"><?= esc($orderProduct->product_title); ?></td>
-                                                <td style="padding: 12px 2px; border-bottom: 1px solid #ddd;"><?= priceFormatted($orderProduct->product_unit_price, $orderProduct->product_currency); ?></td>
-                                                <td style="padding: 12px 2px; border-bottom: 1px solid #ddd;"><?= $orderProduct->product_quantity; ?></td>
+                                                <td style="width: 42%; padding: 12px 8px; border-bottom: 1px solid #ddd; vertical-align: top; text-align: left; font-weight: 600; color: #333;"><?= esc($orderProduct->product_title); ?></td>
+                                                <td style="width: 15%; padding: 12px 8px; border-bottom: 1px solid #ddd; vertical-align: top; text-align: right; white-space: nowrap;"><?= priceFormatted($orderProduct->product_unit_price, $orderProduct->product_currency); ?></td>
+                                                <td style="width: 10%; padding: 12px 8px; border-bottom: 1px solid #ddd; vertical-align: top; text-align: center; white-space: nowrap;"><?= $orderProduct->product_quantity; ?></td>
                                                 <?php if (!empty($order->price_vat)): ?>
-                                                    <td style="padding: 12px 2px; border-bottom: 1px solid #ddd;">
+                                                    <td style="width: 18%; padding: 12px 8px; border-bottom: 1px solid #ddd; vertical-align: top; text-align: right; white-space: nowrap;">
                                                         <?php if (!empty($orderProduct->product_vat)): 
                                                             $shipping = !empty($order->shipping) ? unserializeData($order->shipping) : null;
                                                             $delivState = $shipping->sStateId ?? $shipping->sState ?? $shipping->bState ?? null;
@@ -58,11 +61,12 @@
                                                         endif; ?>
                                                     </td>
                                                 <?php else: ?>
-                                                    <td style="padding: 12px 2px; border-bottom: 1px solid #ddd;">-</td>
+                                                    <td style="width: 18%; padding: 12px 8px; border-bottom: 1px solid #ddd; vertical-align: top; text-align: right;">-</td>
                                                 <?php endif; ?>
-                                                <td style="padding: 12px 2px; border-bottom: 1px solid #ddd;"><?= priceFormatted($orderProduct->product_total_price, $orderProduct->product_currency); ?></td>
+                                                <td style="width: 15%; padding: 12px 8px; border-bottom: 1px solid #ddd; vertical-align: top; text-align: right; white-space: nowrap; font-weight: 600;"><?= priceFormatted($orderProduct->product_total_price, $orderProduct->product_currency); ?></td>
                                             </tr>
                                         <?php endif; ?>
+                                        </tbody>
                                     </table>
                                     <br>
                                     <br>

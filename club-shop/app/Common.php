@@ -503,13 +503,28 @@ if (!function_exists('characterLimiter')) {
 if (!function_exists('trans')) {
     function trans(string $str, bool $clearQuotes = false): string
     {
-        if ($str === 'mercado_pago') {
-            return 'Mercado Pago';
-        }
-
         $translations = getContextValue('languageTranslations');
         if (isset($translations[$str])) {
             return $clearQuotes ? clrQuotes($translations[$str]) : $translations[$str];
+        }
+
+        if ($str === 'mercado_pago') {
+            return 'Mercado Pago';
+        }
+        if ($str === 'total_gst') {
+            return 'GST';
+        }
+        if ($str === 'gst') {
+            return 'GST';
+        }
+        if ($str === 'cgst') {
+            return 'CGST';
+        }
+        if ($str === 'sgst') {
+            return 'SGST';
+        }
+        if ($str === 'igst') {
+            return 'IGST';
         }
 
         return $str;

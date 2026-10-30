@@ -1470,8 +1470,8 @@ class CartController extends BaseController
                 ]);
             }
             $profileModel = new ProfileModel();
-            $sAddr = $profileModel->getShippingAddress($shippingAddressId);
-            if (empty($sAddr) || $sAddr->user_id != user()->id) {
+            $sAddr = $profileModel->getShippingAddressById($shippingAddressId, user()->id);
+            if (empty($sAddr)) {
                 return $this->response->setJSON([
                     'status' => 'error',
                     'message' => 'The selected delivery address is invalid. Please choose a valid address.'

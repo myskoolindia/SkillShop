@@ -201,79 +201,76 @@
                                             </div>
                                         </div>
                                     
-                                    <!-- SECTION 3: Payment Method -->
-                                    <div class="tab-checkout tab-checkout-open" style="background:#fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-top: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-                                        <h2 class="title m-b-15" style="font-size: 17px; font-weight: 700; color: #1e293b;">
-                                            <span class="badge badge-primary mr-2" style="font-size: 13px; border-radius: 50%; width: 24px; height: 24px; line-height: 18px; display: inline-flex; align-items: center; justify-content: center; background-color: #2563eb;">2</span>
-                                            <?= trans("payment_method"); ?>
-                                        </h2>
+                                    <!-- SECTION 3: Payment Method (Hidden for Razorpay default; shown only if alternatives exist) -->
+                                    <?php
+                                    $hasOtherPaymentMethods = false;
+                                    if (!empty($paymentSettings->bank_transfer_enabled)) {
+                                        $hasOtherPaymentMethods = true;
+                                    }
+                                    if (!empty($gateways)) {
+                                        foreach ($gateways as $g) {
+                                            if ($g->name_key !== 'razorpay') {
+                                                $hasOtherPaymentMethods = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    ?>
 
-                                        <div class="cart-options-list">
-                                            <?php 
-                                            $gateways = getActivePaymentGateways();
-                                            $idx = 0;
-                                            if (!empty($gateways)):
-                                                foreach ($gateways as $gateway): ?>
-                                                    <div class="option-card <?= $idx == 0 ? 'is-selected' : ''; ?>" style="border-radius: 8px; margin-bottom: 10px; cursor: pointer;">
-                                                        <div class="custom-control custom-radio">
-                                                            <input type="radio" name="payment_option" value="<?= esc($gateway->name_key); ?>" id="option_gateway_<?= $gateway->id; ?>" class="custom-control-input option-radio" <?= $idx == 0 ? 'checked' : ''; ?> required>
-                                                            <label class="custom-control-label" for="option_gateway_<?= $gateway->id; ?>"></label>
-                                                        </div>
-                                                        <div class="option-details">
-                                                            <div class="method-name" style="font-weight: 700; font-size: 15px; color: #0f172a;"><?= esc($gateway->name); ?></div>
-                                                            <div class="method-desc" style="font-size: 12px; color: #64748b; margin-top: 2px;">
-                                                                <?= $gateway->name_key == 'razorpay' ? 'Cards (Visa, Mastercard, RuPay), UPI (Google Pay, PhonePe, Paytm), Netbanking' : ''; ?>
+                                    <?php if ($hasOtherPaymentMethods): ?>
+                                        <div class="tab-checkout tab-checkout-open" style="background:#fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-top: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                                            <h2 class="title m-b-15" style="font-size: 17px; font-weight: 700; color: #1e293b;">
+                                                <span class="badge badge-primary mr-2" style="font-size: 13px; border-radius: 50%; width: 24px; height: 24px; line-height: 18px; display: inline-flex; align-items: center; justify-content: center; background-color: #2563eb;">2</span>
+                                                <?= trans("payment_method"); ?>
+                                            </h2>
+
+                                            <div class="cart-options-list">
+                                                <?php 
+                                                $idx = 0;
+                                                if (!empty($gateways)):
+                                                    foreach ($gateways as $gateway): ?>
+                                                        <div class="option-card <?= $gateway->name_key == 'razorpay' || $idx == 0 ? 'is-selected' : ''; ?>" style="border-radius: 8px; margin-bottom: 10px; cursor: pointer;">
+                                                            <div class="custom-control custom-radio">
+                                                                <input type="radio" name="payment_option" value="<?= esc($gateway->name_key); ?>" id="option_gateway_<?= $gateway->id; ?>" class="custom-control-input option-radio" <?= $gateway->name_key == 'razorpay' || $idx == 0 ? 'checked' : ''; ?> required>
+                                                                <label class="custom-control-label" for="option_gateway_<?= $gateway->id; ?>"></label>
+                                                            </div>
+                                                            <div class="option-details">
+                                                                <div class="method-name" style="font-weight: 700; font-size: 15px; color: #0f172a;"><?= esc($gateway->name); ?></div>
+                                                                <div class="method-desc" style="font-size: 12px; color: #64748b; margin-top: 2px;">
+                                                                    <?= $gateway->name_key == 'razorpay' ? 'Cards (Visa, Mastercard, RuPay), UPI (Google Pay, PhonePe, Paytm), Netbanking' : ''; ?>
+                                                                </div>
+                                                            </div>
+                                                            <div class="payment-logos">
+                                                                <?php $logos = @explode(',', $gateway->logos);
+                                                                if (!empty($logos) && countItems($logos) > 0):
+                                                                    foreach ($logos as $logo): ?>
+                                                                        <img src="<?= base_url('assets/img/payment/' . esc(trim($logo ?? '')) . '.svg'); ?>" alt="<?= esc(trim($logo ?? '')); ?>" height="22" style="max-height: 22px; margin-left: 5px;">
+                                                                    <?php endforeach;
+                                                                endif; ?>
                                                             </div>
                                                         </div>
-                                                        <div class="payment-logos">
-                                                            <?php $logos = @explode(',', $gateway->logos);
-                                                            if (!empty($logos) && countItems($logos) > 0):
-                                                                foreach ($logos as $logo): ?>
-                                                                    <img src="<?= base_url('assets/img/payment/' . esc(trim($logo ?? '')) . '.svg'); ?>" alt="<?= esc(trim($logo ?? '')); ?>" height="22" style="max-height: 22px; margin-left: 5px;">
-                                                                <?php endforeach;
-                                                            endif; ?>
+                                                        <?php $idx++;
+                                                    endforeach;
+                                                endif; ?>
+
+                                                <?php if (!empty($paymentSettings->bank_transfer_enabled)): ?>
+                                                    <div class="option-card" style="border-radius: 8px; margin-bottom: 10px; cursor: pointer;">
+                                                        <div class="custom-control custom-radio">
+                                                            <input type="radio" name="payment_option" value="bank_transfer" id="option_bank_transfer" class="custom-control-input option-radio" required>
+                                                            <label class="custom-control-label" for="option_bank_transfer"></label>
+                                                        </div>
+                                                        <div class="option-details">
+                                                            <div class="method-name" style="font-weight: 700; font-size: 15px; color: #0f172a;"><?= trans("bank_transfer"); ?></div>
+                                                            <div class="method-desc" style="font-size: 12px; color: #64748b; margin-top: 2px;"><?= trans("bank_transfer_exp"); ?></div>
                                                         </div>
                                                     </div>
-                                                    <?php $idx++;
-                                                endforeach;
-                                            endif; ?>
-
-                                            <?php if (!empty($paymentSettings->bank_transfer_enabled)): ?>
-                                                <div class="option-card" style="border-radius: 8px; margin-bottom: 10px; cursor: pointer;">
-                                                    <div class="custom-control custom-radio">
-                                                        <input type="radio" name="payment_option" value="bank_transfer" id="option_bank_transfer" class="custom-control-input option-radio" <?= $idx == 0 ? 'checked' : ''; ?> required>
-                                                        <label class="custom-control-label" for="option_bank_transfer"></label>
-                                                    </div>
-                                                    <div class="option-details">
-                                                        <div class="method-name" style="font-weight: 700; font-size: 15px; color: #0f172a;"><?= trans("bank_transfer"); ?></div>
-                                                        <div class="method-desc" style="font-size: 12px; color: #64748b; margin-top: 2px;"><?= trans("bank_transfer_exp"); ?></div>
-                                                    </div>
-                                                </div>
-                                                <?php $idx++;
-                                            endif; ?>
-                                        </div>
-
-                                        <div class="form-group m-t-20 m-b-0">
-                                            <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" class="custom-control-input" name="terms" id="checkbox_terms" checked required>
-                                                <label for="checkbox_terms" class="custom-control-label" style="font-size: 13px; color: #475569; cursor: pointer;">
-                                                    <?= trans("terms_conditions_exp"); ?>&nbsp;
-                                                    <?php $pageTerms = getPageByDefaultName('terms_conditions', selectedLangId());
-                                                    if (!empty($pageTerms)): ?>
-                                                        <a href="<?= generateUrl($pageTerms->page_default_name); ?>" class="link-terms" target="_blank" style="color: #2563eb; font-weight: 600; text-decoration: underline;"><?= esc($pageTerms->title); ?></a>
-                                                    <?php endif; ?>
-                                                </label>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
-
-                                        <!-- Mobile Confirm Button -->
-                                        <div class="form-group m-t-25 m-b-0 d-block d-lg-none">
-                                            <button type="button" class="btn btn-lg btn-block btn-express-confirm-trigger" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; font-weight: 700; font-size: 16px; border-radius: 8px; padding: 14px 20px; border: none; box-shadow: 0 4px 14px rgba(37,99,235,0.3);">
-                                                <i class="fa fa-lock mr-2"></i> Confirm and Pay &mdash; <?= priceDecimal(!empty($cart->totals->shipping_cost) ? $cart->totals->total : $cart->totals->total_before_shipping, $cart->currency_code); ?>
-                                            </button>
-                                        </div>
-                                    </div>
-
+                                    <?php else: ?>
+                                        <!-- Razorpay is Default: payment section hidden -->
+                                        <input type="hidden" name="payment_option" value="razorpay">
+                                    <?php endif; ?>
                                     </form>
                                 </div>
                             </div>
@@ -287,132 +284,176 @@
     </div>
 </div>
 
-<?php if (!empty($cartShippingData->sStateId)): ?>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            getShippingMethodsByLocation(<?= esc($cartShippingData->sStateId); ?>);
-        });
-    </script>
-<?php endif; ?>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
-    $(document).on('click', '.btn-express-confirm-trigger', function (e) {
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('.btn-express-confirm-trigger');
+        if (!btn) return;
         e.preventDefault();
-
-        var $btn = $(this);
-        var $allBtns = $('.btn-express-confirm-trigger');
-
-        if ($('#checkbox_terms').length && !$('#checkbox_terms').is(':checked')) {
-            Swal.fire({ text: 'Please accept the Terms and Conditions to proceed.', icon: 'warning', confirmButtonText: 'OK' });
-            return false;
-        }
-
-        var formData = $('#form_express_checkout').serialize();
-        var selectedPayment = $('input[name="payment_option"]:checked').val() || 'razorpay';
-        formData += '&payment_method=' + encodeURIComponent(selectedPayment);
-
-        var origHtml = $btn.html();
-        $allBtns.prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-2"></i> Initializing Payment...');
-
-        function resetButtons() {
-            $allBtns.prop('disabled', false).html(origHtml);
-        }
-
-        $.ajax({
-            type: 'POST',
-            url: '<?= base_url("cart/express-checkout-confirm"); ?>',
-            data: formData,
-            dataType: 'json',
-            success: function (res) {
-                if (!res) {
-                    resetButtons();
-                    Swal.fire({ text: 'Unexpected server response. Please try again.', icon: 'error', confirmButtonText: 'OK' });
-                    return;
-                }
-
-                if (res.status === 'error') {
-                    resetButtons();
-                    Swal.fire({ text: res.message || 'An error occurred.', icon: 'error', confirmButtonText: 'OK' });
-                    return;
-                }
-
-                if (res.status === 'success') {
-                    $allBtns.html('<i class="fa fa-check mr-2"></i> Order Placed! Redirecting...');
-                    window.location.href = res.redirectUrl;
-                    return;
-                }
-
-                if (res.status === 'razorpay') {
-                    $allBtns.html('<i class="fa fa-credit-card mr-2"></i> Processing in Razorpay...');
-
-                    if (typeof Razorpay === 'undefined') {
-                        resetButtons();
-                        Swal.fire({ text: 'Razorpay SDK could not be loaded.', icon: 'error', confirmButtonText: 'OK' });
-                        return;
-                    }
-
-                    var rzpOptions = {
-                        key: res.key,
-                        amount: res.amount,
-                        currency: res.currency,
-                        name: res.name,
-                        description: res.description,
-                        image: res.image,
-                        order_id: res.orderId,
-                        prefill: {
-                            name: res.customer.name,
-                            email: res.customer.email,
-                            contact: res.customer.contact
-                        },
-                        notes: { checkout_token: res.checkoutToken },
-                        theme: { color: "#2563eb" },
-                        handler: function (razorpayResponse) {
-                            $allBtns.html('<i class="fa fa-spinner fa-spin mr-2"></i> Finalizing Order...');
-
-                            var verifyData = {
-                                razorpay_payment_id: razorpayResponse.razorpay_payment_id,
-                                razorpay_order_id: razorpayResponse.razorpay_order_id,
-                                razorpay_signature: razorpayResponse.razorpay_signature,
-                                checkout_token: res.checkoutToken,
-                                '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
-                            };
-
-                            $.ajax({
-                                type: 'POST',
-                                url: res.paymentPostUrl,
-                                data: verifyData,
-                                dataType: 'json',
-                                success: function (verifyRes) {
-                                    if (verifyRes && verifyRes.status == 1 && verifyRes.redirectUrl) {
-                                        window.location.href = verifyRes.redirectUrl;
-                                    } else {
-                                        window.location.href = '<?= generateUrl("order-completed"); ?>/' + res.checkoutToken;
-                                    }
-                                },
-                                error: function () {
-                                    resetButtons();
-                                    Swal.fire({ text: 'Payment verification failed. Please contact support.', icon: 'error', confirmButtonText: 'OK' });
-                                }
-                            });
-                        },
-                        modal: {
-                            ondismiss: function () { resetButtons(); }
-                        }
-                    };
-
-                    var rzp = new Razorpay(rzpOptions);
-                    rzp.on('payment.failed', function (failRes) {
-                        resetButtons();
-                        Swal.fire({ text: failRes.error ? (failRes.error.description || failRes.error.reason) : 'Payment failed.', icon: 'error', confirmButtonText: 'OK' });
-                    });
-                    rzp.open();
-                }
-            },
-            error: function (xhr) {
-                resetButtons();
-                var errMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'A communication error occurred.';
-                Swal.fire({ text: errMsg, icon: 'error', confirmButtonText: 'OK' });
-            }
-        });
+        runGuestExpressCheckout(btn);
     });
+
+    function showGuestAlert(title, message, icon) {
+        if (typeof Swal !== 'undefined' && Swal.fire) {
+            Swal.fire({
+                title: title,
+                text: message,
+                icon: icon || 'warning',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#2563eb'
+            });
+        } else {
+            alert(title + ': ' + message);
+        }
+    }
+
+    function runGuestExpressCheckout(btn) {
+        var termsCheckbox = document.getElementById('checkbox_terms');
+        if (termsCheckbox && !termsCheckbox.checked) {
+            showGuestAlert('Terms & Conditions', 'Please accept the Terms and Conditions to proceed.', 'warning');
+            return;
+        }
+
+        var form = document.getElementById('form_express_checkout');
+        if (!form) form = document.querySelector('form');
+
+        var allBtns = document.querySelectorAll('.btn-express-confirm-trigger');
+        var origHtml = btn.innerHTML;
+        allBtns.forEach(function (b) {
+            b.disabled = true;
+            b.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i> Initializing Payment...';
+        });
+
+        function resetAllBtns() {
+            allBtns.forEach(function (b) {
+                b.disabled = false;
+                b.innerHTML = origHtml;
+            });
+        }
+
+        var formData = form ? new FormData(form) : new FormData();
+        var selectedPayment = 'razorpay';
+        var paymentRadio = form ? form.querySelector('input[name="payment_option"]:checked') : null;
+        if (paymentRadio) {
+            selectedPayment = paymentRadio.value;
+        } else {
+            var hiddenPayment = form ? form.querySelector('input[name="payment_option"]') : null;
+            if (hiddenPayment) selectedPayment = hiddenPayment.value;
+        }
+        if (!formData.has('payment_method')) {
+            formData.append('payment_method', selectedPayment);
+        }
+
+        fetch('<?= base_url("cart/express-checkout-confirm"); ?>', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(function (res) { return res.json(); })
+        .then(function (res) {
+            if (!res) {
+                resetAllBtns();
+                showGuestAlert('Error', 'Unexpected response from server. Please try again.', 'error');
+                return;
+            }
+
+            if (res.status === 'error') {
+                resetAllBtns();
+                showGuestAlert('Checkout Notice', res.message || 'An error occurred.', 'warning');
+                return;
+            }
+
+            if (res.status === 'success') {
+                allBtns.forEach(function (b) {
+                    b.innerHTML = '<i class="fa fa-check mr-2"></i> Order Placed! Redirecting...';
+                });
+                window.location.href = res.redirectUrl;
+                return;
+            }
+
+            if (res.status === 'razorpay') {
+                allBtns.forEach(function (b) {
+                    b.innerHTML = '<i class="fa fa-credit-card mr-2"></i> Processing in Razorpay...';
+                });
+
+                if (typeof Razorpay === 'undefined') {
+                    resetAllBtns();
+                    showGuestAlert('Payment Error', 'Razorpay checkout is loading. Please check your connection and try again.', 'error');
+                    return;
+                }
+
+                var rzpOptions = {
+                    key: res.key,
+                    amount: res.amount,
+                    currency: res.currency,
+                    name: res.name,
+                    description: res.description,
+                    image: res.image,
+                    order_id: res.orderId,
+                    prefill: {
+                        name: res.customer.name,
+                        email: res.customer.email,
+                        contact: res.customer.contact
+                    },
+                    notes: { checkout_token: res.checkoutToken },
+                    theme: { color: "#2563eb" },
+                    handler: function (razorpayResponse) {
+                        allBtns.forEach(function (b) {
+                            b.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i> Finalizing Order...';
+                        });
+
+                        var verifyData = new FormData();
+                        verifyData.append('razorpay_payment_id', razorpayResponse.razorpay_payment_id);
+                        verifyData.append('razorpay_order_id', razorpayResponse.razorpay_order_id);
+                        verifyData.append('razorpay_signature', razorpayResponse.razorpay_signature);
+                        verifyData.append('checkout_token', res.checkoutToken);
+                        verifyData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+
+                        fetch(res.paymentPostUrl, {
+                            method: 'POST',
+                            body: verifyData,
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        })
+                        .then(function (vRes) { return vRes.json(); })
+                        .then(function (verifyRes) {
+                            if (verifyRes && verifyRes.status == 1 && verifyRes.redirectUrl) {
+                                allBtns.forEach(function (b) {
+                                    b.innerHTML = '<i class="fa fa-check mr-2"></i> Payment Successful! Redirecting...';
+                                });
+                                window.location.href = verifyRes.redirectUrl;
+                            } else if (verifyRes && verifyRes.redirectUrl) {
+                                window.location.href = verifyRes.redirectUrl;
+                            } else {
+                                window.location.href = '<?= generateUrl("order-completed"); ?>/' + res.checkoutToken;
+                            }
+                        })
+                        .catch(function () {
+                            resetAllBtns();
+                            showGuestAlert('Order Status', 'Payment was processed. Redirecting to your order confirmation...', 'info');
+                            setTimeout(function () {
+                                window.location.href = '<?= generateUrl("order-completed"); ?>/' + res.checkoutToken;
+                            }, 2000);
+                        });
+                    },
+                    modal: {
+                        ondismiss: function () { resetAllBtns(); }
+                    }
+                };
+
+                var rzp = new Razorpay(rzpOptions);
+                rzp.on('payment.failed', function (failRes) {
+                    resetAllBtns();
+                    var msg = failRes.error ? (failRes.error.description || failRes.error.reason) : 'Payment was cancelled or failed. Please try again.';
+                    showGuestAlert('Payment Cancelled', msg, 'error');
+                });
+                rzp.open();
+            }
+        })
+        .catch(function () {
+            resetAllBtns();
+            showGuestAlert('Communication Error', 'A communication error occurred. Please check your internet connection and try again.', 'error');
+        });
+    }
 </script>

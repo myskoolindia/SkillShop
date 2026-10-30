@@ -57,19 +57,22 @@
                                             </tr>
                                         </table>
                                     <?php endif; ?>
-                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="text-align: left" class="table-products">
-                                        <tr>
-                                            <th style="padding: 10px 0; border-bottom: 2px solid #ddd;"><?= trans("product"); ?></th>
-                                            <th style="padding: 10px 0; border-bottom: 2px solid #ddd;"><?= trans("unit_price"); ?></th>
-                                            <th style="padding: 10px 0; border-bottom: 2px solid #ddd;"><?= trans("quantity"); ?></th>
-                                            <th style="padding: 10px 0; border-bottom: 2px solid #ddd;"><?= trans("vat"); ?></th>
-                                            <th style="padding: 10px 0; border-bottom: 2px solid #ddd;"><?= trans("total"); ?></th>
-                                        </tr>
+                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; margin-top: 25px;" class="table-products">
+                                        <thead>
+                                            <tr>
+                                                <th style="padding: 10px 8px; border-bottom: 2px solid #ddd; text-align: left; font-size: 13px; font-weight: 600; width: 42%;"><?= trans("product"); ?></th>
+                                                <th style="padding: 10px 8px; border-bottom: 2px solid #ddd; text-align: right; font-size: 13px; font-weight: 600; width: 15%; white-space: nowrap;"><?= trans("unit_price"); ?></th>
+                                                <th style="padding: 10px 8px; border-bottom: 2px solid #ddd; text-align: center; font-size: 13px; font-weight: 600; width: 10%; white-space: nowrap;"><?= trans("quantity"); ?></th>
+                                                <th style="padding: 10px 8px; border-bottom: 2px solid #ddd; text-align: right; font-size: 13px; font-weight: 600; width: 18%; white-space: nowrap;"><?= trans("vat"); ?></th>
+                                                <th style="padding: 10px 8px; border-bottom: 2px solid #ddd; text-align: right; font-size: 13px; font-weight: 600; width: 15%; white-space: nowrap;"><?= trans("total"); ?></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
                                         <?php if (!empty($orderProducts)):
                                             foreach ($orderProducts as $item): ?>
                                                 <tr>
-                                                    <td style="width: 40%; padding: 15px 0; border-bottom: 1px solid #ddd;">
-                                                        <?= esc($item->product_title); ?>
+                                                    <td style="width: 42%; padding: 12px 8px; border-bottom: 1px solid #ddd; vertical-align: top; text-align: left;">
+                                                        <span style="font-weight: 600; color: #333;"><?= esc($item->product_title); ?></span>
 
                                                         <?php
                                                         /* ── Bundle / Package Contents ─────────────────────────────
@@ -153,41 +156,42 @@
                                                         <?php endif; endif; ?>
 
                                                     </td>
-                                                    <td style="padding: 12px 2px; border-bottom: 1px solid #ddd;"><?= priceFormatted($item->product_unit_price, $item->product_currency); ?></td>
-                                                    <td style="padding: 12px 2px; border-bottom: 1px solid #ddd;"><?= $item->product_quantity; ?></td>
+                                                    <td style="width: 15%; padding: 12px 8px; border-bottom: 1px solid #ddd; vertical-align: top; text-align: right; white-space: nowrap;"><?= priceFormatted($item->product_unit_price, $item->product_currency); ?></td>
+                                                    <td style="width: 10%; padding: 12px 8px; border-bottom: 1px solid #ddd; vertical-align: top; text-align: center; white-space: nowrap;"><?= $item->product_quantity; ?></td>
                                                     <?php if (!empty($order->price_vat)): ?>
-                                                        <td style="padding: 12px 2px; border-bottom: 1px solid #ddd;">
+                                                        <td style="width: 18%; padding: 12px 8px; border-bottom: 1px solid #ddd; vertical-align: top; text-align: right; white-space: nowrap;">
                                                             <?php if (!empty($item->product_vat) && $item->product_vat > 0):
                                                                 $delivState = !empty($shipping->sState) ? $shipping->sState : (!empty($shipping->bState) ? $shipping->bState : null);
                                                                 $itemGst = calculateGstDetails($item->product_vat_rate, $item->product_vat, $item->seller_id, $delivState);
                                                                 if ($itemGst['is_interstate']): ?>
-                                                                    <?= priceFormatted($itemGst['igst_amount'], $item->product_currency); ?>&nbsp;(<?= $itemGst['igst_rate']; ?>% <?= trans('igst'); ?>)
+                                                                    <?= priceFormatted($itemGst['igst_amount'], $item->product_currency); ?><br><small style="color: #888;">(<?= $itemGst['igst_rate']; ?>% <?= trans('igst'); ?>)</small>
                                                                 <?php else: ?>
-                                                                    <?= priceFormatted($itemGst['cgst_amount'], $item->product_currency); ?>&nbsp;(<?= $itemGst['cgst_rate']; ?>% <?= trans('cgst'); ?>)<br>
-                                                                    <?= priceFormatted($itemGst['sgst_amount'], $item->product_currency); ?>&nbsp;(<?= $itemGst['sgst_rate']; ?>% <?= trans('sgst'); ?>)
+                                                                    <?= priceFormatted($itemGst['cgst_amount'], $item->product_currency); ?>&nbsp;<small style="color: #888;">(<?= $itemGst['cgst_rate']; ?>% <?= trans('cgst'); ?>)</small><br>
+                                                                    <?= priceFormatted($itemGst['sgst_amount'], $item->product_currency); ?>&nbsp;<small style="color: #888;">(<?= $itemGst['sgst_rate']; ?>% <?= trans('sgst'); ?>)</small>
                                                                 <?php endif;
                                                             else: ?>
                                                                 -
                                                             <?php endif; ?>
                                                         </td>
                                                     <?php else: ?>
-                                                        <td style="padding: 12px 2px; border-bottom: 1px solid #ddd;">-</td>
+                                                        <td style="width: 18%; padding: 12px 8px; border-bottom: 1px solid #ddd; vertical-align: top; text-align: right;">-</td>
                                                     <?php endif; ?>
-                                                    <td style="padding: 12px 2px; border-bottom: 1px solid #ddd;"><?= priceFormatted($item->product_total_price, $item->product_currency); ?></td>
+                                                    <td style="width: 15%; padding: 12px 8px; border-bottom: 1px solid #ddd; vertical-align: top; text-align: right; white-space: nowrap; font-weight: 600;"><?= priceFormatted($item->product_total_price, $item->product_currency); ?></td>
                                                 </tr>
                                             <?php endforeach;
                                         endif; ?>
+                                        </tbody>
                                     </table>
-                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="text-align: right;margin-top: 40px;">
+                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="right" style="width: 100%; max-width: 360px; margin-left: auto; margin-right: 0; margin-top: 30px; border-collapse: collapse;">
                                         <tr>
-                                            <td style="width: 70%"><?= trans("subtotal"); ?></td>
-                                            <td style="width: 30%;padding-right: 15px;font-weight: 600;"><?= priceFormatted($order->price_subtotal, $order->price_currency); ?></td>
+                                            <td style="width: 60%; padding: 6px 10px; text-align: right; color: #555;"><?= trans("subtotal"); ?></td>
+                                            <td style="width: 40%; padding: 6px 0; text-align: right; font-weight: 600; white-space: nowrap;"><?= priceFormatted($order->price_subtotal, $order->price_currency); ?></td>
                                         </tr>
                                         <?php $affiliate = unserializeData($order->affiliate_data);
                                         if (!empty($affiliate) && !empty($affiliate['discount'])): ?>
                                             <tr>
-                                                <td style="width: 70%"><?= trans("referral_discount"); ?>&nbsp;(<?= $affiliate['discountRate']; ?>%)</td>
-                                                <td style="width: 30%;padding-right: 15px;font-weight: 600;"><?= priceFormatted($affiliate['discount'], $order->price_currency); ?></td>
+                                                <td style="width: 60%; padding: 6px 10px; text-align: right; color: #555;"><?= trans("referral_discount"); ?>&nbsp;(<?= $affiliate['discountRate']; ?>%)</td>
+                                                <td style="width: 40%; padding: 6px 0; text-align: right; font-weight: 600; white-space: nowrap;">-<?= priceFormatted($affiliate['discount'], $order->price_currency); ?></td>
                                             </tr>
                                         <?php endif;
                                         if (!empty($order->price_vat) && $order->price_vat > 0):
@@ -196,32 +200,32 @@
                                             $orderGst = calculateGstDetails(0, $order->price_vat, $firstSellerId, $delivState);
                                             if ($orderGst['is_interstate']): ?>
                                                 <tr>
-                                                    <td style="width: 70%"><?= trans("igst"); ?></td>
-                                                    <td style="width: 30%;padding-right: 15px;font-weight: 600;"><?= priceFormatted($orderGst['igst_amount'], $order->price_currency); ?></td>
+                                                    <td style="width: 60%; padding: 6px 10px; text-align: right; color: #555;"><?= trans("igst"); ?></td>
+                                                    <td style="width: 40%; padding: 6px 0; text-align: right; font-weight: 600; white-space: nowrap;"><?= priceFormatted($orderGst['igst_amount'], $order->price_currency); ?></td>
                                                 </tr>
                                             <?php else: ?>
                                                 <tr>
-                                                    <td style="width: 70%"><?= trans("cgst"); ?></td>
-                                                    <td style="width: 30%;padding-right: 15px;font-weight: 600;"><?= priceFormatted($orderGst['cgst_amount'], $order->price_currency); ?></td>
+                                                    <td style="width: 60%; padding: 6px 10px; text-align: right; color: #555;"><?= trans("cgst"); ?></td>
+                                                    <td style="width: 40%; padding: 6px 0; text-align: right; font-weight: 600; white-space: nowrap;"><?= priceFormatted($orderGst['cgst_amount'], $order->price_currency); ?></td>
                                                 </tr>
                                                 <tr>
-                                                    <td style="width: 70%"><?= trans("sgst"); ?></td>
-                                                    <td style="width: 30%;padding-right: 15px;font-weight: 600;"><?= priceFormatted($orderGst['sgst_amount'], $order->price_currency); ?></td>
+                                                    <td style="width: 60%; padding: 6px 10px; text-align: right; color: #555;"><?= trans("sgst"); ?></td>
+                                                    <td style="width: 40%; padding: 6px 0; text-align: right; font-weight: 600; white-space: nowrap;"><?= priceFormatted($orderGst['sgst_amount'], $order->price_currency); ?></td>
                                                 </tr>
                                             <?php endif; ?>
                                             <tr>
-                                                <td style="width: 70%"><?= trans("total_gst"); ?></td>
-                                                <td style="width: 30%;padding-right: 15px;font-weight: 600;"><?= priceFormatted($order->price_vat, $order->price_currency); ?></td>
+                                                <td style="width: 60%; padding: 6px 10px; text-align: right; color: #555;"><?= trans("total_gst"); ?></td>
+                                                <td style="width: 40%; padding: 6px 0; text-align: right; font-weight: 600; white-space: nowrap;"><?= priceFormatted($order->price_vat, $order->price_currency); ?></td>
                                             </tr>
                                         <?php endif; ?>
                                         <tr>
-                                            <td style="width: 70%"><?= trans("shipping"); ?></td>
-                                            <td style="width: 30%;padding-right: 15px;font-weight: 600;"><?= priceFormatted($order->price_shipping, $order->price_currency); ?></td>
+                                            <td style="width: 60%; padding: 6px 10px; text-align: right; color: #555;"><?= trans("shipping"); ?></td>
+                                            <td style="width: 40%; padding: 6px 0; text-align: right; font-weight: 600; white-space: nowrap;"><?= priceFormatted($order->price_shipping, $order->price_currency); ?></td>
                                         </tr>
                                         <?php if ($order->coupon_discount > 0): ?>
                                             <tr>
-                                                <td style="width: 70%"><?= trans("coupon"); ?>&nbsp;&nbsp;[<?= esc($order->coupon_code); ?>]</td>
-                                                <td style="width: 30%;padding-right: 15px;font-weight: 600;">-<?= priceFormatted($order->coupon_discount, $order->price_currency); ?></td>
+                                                <td style="width: 60%; padding: 6px 10px; text-align: right; color: #555;"><?= trans("coupon"); ?>&nbsp;[<?= esc($order->coupon_code); ?>]</td>
+                                                <td style="width: 40%; padding: 6px 0; text-align: right; font-weight: 600; white-space: nowrap;">-<?= priceFormatted($order->coupon_discount, $order->price_currency); ?></td>
                                             </tr>
                                         <?php endif;
                                         if (!empty($order->global_taxes_data)):
@@ -230,8 +234,8 @@
                                                 foreach ($globalTaxesArray as $taxItem):
                                                     if (!empty($taxItem['taxNameArray']) && !empty($taxItem['taxTotal']) && !empty($taxItem['taxRate'])):?>
                                                         <tr>
-                                                            <td style="width: 70%"><?= esc(getTaxName($taxItem['taxNameArray'], selectedLangId())); ?>&nbsp;(<?= $taxItem['taxRate']; ?>%)</td>
-                                                            <td style="width: 30%;padding-right: 15px;font-weight: 600;"><?= priceDecimal($taxItem['taxTotal'], $order->price_currency); ?></td>
+                                                            <td style="width: 60%; padding: 6px 10px; text-align: right; color: #555;"><?= esc(getTaxName($taxItem['taxNameArray'], selectedLangId())); ?>&nbsp;(<?= $taxItem['taxRate']; ?>%)</td>
+                                                            <td style="width: 40%; padding: 6px 0; text-align: right; font-weight: 600; white-space: nowrap;"><?= priceDecimal($taxItem['taxTotal'], $order->price_currency); ?></td>
                                                         </tr>
                                                     <?php endif;
                                                 endforeach;
@@ -239,8 +243,8 @@
                                         endif;
                                         if (!empty($order->transaction_fee)): ?>
                                             <tr>
-                                                <td style="width: 70%"><?= trans("transaction_fee"); ?><?= $order->transaction_fee_rate ? ' (' . $order->transaction_fee_rate . '%)' : ''; ?></td>
-                                                <td style="width: 30%;padding-right: 15px;font-weight: 600;"><?= priceFormatted($order->transaction_fee, $order->price_currency); ?></td>
+                                                <td style="width: 60%; padding: 6px 10px; text-align: right; color: #555;"><?= trans("transaction_fee"); ?><?= $order->transaction_fee_rate ? ' (' . $order->transaction_fee_rate . '%)' : ''; ?></td>
+                                                <td style="width: 40%; padding: 6px 0; text-align: right; font-weight: 600; white-space: nowrap;"><?= priceFormatted($order->transaction_fee, $order->price_currency); ?></td>
                                             </tr>
                                         <?php endif; ?>
                                         <tr>
@@ -249,11 +253,11 @@
                                             if (!empty($transaction) && $transaction->currency != $order->price_currency):
                                                 $priceSecondCurrency = priceCurrencyFormat($transaction->payment_amount, $transaction->currency);
                                             endif; ?>
-                                            <td style="width: 70%;font-weight: bold"><?= trans("total"); ?></td>
-                                            <td style="width: 30%;padding-right: 15px;font-weight: 600;">
+                                            <td style="width: 60%; padding: 10px 10px 6px 10px; border-top: 2px solid #ddd; text-align: right; font-size: 15px; font-weight: bold; color: #333;"><?= trans("total"); ?></td>
+                                            <td style="width: 40%; padding: 10px 0 6px 0; border-top: 2px solid #ddd; text-align: right; font-size: 15px; font-weight: bold; white-space: nowrap; color: #333;">
                                                 <?= priceFormatted($order->price_total, $order->price_currency);
                                                 if (!empty($priceSecondCurrency)):?>
-                                                    <br><span style="font-weight: 400;white-space: nowrap;">(<?= trans("paid"); ?>:&nbsp;<?= $priceSecondCurrency; ?>&nbsp;<?= $transaction->currency; ?>)</span>
+                                                    <br><span style="font-weight: 400; font-size: 12px; white-space: nowrap; color: #777;">(<?= trans("paid"); ?>:&nbsp;<?= $priceSecondCurrency; ?>&nbsp;<?= $transaction->currency; ?>)</span>
                                                 <?php endif; ?>
                                             </td>
                                         </tr>
