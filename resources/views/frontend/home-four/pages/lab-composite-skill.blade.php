@@ -4065,10 +4065,17 @@
     {{-- Success state --}}
     <div class="vl-confirm" id="cpConfirmMsg" style="display:none;">
       <span class="vl-confirm-icon">🎉</span>
-      <h3 style="font-size:1.4rem; margin-bottom:8px; color:#db2777;">Custom Proposal Request Received!</h3>
-      <p style="margin:0 0 12px; font-size:0.98rem; color:var(--vl-body);">Our senior lab architect will review your parameters (<span id="confirmScopeText">Advance Lab</span>) and email your detailed proposal dossier.</p>
-      <div style="background:#f5f3ff; border:1px solid #ddd6fe; border-radius:12px; padding:12px; font-size:0.9rem; color:#4338ca; text-align:center; font-weight:700;">
-        ✓ WhatsApp &amp; Email confirmation dispatched
+      <h3 style="font-size:1.4rem; margin-bottom:8px; color:#db2777;">Custom Proposal Dispatched!</h3>
+      <p style="margin:0 0 12px; font-size:0.98rem; color:var(--vl-body);">Your customized proposal dossier (<span id="confirmScopeText">Advance Lab</span>) has been generated and sent to your email and WhatsApp.</p>
+      <div id="cpWaBox" style="display:none; justify-content:center; gap:10px; margin-top:14px; flex-wrap:wrap;">
+        <a id="cpWaBtn" href="#" target="_blank" style="display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border-radius:10px; background:#059669; color:#fff; font-weight:700; text-decoration:none; font-size:13px;">
+          <i class="fa-brands fa-whatsapp" style="font-size:16px;"></i>
+          <span>Open in WhatsApp</span>
+        </a>
+        <a id="cpPdfBtn" href="#" target="_blank" style="display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border-radius:10px; background:#1e1b4b; color:#fff; font-weight:700; text-decoration:none; font-size:13px;">
+          <i class="fa-solid fa-file-pdf" style="font-size:15px;"></i>
+          <span>Download PDF</span>
+        </a>
       </div>
     </div>
 
@@ -4604,9 +4611,17 @@ DIY Kits: ${kitsCount}+`;
             body: new FormData(cpForm),
           })
           .then(res => res.json())
-          .then(() => {
+          .then(resp => {
             cpForm.style.display = 'none';
             if (confirmMsg) confirmMsg.style.display = 'block';
+            if (resp && (resp.whatsapp_url || resp.pdf_url)) {
+              const cpWaBox = document.getElementById('cpWaBox');
+              const cpWaBtn = document.getElementById('cpWaBtn');
+              const cpPdfBtn = document.getElementById('cpPdfBtn');
+              if (cpWaBox) cpWaBox.style.display = 'flex';
+              if (cpWaBtn && resp.whatsapp_url) { cpWaBtn.href = resp.whatsapp_url; cpWaBtn.style.display = 'inline-flex'; }
+              if (cpPdfBtn && resp.pdf_url) { cpPdfBtn.href = resp.pdf_url; cpPdfBtn.style.display = 'inline-flex'; }
+            }
           })
           .catch(() => {
             cpForm.style.display = 'none';

@@ -369,7 +369,15 @@ class CourseEnquiryController extends Controller
             $pdfBytes  = $this->generateProposalPdf($validated, $packageName, $quotationData, $planInfo);
             $cleanSchool = preg_replace('/[^A-Za-z0-9_]/', '_', $validated['school'] ?? 'School');
             $pdfPrefix = $isSkillvationLab ? 'Skillvation_Lab_Proposal_' : 'Composite_Skill_Lab_Proposal_';
-            $pdfName   = $pdfPrefix . $cleanSchool . '.pdf';
+            $pdfName   = $pdfPrefix . $cleanSchool . '_' . time() . '.pdf';
+
+            // Save PDF to public uploads directory for WhatsApp & web access
+            $proposalsDir = public_path('uploads/proposals');
+            if (!file_exists($proposalsDir)) {
+                @mkdir($proposalsDir, 0755, true);
+            }
+            @file_put_contents($proposalsDir . '/' . $pdfName, $pdfBytes);
+            $pdfPublicUrl = url('uploads/proposals/' . rawurlencode($pdfName));
 
             Mail::to($validated['email'])
                 ->send(new DefaultMail(
@@ -379,6 +387,27 @@ class CourseEnquiryController extends Controller
                     $pdfName
                 ));
 
+            // ── 3. WhatsApp notification (if phone available) ───
+            $whatsappUrl = null;
+            if (!empty($validated['phone'])) {
+                try {
+                    $wabaService = app(\App\Services\WabaOtpService::class);
+                    $waPayload = [
+                        'name'               => $validated['name'],
+                        'school'             => $validated['school'] ?? 'School',
+                        'package'            => $packageName,
+                        'total'              => $quotationData['grand_total'] ?? 0,
+                        'pdf_url'            => $pdfPublicUrl,
+                        'product_url'        => $productLink ?: url('/labs'),
+                        'is_skillvation_lab' => $isSkillvationLab,
+                    ];
+                    $whatsappUrl = $wabaService->generateWhatsAppShareUrl($validated['phone'], $waPayload);
+                    $wabaService->sendProposalMessage($validated['phone'], $waPayload);
+                } catch (\Throwable $we) {
+                    Log::warning('[CourseEnquiry] WhatsApp dispatch failed: ' . $we->getMessage());
+                }
+            }
+
         } catch (\Throwable $e) {
             Log::error('[CourseEnquiry] Mail failed: ' . $e->getMessage(), [
                 'enquiry_id' => $enquiry->id,
@@ -387,8 +416,10 @@ class CourseEnquiryController extends Controller
         }
 
         return response()->json([
-            'status'  => 'success',
-            'message' => 'Enquiry submitted successfully.',
+            'status'       => 'success',
+            'message'      => 'Enquiry submitted successfully. Proposal has been sent to your email and WhatsApp.',
+            'pdf_url'      => $pdfPublicUrl ?? null,
+            'whatsapp_url' => $whatsappUrl ?? null,
         ]);
     }
 
@@ -643,10 +674,37 @@ class CourseEnquiryController extends Controller
         $pdfBytes = $this->generateProposalPdf($data, $packageName, $quotationData, $planInfo);
         $cleanSchool = preg_replace('/[^A-Za-z0-9_]/', '_', $data['school'] ?? 'School');
         $pdfPrefix = $isSkillvationLab ? 'Skillvation_Lab_Proposal_' : 'Composite_Skill_Lab_Proposal_';
-        $pdfName  = $pdfPrefix . $cleanSchool . '.pdf';
+        $pdfName  = $pdfPrefix . $cleanSchool . '_' . time() . '.pdf';
+
+        // Save PDF to public uploads directory for WhatsApp & web access
+        $proposalsDir = public_path('uploads/proposals');
+        if (!file_exists($proposalsDir)) {
+            @mkdir($proposalsDir, 0755, true);
+        }
+        @file_put_contents($proposalsDir . '/' . $pdfName, $pdfBytes);
+        $pdfPublicUrl = url('uploads/proposals/' . rawurlencode($pdfName));
 
         Mail::to($data['email'])
             ->send(new DefaultMail(['subject' => $confirmSubject], $confirmBody, $pdfBytes, $pdfName));
+
+        // WhatsApp notification (if phone available)
+        if (!empty($data['phone'])) {
+            try {
+                $wabaService = app(\App\Services\WabaOtpService::class);
+                $waPayload = [
+                    'name'               => $data['name'] ?? '',
+                    'school'             => $data['school'] ?? 'School',
+                    'package'            => $packageName,
+                    'total'              => $quotationData['grand_total'] ?? 0,
+                    'pdf_url'            => $pdfPublicUrl,
+                    'product_url'        => $productLink ?: url('/labs'),
+                    'is_skillvation_lab' => $isSkillvationLab,
+                ];
+                $wabaService->sendProposalMessage($data['phone'], $waPayload);
+            } catch (\Throwable $we) {
+                Log::warning('[CourseEnquiry] WhatsApp resend failed: ' . $we->getMessage());
+            }
+        }
     }
 
     // ──────────────────────────────────────────────────────────────

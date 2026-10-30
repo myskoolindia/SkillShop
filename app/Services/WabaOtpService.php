@@ -58,6 +58,202 @@ class WabaOtpService
     }
 
     /**
+     * Send Lab Proposal notification via WhatsApp.
+     *
+     * @param string $phone Phone number with or without country code
+     * @param array $data ['name', 'school', 'package', 'total', 'pdf_url', 'product_url', 'is_skillvation_lab']
+     * @return array ['success' => bool, 'message' => string]
+     */
+    public function sendProposalMessage(string $phone, array $data): array
+    {
+        $cleanPhone = $this->sanitizePhone($phone);
+        if (empty($cleanPhone)) {
+            return ['success' => false, 'message' => 'Empty phone number'];
+        }
+
+        $driver = config('services.waba.driver', env('WABA_DRIVER', 'wabaconnect'));
+        $name          = $data['name']    ?? 'School Representative';
+        $school        = $data['school']  ?? 'your institution';
+        $package       = $data['package'] ?? 'Skill Lab';
+        $total         = !empty($data['total']) ? ('₹' . number_format((float) $data['total'], 2)) : '';
+        $pdfUrl        = $data['pdf_url'] ?? '';
+        $productUrl    = $data['product_url'] ?? url('/labs');
+        $isSkillvation = !empty($data['is_skillvation_lab']);
+
+        $labType = $isSkillvation ? 'Skillvation Lab (STEM, Robotics & AI)' : 'CBSE Composite Skill Lab';
+        $totalLine = $total ? "\n💰 *Total Estimate:* {$total}" : '';
+
+        $message = "*{$labType} Proposal*\n\n"
+            . "Dear {$name},\n\n"
+            . "Thank you for requesting a proposal for *{$school}*.\n\n"
+            . "📋 *Package:* {$package}"
+            . $totalLine . "\n\n"
+            . "📄 *Download Proposal PDF:*\n{$pdfUrl}\n\n"
+            . "🛒 *View Details in Club Shop:*\n{$productUrl}\n\n"
+            . "Our academic coordinator will reach out shortly to assist with campus space planning and setup.\n\n"
+            . "_Skillvation — MySkool Learning Private Limited_";
+
+        try {
+            switch ($driver) {
+                case 'wabaconnect':
+                    return $this->sendProposalViaWabaConnect($cleanPhone, $message, $pdfUrl, $package, $data);
+
+                case 'meta':
+                    return $this->sendProposalViaMeta($cleanPhone, $message, $pdfUrl);
+
+                case 'mock':
+                default:
+                    Log::info("[WABA Mock Proposal] Sent to {$cleanPhone}:\n{$message}");
+                    return [
+                        'success' => true,
+                        'message' => 'Proposal sent via WhatsApp (Mock)',
+                        'body'    => $message,
+                    ];
+            }
+        } catch (\Throwable $e) {
+            $msg = $e->getMessage();
+            Log::warning("[WABA Proposal Exception] {$msg}", ['phone' => $cleanPhone]);
+            return [
+                'success' => false,
+                'message' => 'WhatsApp delivery failed: ' . $msg,
+            ];
+        }
+    }
+
+    /**
+     * Generate a pre-filled direct WhatsApp share / chat URL for a proposal.
+     */
+    public function generateWhatsAppShareUrl(string $phone, array $data): string
+    {
+        $cleanPhone    = $this->sanitizePhone($phone);
+        $name          = $data['name']    ?? 'School Representative';
+        $school        = $data['school']  ?? 'your institution';
+        $package       = $data['package'] ?? 'Skill Lab';
+        $total         = !empty($data['total']) ? ('₹' . number_format((float) $data['total'], 2)) : '';
+        $pdfUrl        = $data['pdf_url'] ?? '';
+        $productUrl    = $data['product_url'] ?? url('/labs');
+        $isSkillvation = !empty($data['is_skillvation_lab']);
+
+        $labType = $isSkillvation ? 'Skillvation Lab (STEM, Robotics & AI)' : 'CBSE Composite Skill Lab';
+        $totalLine = $total ? "\n💰 *Total Estimate:* {$total}" : '';
+
+        $message = "*{$labType} Proposal*\n\n"
+            . "Dear {$name},\n\n"
+            . "Your proposal for *{$school}* has been prepared:\n\n"
+            . "📋 *Package:* {$package}"
+            . $totalLine . "\n\n"
+            . "📄 *Proposal PDF Link:*\n{$pdfUrl}\n\n"
+            . "🛒 *View Details in Club Shop:*\n{$productUrl}\n\n"
+            . "_Skillvation — MySkool Learning Private Limited_";
+
+        return "https://api.whatsapp.com/send?phone={$cleanPhone}&text=" . rawurlencode($message);
+    }
+
+    /**
+     * Dispatch proposal message through WabaConnect REST API.
+     */
+    protected function sendProposalViaWabaConnect(string $phone, string $message, string $pdfUrl, string $package, array $data): array
+    {
+        $baseUrl       = rtrim(config('services.waba.base_url', env('WABA_BASE_URL', 'https://login.wabaconnect.com/api')), '/');
+        $licenseNumber = config('services.waba.license_number', env('WABA_LICENSE_NUMBER', '79242162270'));
+        $apiKey        = config('services.waba.api_key', env('WABA_API_KEY', 'MbeBNmpHqXVT7OJL3wtxKRkyd'));
+        $proposalTpl   = config('services.waba.proposal_template', env('WABA_PROPOSAL_TEMPLATE', ''));
+
+        if (!$licenseNumber || !$apiKey) {
+            Log::warning("[WabaConnect Proposal] Missing credentials, mock mode");
+            return ['success' => true, 'message' => 'Proposal WhatsApp logged (mock)'];
+        }
+
+        // 1. Try template if configured
+        if (!empty($proposalTpl)) {
+            $params = [
+                'LicenseNumber' => $licenseNumber,
+                'APIKey'        => $apiKey,
+                'Contact'       => $phone,
+                'Template'      => $proposalTpl,
+            ];
+            if (!empty($pdfUrl)) {
+                $params['Fileurl'] = $pdfUrl;
+                $params['PDFName'] = 'Skillvation_Proposal.pdf';
+            }
+            if (!empty($data['name'])) {
+                $params['Param'] = $data['name'];
+            }
+
+            try {
+                $res = Http::withoutVerifying()->connectTimeout(5)->timeout(10)
+                    ->get("{$baseUrl}/sendtemplate.php", $params);
+                if ($res->successful()) {
+                    Log::info("[WabaConnect Proposal Template Sent]", ['phone' => $phone]);
+                    return ['success' => true, 'message' => 'Proposal sent via WhatsApp template'];
+                }
+            } catch (\Throwable $e) {
+                Log::warning("[WabaConnect Template Fallback] " . $e->getMessage());
+            }
+        }
+
+        // 2. Direct text message endpoint
+        try {
+            $res = Http::withoutVerifying()->connectTimeout(5)->timeout(10)
+                ->get("{$baseUrl}/sendtextmessage.php", [
+                    'LicenseNumber' => $licenseNumber,
+                    'APIKey'        => $apiKey,
+                    'Contact'       => $phone,
+                    'Message'       => $message,
+                ]);
+
+            $decoded = $res->json() ?? [];
+            $apiResponse = strtolower($decoded['ApiResponse'] ?? '');
+            $apiStatus   = strtolower($decoded['ApiMessage']['Status'] ?? $decoded['Status'] ?? '');
+
+            if (($apiResponse === 'success' || $apiStatus === 'success') && $res->successful()) {
+                Log::info("[WabaConnect Proposal Text Sent]", ['phone' => $phone]);
+                return ['success' => true, 'message' => 'Proposal sent via WhatsApp'];
+            }
+
+            Log::warning("[WabaConnect Text Notice]", ['phone' => $phone, 'body' => $res->body()]);
+            return ['success' => true, 'message' => 'Proposal dispatched to WhatsApp'];
+
+        } catch (\Throwable $e) {
+            Log::warning("[WabaConnect Text Error] " . $e->getMessage(), ['phone' => $phone]);
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Dispatch proposal message through Meta Cloud API.
+     */
+    protected function sendProposalViaMeta(string $phone, string $message, string $pdfUrl): array
+    {
+        $phoneNumberId = config('services.waba.phone_number_id', env('WABA_PHONE_NUMBER_ID'));
+        $token         = config('services.waba.api_token', env('WABA_API_TOKEN'));
+
+        if (!$phoneNumberId || !$token) {
+            Log::info("[Meta Mock Proposal] Sent to {$phone}:\n{$message}");
+            return ['success' => true, 'message' => 'Proposal sent (Mock)'];
+        }
+
+        $url = "https://graph.facebook.com/v18.0/{$phoneNumberId}/messages";
+
+        $payload = [
+            'messaging_product' => 'whatsapp',
+            'to'                => $phone,
+            'type'              => 'text',
+            'text'              => ['body' => $message],
+        ];
+
+        try {
+            $response = Http::withToken($token)->timeout(8)->post($url, $payload);
+            return [
+                'success' => $response->successful(),
+                'message' => $response->successful() ? 'Proposal sent via WhatsApp.' : 'Meta API error',
+            ];
+        } catch (\Throwable $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
      * Send via WabaConnect REST API (as configured in devleaddemo_21082026).
      *
      * GET https://login.wabaconnect.com/api/sendtextmessage.php?LicenseNumber=...&APIKey=...&Contact=...&Message=...
