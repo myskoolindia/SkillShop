@@ -366,6 +366,60 @@ class CartController extends BaseController
     }
 
     /**
+     * Skillvation Advance Cart
+     */
+    public function skilllabAdvanceCart()
+    {
+        $product = $this->productModel->getProductBySlug('skillvation-lab-advance');
+        if (empty($product)) {
+            $product = $this->productModel->getActiveProduct(385);
+        }
+
+        $this->syncSelectedLabCart($product);
+
+        $data = setPageMeta('Skillvation Advance Plan — Cart');
+        $data['isTranslatable'] = true;
+        $data['cart'] = $this->cartModel->getCart();
+        $data['userSession'] = getUserSession();
+        $data['planKey'] = 'skilllab-advance';
+        $data['planLabel'] = 'Skillvation Advance';
+        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 385;
+
+        helperDeleteSession('mds_service_payment');
+
+        echo view('partials/_header', $data);
+        echo view('cart/skillvation-advance-cart', $data);
+        echo view('partials/_footer');
+    }
+
+    /**
+     * Skillvation Premium Cart
+     */
+    public function skilllabPremiumCart()
+    {
+        $product = $this->productModel->getProductBySlug('skillvation-lab-premium');
+        if (empty($product)) {
+            $product = $this->productModel->getActiveProduct(386);
+        }
+
+        $this->syncSelectedLabCart($product);
+
+        $data = setPageMeta('Skillvation Premium Plan — Cart');
+        $data['isTranslatable'] = true;
+        $data['cart'] = $this->cartModel->getCart();
+        $data['userSession'] = getUserSession();
+        $data['planKey'] = 'skilllab-premium';
+        $data['planLabel'] = 'Skillvation Premium';
+        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 386;
+
+        helperDeleteSession('mds_service_payment');
+
+        echo view('partials/_header', $data);
+        echo view('cart/skillvation-premium-cart', $data);
+        echo view('partials/_footer');
+    }
+
+    /**
      * Add to Cart Bundle
      */
     // public function addToCartBundle()

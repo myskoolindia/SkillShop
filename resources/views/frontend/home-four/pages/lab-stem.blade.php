@@ -3277,28 +3277,28 @@
         {{-- Quick Jump Navigation Pills --}}
         <div style="display:flex;justify-content:center;gap:12px;margin:32px auto 20px;flex-wrap:wrap;">
           <a href="#skill-sectors-section" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#eff6ff;color:#1e40af;font-size:13px;font-weight:700;border:1px solid #bfdbfe;text-decoration:none;transition:all .2s;">
-            <i class="fa-solid fa-cube text-blue-600"></i> Basic Package
+            <i class="fa-solid fa-cube text-blue-600"></i> Skillvation Lab (Basic)
           </a>
           <a href="#skill-sectors-section-advance" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#f0fdf4;color:#047857;font-size:13px;font-weight:700;border:1px solid #a7f3d0;text-decoration:none;transition:all .2s;">
-            <i class="fa-solid fa-layer-group text-emerald-600"></i> Advance Package
+            <i class="fa-solid fa-layer-group text-emerald-600"></i> Skillvation Lab Advance
           </a>
           <a href="#skill-sectors-section-premium" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#f5f3ff;color:#6d28d9;font-size:13px;font-weight:700;border:1px solid #ddd6fe;text-decoration:none;transition:all .2s;">
-            <i class="fa-solid fa-crown text-purple-600"></i> Premium Package
+            <i class="fa-solid fa-crown text-purple-600"></i> Skillvation Lab Premium
           </a>
         </div>
 
-        {{-- 1. BASIC PACKAGE --}}
+        {{-- 1. BASIC PACKAGE (Skillvation Lab - 74) --}}
         <div id="skill-sectors-section" style="margin-top:36px;padding-bottom:48px;">
           <div class="max-w-7xl mx-auto">
             <div class="text-center max-w-2xl mx-auto mb-12">
               <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-navy/10 text-brand-navy text-xs font-bold uppercase tracking-wider mb-3">
-                Basic Package
+                Skillvation Lab (Basic)
               </div>
               <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
-                Skill Components in the Basic Package
+                Skill Components in Skillvation Lab
               </h2>
               <p class="mt-3 text-slate-500 text-sm sm:text-base">
-                Browse the curated equipment, activity items, and consumable resources included in the Skillvation Basic Package.
+                Browse the curated equipment, activity items, and consumable resources included in the standard Skillvation Lab kit.
               </p>
             </div>
 
@@ -3306,14 +3306,14 @@
             <div id="sks-loading" class="text-center py-16">
               <div class="inline-flex items-center gap-3 text-brand-navy font-medium text-sm">
                 <i class="fa-solid fa-circle-notch fa-spin text-xl text-brand-orange"></i>
-                <span>Loading basic kit inventory details…</span>
+                <span>Loading Skillvation Lab inventory details…</span>
               </div>
             </div>
 
             {{-- Error State --}}
             <div id="sks-error" class="hidden max-w-md mx-auto bg-red-50 border border-red-200 text-red-700 rounded-2xl p-6 text-center">
               <i class="fa-solid fa-triangle-exclamation text-2xl mb-2 text-red-400"></i>
-              <p class="text-sm font-medium">Unable to load basic kit details at this moment. Please refresh the page.</p>
+              <p class="text-sm font-medium">Unable to load kit details at this moment. Please refresh the page.</p>
             </div>
 
             {{-- Dynamic Cards Container --}}
@@ -3335,18 +3335,18 @@
                   <div style="position:relative;" class="sks-customise-wrap">
                     <button type="button" class="sks-customise-toggle-btn"
                        style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
-                      <i class="fa-solid fa-sliders" style="font-size:11px;"></i> Customise Basic Lab
+                      <i class="fa-solid fa-sliders" style="font-size:11px;"></i> Customise This Lab
                       <i class="fa-solid fa-chevron-down" style="font-size:10px;margin-left:2px;"></i>
                     </button>
                     <div class="sks-customise-menu"
                          style="display:none;position:absolute;right:0;bottom:calc(100% + 8px);min-width:230px;background:#fff;border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);overflow:hidden;z-index:50;">
-                      <a href="{{ url('/sso/shop') }}?target=%2Fbasic-cart"
+                      <a href="{{ url('/sso/shop') }}?target=%2Fskillvation-cart"
                          style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;border-bottom:1px solid #eef1f6;transition:background .15s;"
                          onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
                         <i class="fa-solid fa-cart-shopping" style="color:#f4742b;width:16px;"></i>
-                        <span>Buy Standard Basic Lab</span>
+                        <span>Buy Standard Skillvation Lab</span>
                       </a>
-                      <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="composite-skill-basic"
+                      <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="skillvation-lab"
                          style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;transition:background .15s;cursor:pointer;"
                          onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
                         <i class="fa-solid fa-pen-ruler" style="color:#2563eb;width:16px;"></i>
@@ -3373,18 +3373,18 @@
           </div>
         </div>
 
-        {{-- 2. ADVANCE PACKAGE --}}
+        {{-- 2. ADVANCE PACKAGE (Skillvation Lab Advance - 385) --}}
         <div id="skill-sectors-section-advance" style="margin-top:48px;padding-top:48px;padding-bottom:48px;border-top:1px solid #e2e8f0;">
           <div class="max-w-7xl mx-auto">
             <div class="text-center max-w-2xl mx-auto mb-12">
               <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-600/10 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-3">
-                Advance Package
+                Skillvation Lab Advance
               </div>
               <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
-                Skill Components in the Advance Package
+                Skill Components in Skillvation Lab Advance
               </h2>
               <p class="mt-3 text-slate-500 text-sm sm:text-base">
-                Browse the curated equipment, activity items, and consumable resources included in the Skillvation Advance Package.
+                Browse the curated equipment, activity items, and consumable resources included in Skillvation Lab Advance.
               </p>
             </div>
 
@@ -3417,7 +3417,7 @@
                   <h4 style="font-size:17px;font-weight:800;color:#fff;margin:0 0 6px;">Explore the Advance Configuration</h4>
                   <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Enhanced equipment and deeper activity modules for advanced skill delivery.</p>
                 </div>
-                <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                <div style="display:flex;flex-wrap:gap:10px;">
                   <div style="position:relative;" class="sks-customise-wrap">
                     <button type="button" class="sks-customise-toggle-btn"
                        style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
@@ -3426,13 +3426,13 @@
                     </button>
                     <div class="sks-customise-menu"
                          style="display:none;position:absolute;right:0;bottom:calc(100% + 8px);min-width:230px;background:#fff;border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);overflow:hidden;z-index:50;">
-                      <a href="{{ url('/sso/shop') }}?target=%2Fadvance-cart"
+                      <a href="{{ url('/sso/shop') }}?target=%2Fskillvation-advance-cart"
                          style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;border-bottom:1px solid #eef1f6;transition:background .15s;"
                          onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
                         <i class="fa-solid fa-cart-shopping" style="color:#f4742b;width:16px;"></i>
-                        <span>Buy Advance Lab</span>
+                        <span>Buy Skillvation Lab Advance</span>
                       </a>
-                      <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="composite-skill-advance"
+                      <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="skillvation-lab-advance"
                          style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;transition:background .15s;cursor:pointer;"
                          onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
                         <i class="fa-solid fa-pen-ruler" style="color:#2563eb;width:16px;"></i>
@@ -3459,18 +3459,18 @@
           </div>
         </div>
 
-        {{-- 3. PREMIUM PACKAGE --}}
+        {{-- 3. PREMIUM PACKAGE (Skillvation Lab Premium - 386) --}}
         <div id="skill-sectors-section-premium" style="margin-top:48px;padding-top:48px;padding-bottom:48px;border-top:1px solid #e2e8f0;">
           <div class="max-w-7xl mx-auto">
             <div class="text-center max-w-2xl mx-auto mb-12">
               <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-600/10 text-purple-700 text-xs font-bold uppercase tracking-wider mb-3">
-                Premium Package
+                Skillvation Lab Premium
               </div>
               <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
-                Skill Components in the Premium Package
+                Skill Components in Skillvation Lab Premium
               </h2>
               <p class="mt-3 text-slate-500 text-sm sm:text-base">
-                Browse the comprehensive equipment, activity items, and advanced innovation modules included in the Premium Package.
+                Browse the comprehensive equipment, activity items, and advanced innovation modules included in Skillvation Lab Premium.
               </p>
             </div>
 
@@ -3512,13 +3512,13 @@
                     </button>
                     <div class="sks-customise-menu"
                          style="display:none;position:absolute;right:0;bottom:calc(100% + 8px);min-width:230px;background:#fff;border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);overflow:hidden;z-index:50;">
-                      <a href="{{ url('/sso/shop') }}?target=%2Fpremium-cart"
+                      <a href="{{ url('/sso/shop') }}?target=%2Fskillvation-premium-cart"
                          style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;border-bottom:1px solid #eef1f6;transition:background .15s;"
                          onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
                         <i class="fa-solid fa-cart-shopping" style="color:#f4742b;width:16px;"></i>
-                        <span>Buy Premium Lab</span>
+                        <span>Buy Skillvation Lab Premium</span>
                       </a>
-                      <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="composite-skill-premium"
+                      <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="skillvation-lab-premium"
                          style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;transition:background .15s;cursor:pointer;"
                          onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
                         <i class="fa-solid fa-pen-ruler" style="color:#2563eb;width:16px;"></i>
@@ -4777,10 +4777,10 @@ function renderBundleSection(product, allCats, config){
 }
 
 Promise.all([
-  fetch(BASE+'/api/products/slug/cbse-composite-skill-lab-basic-68').then(function(r){if(!r.ok)throw r.status;return r.json();}),
+  fetch(BASE+'/api/products/slug/skillvation-lab').then(function(r){if(!r.ok)throw r.status;return r.json();}),
   fetch(BASE+'/api/categories/tree').then(function(r){if(!r.ok)throw r.status;return r.json();}),
-  fetch(BASE+'/api/products/slug/cbse-composite-skill-lab-advanced-72').then(function(r){if(!r.ok)return null;return r.json();}).catch(function(){ return null; }),
-  fetch(BASE+'/api/products/slug/cbse-composite-skill-lab-premium-73').then(function(r){if(!r.ok)return null;return r.json();}).catch(function(){ return null; })
+  fetch(BASE+'/api/products/slug/skillvation-lab-advance').then(function(r){if(!r.ok)return null;return r.json();}).catch(function(){ return null; }),
+  fetch(BASE+'/api/products/slug/skillvation-lab-premium').then(function(r){if(!r.ok)return null;return r.json();}).catch(function(){ return null; })
 ])
 .then(function(res){
   var basicProduct = res[0] ? res[0].data : null;
@@ -4792,7 +4792,7 @@ Promise.all([
 
   window._sksComponents = (basicProduct.bundle_components || []).filter(function(c){ return !c.is_optional; });
 
-  // 1. Render Basic Lab Section
+  // 1. Render Basic Lab Section (Skillvation Lab)
   renderBundleSection(basicProduct, allCats, {
     loadEl: document.getElementById('sks-loading'),
     errEl: document.getElementById('sks-error'),
@@ -4800,12 +4800,12 @@ Promise.all([
     boxesEl: document.getElementById('sks-boxes'),
     countEl: document.getElementById('sks-count'),
     itemsEl: document.getElementById('sks-items'),
-    customiseUrl: '{{ url("/sso/shop") }}?target=%2Fbasic-cart',
+    customiseUrl: '{{ url("/sso/shop") }}?target=%2Fskillvation-cart',
     viewportEl: document.getElementById('sks-carousel-viewport'),
     themePalette: BASIC_THEMES
   });
 
-  // 2. Render Advance Lab Section
+  // 2. Render Advance Lab Section (Skillvation Lab Advance)
   if(advProduct){
     renderBundleSection(advProduct, allCats, {
       loadEl: document.getElementById('sks-adv-loading'),
@@ -4814,7 +4814,7 @@ Promise.all([
       boxesEl: document.getElementById('sks-adv-boxes'),
       countEl: document.getElementById('sks-adv-count'),
       itemsEl: document.getElementById('sks-adv-items'),
-      customiseUrl: '{{ url("/sso/shop") }}?target=%2Fadvance-cart',
+      customiseUrl: '{{ url("/sso/shop") }}?target=%2Fskillvation-advance-cart',
       viewportEl: document.getElementById('sks-adv-carousel-viewport'),
       themePalette: ADVANCE_THEMES
     });
@@ -4825,7 +4825,7 @@ Promise.all([
     if(advErr) advErr.classList.remove('hidden');
   }
 
-  // 3. Render Premium Lab Section
+  // 3. Render Premium Lab Section (Skillvation Lab Premium)
   if(premProduct){
     renderBundleSection(premProduct, allCats, {
       loadEl: document.getElementById('sks-prem-loading'),
@@ -4834,7 +4834,7 @@ Promise.all([
       boxesEl: document.getElementById('sks-prem-boxes'),
       countEl: document.getElementById('sks-prem-count'),
       itemsEl: document.getElementById('sks-prem-items'),
-      customiseUrl: '{{ url("/sso/shop") }}?target=%2Fpremium-cart',
+      customiseUrl: '{{ url("/sso/shop") }}?target=%2Fskillvation-premium-cart',
       viewportEl: document.getElementById('sks-prem-carousel-viewport'),
       themePalette: PREMIUM_THEMES
     });
