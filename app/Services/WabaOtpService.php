@@ -166,27 +166,55 @@ class WabaOtpService
 
         // 1. Try template if configured
         if (!empty($proposalTpl)) {
+            // Template sv_skill_lab_proposal is POSITIONAL with 3 body params:
+            //   {{1}} = name, {{2}} = package, {{3}} = request type / demo date
+            // WabaConnect expects all positional params joined by commas in `Param`.
+            $requestType = trim($data['request_type'] ?? $data['message'] ?? 'Detailed Proposal');
+            $bodyParams  = [
+                $data['name']    ?? 'there',
+                $package         ?: ($data['package'] ?? 'Skill Lab'),
+                $requestType     ?: 'Detailed Proposal',
+            ];
+
+            // NOTE: the registered sv_skill_lab_proposal template has Header = None
+            // (text-only body, no media). Do NOT send Fileurl/PDFName here — a header
+            // param on a header-less template triggers Meta error (#100)
+            // "Unexpected key on components[0].parameters[0]". The PDF link travels
+            // in the text fallback / success-panel buttons instead.
             $params = [
                 'LicenseNumber' => $licenseNumber,
                 'APIKey'        => $apiKey,
                 'Contact'       => $phone,
                 'Template'      => $proposalTpl,
+                'Param'         => implode(',', array_map(
+                    // Commas inside a value would break positional parsing — strip them.
+                    static fn ($v) => str_replace(',', ' ', (string) $v),
+                    $bodyParams
+                )),
             ];
-            if (!empty($pdfUrl)) {
-                $params['Fileurl'] = $pdfUrl;
-                $params['PDFName'] = 'Skillvation_Proposal.pdf';
-            }
-            if (!empty($data['name'])) {
-                $params['Param'] = $data['name'];
-            }
 
             try {
                 $res = Http::withoutVerifying()->connectTimeout(5)->timeout(10)
                     ->get("{$baseUrl}/sendtemplate.php", $params);
-                if ($res->successful()) {
-                    Log::info("[WabaConnect Proposal Template Sent]", ['phone' => $phone]);
+
+                // WabaConnect returns HTTP 200 even on rejection — the real
+                // outcome is in the body's ApiResponse, so parse it.
+                $decoded     = $res->json() ?? [];
+                $apiResponse = strtolower($decoded['ApiResponse'] ?? '');
+
+                if ($res->successful() && $apiResponse === 'success') {
+                    Log::info("[WabaConnect Proposal Template Sent]", [
+                        'phone'  => $phone,
+                        'params' => $params['Param'],   // {{1}}=name, {{2}}=package, {{3}}=request type
+                    ]);
                     return ['success' => true, 'message' => 'Proposal sent via WhatsApp template'];
                 }
+
+                // Template failed — log the real error and fall through to text.
+                Log::warning("[WabaConnect Template Failed]", [
+                    'phone' => $phone,
+                    'body'  => $res->body(),
+                ]);
             } catch (\Throwable $e) {
                 Log::warning("[WabaConnect Template Fallback] " . $e->getMessage());
             }

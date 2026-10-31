@@ -3955,6 +3955,7 @@
               <input type="hidden" name="source"       id="planSource">
               <input type="hidden" name="course_title" id="planTitle">
               <input type="hidden" name="quotation"    id="planQuotation">
+              <input type="hidden" name="message"      value="Request Detailed Proposal">
 
               <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">School Name *</label>
@@ -3999,7 +4000,7 @@
                 </div>
                 <div>
                   <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">School Board</label>
-                  <select name="message" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all">
+                  <select name="board" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all">
                     <option value="ICSE">ICSE</option>
                     <option value="State Board">State Board</option>
                     <option value="CBSE">CBSE</option>

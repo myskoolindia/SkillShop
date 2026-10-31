@@ -211,6 +211,26 @@ class OrderModel extends BaseModel
         // echo '<pre>';
         // print_r($checkoutItems);
         // exit();
+        $hasOrderMarkupRate = $this->db->fieldExists('markup_rate', 'order_products');
+        if (!$hasOrderMarkupRate) {
+            try {
+                $forge = \Config\Database::forge();
+                $forge->addColumn('order_products', [
+                    'markup_rate' => [
+                        'type'       => 'DECIMAL',
+                        'constraint' => '5,2',
+                        'default'    => 0.00,
+                        'after'      => 'commission_rate',
+                        'null'       => true,
+                    ],
+                ]);
+                $hasOrderMarkupRate = true;
+            } catch (\Throwable $e) {
+                log_message('error', 'Auto-add markup_rate to order_products failed: ' . $e->getMessage());
+                $hasOrderMarkupRate = false;
+            }
+        }
+
         foreach ($checkoutItems as $item) {
             $data = [
                 'order_id' => $orderId,
@@ -232,7 +252,6 @@ class OrderModel extends BaseModel
                 'product_options_snapshot' => !empty($item->product_options_snapshot) ? sanitizeJsonString($item->product_options_snapshot) : '',
                 'product_options_summary' => !empty($item->product_options_summary) ? sanitizeJsonString($item->product_options_summary) : '',
                 'commission_rate' => $item->product_commission_rate ?? 0,
-                'markup_rate' => !empty($item->markup_rate) ? $item->markup_rate : 0,
                 'order_status' => ($item->product_type === 'digital' && $orderStatus == 'payment_received') ? 'completed' : $orderStatus,
                 'is_approved' => ($item->product_type === 'digital') ? 1 : 0,
                 'shipping_tracking_number' => '',
@@ -245,6 +264,9 @@ class OrderModel extends BaseModel
                 'is_bundle' => $item->is_bundle,
 
             ];
+            if ($hasOrderMarkupRate) {
+                $data['markup_rate'] = !empty($item->markup_rate) ? $item->markup_rate : 0;
+            }
 
             $data['product_total_price'] = numToDecimal($item->total_price) + numToDecimal($item->product_vat);
 

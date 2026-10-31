@@ -132,11 +132,32 @@ class CheckoutModel extends BaseModel
         // Prepare checkout items
         $orderModel = new OrderModel();
         $checkoutItems = [];
+
+        $hasMarkupRate = $this->db->fieldExists('markup_rate', 'checkout_items');
+        if (!$hasMarkupRate) {
+            try {
+                $forge = \Config\Database::forge();
+                $forge->addColumn('checkout_items', [
+                    'markup_rate' => [
+                        'type'       => 'DECIMAL',
+                        'constraint' => '5,2',
+                        'default'    => 0.00,
+                        'after'      => 'product_commission_rate',
+                        'null'       => true,
+                    ],
+                ]);
+                $hasMarkupRate = true;
+            } catch (\Throwable $e) {
+                log_message('error', 'Auto-add markup_rate to checkout_items failed: ' . $e->getMessage());
+                $hasMarkupRate = false;
+            }
+        }
+
         foreach ($cart->items as $item) {
 
             $productCommissionRate = $orderModel->getProductCommissionRate($item->product_id);
 
-            $checkoutItems[] = [
+            $itemData = [
                 'checkout_id' => $checkoutId,
                 'product_id' => $item->product_id,
                 'seller_id' => $item->seller_id,
@@ -155,12 +176,15 @@ class CheckoutModel extends BaseModel
                 'product_options_snapshot' => $item->product_options_snapshot,
                 'product_options_summary' => $item->product_options_summary,
                 'product_commission_rate' => !empty($productCommissionRate) ? $productCommissionRate : 0,
-                'markup_rate' => !empty($item->markup_rate) ? $item->markup_rate : 0,
                 'extra_options' => $item->extra_options,
                 'created_at' => date('Y-m-d H:i:s'),
                 'bundle_items' => $item->bundle_items,
                 'is_bundle' => $item->is_bundle,
             ];
+            if ($hasMarkupRate) {
+                $itemData['markup_rate'] = !empty($item->markup_rate) ? $item->markup_rate : 0;
+            }
+            $checkoutItems[] = $itemData;
         }
         // echo '<pre>';
         // print_r($checkoutItems);

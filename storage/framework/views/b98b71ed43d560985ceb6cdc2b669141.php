@@ -36,10 +36,16 @@
         return $menu;
     }, is_array($nav_menu) ? $nav_menu : ($nav_menu?->toArray() ?? [])), fn($menu) => $allowedShopLink($menu['link'] ?? '')));
 
-    $categories = \Modules\Course\app\Models\CourseCategory::with('translation')
-        ->where('status', 1)
-        ->whereNull('parent_id')
-        ->get();
+    try {
+        $categories = Cache::remember('header_course_categories', 3600, function () {
+            return \Modules\Course\app\Models\CourseCategory::with('translation')
+                ->where('status', 1)
+                ->whereNull('parent_id')
+                ->get();
+        });
+    } catch (\Throwable $e) {
+        $categories = collect();
+    }
 
     // Image map for known child menu links
     $childImageMap = [
@@ -286,7 +292,7 @@
                                                                 href="<?php echo e(route('student.dashboard')); ?>"><?php echo e(__('Student Dashboard')); ?></a>
                                                         </li>
                                                     <?php endif; ?>
-                                                    <li><a href="<?php echo e(route('sso.shop')); ?>" target="_blank" style="color:#d97706; font-weight:600;"><i class="fas fa-shopping-bag mr-1"></i> <?php echo e(__('Club Shop & Orders')); ?></a>
+                                                    <li><a href="<?php echo e(route('sso.shop', ['target' => '/orders'])); ?>" target="_blank" style="color:#d97706; font-weight:600;"><i class="fas fa-shopping-bag mr-1"></i> <?php echo e(__('Club Shop & Orders')); ?></a>
                                                     </li>
                                                     <li><a
                                                             href="<?php echo e(userAuth()->role == 'instructor' ? route('instructor.setting.index') : (userAuth()->role == 'school' ? route('school.profile.index') : route('student.setting.index'))); ?>"><?php echo e(__('Profile')); ?></a>

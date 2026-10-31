@@ -255,6 +255,7 @@ class CourseEnquiryController extends Controller
             'city'          => ['nullable', 'string', 'max:255'],
             'address'       => ['nullable', 'string', 'max:1000'],
             'message'       => ['nullable', 'string', 'max:2000'],
+            'board'         => ['nullable', 'string', 'max:100'],
             'quotation'     => ['nullable', 'string'],
             'course_id'     => ['nullable'],
             'api_course_id' => ['nullable'],
@@ -262,10 +263,16 @@ class CourseEnquiryController extends Controller
             'source'        => ['nullable', 'string', 'max:100'],
         ]);
 
-        $enquiry = CourseEnquiry::create($validated);
+        // `board` (e.g. the School Board on the labs enquiry forms) has no column
+        // of its own — fold it into the notes/address so it is still captured.
+        if (!empty($validated['board'])) {
+            $boardLine = 'School Board: ' . $validated['board'];
+            $validated['address'] = trim($boardLine . (empty($validated['address']) ? '' : "\n" . $validated['address']));
+        }
+        // Not a column on course_enquiries — drop before persisting.
+        unset($validated['board']);
 
-        // ── Push to LeadDemo CRM (fire-and-forget) ────────────────
-        // $this->sendToLeadDemo($validated);
+        $enquiry = CourseEnquiry::create($validated);
 
         try {
             self::setMailConfig();
@@ -312,6 +319,12 @@ class CourseEnquiryController extends Controller
                 $quotationData    = $this->buildQuotationData($bundleComponents);
             }
 
+            // ── Push to LeadDemo CRM ──────────────────────────────────
+            // The request type decides which endpoint is hit (see sendToLeadDemo):
+            //   "Schedule a Demo with Academic Team" / "Book a Skill Lab Visit" => /api/demos/create
+            //   "Request Detailed Proposal"                                     => /api/leads/create-with-demo
+            $this->sendToLeadDemo($validated, $quotationData);
+
             // ── Build the HTML table (used in email body for admin)
             $quotationHtml = $this->renderQuotationTable($quotationData);
 
@@ -323,7 +336,7 @@ class CourseEnquiryController extends Controller
             // ── Variable map ──────────────────────────────────────
             $vars = [
                 '{{name}}'            => htmlspecialchars($validated['name']),
-                '{{designation}}'     => $validated['designation'] ? ', ' . htmlspecialchars($validated['designation']) : '',
+                '{{designation}}'     => !empty($validated['designation']) ? ', ' . htmlspecialchars($validated['designation']) : '',
                 '{{school}}'          => htmlspecialchars($validated['school'] ?? '—'),
                 '{{city}}'            => htmlspecialchars($validated['city'] ?? '—'),
                 '{{phone}}'           => htmlspecialchars($validated['phone'] ?? '—'),
@@ -397,6 +410,7 @@ class CourseEnquiryController extends Controller
                         'name'               => $validated['name'],
                         'school'             => $validated['school'] ?? 'School',
                         'package'            => $packageName,
+                        'request_type'       => $validated['message'] ?? 'Detailed Proposal',
                         'total'              => $quotationData['grand_total'] ?? 0,
                         'pdf_url'            => $pdfPublicUrl,
                         'product_url'        => $productLink ?: url('/labs'),
@@ -1002,11 +1016,15 @@ class CourseEnquiryController extends Controller
     // ──────────────────────────────────────────────────────────────
     // Push lead to LeadDemo CRM API
     // ──────────────────────────────────────────────────────────────
-    private function sendToLeadDemo(array $data): void
+    // private function sendToLeadDemo(array $data): void
+    private function sendToLeadDemo(array $data, ?array $quotationData = null): void
     {
-        $apiUrl = env('LEADDEMO_API_URL');
+        $api = env('LEADDEMO_API_URL');
 
-        if (empty($apiUrl)) return;
+        if (empty($api)) return;
+
+        $apiUrl  = rtrim($api, '/') . '/api/demos/create';            // demo / visit requests
+        $apiUrl2 = rtrim($api, '/') . '/api/leads/create-with-demo';  // proposal requests
 
         try {
             $source      = 'SV_WEBSITE';
@@ -1026,38 +1044,179 @@ class CourseEnquiryController extends Controller
                 $data['address'] ?? '',
             ])));
 
-            $payload = [
-                'first_name'    => $data['name'],
-                'phone_number'  => $data['phone'] ?? '',
-                'user'          => '',
-                'language'      => 'English',
-                'remarks'       => $remarks ?: ('Interested in ' . $packageName),
-                'demo_type'     => 'walkthrough',
-                'demo_date'     => now()->addHour()->format('Y-m-d H:i'),
-                'notes'         => $notes ?: $packageName,
-                'incharge_name' => $data['school'] ?? 'website',
-                'campaign'      => $packageName,
-                'designation'   => $data['designation'] ?? '',
-                'source'        => $source,
-                'assigned_to'   => 116 ?? 1,
-            ];
+            // The selected request type decides the endpoint, the demo_type,
+            // and the payload shape expected by LeadDemo:
+            //   "Schedule a Demo with Academic Team" => walkthrough   -> /api/demos/create        (demo-centric)
+            //   "Book a Skill Lab Visit"             => branch visit  -> /api/demos/create        (demo-centric)
+            //   "Request Detailed Proposal"          => (no demo)     -> /api/leads/create-with-demo (lead-only)
+            $requestType = $data['message'] ?? '';
+            $isDemoRequest = in_array($requestType, [
+                'Schedule a Demo with Academic Team',
+                'Book a Skill Lab Visit',
+            ], true);
 
-            $response = Http::timeout(8)
-                ->withoutVerifying()
-                ->post($apiUrl, $payload);
+            $assignedTo = (int) env('LEADDEMO_ASSIGNED_TO', 1);
 
-            Log::info('[LeadDemo] Pushed lead', [
-                'status'   => $response->status(),
-                'phone'    => $data['phone'] ?? '',
-                'source'   => $source,
-                'response' => $response->json(),
-            ]);
+            if ($isDemoRequest) {
+                // ── Options 2 & 3: demo / visit → /api/demos/create ──────────
+                $demoType = $requestType === 'Book a Skill Lab Visit'
+                    ? 'branch visit'
+                    : 'walkthrough';
+
+                $targetUrl = $apiUrl;
+                $payload = [
+                    'first_name'    => $data['name'],
+                    'phone_number'  => $data['phone'] ?? '',
+                    'user'          => env('LEADDEMO_USER', ''),
+                    'language'      => 'English',
+                    'remarks'       => $remarks ?: ('Interested in ' . $packageName),
+                    'demo_type'     => $demoType,
+                    'demo_date'     => now()->addHour()->format('Y-m-d H:i'),
+                    'notes'         => $notes ?: $packageName,
+                    'incharge_name' => $data['school'] ?? 'website',
+                    'campaign'      => $packageName,
+                    'designation'   => $data['designation'] ?? '',
+                    'source'        => $source,
+                    'assigned_to'   => $assignedTo,
+                    'pdf_json'      => $quotationData ?? [],
+                ];
+            } else {
+                // ── Option 1: proposal → /api/leads/create-with-demo (lead-only)
+                // Omitting `demo_schedule` makes the endpoint create a lead with
+                // NO demo. Field names follow that endpoint's contract
+                // (lead_name / phone / email), not the demos/create shape.
+                $targetUrl = $apiUrl2;
+                $payload = [
+                    'lead_name'   => $data['name'],
+                    'phone'       => $data['phone'] ?? '',
+                    'email'       => $data['email'] ?? '',
+                    'status'      => 'NEW',
+                    'source'      => 'Website',          // allowed enum on this endpoint
+                    'language'    => 'English',
+                    'remarks'     => $remarks ?: ('Interested in ' . $packageName),
+                    'notes'       => $notes ?: $packageName,
+                    'assigned_to' => $assignedTo,
+                    'pdf_json'    => $quotationData ?? [],
+                    // NOTE: no 'demo_schedule' key → lead only, no demo created.
+                ];
+            }
+
+            // Sends the request with the given bearer token.
+            $doPost = function (string $token) use ($targetUrl, $payload) {
+                return Http::timeout(8)
+                    ->withoutVerifying()
+                    ->withToken($token)   // Authorization: Bearer <token>
+                    ->post($targetUrl, $payload);
+            };
+
+            $token    = (string) env('LEADDEMO_TOKEN', '');
+            $response = $doPost($token);
+
+            // A 401 means the token is missing/expired/revoked. Mint a fresh one
+            // from the configured credentials and retry once.
+            if ($response->status() === 401) {
+                Log::warning('[LeadDemo] Token rejected (401) — attempting re-mint & retry', [
+                    'endpoint' => $targetUrl,
+                ]);
+
+                $newToken = $this->mintLeadDemoToken($api);
+                if ($newToken) {
+                    $response = $doPost($newToken);
+                }
+            }
+
+            if ($response->failed()) {
+                // 4xx/5xx — the lead did NOT reach the CRM. Log loudly so it is noticed.
+                Log::error('[LeadDemo] Push FAILED', [
+                    'status'   => $response->status(),
+                    'endpoint' => $targetUrl,
+                    'phone'    => $data['phone'] ?? '',
+                    'source'   => $source,
+                    'body'     => $response->body(),
+                ]);
+            } else {
+                Log::info('[LeadDemo] Pushed lead', [
+                    'status'   => $response->status(),
+                    'endpoint' => $targetUrl,
+                    'phone'    => $data['phone'] ?? '',
+                    'source'   => $source,
+                    'response' => $response->json(),
+                ]);
+            }
 
         } catch (\Throwable $e) {
             Log::warning('[LeadDemo] Push failed: ' . $e->getMessage(), [
                 'phone' => $data['phone'] ?? '',
             ]);
             // Never block the main enquiry flow
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Mint a fresh LeadDemo bearer token via POST /api/auth/token
+    // using the credentials in LEADDEMO_EMAIL / LEADDEMO_PASSWORD.
+    // On success the token is persisted back to .env (LEADDEMO_TOKEN)
+    // so subsequent requests reuse it. Returns the raw token or null.
+    // ──────────────────────────────────────────────────────────────
+    private function mintLeadDemoToken(string $api): ?string
+    {
+        $email    = (string) env('LEADDEMO_EMAIL', '');
+        $password = (string) env('LEADDEMO_PASSWORD', '');
+
+        if ($email === '' || $password === '') {
+            Log::error('[LeadDemo] Cannot mint token — LEADDEMO_EMAIL / LEADDEMO_PASSWORD not set.');
+            return null;
+        }
+
+        try {
+            $resp = Http::timeout(8)
+                ->withoutVerifying()
+                ->post(rtrim($api, '/') . '/api/auth/token', [
+                    'email'    => $email,
+                    'password' => $password,
+                    'label'    => 'SkillShop Website',
+                ]);
+
+            $newToken = $resp->json('token');
+            if ($resp->successful() && is_string($newToken) && $newToken !== '') {
+                $this->persistLeadDemoToken($newToken);
+                Log::info('[LeadDemo] Minted a fresh token.', ['status' => $resp->status()]);
+                return $newToken;
+            }
+
+            Log::error('[LeadDemo] Token mint failed', [
+                'status' => $resp->status(),
+                'body'   => $resp->body(),
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('[LeadDemo] Token mint threw: ' . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    // Writes the new token into .env (replacing or appending LEADDEMO_TOKEN)
+    // and updates the runtime env so the current request uses it too.
+    private function persistLeadDemoToken(string $token): void
+    {
+        try {
+            $path = base_path('.env');
+            if (!is_writable($path)) return;
+
+            $contents = file_get_contents($path);
+            $line     = 'LEADDEMO_TOKEN=' . $token;
+
+            if (preg_match('/^LEADDEMO_TOKEN=.*$/m', $contents)) {
+                $contents = preg_replace('/^LEADDEMO_TOKEN=.*$/m', $line, $contents);
+            } else {
+                $contents .= PHP_EOL . $line . PHP_EOL;
+            }
+
+            file_put_contents($path, $contents);
+            putenv($line);
+            $_ENV['LEADDEMO_TOKEN'] = $token;
+        } catch (\Throwable $e) {
+            Log::warning('[LeadDemo] Could not persist token to .env: ' . $e->getMessage());
         }
     }
 }
