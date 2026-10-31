@@ -3277,13 +3277,16 @@
         {{-- Quick Jump Navigation Pills --}}
         <div style="display:flex;justify-content:center;gap:12px;margin:32px auto 20px;flex-wrap:wrap;">
           <a href="#skill-sectors-section" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#eff6ff;color:#1e40af;font-size:13px;font-weight:700;border:1px solid #bfdbfe;text-decoration:none;transition:all .2s;">
-            <i class="fa-solid fa-cube text-blue-600"></i> Skillvation Lab (Basic)
+            <i class="fa-solid fa-cube text-blue-600"></i> Skillvation Lab Basic
           </a>
           <a href="#skill-sectors-section-advance" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#f0fdf4;color:#047857;font-size:13px;font-weight:700;border:1px solid #a7f3d0;text-decoration:none;transition:all .2s;">
             <i class="fa-solid fa-layer-group text-emerald-600"></i> Skillvation Lab Advance
           </a>
           <a href="#skill-sectors-section-premium" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#f5f3ff;color:#6d28d9;font-size:13px;font-weight:700;border:1px solid #ddd6fe;text-decoration:none;transition:all .2s;">
             <i class="fa-solid fa-crown text-purple-600"></i> Skillvation Lab Premium
+          </a>
+          <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="skillvation-lab" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#fff7ed;color:#c2410c;font-size:13px;font-weight:700;border:1px solid #fed7aa;text-decoration:none;transition:all .2s;cursor:pointer;">
+            <i class="fa-solid fa-pen-ruler text-orange-500"></i> Design My Lab
           </a>
         </div>
 
@@ -3376,6 +3379,21 @@
         {{-- 2. ADVANCE PACKAGE (Skillvation Lab Advance - 385) --}}
         <div id="skill-sectors-section-advance" style="margin-top:48px;padding-top:48px;padding-bottom:48px;border-top:1px solid #e2e8f0;">
           <div class="max-w-7xl mx-auto">
+            {{-- Quick Jump Navigation Pills --}}
+            <div style="display:flex;justify-content:center;gap:12px;margin:0 auto 24px;flex-wrap:wrap;">
+              <a href="#skill-sectors-section" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#eff6ff;color:#1e40af;font-size:13px;font-weight:700;border:1px solid #bfdbfe;text-decoration:none;transition:all .2s;">
+                <i class="fa-solid fa-cube text-blue-600"></i> Skillvation Lab Basic
+              </a>
+              <a href="#skill-sectors-section-advance" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#f0fdf4;color:#047857;font-size:13px;font-weight:700;border:1px solid #a7f3d0;text-decoration:none;transition:all .2s;">
+                <i class="fa-solid fa-layer-group text-emerald-600"></i> Skillvation Lab Advance
+              </a>
+              <a href="#skill-sectors-section-premium" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#f5f3ff;color:#6d28d9;font-size:13px;font-weight:700;border:1px solid #ddd6fe;text-decoration:none;transition:all .2s;">
+                <i class="fa-solid fa-crown text-purple-600"></i> Skillvation Lab Premium
+              </a>
+              <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="skillvation-lab-advance" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#fff7ed;color:#c2410c;font-size:13px;font-weight:700;border:1px solid #fed7aa;text-decoration:none;transition:all .2s;cursor:pointer;">
+                <i class="fa-solid fa-pen-ruler text-orange-500"></i> Design My Lab
+              </a>
+            </div>
             <div class="text-center max-w-2xl mx-auto mb-12">
               <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-600/10 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-3">
                 Advance Package
@@ -3462,6 +3480,21 @@
         {{-- 3. PREMIUM PACKAGE (Skillvation Lab Premium - 386) --}}
         <div id="skill-sectors-section-premium" style="margin-top:48px;padding-top:48px;padding-bottom:48px;border-top:1px solid #e2e8f0;">
           <div class="max-w-7xl mx-auto">
+            {{-- Quick Jump Navigation Pills --}}
+            <div style="display:flex;justify-content:center;gap:12px;margin:0 auto 24px;flex-wrap:wrap;">
+              <a href="#skill-sectors-section" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#eff6ff;color:#1e40af;font-size:13px;font-weight:700;border:1px solid #bfdbfe;text-decoration:none;transition:all .2s;">
+                <i class="fa-solid fa-cube text-blue-600"></i> Skillvation Lab Basic
+              </a>
+              <a href="#skill-sectors-section-advance" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#f0fdf4;color:#047857;font-size:13px;font-weight:700;border:1px solid #a7f3d0;text-decoration:none;transition:all .2s;">
+                <i class="fa-solid fa-layer-group text-emerald-600"></i> Skillvation Lab Advance
+              </a>
+              <a href="#skill-sectors-section-premium" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#f5f3ff;color:#6d28d9;font-size:13px;font-weight:700;border:1px solid #ddd6fe;text-decoration:none;transition:all .2s;">
+                <i class="fa-solid fa-crown text-purple-600"></i> Skillvation Lab Premium
+              </a>
+              <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="skillvation-lab-premium" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#fff7ed;color:#c2410c;font-size:13px;font-weight:700;border:1px solid #fed7aa;text-decoration:none;transition:all .2s;cursor:pointer;">
+                <i class="fa-solid fa-pen-ruler text-orange-500"></i> Design My Lab
+              </a>
+            </div>
             <div class="text-center max-w-2xl mx-auto mb-12">
               <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-600/10 text-purple-700 text-xs font-bold uppercase tracking-wider mb-3">
                 Premium Package

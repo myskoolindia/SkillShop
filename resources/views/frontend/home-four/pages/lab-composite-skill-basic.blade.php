@@ -825,6 +825,9 @@
       <a href="#skill-sectors-section-advance" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#f0fdf4;color:#047857;font-size:13px;font-weight:700;border:1px solid #a7f3d0;text-decoration:none;transition:all .2s;">
         <i class="fa-solid fa-layer-group text-emerald-600"></i> Composite Skill Lab Advance
       </a>
+      <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/composite-skill-basic" data-reference="composite-skill-basic" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#fff7ed;color:#c2410c;font-size:13px;font-weight:700;border:1px solid #fed7aa;text-decoration:none;transition:all .2s;cursor:pointer;">
+        <i class="fa-solid fa-pen-ruler text-orange-500"></i> Design My Lab
+      </a>
     </div>
 
     <div class="text-center max-w-2xl mx-auto mb-12">
@@ -948,6 +951,19 @@
      ===================================================================== --}}
 <section class="py-16 lg:py-20 bg-slate-50 border-t border-slate-200" id="skill-sectors-section-advance">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    {{-- Quick Jump Navigation Pills --}}
+    <div style="display:flex;justify-content:center;gap:12px;margin:0 auto 32px;flex-wrap:wrap;">
+      <a href="#skill-sectors-section" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#eff6ff;color:#1e40af;font-size:13px;font-weight:700;border:1px solid #bfdbfe;text-decoration:none;transition:all .2s;">
+        <i class="fa-solid fa-cube text-blue-600"></i> Composite Skill Lab Basic
+      </a>
+      <a href="#skill-sectors-section-advance" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#f0fdf4;color:#047857;font-size:13px;font-weight:700;border:1px solid #a7f3d0;text-decoration:none;transition:all .2s;">
+        <i class="fa-solid fa-layer-group text-emerald-600"></i> Composite Skill Lab Advance
+      </a>
+      <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/composite-skill-basic" data-reference="composite-skill-advance" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#fff7ed;color:#c2410c;font-size:13px;font-weight:700;border:1px solid #fed7aa;text-decoration:none;transition:all .2s;cursor:pointer;">
+        <i class="fa-solid fa-pen-ruler text-orange-500"></i> Design My Lab
+      </a>
+    </div>
 
     <div class="text-center max-w-2xl mx-auto mb-12">
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-600/10 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-3">
