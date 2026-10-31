@@ -394,13 +394,13 @@ ksort($categoriesList);
                             <span class="badge" style="background:#eff6ff; color:#1e40af; font-size:10.5px; font-weight:700; padding:2px 6px; border-radius:5px; border:1px solid #bfdbfe;">VAL</span>
                         </div>
                         <div class="bundle-metric-body" style="margin:4px 0 8px 0; display:flex; align-items:center; justify-content:space-between; gap:6px;">
-                            <span class="bundle-metric-value text-dark font-weight-bold" id="badge_sum_price" style="font-size:19px; font-family:'Segoe UI', 'Consolas', monospace; white-space:nowrap; line-height:1.2;">₹ <?= number_format($allSum, 2, '.', ','); ?></span>
+                            <span class="bundle-metric-value text-dark font-weight-bold" id="badge_sum_price" style="font-size:19px; font-family:'Segoe UI', 'Consolas', monospace; white-space:nowrap; line-height:1.2;">₹ <?= number_format(round($allSum), 0, '.', ','); ?></span>
                             <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-sm btn-primary font-weight-bold" onclick="applyBundleSumToPrice('total');" style="font-size:10.5px; padding:3px 8px; border-radius:4px 0 0 4px; white-space:nowrap;" title="Apply total package value (₹ <?= number_format($allSum, 2, '.', ','); ?>) to product price">
+                                <button type="button" class="btn btn-sm btn-primary font-weight-bold" onclick="applyBundleSumToPrice('total');" style="font-size:10.5px; padding:3px 8px; border-radius:4px 0 0 4px; white-space:nowrap;" title="Apply total package value (₹ <?= number_format(round($allSum), 0, '.', ','); ?>) to product price">
                                     <i class="fa fa-arrow-up"></i> Apply
                                 </button>
                                 <?php if ($optionalCount > 0): ?>
-                                    <button type="button" class="btn btn-sm btn-outline-primary font-weight-bold" onclick="applyBundleSumToPrice('mandatory');" style="font-size:10.5px; padding:3px 7px; border-radius:0 4px 4px 0; border-left:none; white-space:nowrap; background:#eff6ff;" title="Apply mandatory base sum (₹ <?= number_format($mandatorySum, 2, '.', ','); ?>) to product price">
+                                    <button type="button" class="btn btn-sm btn-outline-primary font-weight-bold" onclick="applyBundleSumToPrice('mandatory');" style="font-size:10.5px; padding:3px 7px; border-radius:0 4px 4px 0; border-left:none; white-space:nowrap; background:#eff6ff;" title="Apply mandatory base sum (₹ <?= number_format(round($mandatorySum), 0, '.', ','); ?>) to product price">
                                         Base
                                     </button>
                                 <?php endif; ?>
@@ -408,7 +408,7 @@ ksort($categoriesList);
                         </div>
                         <div style="font-size:11px; color:#64748b; padding-top:5px; border-top:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
                             <span id="card_mand_box" <?= ($optionalCount > 0) ? '' : 'style="display:none;"'; ?> style="white-space:nowrap;">
-                                Base: <strong class="text-dark font-weight-bold" id="card_mand_sum_disp">₹ <?= number_format($mandatorySum, 2, '.', ','); ?></strong>
+                                Base: <strong class="text-dark font-weight-bold" id="card_mand_sum_disp">₹ <?= number_format(round($mandatorySum), 0, '.', ','); ?></strong>
                             </span>
                             <span id="card_all_mand_note" style="<?= ($optionalCount > 0) ? 'display:none;' : ''; ?> white-space:nowrap; color:#64748b;">
                                 All items mandatory
@@ -534,14 +534,14 @@ ksort($categoriesList);
                                 $isSelected = empty($isOpt) || ((int)$comp->required_quantity > 0);
                                 $minQtyVal = !empty($comp->min_quantity) ? (int)$comp->min_quantity : max(1, (int)$comp->required_quantity);
                                 
-                                // Price override formatting: ALWAYS guarantee 2 decimal places with .00 visible
+                                // Price override formatting: Whole numbers without decimals
                                 $effectiveUnitPrice = ($comp->price_override !== null && $comp->price_override !== '') 
                                     ? (float)$comp->price_override 
                                     : (float)$comp->unit_price;
-                                $formattedUnitPrice = number_format($effectiveUnitPrice, 2, '.', '');
+                                $formattedUnitPrice = ($effectiveUnitPrice > 0) ? (string)(int)round($effectiveUnitPrice) : '0';
                                 $activeQty = $isSelected ? $minQtyVal : 0;
                                 $lineTotal = $effectiveUnitPrice * $activeQty;
-                                $formattedLineTotal = number_format($lineTotal, 2, '.', ',');
+                                $formattedLineTotal = number_format(round($lineTotal), 0, '.', ',');
 
                                 if ($compCat !== $currCatName):
                                     $currCatName = $compCat;
@@ -565,12 +565,12 @@ ksort($categoriesList);
                                             </div>
                                             <div style="display:flex; align-items:center; gap:8px;">
                                                 <span class="cat-mand-wrapper text-muted small" style="font-size:11.5px; <?= ($cStat['opt_count'] > 0) ? '' : 'display:none;'; ?>">
-                                                    Base/Mandatory: <strong class="cat-mand-val text-dark" style="font-family:'Segoe UI', 'Consolas', monospace;">₹ <?= number_format($cStat['mand_total'], 2, '.', ','); ?></strong>
+                                                    Base/Mandatory: <strong class="cat-mand-val text-dark" style="font-family:'Segoe UI', 'Consolas', monospace;">₹ <?= number_format(round($cStat['mand_total']), 0, '.', ','); ?></strong>
                                                     <span class="cat-mand-sep text-muted mx-1">|</span>
                                                 </span>
                                                 <span style="font-size:12px; font-weight:700; color:#1e3a8a; background:#e0e7ff; border:1px solid #c7d2fe; padding:3px 10px; border-radius:6px; display:inline-flex; align-items:center; gap:5px;">
                                                     <span>Category Total:</span>
-                                                    <span class="cat-total-val" style="font-family:'Segoe UI', 'Consolas', monospace; font-size:13px; color:#1e1b4b;">₹ <?= number_format($cStat['total'], 2, '.', ','); ?></span>
+                                                    <span class="cat-total-val" style="font-family:'Segoe UI', 'Consolas', monospace; font-size:13px; color:#1e1b4b;">₹ <?= number_format(round($cStat['total']), 0, '.', ','); ?></span>
                                                 </span>
                                             </div>
                                         </div>
@@ -638,16 +638,16 @@ ksort($categoriesList);
                                         </div>
                                     </td>
                                     
-                                    <!-- Unit Price (Clean full amount with guaranteed .00, no rupee symbol) -->
+                                    <!-- Unit Price (Clean full amount, no rupee symbol) -->
                                     <td class="text-right">
-                                        <input type="number" step="0.01" min="0" 
+                                        <input type="number" step="any" min="0" 
                                                name="bundle_items[<?= $idx; ?>][price_override]" 
                                                class="form-control form-control-sm bundle-price-input text-right" 
                                                value="<?= $formattedUnitPrice; ?>" 
-                                               placeholder="0.00"
+                                               placeholder="0"
                                                onchange="normalizePriceInput(this); recalculateBundleTotals();"
                                                onblur="normalizePriceInput(this);"
-                                               title="Unit price amount (full amount with .00)">
+                                               title="Unit price amount">
                                     </td>
                                     
                                     <!-- Line Total (Clean number, no rupee symbol) -->
@@ -700,7 +700,7 @@ ksort($categoriesList);
                     <div style="width:1px; height:18px; background:#475569;"></div>
                     <div>
                         <span style="color:#94a3b8; font-size:12px;">Mandatory Base Price:</span>
-                        <strong style="color:#38bdf8; font-size:15px; margin-left:4px; font-family:'Segoe UI', 'Consolas', monospace;" id="sticky_mand_sum">₹ <?= number_format($mandatorySum, 2, '.', ','); ?></strong>
+                        <strong style="color:#38bdf8; font-size:15px; margin-left:4px; font-family:'Segoe UI', 'Consolas', monospace;" id="sticky_mand_sum">₹ <?= number_format(round($mandatorySum), 0, '.', ','); ?></strong>
                     </div>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
@@ -852,13 +852,13 @@ window.bundleSelectedMap = {};
 var bundleSearchTimer = null;
 window.currentBundleFilterType = 'all';
 
-// Normalize price input to always have 2 decimal places (.00)
+// Normalize price input to always be clean integer
 function normalizePriceInput(input) {
     var rawVal = $(input).val();
     if (rawVal === '' || rawVal === null || rawVal === undefined) return;
     var num = parseFloat(rawVal);
     if (!isNaN(num) && num >= 0) {
-        $(input).val(num.toFixed(2));
+        $(input).val(Math.round(num));
     }
 }
 
@@ -982,7 +982,7 @@ function filterBundleTable() {
 
     $('#sticky_visible_count').text(visibleCount);
     $('#sticky_visible_units').text(visibleUnits);
-    $('#sticky_mand_sum').text('₹ ' + visibleMandatorySum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    $('#sticky_mand_sum').text('₹ ' + Math.round(visibleMandatorySum).toLocaleString('en-IN'));
 }
 
 function getExistingBundleProductIds() {
@@ -1096,7 +1096,7 @@ function renderBundleSearchResultsList(query) {
         var isChecked = window.bundleSelectedMap[item.id] ? 'checked' : '';
         var imgTag = item.image_small ? '<img src="' + item.image_small + '" style="width:40px; height:40px; object-fit:cover; border-radius:4px; display:inline-block;">' : '<div style="width:40px; height:40px; background:#f1f5f9; border-radius:4px; display:inline-block; line-height:40px; text-align:center; color:#94a3b8;"><i class="fa fa-cube"></i></div>';
         
-        var formattedItemPrice = parseFloat(item.price || 0).toFixed(2);
+        var formattedItemPrice = Math.round(parseFloat(item.price || 0));
 
         var variantSelectorHtml = '';
         if (item.variants && item.variants.length > 0) {
@@ -1104,7 +1104,7 @@ function renderBundleSearchResultsList(query) {
                 '<select class="form-control input-sm bundle-item-variant-select" id="bundle_item_var_' + idx + '" style="font-size:11px; height:26px; padding:2px 6px; max-width:320px; display:inline-block;" onchange="onVariantChangeInSearch(' + idx + ', this);">' +
                 '<option value="" data-sku="' + (item.sku || '') + '" data-price="' + formattedItemPrice + '" data-stock="' + item.stock + '">-- Base Product (SKU: ' + (item.sku || 'N/A') + ') --</option>';
             $.each(item.variants, function(vIdx, v) {
-                var vPrice = parseFloat(v.price || 0).toFixed(2);
+                var vPrice = Math.round(parseFloat(v.price || 0));
                 variantSelectorHtml += '<option value="' + v.id + '" data-sku="' + (v.sku || '') + '" data-price="' + vPrice + '" data-stock="' + v.quantity + '">' + $('<div>').text(v.name).html() + ' (SKU: ' + (v.sku || 'N/A') + ' - Stock: ' + v.quantity + ')</option>';
             });
             variantSelectorHtml += '</select></div>';
@@ -1133,7 +1133,7 @@ function renderBundleSearchResultsList(query) {
         html += '</td>';
 
         html += '<td style="width:130px; text-align:center; vertical-align:middle;" onclick="event.stopPropagation();">';
-        html += '<input type="number" step="0.01" min="0" id="bundle_row_price_' + idx + '" class="form-control input-sm text-right font-weight-bold bundle-row-price" placeholder="' + formattedItemPrice + '" onblur="normalizePriceInput(this);" style="width:115px; margin:0 auto; height:30px; padding:2px 6px; font-family:monospace; font-size:12px; display:inline-block;" title="Price override with .00">';
+        html += '<input type="number" step="any" min="0" id="bundle_row_price_' + idx + '" class="form-control input-sm text-right font-weight-bold bundle-row-price" placeholder="' + formattedItemPrice + '" onblur="normalizePriceInput(this);" style="width:115px; margin:0 auto; height:30px; padding:2px 6px; font-family:monospace; font-size:12px; display:inline-block;" title="Price override">';
         html += '</td>';
 
         html += '<td style="width:75px; text-align:center; vertical-align:middle;" onclick="event.stopPropagation();">';
@@ -1190,7 +1190,7 @@ function onBundleRowClick(e, idx) {
 function onVariantChangeInSearch(idx, selectEl) {
     var $opt = $(selectEl).find('option:selected');
     var sku = $opt.data('sku');
-    var price = parseFloat($opt.data('price') || 0).toFixed(2);
+    var price = Math.round(parseFloat($opt.data('price') || 0));
     var stock = $opt.data('stock');
     if (sku !== undefined) $('#bundle_item_sku_disp_' + idx).text(sku || 'N/A');
     if (price !== undefined) {
@@ -1412,11 +1412,11 @@ function onBundleQtyInputChange(input) {
 
 function renderBundleComponentRowHtml(item, variantId, variantName, sku, price, stock, qty, isOptional, priceOverride) {
     var rawPrice = (priceOverride !== '' && priceOverride !== null && priceOverride !== undefined) ? parseFloat(priceOverride) : parseFloat(price);
-    var formattedUnitPrice = isNaN(rawPrice) ? '0.00' : rawPrice.toFixed(2);
+    var formattedUnitPrice = isNaN(rawPrice) ? '0' : Math.round(rawPrice);
     var isSel = isOptional ? (qty > 0) : true;
     var minQtyVal = Math.max(1, qty > 0 ? qty : 1);
     var totalPriceNum = rawPrice * (isSel ? minQtyVal : 0);
-    var formattedTotal = totalPriceNum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    var formattedTotal = Math.round(totalPriceNum).toLocaleString('en-IN');
     
     var imgHtml = item.image_small ? '<img src="' + item.image_small + '" style="width:40px; height:40px; object-fit:cover; border-radius:6px; border:1px solid #e2e8f0;">' : '<div style="width:40px; height:40px; background:#f1f5f9; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; color:#94a3b8; border:1px solid #e2e8f0;"><i class="fa fa-cube"></i></div>';
     var catName = item.category_name || 'General';
@@ -1454,7 +1454,7 @@ function renderBundleComponentRowHtml(item, variantId, variantName, sku, price, 
         '</div>' +
         '</td>' +
         '<td class="text-right">' +
-        '<input type="number" step="0.01" min="0" name="bundle_items[' + rowIdx + '][price_override]" class="form-control form-control-sm bundle-price-input text-right font-weight-bold" value="' + formattedUnitPrice + '" placeholder="0.00" onchange="normalizePriceInput(this); recalculateBundleTotals();" onblur="normalizePriceInput(this);" title="Unit price amount">' +
+        '<input type="number" step="any" min="0" name="bundle_items[' + rowIdx + '][price_override]" class="form-control form-control-sm bundle-price-input text-right font-weight-bold" value="' + formattedUnitPrice + '" placeholder="0" onchange="normalizePriceInput(this); recalculateBundleTotals();" onblur="normalizePriceInput(this);" title="Unit price amount">' +
         '</td>' +
         '<td class="text-right font-weight-bold text-dark item-row-total" style="font-family:\'Segoe UI\', \'Consolas\', monospace; font-size:13px; white-space:nowrap;">' + formattedTotal + '</td>' +
         '<td class="text-center"><span class="badge ' + (stock >= minQtyVal ? 'badge-success' : 'badge-danger') + '" style="font-size:10.5px; padding:3px 6px;">' + stock + ' in stock</span></td>' +
@@ -1611,12 +1611,12 @@ function insertBundleRowIntoTable(rowHtml, catName) {
             '</div>' +
             '<div style="display:flex; align-items:center; gap:8px;">' +
             '<span class="cat-mand-wrapper text-muted small" style="font-size:11.5px; display:none;">' +
-            'Base/Mandatory: <strong class="cat-mand-val text-dark" style="font-family:\'Segoe UI\', \'Consolas\', monospace;">₹ 0.00</strong>' +
+            'Base/Mandatory: <strong class="cat-mand-val text-dark" style="font-family:\'Segoe UI\', \'Consolas\', monospace;">₹ 0</strong>' +
             '<span class="cat-mand-sep text-muted mx-1">|</span>' +
             '</span>' +
             '<span style="font-size:12px; font-weight:700; color:#1e3a8a; background:#e0e7ff; border:1px solid #c7d2fe; padding:3px 10px; border-radius:6px; display:inline-flex; align-items:center; gap:5px;">' +
             '<span>Category Total:</span>' +
-            '<span class="cat-total-val" style="font-family:\'Segoe UI\', \'Consolas\', monospace; font-size:13px; color:#1e1b4b;">₹ 0.00</span>' +
+            '<span class="cat-total-val" style="font-family:\'Segoe UI\', \'Consolas\', monospace; font-size:13px; color:#1e1b4b;">₹ 0</span>' +
             '</span>' +
             '</div>' +
             '</div>' +
@@ -1660,7 +1660,7 @@ function recalculateBundleTotals() {
         var cat = ($(this).attr('data-category') || 'general').toLowerCase().trim();
         
         var rowTotal = activeQty * price;
-        $(this).find('.item-row-total').text(rowTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+        $(this).find('.item-row-total').text(Math.round(rowTotal).toLocaleString('en-IN'));
         
         totalUnits += activeQty;
         sumPrice += rowTotal;
@@ -1700,12 +1700,12 @@ function recalculateBundleTotals() {
         var catUnit = catUnits[cat] || 0;
         var catOpt = catOptCounts[cat] || 0;
 
-        $(this).find('.cat-total-val').text('₹ ' + catTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+        $(this).find('.cat-total-val').text('₹ ' + Math.round(catTotal).toLocaleString('en-IN'));
         $(this).find('.cat-item-count').text(catCount);
         $(this).find('.cat-item-count-label').text(catCount === 1 ? 'Product' : 'Products');
         $(this).find('.cat-unit-count').text(catUnit);
         $(this).find('.cat-unit-count-label').text(catUnit === 1 ? 'Unit' : 'Units');
-        $(this).find('.cat-mand-val').text('₹ ' + catMand.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+        $(this).find('.cat-mand-val').text('₹ ' + Math.round(catMand).toLocaleString('en-IN'));
 
         if (catOpt > 0) {
             $(this).find('.cat-mand-wrapper').show();
@@ -1730,8 +1730,8 @@ function recalculateBundleTotals() {
     $('#badge_mand_count').text(mandCount);
     $('#badge_opt_count').text(optCount);
     $('#badge_total_units').text(totalUnits);
-    $('#badge_sum_price').text('₹ ' + sumPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-    $('#card_mand_sum_disp').text('₹ ' + mandSum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    $('#badge_sum_price').text('₹ ' + Math.round(sumPrice).toLocaleString('en-IN'));
+    $('#card_mand_sum_disp').text('₹ ' + Math.round(mandSum).toLocaleString('en-IN'));
     if (optCount > 0) {
         $('#card_mand_box').show();
     } else {
@@ -1741,7 +1741,7 @@ function recalculateBundleTotals() {
     // Update Bottom Sticky Bar
     $('#sticky_visible_count').text(count);
     $('#sticky_visible_units').text(totalUnits);
-    $('#sticky_mand_sum').text('₹ ' + mandSum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    $('#sticky_mand_sum').text('₹ ' + Math.round(mandSum).toLocaleString('en-IN'));
     
     // If a filter is currently active, re-filter so visible counts match
     filterBundleTable();
@@ -1768,7 +1768,7 @@ function applyBundleSumToPrice(mode) {
     var targetAmount = (mode === 'mandatory') ? mandPrice : sumPrice;
     var label = (mode === 'mandatory') ? 'Mandatory Package Base' : 'Total Package Value (Mandatory + Selected Optionals)';
 
-    var formattedVal = targetAmount.toFixed(2);
+    var formattedVal = Math.round(targetAmount);
     if ($('input[name="price"]').length) {
         $('input[name="price"]').val(formattedVal).trigger('input').trigger('change');
     }
@@ -1783,7 +1783,7 @@ function applyBundleSumToPrice(mode) {
     }
 
     if (typeof alert !== 'undefined') {
-        alert('Applied ' + label + ' (₹ ' + targetAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ') to Product Price input above!');
+        alert('Applied ' + label + ' (₹ ' + Math.round(targetAmount).toLocaleString('en-IN') + ') to Product Price input above!');
     }
 }
 
@@ -1821,12 +1821,12 @@ function sortBundleTableByCategory() {
                 '</div>' +
                 '<div style="display:flex; align-items:center; gap:8px;">' +
                 '<span class="cat-mand-wrapper text-muted small" style="font-size:11.5px; display:none;">' +
-                'Base/Mandatory: <strong class="cat-mand-val text-dark" style="font-family:\'Segoe UI\', \'Consolas\', monospace;">₹ 0.00</strong>' +
+                'Base/Mandatory: <strong class="cat-mand-val text-dark" style="font-family:\'Segoe UI\', \'Consolas\', monospace;">₹ 0</strong>' +
                 '<span class="cat-mand-sep text-muted mx-1">|</span>' +
                 '</span>' +
                 '<span style="font-size:12px; font-weight:700; color:#1e3a8a; background:#e0e7ff; border:1px solid #c7d2fe; padding:3px 10px; border-radius:6px; display:inline-flex; align-items:center; gap:5px;">' +
                 '<span>Category Total:</span>' +
-                '<span class="cat-total-val" style="font-family:\'Segoe UI\', \'Consolas\', monospace; font-size:13px; color:#1e1b4b;">₹ 0.00</span>' +
+                '<span class="cat-total-val" style="font-family:\'Segoe UI\', \'Consolas\', monospace; font-size:13px; color:#1e1b4b;">₹ 0</span>' +
                 '</span>' +
                 '</div>' +
                 '</div>' +

@@ -124,9 +124,9 @@
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 11.5px; color: #64748b; background: #f8fafc; padding: 5px 10px; border-radius: 5px; border: 1px dashed #e2e8f0;">
                                 <span>
                                     <i class="fa fa-percent text-muted" style="font-size: 10px; margin-right: 3px;"></i>
-                                    <?= trans("gst"); ?> (<?= $cartItem->product_vat_rate; ?>%<?= $itemGst['is_interstate'] ? ' ' . trans('igst') : ''; ?>):
+                                    <?= trans("gst"); ?> (<?= (int)round((float)$cartItem->product_vat_rate); ?>%<?= $itemGst['is_interstate'] ? ' ' . trans('igst') : ''; ?>):
                                     <?php if (!$itemGst['is_interstate']): ?>
-                                        <span style="color: #94a3b8; font-size: 10.5px;">(CGST <?= $itemGst['cgst_rate']; ?>% + SGST <?= $itemGst['sgst_rate']; ?>%)</span>
+                                        <span style="color: #94a3b8; font-size: 10.5px;">(CGST <?= (int)round((float)$itemGst['cgst_rate']); ?>% + SGST <?= (int)round((float)$itemGst['sgst_rate']); ?>%)</span>
                                     <?php endif; ?>
                                 </span>
                                 <strong style="color: #334155; font-size: 12px;"><?= priceDecimal($cartItem->product_vat, $cart->currency_code); ?></strong>
@@ -226,7 +226,7 @@
             <!-- Referral / Affiliate Discount -->
             <?php if ($cart->totals->affiliate_discount > 0): ?>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 13.5px; color: #15803d;">
-                    <span><?= trans("referral_discount"); ?> (<?= $cart->totals->affiliate_discount_rate; ?>%)</span>
+                    <span><?= trans("referral_discount"); ?> (<?= (int)round((float)$cart->totals->affiliate_discount_rate); ?>%)</span>
                     <strong style="text-align: right; min-width: 100px;">- <?= priceDecimal($cart->totals->affiliate_discount, $cart->currency_code); ?></strong>
                 </div>
             <?php endif; ?>
@@ -239,22 +239,22 @@
             ?>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 14px; color: #334155;">
                     <span style="font-weight: 600;">
-                        <?= trans("total_gst"); ?> <span style="font-size: 12px; font-weight: normal; color: #64748b;">(<?= $cartGst['is_interstate'] ? $cartGst['igst_rate'] : ($cartGst['cgst_rate'] + $cartGst['sgst_rate']); ?>%)</span>
+                        <?= trans("total_gst"); ?> <span style="font-size: 12px; font-weight: normal; color: #64748b;">(<?= $cartGst['is_interstate'] ? (int)round((float)$cartGst['igst_rate']) : (int)round((float)$cartGst['cgst_rate'] + (float)$cartGst['sgst_rate']); ?>%)</span>
                     </span>
                     <strong style="font-size: 14.5px; color: #1e293b; text-align: right; min-width: 100px;"><?= priceDecimal($cart->totals->vat, $cart->currency_code); ?></strong>
                 </div>
                 <?php if ($cartGst['is_interstate']): ?>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12.5px; color: #64748b; padding-left: 12px;">
-                        <span>&bull; <?= trans("igst"); ?> (<?= $cartGst['igst_rate']; ?>%)</span>
+                        <span>&bull; <?= trans("igst"); ?> (<?= (int)round((float)$cartGst['igst_rate']); ?>%)</span>
                         <span style="text-align: right; min-width: 100px;"><?= priceDecimal($cartGst['igst_amount'], $cart->currency_code); ?></span>
                     </div>
                 <?php else: ?>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 12.5px; color: #64748b; padding-left: 12px;">
-                        <span>&bull; <?= trans("cgst"); ?> (<?= $cartGst['cgst_rate']; ?>%)</span>
+                        <span>&bull; <?= trans("cgst"); ?> (<?= (int)round((float)$cartGst['cgst_rate']); ?>%)</span>
                         <span style="text-align: right; min-width: 100px;"><?= priceDecimal($cartGst['cgst_amount'], $cart->currency_code); ?></span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12.5px; color: #64748b; padding-left: 12px;">
-                        <span>&bull; <?= trans("sgst"); ?> (<?= $cartGst['sgst_rate']; ?>%)</span>
+                        <span>&bull; <?= trans("sgst"); ?> (<?= (int)round((float)$cartGst['sgst_rate']); ?>%)</span>
                         <span style="text-align: right; min-width: 100px;"><?= priceDecimal($cartGst['sgst_amount'], $cart->currency_code); ?></span>
                     </div>
                 <?php endif; ?>
@@ -319,7 +319,7 @@
                     </div>
                     <?php if (!empty($cart->totals->savings_percentage) && $cart->totals->savings_percentage > 0): ?>
                         <div style="font-size: 11px; color: #16a34a; font-weight: 600; margin-top: 4px;">
-                            🎉 You are saving <?= $cart->totals->savings_percentage; ?>% on this order!
+                            🎉 You are saving <?= (int)round((float)$cart->totals->savings_percentage); ?>% on this order!
                         </div>
                     <?php endif; ?>
                 </div>

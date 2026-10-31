@@ -627,13 +627,8 @@ function openBundleProductQuickView(compId) {
 }
 
 function formatBundleCurrency(amount) {
-    var formatted = parseFloat(amount).toFixed(2);
-    if (formatted.endsWith('.00')) {
-        formatted = formatted.substring(0, formatted.length - 3);
-    }
-    var parts = formatted.split('.');
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    formatted = parts.join('.');
+    var rounded = Math.round(parseFloat(amount) || 0);
+    var formatted = rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
     var symbol = '<?= escJs($currencySymbol); ?>';
     var dir = '<?= escJs($symbolDirection); ?>';
@@ -1091,7 +1086,7 @@ function recalculateStorefrontBundleTotals() {
         $('#form-add-to-cart').append('<input type="hidden" name="bundle_total_price" id="hidden_bundle_total_price">');
     }
     $('#hidden_bundle_components_data').val(bundleJson);
-    $('#hidden_bundle_total_price').val(totalPrice.toFixed(2));
+    $('#hidden_bundle_total_price').val(Math.round(totalPrice));
 }
 
 window.recalculateStorefrontBundleTotals = recalculateStorefrontBundleTotals;

@@ -454,7 +454,7 @@
                                     <!-- Referral / Affiliate Discount -->
                                     <?php if ($cart->totals->affiliate_discount > 0): ?>
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 13.5px; color: #15803d;">
-                                            <span><?= trans("referral_discount"); ?> (<?= $cart->totals->affiliate_discount_rate; ?>%)</span>
+                                            <span><?= trans("referral_discount"); ?> (<?= (int)round((float)$cart->totals->affiliate_discount_rate); ?>%)</span>
                                             <strong style="text-align: right; min-width: 100px;">- <?= priceDecimal($cart->totals->affiliate_discount, $cart->currency_code); ?></strong>
                                         </div>
                                     <?php endif; ?>
@@ -503,7 +503,7 @@
                                             </div>
                                             <?php if (!empty($cart->totals->savings_percentage) && $cart->totals->savings_percentage > 0): ?>
                                                 <div style="font-size: 11px; color: #16a34a; font-weight: 600; margin-top: 4px;">
-                                                    🎉 You are saving <?= $cart->totals->savings_percentage; ?>% on this order!
+                                                    🎉 You are saving <?= (int)round((float)$cart->totals->savings_percentage); ?>% on this order!
                                                 </div>
                                             <?php endif; ?>
                                         </div>

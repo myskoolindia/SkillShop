@@ -398,12 +398,11 @@ if (!function_exists('priceFormatted')) {
             $decPoint = ',';
             $thousandsSep = '.';
         }
-        if (!empty($price)) {
-            if (filter_var($price, FILTER_VALIDATE_INT) !== false) {
-                $price = number_format($price, 0, $decPoint, $thousandsSep);
-            } else {
-                $price = number_format($price, 2, $decPoint, $thousandsSep);
-            }
+        if ($price !== null && $price !== '') {
+            $numericPrice = round((float)$price);
+            $price = number_format($numericPrice, 0, $decPoint, $thousandsSep);
+        } else {
+            $price = '0';
         }
         return priceCurrencyFormat($price, $currencyCode);
     }
@@ -429,15 +428,11 @@ if (!function_exists('priceDecimal')) {
             $decPoint = ',';
             $thousandsSep = '.';
         }
-        if (!empty($price)) {
-            if (strpos($price, '.00') !== false) {
-                $price = str_replace('.00', '', $price);
-            }
-            if (filter_var($price, FILTER_VALIDATE_INT) !== false) {
-                $price = number_format($price, 0, $decPoint, $thousandsSep);
-            } else {
-                $price = number_format($price, 2, $decPoint, $thousandsSep);
-            }
+        if ($price !== null && $price !== '') {
+            $numericPrice = round((float)$price);
+            $price = number_format($numericPrice, 0, $decPoint, $thousandsSep);
+        } else {
+            $price = '0';
         }
         if ($moneySign == false) {
             return $price;
