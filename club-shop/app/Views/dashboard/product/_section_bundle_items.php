@@ -237,6 +237,13 @@ ksort($categoriesList);
 .bundle-row.row-optional {
     background-color: #fcfcfc;
 }
+.bundle-row.row-optional.row-unselected {
+    opacity: 0.68;
+    background-color: #f8fafc !important;
+}
+.bundle-row.row-optional.row-unselected:hover {
+    opacity: 0.95;
+}
 .bundle-row.row-mandatory {
     background-color: #ffffff;
 }
@@ -455,7 +462,7 @@ ksort($categoriesList);
                 </div>
             </div>
 
-            <!-- Toolbar 2: Quick Filter Pills & Category Dropdown -->
+            <!-- Toolbar 2: Quick Filter Pills, Optional Toggle & Category Dropdown -->
             <div class="p-2 mb-3" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
                 <div style="display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
                     <span class="text-muted small font-weight-bold text-uppercase" style="margin-right:4px;">Filter:</span>
@@ -467,6 +474,16 @@ ksort($categoriesList);
                     </div>
                     <div class="bundle-filter-pill" id="pill_optional" onclick="setBundleFilterType('optional');">
                         <i class="fa fa-tag text-muted"></i> Optional <span class="badge-count" id="pill_count_opt"><?= $optionalCount; ?></span>
+                    </div>
+
+                    <!-- Optional Products Selected / Unselected Quick Toggle -->
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Toggle Optional Selection" style="box-shadow:0 1px 2px rgba(0,0,0,0.04); margin-left:4px;">
+                        <button type="button" class="btn btn-sm btn-outline-success font-weight-bold px-2 py-1" onclick="toggleAllOptionalSelection(true);" title="Select / Include all optional products (Sets Qty = 1)" style="font-size:11.5px;">
+                            <i class="fa fa-check-circle"></i> Select All Optional
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary font-weight-bold px-2 py-1" onclick="toggleAllOptionalSelection(false);" title="Unselect / Exclude all optional products (Sets Qty = 0)" style="font-size:11.5px;">
+                            <i class="fa fa-circle-o"></i> Unselect All Optional
+                        </button>
                     </div>
                 </div>
 
@@ -490,7 +507,12 @@ ksort($categoriesList);
                             <th style="width: 60px; text-align:center;">Image</th>
                             <th style="min-width: 250px;">Component & Variation</th>
                             <th style="width: 120px;">SKU</th>
-                            <th style="width: 75px;" class="text-center">Optional</th>
+                            <th style="width: 85px;" class="text-center">
+                                <div style="display:inline-flex; align-items:center; justify-content:center; gap:4px;" title="Check to mark all optional, uncheck to mark all mandatory">
+                                    <span>Optional</span>
+                                    <input type="checkbox" id="master_bundle_opt_chk" title="Toggle Optional for all products" onchange="toggleAllOptionalCheckboxes(this.checked);" style="cursor:pointer; width:15px; height:15px; margin:0;">
+                                </div>
+                            </th>
                             <th style="width: 85px;" class="text-center">Qty</th>
                             <th style="width: 140px;" class="text-right">Unit Price (₹)</th>
                             <th style="width: 130px;" class="text-right">Total (₹)</th>
@@ -505,13 +527,16 @@ ksort($categoriesList);
                             foreach ($bundleComponents as $idx => $comp): 
                                 $compCat = !empty($comp->category_name) ? $comp->category_name : 'General';
                                 $isOpt = !empty($comp->is_optional) ? 1 : 0;
+                                $isSelected = empty($isOpt) || ((int)$comp->required_quantity > 0);
+                                $minQtyVal = !empty($comp->min_quantity) ? (int)$comp->min_quantity : max(1, (int)$comp->required_quantity);
                                 
                                 // Price override formatting: ALWAYS guarantee 2 decimal places with .00 visible
                                 $effectiveUnitPrice = ($comp->price_override !== null && $comp->price_override !== '') 
                                     ? (float)$comp->price_override 
                                     : (float)$comp->unit_price;
                                 $formattedUnitPrice = number_format($effectiveUnitPrice, 2, '.', '');
-                                $lineTotal = $effectiveUnitPrice * (int)$comp->required_quantity;
+                                $activeQty = $isSelected ? $minQtyVal : 0;
+                                $lineTotal = $effectiveUnitPrice * $activeQty;
                                 $formattedLineTotal = number_format($lineTotal, 2, '.', ',');
 
                                 if ($compCat !== $currCatName):
@@ -528,6 +553,11 @@ ksort($categoriesList);
                                                 <span style="font-size:11.5px; font-weight:700; color:#1e293b; background:#e2e8f0; border:1px solid #cbd5e1; padding:3px 9px; border-radius:12px;">
                                                     <span class="cat-item-count"><?= $cStat['count']; ?></span> <span class="cat-item-count-label"><?= $cStat['count'] == 1 ? 'Product' : 'Products'; ?></span> (<span class="cat-unit-count"><?= $cStat['units']; ?></span> <span class="cat-unit-count-label"><?= $cStat['units'] == 1 ? 'Unit' : 'Units'; ?></span>)
                                                 </span>
+                                                <span class="badge badge-light border text-muted cat-opt-toggle-badge" style="font-size:11px; padding:3px 8px; <?= ($cStat['opt_count'] > 0) ? '' : 'display:none;'; ?>">
+                                                    <span class="cat-opt-count-val"><?= $cStat['opt_count']; ?></span> Optional:
+                                                    <a href="javascript:void(0);" onclick="toggleCategoryOptional(this, true);" class="text-success font-weight-bold ml-1" title="Select all optional in this category"><i class="fa fa-check"></i> Select</a> |
+                                                    <a href="javascript:void(0);" onclick="toggleCategoryOptional(this, false);" class="text-secondary font-weight-bold ml-1" title="Unselect all optional in this category"><i class="fa fa-times"></i> Unselect</a>
+                                                </span>
                                             </div>
                                             <div style="display:flex; align-items:center; gap:8px;">
                                                 <span class="cat-mand-wrapper text-muted small" style="font-size:11.5px; <?= ($cStat['opt_count'] > 0) ? '' : 'display:none;'; ?>">
@@ -543,7 +573,7 @@ ksort($categoriesList);
                                     </td>
                                 </tr>
                             <?php endif; ?>
-                                <tr class="bundle-row <?= $isOpt ? 'row-optional' : 'row-mandatory'; ?>" 
+                                <tr class="bundle-row <?= $isOpt ? 'row-optional' : 'row-mandatory'; ?> <?= ($isOpt && !$isSelected) ? 'row-unselected' : ''; ?>" 
                                     data-id="<?= $comp->id; ?>" 
                                     data-title="<?= esc(strtolower($comp->title)); ?>" 
                                     data-sku="<?= esc(strtolower($comp->sku)); ?>" 
@@ -587,9 +617,21 @@ ksort($categoriesList);
                                         </div>
                                     </td>
                                     
-                                    <!-- Qty in Pkg -->
-                                    <td class="text-center">
-                                        <input type="number" min="<?= $isOpt ? '0' : '1'; ?>" max="9999" name="bundle_items[<?= $idx; ?>][quantity]" class="form-control form-control-sm text-center font-weight-bold bundle-qty-input" value="<?= $comp->required_quantity; ?>" onchange="recalculateBundleTotals();" style="width:65px; margin:0 auto; font-size:13px;">
+                                    <!-- Qty in Pkg (Single textbox = min qty) with 1-Click Selected/Unselected Toggle -->
+                                    <td class="text-center" style="vertical-align:middle; width:80px;">
+                                        <div style="display:flex; flex-direction:column; align-items:center; gap:3px;">
+                                            <input type="number" min="1" max="9999" name="bundle_items[<?= $idx; ?>][quantity]" class="form-control form-control-sm text-center font-weight-bold bundle-qty-input" value="<?= $minQtyVal; ?>" onchange="onBundleQtyInputChange(this);" style="width:65px; margin:0 auto; font-size:13px;" title="Minimum quantity required when this component is included">
+                                            <div class="opt-status-container mt-1" style="<?= $isOpt ? '' : 'display:none;'; ?>">
+                                                <input type="hidden" name="bundle_items[<?= $idx; ?>][is_selected]" class="bundle-is-selected-input" value="<?= $isSelected ? '1' : '0'; ?>">
+                                                <button type="button" 
+                                                        class="btn btn-xs btn-toggle-opt-selection <?= $isSelected ? 'btn-success' : 'btn-light border text-muted'; ?>" 
+                                                        onclick="toggleSingleItemSelection(this);" 
+                                                        title="Click to toggle: Selected vs Unselected" 
+                                                        style="font-size:10px; font-weight:700; padding:1px 8px; border-radius:12px; line-height:1.4; transition:all 0.15s ease;">
+                                                    <?= $isSelected ? '<i class="fa fa-check"></i> Selected' : '<i class="fa fa-times"></i> Unselected'; ?>
+                                                </button>
+                                            </div>
+                                        </div>
                                     </td>
                                     
                                     <!-- Unit Price (Clean full amount with guaranteed .00, no rupee symbol) -->
@@ -1230,25 +1272,136 @@ function onBatchOptionalChange(checked) {
     });
 }
 
-function onBundleOptionalChange(checkbox) {
+function updateRowSelectionVisual($row, isSelected) {
+    var $btn = $row.find('.btn-toggle-opt-selection');
+    var $selInput = $row.find('.bundle-is-selected-input');
+    if ($selInput.length) {
+        $selInput.val(isSelected ? '1' : '0');
+    }
+    if ($btn.length) {
+        if (isSelected) {
+            $btn.removeClass('btn-light text-muted border').addClass('btn-success')
+                .html('<i class="fa fa-check"></i> Selected');
+            $row.removeClass('row-unselected');
+        } else {
+            $btn.removeClass('btn-success').addClass('btn-light text-muted border')
+                .html('<i class="fa fa-times"></i> Unselected');
+            $row.addClass('row-unselected');
+        }
+    }
+}
+
+// 1-Click Toggle for individual product: Selected vs Unselected
+function toggleSingleItemSelection(btn) {
+    var $row = $(btn).closest('tr');
+    var isOpt = parseInt($row.attr('data-is-optional')) || 0;
+    if (isOpt !== 1) return;
+    
+    var $selInput = $row.find('.bundle-is-selected-input');
+    var isCurrentlySelected = ($selInput.val() === '1');
+    var newSelected = !isCurrentlySelected;
+    
+    updateRowSelectionVisual($row, newSelected);
+    recalculateBundleTotals();
+}
+
+function onBundleOptionalChange(checkbox, skipRecalc) {
     var $row = $(checkbox).closest('tr');
     var $qtyInput = $row.find('.bundle-qty-input');
     var isChecked = $(checkbox).is(':checked');
+    var $statusContainer = $row.find('.opt-status-container');
     
     if (isChecked) {
         $row.removeClass('row-mandatory').addClass('row-optional');
         $row.attr('data-is-optional', 1);
-        $qtyInput.attr('min', 0);
-        if (parseInt($qtyInput.val()) <= 0) {
-            $qtyInput.val(0);
+        if ($statusContainer.length === 0) {
+            var nameSel = $qtyInput.attr('name').replace('[quantity]', '[is_selected]');
+            $qtyInput.after(
+                '<div class="opt-status-container mt-1">' +
+                '<input type="hidden" name="' + nameSel + '" class="bundle-is-selected-input" value="1">' +
+                '<button type="button" class="btn btn-xs btn-toggle-opt-selection btn-success" onclick="toggleSingleItemSelection(this);" title="Click to toggle: Selected vs Unselected" style="font-size:10px; font-weight:700; padding:1px 8px; border-radius:12px; line-height:1.4; transition:all 0.15s ease;">' +
+                '<i class="fa fa-check"></i> Selected' +
+                '</button>' +
+                '</div>'
+            );
+            $statusContainer = $row.find('.opt-status-container');
         }
+        $statusContainer.show();
+        var isSel = ($row.find('.bundle-is-selected-input').val() === '1');
+        updateRowSelectionVisual($row, isSel);
     } else {
-        $row.removeClass('row-optional').addClass('row-mandatory');
+        $row.removeClass('row-optional row-unselected').addClass('row-mandatory');
         $row.attr('data-is-optional', 0);
-        $qtyInput.attr('min', 1);
-        if (parseInt($qtyInput.val()) < 1) {
-            $qtyInput.val(1);
+        $row.find('.bundle-is-selected-input').val('1');
+        if ($statusContainer.length) {
+            $statusContainer.hide();
         }
+    }
+    if (!skipRecalc) {
+        recalculateBundleTotals();
+    }
+}
+
+// Toggle all optional products selected vs unselected
+function toggleAllOptionalSelection(select) {
+    var hasFilter = (window.currentBundleFilterType !== 'all') || ($('#bundle_category_filter_select').val() !== '') || ($('#bundle_filter_input').val().trim() !== '');
+    var selector = '#table_bundle_components tbody tr.bundle-row';
+    if (hasFilter) {
+        selector += ':visible';
+    }
+    
+    $(selector).each(function() {
+        var isOpt = parseInt($(this).attr('data-is-optional')) || 0;
+        if (isOpt === 1) {
+            updateRowSelectionVisual($(this), select);
+        }
+    });
+
+    recalculateBundleTotals();
+}
+
+// Toggle optional products for a specific category
+function toggleCategoryOptional(link, select) {
+    var $catHeader = $(link).closest('tr.bundle-category-header');
+    var catKey = ($catHeader.attr('data-category') || '').toLowerCase().trim();
+    if (!catKey) return;
+
+    var $row = $catHeader.next();
+    while ($row.length && !$row.hasClass('bundle-category-header')) {
+        if ($row.hasClass('bundle-row')) {
+            var isOpt = parseInt($row.attr('data-is-optional')) || 0;
+            if (isOpt === 1) {
+                updateRowSelectionVisual($row, select);
+            }
+        }
+        $row = $row.next();
+    }
+
+    recalculateBundleTotals();
+}
+
+// Master toggle to mark all products as Optional or Mandatory
+function toggleAllOptionalCheckboxes(checked) {
+    var hasFilter = (window.currentBundleFilterType !== 'all') || ($('#bundle_category_filter_select').val() !== '') || ($('#bundle_filter_input').val().trim() !== '');
+    var selector = '#table_bundle_components tbody tr.bundle-row';
+    if (hasFilter) {
+        selector += ':visible';
+    }
+
+    $(selector).each(function() {
+        var $chk = $(this).find('.bundle-optional-checkbox');
+        $chk.prop('checked', checked);
+        onBundleOptionalChange($chk[0], true);
+    });
+    recalculateBundleTotals();
+}
+
+function onBundleQtyInputChange(input) {
+    var $row = $(input).closest('tr');
+    var qty = parseInt($(input).val()) || 1;
+    if (qty < 1) {
+        qty = 1;
+        $(input).val(1);
     }
     recalculateBundleTotals();
 }
@@ -1256,7 +1409,9 @@ function onBundleOptionalChange(checkbox) {
 function renderBundleComponentRowHtml(item, variantId, variantName, sku, price, stock, qty, isOptional, priceOverride) {
     var rawPrice = (priceOverride !== '' && priceOverride !== null && priceOverride !== undefined) ? parseFloat(priceOverride) : parseFloat(price);
     var formattedUnitPrice = isNaN(rawPrice) ? '0.00' : rawPrice.toFixed(2);
-    var totalPriceNum = rawPrice * qty;
+    var isSel = isOptional ? (qty > 0) : true;
+    var minQtyVal = Math.max(1, qty > 0 ? qty : 1);
+    var totalPriceNum = rawPrice * (isSel ? minQtyVal : 0);
     var formattedTotal = totalPriceNum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     
     var imgHtml = item.image_small ? '<img src="' + item.image_small + '" style="width:40px; height:40px; object-fit:cover; border-radius:6px; border:1px solid #e2e8f0;">' : '<div style="width:40px; height:40px; background:#f1f5f9; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; color:#94a3b8; border:1px solid #e2e8f0;"><i class="fa fa-cube"></i></div>';
@@ -1264,7 +1419,15 @@ function renderBundleComponentRowHtml(item, variantId, variantName, sku, price, 
     var varBadge = variantName ? '<div style="margin-top:3px;"><span class="badge badge-info" style="font-size:10px;"><i class="fa fa-tag"></i> ' + $('<div>').text(variantName).html() + '</span></div>' : '';
 
     var rowIdx = bundleRowIndex++;
-    return '<tr class="bundle-row ' + (isOptional ? 'row-optional' : 'row-mandatory') + '" data-id="0" data-title="' + (item.title || '').toLowerCase() + '" data-sku="' + (sku || '').toLowerCase() + '" data-category="' + catName.toLowerCase() + '" data-is-optional="' + (isOptional ? 1 : 0) + '">' +
+    var statusBtnHtml = isOptional ? 
+        '<div class="opt-status-container mt-1">' +
+        '<input type="hidden" name="bundle_items[' + rowIdx + '][is_selected]" class="bundle-is-selected-input" value="' + (isSel ? '1' : '0') + '">' +
+        '<button type="button" class="btn btn-xs btn-toggle-opt-selection ' + (isSel ? 'btn-success' : 'btn-light border text-muted') + '" onclick="toggleSingleItemSelection(this);" title="Click to toggle: Selected vs Unselected" style="font-size:10px; font-weight:700; padding:1px 8px; border-radius:12px; line-height:1.4; transition:all 0.15s ease;">' +
+        (isSel ? '<i class="fa fa-check"></i> Selected' : '<i class="fa fa-times"></i> Unselected') +
+        '</button>' +
+        '</div>' : '';
+
+    return '<tr class="bundle-row ' + (isOptional ? ('row-optional' + (!isSel ? ' row-unselected' : '')) : 'row-mandatory') + '" data-id="0" data-title="' + (item.title || '').toLowerCase() + '" data-sku="' + (sku || '').toLowerCase() + '" data-category="' + catName.toLowerCase() + '" data-is-optional="' + (isOptional ? 1 : 0) + '">' +
         '<td class="text-center text-muted font-weight-bold" style="font-size:12px;">' + ($('#table_bundle_components tbody tr.bundle-row').length + 1) + '</td>' +
         '<td class="text-center" style="padding:4px;">' + imgHtml + '</td>' +
         '<td>' +
@@ -1280,12 +1443,17 @@ function renderBundleComponentRowHtml(item, variantId, variantName, sku, price, 
         '<label class="custom-control-label" for="bundle_opt_' + rowIdx + '" title="Optional"></label>' +
         '</div>' +
         '</td>' +
-        '<td class="text-center"><input type="number" min="' + (isOptional ? '0' : '1') + '" max="9999" name="bundle_items[' + rowIdx + '][quantity]" class="form-control form-control-sm text-center font-weight-bold bundle-qty-input" value="' + qty + '" onchange="recalculateBundleTotals();" style="width:65px; margin:0 auto; font-size:13px;"></td>' +
+        '<td class="text-center" style="vertical-align:middle; width:80px;">' +
+        '<div style="display:flex; flex-direction:column; align-items:center; gap:3px;">' +
+        '<input type="number" min="1" max="9999" name="bundle_items[' + rowIdx + '][quantity]" class="form-control form-control-sm text-center font-weight-bold bundle-qty-input" value="' + minQtyVal + '" onchange="onBundleQtyInputChange(this);" style="width:65px; margin:0 auto; font-size:13px;" title="Minimum quantity required when this component is included">' +
+        statusBtnHtml +
+        '</div>' +
+        '</td>' +
         '<td class="text-right">' +
         '<input type="number" step="0.01" min="0" name="bundle_items[' + rowIdx + '][price_override]" class="form-control form-control-sm bundle-price-input text-right font-weight-bold" value="' + formattedUnitPrice + '" placeholder="0.00" onchange="normalizePriceInput(this); recalculateBundleTotals();" onblur="normalizePriceInput(this);" title="Unit price amount">' +
         '</td>' +
         '<td class="text-right font-weight-bold text-dark item-row-total" style="font-family:\'Segoe UI\', \'Consolas\', monospace; font-size:13px; white-space:nowrap;">' + formattedTotal + '</td>' +
-        '<td class="text-center"><span class="badge ' + (stock >= qty ? 'badge-success' : 'badge-danger') + '" style="font-size:10.5px; padding:3px 6px;">' + stock + ' in stock</span></td>' +
+        '<td class="text-center"><span class="badge ' + (stock >= minQtyVal ? 'badge-success' : 'badge-danger') + '" style="font-size:10.5px; padding:3px 6px;">' + stock + ' in stock</span></td>' +
         '<td class="text-center"><button type="button" class="btn btn-xs btn-outline-danger" onclick="removeBundleRow(this);" title="Remove"><i class="fa fa-trash"></i></button></td>' +
         '</tr>';
 }
@@ -1480,15 +1648,17 @@ function recalculateBundleTotals() {
     $('#table_bundle_components tbody tr.bundle-row').each(function() {
         count++;
         var isOpt = parseInt($(this).attr('data-is-optional')) || 0;
-        var qty = parseInt($(this).find('.bundle-qty-input').val()) || 0;
+        var isSelected = isOpt ? ($(this).find('.bundle-is-selected-input').val() === '1') : true;
+        var minQty = parseInt($(this).find('.bundle-qty-input').val()) || 1;
+        var activeQty = isSelected ? minQty : 0;
         var priceInput = $(this).find('.bundle-price-input');
         var price = parseFloat(priceInput.val()) || 0;
         var cat = ($(this).attr('data-category') || 'general').toLowerCase().trim();
         
-        var rowTotal = qty * price;
+        var rowTotal = activeQty * price;
         $(this).find('.item-row-total').text(rowTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
         
-        totalUnits += qty;
+        totalUnits += activeQty;
         sumPrice += rowTotal;
         
         if (typeof catCounts[cat] === 'undefined') {
@@ -1500,11 +1670,16 @@ function recalculateBundleTotals() {
         }
         catTotals[cat] += rowTotal;
         catCounts[cat]++;
-        catUnits[cat] += qty;
+        catUnits[cat] += activeQty;
         
         if (isOpt === 1) {
             optCount++;
             catOptCounts[cat]++;
+            if (!isSelected) {
+                $(this).addClass('row-unselected');
+            } else {
+                $(this).removeClass('row-unselected');
+            }
         } else {
             mandCount++;
             mandSum += rowTotal;
@@ -1530,10 +1705,16 @@ function recalculateBundleTotals() {
 
         if (catOpt > 0) {
             $(this).find('.cat-mand-wrapper').show();
+            $(this).find('.cat-opt-toggle-badge').show();
+            $(this).find('.cat-opt-count-val').text(catOpt);
         } else {
             $(this).find('.cat-mand-wrapper').hide();
+            $(this).find('.cat-opt-toggle-badge').hide();
         }
     });
+
+    // Sync master Optional checkbox state
+    $('#master_bundle_opt_chk').prop('checked', count > 0 && count === optCount);
 
     // Update Filter Pill counts
     $('#pill_count_all').text(count);

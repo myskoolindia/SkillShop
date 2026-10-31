@@ -186,6 +186,16 @@ if (!empty($targetBundleCat) && $targetBundleCat !== 'all') {
                             </button>
                         <?php endforeach; ?>
                     <?php endif; ?>
+
+                    <!-- Optional Products Selected / Unselected Quick Toggle -->
+                    <div class="btn-group btn-group-sm ml-1" role="group" aria-label="Toggle Optional Products" style="box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+                        <button type="button" class="btn btn-sm btn-outline-success font-weight-bold px-2 py-1" onclick="toggleAllStorefrontOptional(true);" title="Select / Include all optional products (Sets Qty = 1)" style="font-size: 11.5px;">
+                            <i class="fa fa-check-circle"></i> Select All Optional
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary font-weight-bold px-2 py-1" onclick="toggleAllStorefrontOptional(false);" title="Unselect / Exclude all optional products (Sets Qty = 0)" style="font-size: 11.5px;">
+                            <i class="fa fa-circle-o"></i> Unselect All Optional
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -197,7 +207,12 @@ if (!empty($targetBundleCat) && $targetBundleCat !== 'all') {
             <thead class="thead-light" style="position: sticky; top:0; z-index:3; background:#f8f9fa;">
                 <tr>
                     <th style="width: 40px;" class="text-center">#</th>
-                    <th style="width: 65px;" class="text-center">Select</th>
+                    <th style="width: 75px;" class="text-center">
+                        <div style="display:inline-flex; align-items:center; justify-content:center; gap:4px;" title="Select / Unselect All Optional Products">
+                            <span>Select</span>
+                            <input type="checkbox" id="master_storefront_opt_chk" title="Toggle Select / Unselect All Optional" onchange="toggleAllStorefrontOptional(this.checked);" style="cursor:pointer; width:15px; height:15px; margin:0;">
+                        </div>
+                    </th>
                     <th style="width: 60px;">Item</th>
                     <th>Product & Details</th>
                     <th style="width: 110px;">SKU</th>
@@ -231,6 +246,22 @@ if (!empty($targetBundleCat) && $targetBundleCat !== 'all') {
                                             (Click to collapse/expand)
                                         </span>
                                     </div>
+                                    <?php 
+                                    $catOptCount = 0;
+                                    foreach ($catGroup['items'] as $it) {
+                                        if (!empty($it->is_optional)) $catOptCount++;
+                                    }
+                                    if ($catOptCount > 0): ?>
+                                        <div class="bundle-cat-opt-actions" onclick="event.stopPropagation();" style="font-size: 11.5px;">
+                                            <span class="text-muted mr-1"><?= $catOptCount; ?> Optional:</span>
+                                            <button type="button" class="btn btn-xs btn-outline-primary py-0 px-2 font-weight-bold" onclick="toggleCategoryStorefrontOptional('<?= esc($catKey); ?>', true);" title="Select all optional in this category" style="font-size: 11px;">
+                                                <i class="fa fa-check"></i> Select
+                                            </button>
+                                            <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-2 ml-1 font-weight-bold" onclick="toggleCategoryStorefrontOptional('<?= esc($catKey); ?>', false);" title="Unselect all optional in this category" style="font-size: 11px;">
+                                                <i class="fa fa-times"></i> Unselect
+                                            </button>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>
@@ -238,7 +269,8 @@ if (!empty($targetBundleCat) && $targetBundleCat !== 'all') {
                         <!-- Category Items Rows -->
                         <?php foreach ($catGroup['items'] as $comp):
                             $isOptional = !empty($comp->is_optional);
-                            $pkgMinQty = $isOptional ? 0 : max(1, (int)$comp->required_quantity);
+                            $configuredMinQty = !empty($comp->min_quantity) ? (int)$comp->min_quantity : max(1, (int)$comp->required_quantity);
+                            $pkgMinQty = $isOptional ? 0 : $configuredMinQty;
                             $availableStock = isset($comp->available_stock) ? (int)$comp->available_stock : 9999;
                             $unitPrice = !empty($comp->unit_price) ? (float)$comp->unit_price : 0.00;
                             $displaySku = $comp->sku;
@@ -256,7 +288,7 @@ if (!empty($targetBundleCat) && $targetBundleCat !== 'all') {
                             }
 
                             $savedConfig = $editItemMap['c_' . $comp->id] ?? ($editItemMap['p_' . $comp->component_product_id] ?? null);
-                            $currentQty = $isOptional ? 0 : $pkgMinQty;
+                            $currentQty = $isOptional ? ((int)$comp->required_quantity > 0 ? (int)$comp->required_quantity : 0) : $pkgMinQty;
                             $selectedVarId = !empty($comp->variant_id) ? (int)$comp->variant_id : (int)$firstVariantId;
 
                             if (!empty($savedConfig)) {
@@ -329,8 +361,8 @@ if (!empty($targetBundleCat) && $targetBundleCat !== 'all') {
                                             <i class="fa fa-folder-o mr-1"></i><?= esc($catGroup['name']); ?>
                                         </span>
                                         <?php if (!empty($comp->is_optional)): ?>
-                                            <span class="badge badge-warning text-dark border px-2 py-1" style="background:#fef3c7; color:#92400e !important; border-color:#fde68a !important; font-size: 10.5px;" title="Optional item (0 qty by default, check to select)">
-                                                <i class="fa fa-plus-circle mr-1"></i>Optional
+                                            <span class="badge badge-warning text-dark border px-2 py-1" style="background:#fef3c7; color:#92400e !important; border-color:#fde68a !important; font-size: 10.5px;" title="Optional item (<?= $configuredMinQty > 1 ? 'Min: ' . $configuredMinQty . ' if selected' : 'Can be deselected'; ?>)">
+                                                <i class="fa fa-plus-circle mr-1"></i>Optional<?= $configuredMinQty > 1 ? ' (Min: ' . $configuredMinQty . ')' : ''; ?>
                                             </span>
                                         <?php endif; ?>
                                         <?php if (!empty($comp->variant_name)): ?>
@@ -386,6 +418,7 @@ if (!empty($targetBundleCat) && $targetBundleCat !== 'all') {
                                                    max="<?= $availableStock > 0 ? $availableStock : 9999; ?>"
                                                    data-min="<?= $pkgMinQty; ?>"
                                                    data-pkg-min="<?= $pkgMinQty; ?>"
+                                                   data-min-selected="<?= $configuredMinQty; ?>"
                                                    data-is-optional="<?= !empty($comp->is_optional) ? '1' : '0'; ?>"
                                                    data-unit-price="<?= $unitPrice; ?>"
                                                    data-comp-id="<?= $comp->id; ?>"
@@ -405,7 +438,7 @@ if (!empty($targetBundleCat) && $targetBundleCat !== 'all') {
                                     <div class="mt-1">
                                         <small class="text-muted d-block" style="font-size: 11px;">
                                             <?php if (!empty($comp->is_optional)): ?>
-                                                <i class="fa fa-info-circle" style="font-size: 9px; color: #f59e0b;"></i> Optional (0 qty default)
+                                                <i class="fa fa-info-circle" style="font-size: 9px; color: #f59e0b;"></i> Optional (Min: <?= $configuredMinQty; ?> if selected)
                                             <?php else: ?>
                                                 <i class="fa fa-lock" style="font-size: 9px; color: #16a34a;"></i> Min in pkg: <strong><?= $pkgMinQty; ?></strong>
                                             <?php endif; ?>
@@ -791,11 +824,12 @@ function toggleBundleOptionalItem(chk) {
     var $row = $chk.closest('tr.storefront-bundle-row');
     var $input = $row.find('.bundle-storefront-qty-input');
     var isChecked = $chk.is(':checked');
+    var minSelected = parseInt($input.attr('data-min-selected')) || 1;
 
     if (isChecked) {
         var currentVal = parseInt($input.val()) || 0;
-        if (currentVal < 1) {
-            $input.val(1);
+        if (currentVal < minSelected) {
+            $input.val(minSelected);
         }
         $row.removeClass('bundle-row-disabled');
     } else {
@@ -806,14 +840,76 @@ function toggleBundleOptionalItem(chk) {
     validateBundleStorefrontQty($input[0]);
 }
 
+function toggleAllStorefrontOptional(select) {
+    var hasFilter = ($('#bundle_storefront_filter').val() || '').trim() !== '';
+    var selector = '#table_storefront_bundle tbody tr.storefront-bundle-row';
+    if (hasFilter) {
+        selector += ':visible';
+    }
+
+    $(selector).each(function() {
+        var $chk = $(this).find('.bundle-item-checkbox');
+        if ($chk.length && $chk.attr('data-mandatory') === '0' && !$chk.is(':disabled')) {
+            $chk.prop('checked', select);
+            var $input = $(this).find('.bundle-storefront-qty-input');
+            if (select) {
+                var minSelected = parseInt($input.attr('data-min-selected')) || 1;
+                var currentVal = parseInt($input.val()) || 0;
+                if (currentVal < minSelected) {
+                    $input.val(minSelected);
+                }
+                $(this).removeClass('bundle-row-disabled');
+            } else {
+                $input.val(0);
+                $(this).addClass('bundle-row-disabled');
+            }
+            validateBundleStorefrontQty($input[0]);
+        }
+    });
+
+    $('#master_storefront_opt_chk').prop('checked', select);
+}
+
+function toggleCategoryStorefrontOptional(catKey, select) {
+    $('#table_storefront_bundle tbody tr.storefront-bundle-row[data-cat-key="' + catKey + '"]').each(function() {
+        var $chk = $(this).find('.bundle-item-checkbox');
+        if ($chk.length && $chk.attr('data-mandatory') === '0' && !$chk.is(':disabled')) {
+            $chk.prop('checked', select);
+            var $input = $(this).find('.bundle-storefront-qty-input');
+            if (select) {
+                var minSelected = parseInt($input.attr('data-min-selected')) || 1;
+                var currentVal = parseInt($input.val()) || 0;
+                if (currentVal < minSelected) {
+                    $input.val(minSelected);
+                }
+                $(this).removeClass('bundle-row-disabled');
+            } else {
+                $input.val(0);
+                $(this).addClass('bundle-row-disabled');
+            }
+            validateBundleStorefrontQty($input[0]);
+        }
+    });
+}
+
 function changeBundleStorefrontQty(btn, delta) {
     var $input = $(btn).closest('.bundle-qty-spinner').find('.bundle-storefront-qty-input');
     var current = parseInt($input.val());
     if (isNaN(current)) current = 0;
+    var isOptional = $input.data('is-optional') == '1';
+    var minSelected = parseInt($input.attr('data-min-selected')) || 1;
     var min = parseInt($input.data('min'));
     if (isNaN(min)) min = 0;
     var max = parseInt($input.attr('max')) || 9999;
     var nextVal = current + delta;
+
+    if (isOptional) {
+        if (delta > 0 && current < minSelected) {
+            nextVal = minSelected;
+        } else if (delta < 0 && current <= minSelected) {
+            nextVal = 0;
+        }
+    }
 
     if (nextVal < min) {
         nextVal = min;
@@ -829,24 +925,37 @@ function changeBundleStorefrontQty(btn, delta) {
 function validateBundleStorefrontQty(input) {
     var $input = $(input);
     var isOptional = $input.data('is-optional') == '1';
+    var minSelected = parseInt($input.attr('data-min-selected')) || 1;
     var min = parseInt($input.data('min'));
     if (isNaN(min)) min = 0;
     var max = parseInt($input.attr('max')) || 9999;
     var val = parseInt($input.val());
 
-    if (isNaN(val) || val < min) {
-        val = min;
-        $input.val(min);
-    } else if (val > max) {
-        val = max;
-        $input.val(max);
+    if (isNaN(val)) val = min;
+
+    if (isOptional) {
+        if (val > 0 && val < minSelected) {
+            val = minSelected;
+        }
+        if (val < 0) {
+            val = 0;
+        }
+    } else {
+        if (val < min) {
+            val = min;
+        }
     }
+
+    if (val > max) {
+        val = max;
+    }
+    $input.val(val);
 
     // Sync checkbox state for optional items
     var $row = $input.closest('tr.storefront-bundle-row');
     var $chk = $row.find('.bundle-item-checkbox');
     if (isOptional && $chk.length) {
-        if (val > 0) {
+        if (val >= minSelected) {
             $chk.prop('checked', true);
             $row.removeClass('bundle-row-disabled');
         } else {

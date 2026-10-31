@@ -72,6 +72,9 @@ class BundleModel extends BaseModel
                 if (!in_array('is_optional', $bundleCols)) {
                     $this->db->query("ALTER TABLE product_bundles ADD COLUMN is_optional TINYINT(1) NOT NULL DEFAULT 0");
                 }
+                if (!in_array('min_quantity', $bundleCols)) {
+                    $this->db->query("ALTER TABLE product_bundles ADD COLUMN min_quantity INT UNSIGNED NULL DEFAULT NULL AFTER quantity");
+                }
 
                 // Automatically clean up any duplicate rows in product_bundles
                 $this->db->query("DELETE b1 FROM product_bundles b1
@@ -275,6 +278,7 @@ class BundleModel extends BaseModel
             $item->component_product_id = $row->component_product_id;
             $item->variant_id = $row->variant_id;
             $item->is_optional = !empty($row->is_optional) ? 1 : 0;
+            $item->min_quantity = isset($row->min_quantity) && $row->min_quantity !== null && $row->min_quantity !== '' ? (int)$row->min_quantity : null;
             $item->required_quantity = !empty($item->is_optional) ? (int)$row->quantity : max(1, (int)$row->quantity);
             $item->price_override = $row->price_override;
             $item->sort_order = (int)$row->sort_order;
@@ -470,7 +474,23 @@ class BundleModel extends BaseModel
         foreach ($componentsArray as $comp) {
             $productId = (int)($comp['component_product_id'] ?? 0);
             $isOptional = !empty($comp['is_optional']) ? 1 : 0;
-            $qty = $isOptional ? max(0, (int)($comp['quantity'] ?? 0)) : max(1, (int)($comp['quantity'] ?? 1));
+            $enteredQty = max(1, (int)($comp['quantity'] ?? 1));
+
+            // Check if is_selected toggle is passed (1 or 0)
+            if (isset($comp['is_selected'])) {
+                $isSelected = (!empty($comp['is_selected']) && $comp['is_selected'] !== '0');
+            } else {
+                $isSelected = ((int)($comp['quantity'] ?? 0) > 0);
+            }
+
+            if ($isOptional) {
+                $minQty = $enteredQty; // whatever qty entered is min qty only
+                $qty = $isSelected ? $enteredQty : 0;
+            } else {
+                $minQty = $enteredQty;
+                $qty = $enteredQty;
+            }
+
             $variantId = !empty($comp['variant_id']) ? (int)$comp['variant_id'] : null;
             $priceOverride = isset($comp['price_override']) && is_numeric($comp['price_override']) ? (float)$comp['price_override'] : null;
 
@@ -486,6 +506,7 @@ class BundleModel extends BaseModel
                     'component_product_id' => $productId,
                     'variant_id'           => $variantId,
                     'quantity'             => $qty,
+                    'min_quantity'         => $minQty,
                     'price_override'       => $priceOverride,
                     'is_optional'          => $isOptional,
                     'sort_order'           => $sort++,
