@@ -818,11 +818,11 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
     <div class="text-center max-w-2xl mx-auto mb-12">
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-navy/10 text-brand-navy text-xs font-bold uppercase tracking-wider mb-3">
+      <!-- <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-navy/10 text-brand-navy text-xs font-bold uppercase tracking-wider mb-3">
         Basic package
-      </div>
+      </div> -->
       <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
-        Skill Components in the Standard Package
+        Skill Components in the Standard Package(Without Lab Infra)
       </h2>
       <p class="mt-3 text-slate-500 text-sm sm:text-base">
         Browse the curated equipment, activity items, and consumable resources included in the Skillvation Standard Package.
@@ -940,11 +940,11 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
     <div class="text-center max-w-2xl mx-auto mb-12">
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-600/10 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-3">
+      <!-- <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-600/10 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-3">
         Advance Package
-      </div>
+      </div> -->
       <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
-        Skill Components in the Advance Package
+        Skill Components in the Standard Package(With Lab Infra)
       </h2>
       <p class="mt-3 text-slate-500 text-sm sm:text-base">
         Browse the curated equipment, activity items, and consumable resources included in the Skillvation Advance Package.
@@ -2050,7 +2050,7 @@ function renderBundleSection(product, allCats, config){
 Promise.all([
   fetch(BASE+'/api/products/slug/cbse-composite-skill-lab-basic-68').then(function(r){if(!r.ok)throw r.status;return r.json();}),
   fetch(BASE+'/api/categories/tree').then(function(r){if(!r.ok)throw r.status;return r.json();}),
-  fetch(BASE+'/api/products/slug/cbse-composite-skill-lab-advanced-72').then(function(r){if(!r.ok)return null;return r.json();}).catch(function(){ return null; })
+  fetch(BASE+'/api/products/slug/cbse-composite-skill-lab-basic-68-1793453049').then(function(r){if(!r.ok)return null;return r.json();}).catch(function(){ return null; })
 ])
 .then(function(res){
   var basicProduct = res[0] ? res[0].data : null;
