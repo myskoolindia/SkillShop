@@ -3292,13 +3292,13 @@
           <div class="max-w-7xl mx-auto">
             <div class="text-center max-w-2xl mx-auto mb-12">
               <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-navy/10 text-brand-navy text-xs font-bold uppercase tracking-wider mb-3">
-                Skillvation Lab (Basic)
+                Basic Package
               </div>
               <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
-                Skill Components in Skillvation Lab
+                Skillvation Lab Basic Package
               </h2>
               <p class="mt-3 text-slate-500 text-sm sm:text-base">
-                Browse the curated equipment, activity items, and consumable resources included in the standard Skillvation Lab kit.
+                Browse the curated equipment, activity items, and consumable resources included in the Skillvation Lab Basic Package.
               </p>
             </div>
 
@@ -3378,13 +3378,13 @@
           <div class="max-w-7xl mx-auto">
             <div class="text-center max-w-2xl mx-auto mb-12">
               <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-600/10 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-3">
-                Skillvation Lab Advance
+                Advance Package
               </div>
               <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
-                Skill Components in Skillvation Lab Advance
+                Skillvation Lab Advance Package
               </h2>
               <p class="mt-3 text-slate-500 text-sm sm:text-base">
-                Browse the curated equipment, activity items, and consumable resources included in Skillvation Lab Advance.
+                Browse the curated equipment, activity items, and consumable resources included in the Skillvation Lab Advance Package.
               </p>
             </div>
 
@@ -3464,13 +3464,13 @@
           <div class="max-w-7xl mx-auto">
             <div class="text-center max-w-2xl mx-auto mb-12">
               <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-600/10 text-purple-700 text-xs font-bold uppercase tracking-wider mb-3">
-                Skillvation Lab Premium
+                Premium Package
               </div>
               <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
-                Skill Components in Skillvation Lab Premium
+                Skillvation Lab Premium Package
               </h2>
               <p class="mt-3 text-slate-500 text-sm sm:text-base">
-                Browse the comprehensive equipment, activity items, and advanced innovation modules included in Skillvation Lab Premium.
+                Browse the comprehensive equipment, activity items, and advanced innovation modules included in the Skillvation Lab Premium Package.
               </p>
             </div>
 
