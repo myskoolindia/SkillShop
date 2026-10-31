@@ -28,14 +28,18 @@ foreach ($bundleComponents as $c) {
     $effectiveUnitPrice = ($c->price_override !== null && $c->price_override !== '') 
         ? (float)$c->price_override 
         : (float)$c->unit_price;
-    $lineTotal = $effectiveUnitPrice * (int)$c->required_quantity;
+    $isOpt = !empty($c->is_optional) ? 1 : 0;
+    $isSelected = empty($isOpt) || ((int)$c->required_quantity > 0);
+    $minQtyVal = !empty($c->min_quantity) ? (int)$c->min_quantity : max(1, (int)$c->required_quantity);
+    $activeQty = $isSelected ? $minQtyVal : 0;
+    $lineTotal = $effectiveUnitPrice * $activeQty;
 
     $categoryStats[$cCat]['count']++;
-    $categoryStats[$cCat]['units'] += (int)$c->required_quantity;
+    $categoryStats[$cCat]['units'] += $activeQty;
     $categoryStats[$cCat]['total'] += $lineTotal;
     $allSum += $lineTotal;
 
-    if (!empty($c->is_optional)) {
+    if ($isOpt) {
         $optionalCount++;
         $categoryStats[$cCat]['opt_count']++;
     } else {
@@ -1750,17 +1754,19 @@ function applyBundleSumToPrice(mode) {
 
     $('#table_bundle_components tbody tr.bundle-row').each(function() {
         var isOpt = parseInt($(this).attr('data-is-optional')) || 0;
+        var isSelected = isOpt ? ($(this).find('.bundle-is-selected-input').val() === '1') : true;
         var qty = parseInt($(this).find('.bundle-qty-input').val()) || 1;
+        var activeQty = isSelected ? qty : 0;
         var price = parseFloat($(this).find('.bundle-price-input').val()) || 0;
-        var line = qty * price;
+        var line = activeQty * price;
         sumPrice += line;
         if (isOpt === 0) {
-            mandPrice += line;
+            mandPrice += (qty * price);
         }
     });
 
     var targetAmount = (mode === 'mandatory') ? mandPrice : sumPrice;
-    var label = (mode === 'mandatory') ? 'Mandatory Package Base' : 'Total Items Value';
+    var label = (mode === 'mandatory') ? 'Mandatory Package Base' : 'Total Package Value (Mandatory + Selected Optionals)';
 
     var formattedVal = targetAmount.toFixed(2);
     if ($('input[name="price"]').length) {
