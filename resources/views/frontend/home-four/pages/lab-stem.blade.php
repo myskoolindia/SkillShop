@@ -3274,54 +3274,55 @@
 
       {{-- VIEW 1: Standard Turnkey Packages --}}
       <div id="fixedPackagesView">
-        <div id="skill-sectors-section" style="margin-top:56px;">
-          <div class="max-w-7xl mx-auto">
+        {{-- Quick Jump Navigation Pills --}}
+        <div style="display:flex;justify-content:center;gap:12px;margin:32px auto 20px;flex-wrap:wrap;">
+          <a href="#skill-sectors-section" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#eff6ff;color:#1e40af;font-size:13px;font-weight:700;border:1px solid #bfdbfe;text-decoration:none;transition:all .2s;">
+            <i class="fa-solid fa-cube text-blue-600"></i> Basic Package
+          </a>
+          <a href="#skill-sectors-section-advance" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#f0fdf4;color:#047857;font-size:13px;font-weight:700;border:1px solid #a7f3d0;text-decoration:none;transition:all .2s;">
+            <i class="fa-solid fa-layer-group text-emerald-600"></i> Advance Package
+          </a>
+          <a href="#skill-sectors-section-premium" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#f5f3ff;color:#6d28d9;font-size:13px;font-weight:700;border:1px solid #ddd6fe;text-decoration:none;transition:all .2s;">
+            <i class="fa-solid fa-crown text-purple-600"></i> Premium Package
+          </a>
+        </div>
 
-            <!-- <div class="text-center max-w-2xl mx-auto mb-12">
+        {{-- 1. BASIC PACKAGE --}}
+        <div id="skill-sectors-section" style="margin-top:36px;padding-bottom:48px;">
+          <div class="max-w-7xl mx-auto">
+            <div class="text-center max-w-2xl mx-auto mb-12">
               <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-navy/10 text-brand-navy text-xs font-bold uppercase tracking-wider mb-3">
-                Skillvation Lab
+                Basic Package
               </div>
               <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
-                Explore Components in the Skillvation Lab Kit
+                Skill Components in the Basic Package
               </h2>
               <p class="mt-3 text-slate-500 text-sm sm:text-base">
-                Browse the curated equipment, activity items, and consumable resources included in the Skillvation Lab.
+                Browse the curated equipment, activity items, and consumable resources included in the Skillvation Basic Package.
               </p>
-            </div> -->
+            </div>
 
             {{-- Loading Indicator --}}
             <div id="sks-loading" class="text-center py-16">
               <div class="inline-flex items-center gap-3 text-brand-navy font-medium text-sm">
                 <i class="fa-solid fa-circle-notch fa-spin text-xl text-brand-orange"></i>
-                <span>Loading kit inventory details…</span>
+                <span>Loading basic kit inventory details…</span>
               </div>
             </div>
 
             {{-- Error State --}}
             <div id="sks-error" class="hidden max-w-md mx-auto bg-red-50 border border-red-200 text-red-700 rounded-2xl p-6 text-center">
               <i class="fa-solid fa-triangle-exclamation text-2xl mb-2 text-red-400"></i>
-              <p class="text-sm font-medium">Unable to load kit details at this moment. Please refresh the page.</p>
+              <p class="text-sm font-medium">Unable to load basic kit details at this moment. Please refresh the page.</p>
             </div>
 
-            {{-- Dynamic Carousel Container --}}
+            {{-- Dynamic Cards Container --}}
             <div id="sks-content" class="hidden">
               <div style="position:relative;">
-                <button id="sks-box-prev" type="button" aria-label="Previous"
-                  class="sks-nav-btn sks-nav-prev">
-                  <i class="fa-solid fa-chevron-left" style="font-size:12px;"></i>
-                </button>
-                <button id="sks-box-next" type="button" aria-label="Next"
-                  class="sks-nav-btn sks-nav-next">
-                  <i class="fa-solid fa-chevron-right" style="font-size:12px;"></i>
-                </button>
-
-                <div style="overflow:hidden;border-radius:12px;" id="sks-carousel-viewport">
+                <div style="overflow:visible;border-radius:12px;" id="sks-carousel-viewport">
                   <div id="sks-boxes"
-                       style="display:flex;gap:16px;transition:transform .45s cubic-bezier(.25,1,.5,1);will-change:transform;align-items:flex-start;"></div>
+                       style="display:flex;gap:16px;transition:none;align-items:flex-start;"></div>
                 </div>
-
-                {{-- Dots pagination indicator --}}
-                <div id="sks-dots" style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:18px;"></div>
               </div>
 
               {{-- CTA Bar inside Kit Box --}}
@@ -3331,7 +3332,28 @@
                   <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Adjust quantities, add optional modules or custom skill domains to match your school's exact requirements.</p>
                 </div>
                 <div style="display:flex;flex-wrap:wrap;gap:10px;">
-                  @include('frontend.home-four.partials.skillvation-lab-customisation')
+                  <div style="position:relative;" class="sks-customise-wrap">
+                    <button type="button" class="sks-customise-toggle-btn"
+                       style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
+                      <i class="fa-solid fa-sliders" style="font-size:11px;"></i> Customise Basic Lab
+                      <i class="fa-solid fa-chevron-down" style="font-size:10px;margin-left:2px;"></i>
+                    </button>
+                    <div class="sks-customise-menu"
+                         style="display:none;position:absolute;right:0;bottom:calc(100% + 8px);min-width:230px;background:#fff;border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);overflow:hidden;z-index:50;">
+                      <a href="{{ url('/sso/shop') }}?target=%2Fbasic-cart"
+                         style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;border-bottom:1px solid #eef1f6;transition:background .15s;"
+                         onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
+                        <i class="fa-solid fa-cart-shopping" style="color:#f4742b;width:16px;"></i>
+                        <span>Buy Standard Basic Lab</span>
+                      </a>
+                      <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="composite-skill-basic"
+                         style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;transition:background .15s;cursor:pointer;"
+                         onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
+                        <i class="fa-solid fa-pen-ruler" style="color:#2563eb;width:16px;"></i>
+                        <span>Design My Lab</span>
+                      </a>
+                    </div>
+                  </div>
                   <a href="#planEnquiryForm"
                      style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
                     <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
@@ -3348,6 +3370,198 @@
               </div>
             </div>
 
+          </div>
+        </div>
+
+        {{-- 2. ADVANCE PACKAGE --}}
+        <div id="skill-sectors-section-advance" style="margin-top:48px;padding-top:48px;padding-bottom:48px;border-top:1px solid #e2e8f0;">
+          <div class="max-w-7xl mx-auto">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+              <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-600/10 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-3">
+                Advance Package
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
+                Skill Components in the Advance Package
+              </h2>
+              <p class="mt-3 text-slate-500 text-sm sm:text-base">
+                Browse the curated equipment, activity items, and consumable resources included in the Skillvation Advance Package.
+              </p>
+            </div>
+
+            {{-- Loading Indicator --}}
+            <div id="sks-adv-loading" class="text-center py-16">
+              <div class="inline-flex items-center gap-3 text-brand-navy font-medium text-sm">
+                <i class="fa-solid fa-circle-notch fa-spin text-xl text-brand-orange"></i>
+                <span>Loading advance kit inventory details…</span>
+              </div>
+            </div>
+
+            {{-- Error State --}}
+            <div id="sks-adv-error" class="hidden max-w-md mx-auto bg-red-50 border border-red-200 text-red-700 rounded-2xl p-6 text-center">
+              <i class="fa-solid fa-triangle-exclamation text-2xl mb-2 text-red-400"></i>
+              <p class="text-sm font-medium">Unable to load advance kit details at this moment. Please refresh the page.</p>
+            </div>
+
+            {{-- Dynamic Cards Container --}}
+            <div id="sks-adv-content" class="hidden">
+              <div style="position:relative;">
+                <div style="overflow:visible;border-radius:12px;" id="sks-adv-carousel-viewport">
+                  <div id="sks-adv-boxes"
+                       style="display:flex;gap:16px;transition:none;align-items:flex-start;"></div>
+                </div>
+              </div>
+
+              {{-- CTA Bar inside Kit Box --}}
+              <div style="margin-top:40px;border-radius:16px;background:linear-gradient(135deg,#0b2545 0%,#047857 100%);padding:28px 32px;display:flex;flex-wrap:wrap;align-items:center;gap:20px;box-shadow:0 8px 30px rgba(11,37,69,.25);">
+                <div style="flex:1;min-width:220px;">
+                  <h4 style="font-size:17px;font-weight:800;color:#fff;margin:0 0 6px;">Explore the Advance Configuration</h4>
+                  <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Enhanced equipment and deeper activity modules for advanced skill delivery.</p>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                  <div style="position:relative;" class="sks-customise-wrap">
+                    <button type="button" class="sks-customise-toggle-btn"
+                       style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
+                      <i class="fa-solid fa-sliders" style="font-size:11px;"></i> Customise Advance Lab
+                      <i class="fa-solid fa-chevron-down" style="font-size:10px;margin-left:2px;"></i>
+                    </button>
+                    <div class="sks-customise-menu"
+                         style="display:none;position:absolute;right:0;bottom:calc(100% + 8px);min-width:230px;background:#fff;border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);overflow:hidden;z-index:50;">
+                      <a href="{{ url('/sso/shop') }}?target=%2Fadvance-cart"
+                         style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;border-bottom:1px solid #eef1f6;transition:background .15s;"
+                         onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
+                        <i class="fa-solid fa-cart-shopping" style="color:#f4742b;width:16px;"></i>
+                        <span>Buy Advance Lab</span>
+                      </a>
+                      <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="composite-skill-advance"
+                         style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;transition:background .15s;cursor:pointer;"
+                         onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
+                        <i class="fa-solid fa-pen-ruler" style="color:#2563eb;width:16px;"></i>
+                        <span>Design My Lab</span>
+                      </a>
+                    </div>
+                  </div>
+                  <a href="#planEnquiryForm"
+                     style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
+                    <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
+                  </a>
+                </div>
+              </div>
+
+              {{-- Count Badge --}}
+              <div style="text-align:center;margin-top:20px;">
+                <span style="display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:20px;background:rgba(11,37,69,.05);border:1px solid rgba(11,37,69,.1);color:#0b2545;font-size:11px;font-weight:700;">
+                  <i class="fa-solid fa-circle-check" style="color:#22c55e;"></i>
+                  <span id="sks-adv-count">…</span> categories · <span id="sks-adv-items">…</span> items in this lab
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {{-- 3. PREMIUM PACKAGE --}}
+        <div id="skill-sectors-section-premium" style="margin-top:48px;padding-top:48px;padding-bottom:48px;border-top:1px solid #e2e8f0;">
+          <div class="max-w-7xl mx-auto">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+              <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-600/10 text-purple-700 text-xs font-bold uppercase tracking-wider mb-3">
+                Premium Package
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
+                Skill Components in the Premium Package
+              </h2>
+              <p class="mt-3 text-slate-500 text-sm sm:text-base">
+                Browse the comprehensive equipment, activity items, and advanced innovation modules included in the Premium Package.
+              </p>
+            </div>
+
+            {{-- Loading Indicator --}}
+            <div id="sks-prem-loading" class="text-center py-16">
+              <div class="inline-flex items-center gap-3 text-brand-navy font-medium text-sm">
+                <i class="fa-solid fa-circle-notch fa-spin text-xl text-brand-orange"></i>
+                <span>Loading premium kit inventory details…</span>
+              </div>
+            </div>
+
+            {{-- Error State --}}
+            <div id="sks-prem-error" class="hidden max-w-md mx-auto bg-red-50 border border-red-200 text-red-700 rounded-2xl p-6 text-center">
+              <i class="fa-solid fa-triangle-exclamation text-2xl mb-2 text-red-400"></i>
+              <p class="text-sm font-medium">Unable to load premium kit details at this moment. Please refresh the page.</p>
+            </div>
+
+            {{-- Dynamic Cards Container --}}
+            <div id="sks-prem-content" class="hidden">
+              <div style="position:relative;">
+                <div style="overflow:visible;border-radius:12px;" id="sks-prem-carousel-viewport">
+                  <div id="sks-prem-boxes"
+                       style="display:flex;gap:16px;transition:none;align-items:flex-start;"></div>
+                </div>
+              </div>
+
+              {{-- CTA Bar inside Kit Box --}}
+              <div style="margin-top:40px;border-radius:16px;background:linear-gradient(135deg,#0b2545 0%,#581c87 100%);padding:28px 32px;display:flex;flex-wrap:wrap;align-items:center;gap:20px;box-shadow:0 8px 30px rgba(11,37,69,.25);">
+                <div style="flex:1;min-width:220px;">
+                  <h4 style="font-size:17px;font-weight:800;color:#fff;margin:0 0 6px;">Flagship Premium Innovation Hub</h4>
+                  <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Full turnkey setup with specialized high-tech equipment and future-ready robotics.</p>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                  <div style="position:relative;" class="sks-customise-wrap">
+                    <button type="button" class="sks-customise-toggle-btn"
+                       style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
+                      <i class="fa-solid fa-sliders" style="font-size:11px;"></i> Customise Premium Lab
+                      <i class="fa-solid fa-chevron-down" style="font-size:10px;margin-left:2px;"></i>
+                    </button>
+                    <div class="sks-customise-menu"
+                         style="display:none;position:absolute;right:0;bottom:calc(100% + 8px);min-width:230px;background:#fff;border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);overflow:hidden;z-index:50;">
+                      <a href="{{ url('/sso/shop') }}?target=%2Fpremium-cart"
+                         style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;border-bottom:1px solid #eef1f6;transition:background .15s;"
+                         onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
+                        <i class="fa-solid fa-cart-shopping" style="color:#f4742b;width:16px;"></i>
+                        <span>Buy Premium Lab</span>
+                      </a>
+                      <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="composite-skill-premium"
+                         style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;transition:background .15s;cursor:pointer;"
+                         onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
+                        <i class="fa-solid fa-pen-ruler" style="color:#2563eb;width:16px;"></i>
+                        <span>Design My Lab</span>
+                      </a>
+                    </div>
+                  </div>
+                  <a href="#planEnquiryForm"
+                     style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
+                    <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
+                  </a>
+                </div>
+              </div>
+
+              {{-- Count Badge --}}
+              <div style="text-align:center;margin-top:20px;">
+                <span style="display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:20px;background:rgba(11,37,69,.05);border:1px solid rgba(11,37,69,.1);color:#0b2545;font-size:11px;font-weight:700;">
+                  <i class="fa-solid fa-circle-check" style="color:#22c55e;"></i>
+                  <span id="sks-prem-count">…</span> categories · <span id="sks-prem-items">…</span> items in this lab
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {{-- Design My Lab modal --}}
+        <div id="dml-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(11,37,69,.55);align-items:center;justify-content:center;padding:16px;">
+          <div id="dml-box" style="background:#fff;border-radius:16px;max-width:760px;width:100%;max-height:88vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);display:flex;flex-direction:column;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid #eef1f6;position:sticky;top:0;background:#fff;">
+              <strong style="font-size:16px;color:#0b2545;"><i class="fa-solid fa-pen-ruler" style="color:#2563eb;"></i>&nbsp; Design My Lab</strong>
+              <button type="button" id="dml-close" style="background:none;border:none;font-size:20px;color:#64748b;cursor:pointer;line-height:1;">&times;</button>
+            </div>
+            <div id="dml-ready" style="display:none;align-items:center;justify-content:space-between;gap:12px;padding:10px 22px;background:#ecfdf5;border-bottom:1px solid #a7f3d0;font-size:13px;color:#065f46;font-weight:600;">
+              <span><i class="fa-solid fa-circle-check" style="color:#22c55e;"></i>&nbsp; Your lab is confirmed. Taking you to your cart…</span>
+              <a id="dml-go-cart" href="#" style="padding:7px 14px;border-radius:8px;background:#065f46;color:#fff;font-size:12px;font-weight:700;text-decoration:none;">Go to cart now</a>
+            </div>
+            <div id="dml-frame-wrap" style="display:none;flex:1;min-height:0;">
+              <iframe id="dml-frame" title="Design My Lab" style="width:100%;height:100%;border:0;display:block;" allow="microphone"></iframe>
+            </div>
+            <div id="dml-body" style="padding:22px;">
+              {{-- content injected by JS --}}
+            </div>
           </div>
         </div>
       </div>
@@ -4342,14 +4556,17 @@ function buildBox(parentName, parentId, subGroups, theme, productUrl, isCenter){
   var totalBoxComps = 0;
   catNames.forEach(function(cn){ totalBoxComps += subGroups[cn].length; });
 
-  var hdr = '<div style="background:'+theme.hdrBg+';padding:13px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;">'
+  var hdr = '<div class="sks-card-header" style="background:'+theme.hdrBg+';padding:13px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;user-select:none;transition:filter .15s;">'
     +'<div style="display:flex;align-items:center;gap:10px;min-width:0;">'
       +'<i class="fa-solid '+getIcon(parentName)+'" style="color:#fff;font-size:16px;flex-shrink:0;"></i>'
       +'<span style="font-weight:700;color:#fff;font-size:15.5px;line-height:1.2;">'+esc(parentName)+'</span>'
     +'</div>'
-    +'<span style="font-size:11px;font-weight:700;color:rgba(255,255,255,.9);background:rgba(255,255,255,.18);padding:3px 9px;border-radius:12px;white-space:nowrap;flex-shrink:0;">'
-      +totalBoxComps+' item'+(totalBoxComps!==1?'s':'')
-    +'</span>'
+    +'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">'
+      +'<span style="font-size:11px;font-weight:700;color:rgba(255,255,255,.9);background:rgba(255,255,255,.18);padding:3px 9px;border-radius:12px;white-space:nowrap;">'
+        +totalBoxComps+' item'+(totalBoxComps!==1?'s':'')
+      +'</span>'
+      +'<i class="fa-solid fa-chevron-down sks-card-chev" style="color:rgba(255,255,255,.85);font-size:12px;transition:transform .3s;"></i>'
+    +'</div>'
   +'</div>';
 
   var cleanParent = (parentName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -4369,39 +4586,102 @@ function buildBox(parentName, parentId, subGroups, theme, productUrl, isCenter){
     + '</div>';
   }
 
-  el.innerHTML = hdr + rows;
+  var body = '<div class="sks-card-body" style="max-height:0;overflow:hidden;transition:max-height .35s ease;">'
+    + rows
+  + '</div>';
+
+  el.innerHTML = hdr + body;
+
+  var hdrEl = el.querySelector('.sks-card-header');
+  if(hdrEl){
+    hdrEl.addEventListener('mouseenter', function(){ this.style.filter = 'brightness(1.08)'; });
+    hdrEl.addEventListener('mouseleave', function(){ this.style.filter = 'none'; });
+    hdrEl.addEventListener('click', function(){
+      var b = el.querySelector('.sks-card-body');
+      var c = el.querySelector('.sks-card-chev');
+      if(!b) return;
+      var isOpen = el.dataset.open === '1';
+
+      // Auto close any other open category card in the same container
+      var container = el.parentElement;
+      if (container) {
+        var siblings = container.querySelectorAll('.sks-box-card');
+        siblings.forEach(function(otherCard){
+          if (otherCard !== el && otherCard.dataset.open === '1') {
+            var ob = otherCard.querySelector('.sks-card-body');
+            var oc = otherCard.querySelector('.sks-card-chev');
+            if (ob) {
+              ob.style.maxHeight = ob.scrollHeight + 'px';
+              ob.offsetHeight; // force reflow
+              ob.style.maxHeight = '0';
+            }
+            if (oc) oc.style.transform = 'rotate(0deg)';
+            otherCard.dataset.open = '0';
+            otherCard.style.boxShadow = 'none';
+          }
+        });
+      }
+
+      if(isOpen){
+        b.style.maxHeight = b.scrollHeight + 'px';
+        b.offsetHeight; // force reflow for smooth collapse
+        b.style.maxHeight = '0';
+        if(c) c.style.transform = 'rotate(0deg)';
+        el.dataset.open = '0';
+        el.style.boxShadow = theme.shadow ? '0 8px 24px rgba(0,0,0,.08)' : 'none';
+      } else {
+        el.dataset.open = '1';
+        b.style.maxHeight = (b.scrollHeight + 40) + 'px';
+        if(c) c.style.transform = 'rotate(180deg)';
+        el.style.boxShadow = '0 10px 28px rgba(0,0,0,.12)';
+        setTimeout(function(){
+          if(el.dataset.open === '1'){
+            b.style.maxHeight = 'none';
+          }
+        }, 360);
+      }
+    });
+  }
+
   bootHover(el);
   return el;
 }
 
-var loadEl    = document.getElementById('sks-loading');
-var errEl     = document.getElementById('sks-error');
-var contentEl = document.getElementById('sks-content');
-var boxesEl   = document.getElementById('sks-boxes');
-var countEl   = document.getElementById('sks-count');
-var itemsEl   = document.getElementById('sks-items');
+var BASIC_THEMES = [
+  { hdrBg:'#1e3a8a', border:'#bfdbfe', bg:'#f8fafc', rowAltBg:'#f1f5f9', pillBg:'#dbeafe', pillColor:'#1e40af', dotColor:'#2563eb', shadow:true },
+  { hdrBg:'#047857', border:'#a7f3d0', bg:'#f8fafc', rowAltBg:'#f0fdf4', pillBg:'#d1fae5', pillColor:'#065f46', dotColor:'#059669', shadow:false },
+  { hdrBg:'#ea580c', border:'#fed7aa', bg:'#f8fafc', rowAltBg:'#fff7ed', pillBg:'#ffedd5', pillColor:'#9a3412', dotColor:'#ea580c', shadow:false }
+];
+var ADVANCE_THEMES = [
+  { hdrBg:'#065f46', border:'#a7f3d0', bg:'#f8fafc', rowAltBg:'#f0fdf4', pillBg:'#d1fae5', pillColor:'#065f46', dotColor:'#059669', shadow:true },
+  { hdrBg:'#0f766e', border:'#99f6e4', bg:'#f8fafc', rowAltBg:'#f0fdfa', pillBg:'#ccfbf1', pillColor:'#115e59', dotColor:'#0d9488', shadow:false },
+  { hdrBg:'#1e3a8a', border:'#bfdbfe', bg:'#f8fafc', rowAltBg:'#f1f5f9', pillBg:'#dbeafe', pillColor:'#1e40af', dotColor:'#2563eb', shadow:false }
+];
+var PREMIUM_THEMES = [
+  { hdrBg:'#581c87', border:'#ddd6fe', bg:'#f8fafc', rowAltBg:'#faf5ff', pillBg:'#f3e8ff', pillColor:'#6b21a8', dotColor:'#7c3aed', shadow:true },
+  { hdrBg:'#1e3a8a', border:'#bfdbfe', bg:'#f8fafc', rowAltBg:'#f1f5f9', pillBg:'#dbeafe', pillColor:'#1e40af', dotColor:'#2563eb', shadow:false },
+  { hdrBg:'#b45309', border:'#fde68a', bg:'#f8fafc', rowAltBg:'#fffbeb', pillBg:'#fef3c7', pillColor:'#92400e', dotColor:'#d97706', shadow:false }
+];
+function getThemeByIndex(idx, palette){
+  var p = palette || BASIC_THEMES;
+  return p[idx % p.length];
+}
 
-Promise.all([
-  fetch(BASE+'/api/products/slug/skillvation-lab').then(function(r){if(!r.ok)throw r.status;return r.json();}),
-  fetch(BASE+'/api/categories/tree').then(function(r){if(!r.ok)throw r.status;return r.json();}),
-])
-.then(function(res){
-  var product    = res[0].data;
-  var allCats    = res[1].data || [];
+function renderBundleSection(product, allCats, config){
+  if(!product || !config || !config.boxesEl) return;
   var components = product.bundle_components || [];
   // Exclude optional items — only mandatory components are listed.
   components = components.filter(function(c){ return !c.is_optional; });
-  if(!components.length) throw new Error('empty bundle');
-
-  // Store globally so the enquiry form can build a quotation
-  window._sksComponents = components;
+  if(!components.length){
+    if(config.loadEl) config.loadEl.classList.add('hidden');
+    if(config.errEl) config.errEl.classList.remove('hidden');
+    return;
+  }
 
   var tree = {};
   allCats.forEach(function(c){ tree[c.id]=c; });
 
   var productUrl   = product.url || (BASE+'/'+product.slug);
-  var customiseUrl = '{{ url("/sso/shop") }}?target=%2Fskillvation-cart';
-
   var groups   = {};
   var usedCats = {};
   var totalItems = 0;
@@ -4437,45 +4717,37 @@ Promise.all([
     if(count>maxItems){ maxItems=count; maxKey=pid; }
   });
 
-  if(countEl) countEl.textContent = totalCats;
-  if(itemsEl) itemsEl.textContent = totalItems;
-  var btnC=document.getElementById('sks-opt-cart'), btnP=document.getElementById('sks-btn-product');
-  if(btnC) btnC.href = customiseUrl;
-  if(btnP) btnP.href = productUrl;
+  if(config.countEl) config.countEl.textContent = totalCats;
+  if(config.itemsEl) config.itemsEl.textContent = totalItems;
+  if(config.btnCart && config.customiseUrl) config.btnCart.href = config.customiseUrl;
+  if(config.btnP) config.btnP.href = productUrl;
 
   // Unhide content container BEFORE building cards and measuring layout
-  if(loadEl) loadEl.classList.add('hidden');
-  if(contentEl) contentEl.classList.remove('hidden');
+  if(config.loadEl) config.loadEl.classList.add('hidden');
+  if(config.contentEl) config.contentEl.classList.remove('hidden');
 
-  boxesEl.innerHTML = '';
+  config.boxesEl.innerHTML = '';
   parentIds.forEach(function(pid, idx){
     var g      = groups[pid];
-    var theme  = getThemeByIndex(idx); // 1st blue, 2nd green, 3rd orange, repeating
+    var theme  = getThemeByIndex(idx, config.themePalette || BASIC_THEMES);
     var isCenter = (pid===maxKey && parentIds.length>1);
     var box    = buildBox(g.name, pid, g.subGroups, theme, productUrl, isCenter);
-    boxesEl.appendChild(box);
+    config.boxesEl.appendChild(box);
   });
 
   (function(){
-    // Arrange the category boxes as separate horizontal divs side by side
-    // (no sliding carousel). They wrap responsively and share equal width.
-    var boxes = Array.prototype.slice.call(boxesEl.children);
+    var boxes = Array.prototype.slice.call(config.boxesEl.children);
     var total = boxes.length;
 
-    // Lay out #sks-boxes as a responsive wrapping flex row, no transform.
-    boxesEl.style.transform = 'none';
-    boxesEl.style.transition = 'none';
-    boxesEl.style.display = 'flex';
-    boxesEl.style.flexWrap = 'wrap';
-    boxesEl.style.justifyContent = 'center';
-    boxesEl.style.gap = '16px';
+    config.boxesEl.style.transform = 'none';
+    config.boxesEl.style.transition = 'none';
+    config.boxesEl.style.display = 'flex';
+    config.boxesEl.style.flexWrap = 'wrap';
+    config.boxesEl.style.justifyContent = 'center';
+    config.boxesEl.style.gap = '16px';
 
-    // Remove the carousel viewport clipping so all boxes are visible.
-    var vp = document.getElementById('sks-carousel-viewport');
-    if (vp) { vp.style.overflow = 'visible'; }
+    if (config.viewportEl) { config.viewportEl.style.overflow = 'visible'; }
 
-    // Give each box an equal, responsive width (3 per row on desktop,
-    // 2 on tablet, 1 on mobile) while allowing wrap.
     function applyWidths(){
       var perRow = 3;
       var w = window.innerWidth;
@@ -4498,22 +4770,263 @@ Promise.all([
       resizeTimer = setTimeout(applyWidths, 80);
     });
 
-    // Hide now-unused carousel controls.
-    var prevBtn = document.getElementById('sks-box-prev');
-    var nextBtn = document.getElementById('sks-box-next');
-    var dotsContainer = document.getElementById('sks-dots');
-    if (prevBtn) prevBtn.style.display = 'none';
-    if (nextBtn) nextBtn.style.display = 'none';
-    if (dotsContainer) dotsContainer.style.display = 'none';
+    if (config.prevBtn) config.prevBtn.style.display = 'none';
+    if (config.nextBtn) config.nextBtn.style.display = 'none';
+    if (config.dotsContainer) config.dotsContainer.style.display = 'none';
   })();
+}
+
+Promise.all([
+  fetch(BASE+'/api/products/slug/cbse-composite-skill-lab-basic-68').then(function(r){if(!r.ok)throw r.status;return r.json();}),
+  fetch(BASE+'/api/categories/tree').then(function(r){if(!r.ok)throw r.status;return r.json();}),
+  fetch(BASE+'/api/products/slug/cbse-composite-skill-lab-advanced-72').then(function(r){if(!r.ok)return null;return r.json();}).catch(function(){ return null; }),
+  fetch(BASE+'/api/products/slug/cbse-composite-skill-lab-premium-73').then(function(r){if(!r.ok)return null;return r.json();}).catch(function(){ return null; })
+])
+.then(function(res){
+  var basicProduct = res[0] ? res[0].data : null;
+  var allCats      = res[1] ? (res[1].data || []) : [];
+  var advProduct   = res[2] ? res[2].data : null;
+  var premProduct  = res[3] ? res[3].data : null;
+
+  if(!basicProduct) throw new Error('empty basic bundle');
+
+  window._sksComponents = (basicProduct.bundle_components || []).filter(function(c){ return !c.is_optional; });
+
+  // 1. Render Basic Lab Section
+  renderBundleSection(basicProduct, allCats, {
+    loadEl: document.getElementById('sks-loading'),
+    errEl: document.getElementById('sks-error'),
+    contentEl: document.getElementById('sks-content'),
+    boxesEl: document.getElementById('sks-boxes'),
+    countEl: document.getElementById('sks-count'),
+    itemsEl: document.getElementById('sks-items'),
+    customiseUrl: '{{ url("/sso/shop") }}?target=%2Fbasic-cart',
+    viewportEl: document.getElementById('sks-carousel-viewport'),
+    themePalette: BASIC_THEMES
+  });
+
+  // 2. Render Advance Lab Section
+  if(advProduct){
+    renderBundleSection(advProduct, allCats, {
+      loadEl: document.getElementById('sks-adv-loading'),
+      errEl: document.getElementById('sks-adv-error'),
+      contentEl: document.getElementById('sks-adv-content'),
+      boxesEl: document.getElementById('sks-adv-boxes'),
+      countEl: document.getElementById('sks-adv-count'),
+      itemsEl: document.getElementById('sks-adv-items'),
+      customiseUrl: '{{ url("/sso/shop") }}?target=%2Fadvance-cart',
+      viewportEl: document.getElementById('sks-adv-carousel-viewport'),
+      themePalette: ADVANCE_THEMES
+    });
+  } else {
+    var advLoad = document.getElementById('sks-adv-loading');
+    var advErr = document.getElementById('sks-adv-error');
+    if(advLoad) advLoad.classList.add('hidden');
+    if(advErr) advErr.classList.remove('hidden');
+  }
+
+  // 3. Render Premium Lab Section
+  if(premProduct){
+    renderBundleSection(premProduct, allCats, {
+      loadEl: document.getElementById('sks-prem-loading'),
+      errEl: document.getElementById('sks-prem-error'),
+      contentEl: document.getElementById('sks-prem-content'),
+      boxesEl: document.getElementById('sks-prem-boxes'),
+      countEl: document.getElementById('sks-prem-count'),
+      itemsEl: document.getElementById('sks-prem-items'),
+      customiseUrl: '{{ url("/sso/shop") }}?target=%2Fpremium-cart',
+      viewportEl: document.getElementById('sks-prem-carousel-viewport'),
+      themePalette: PREMIUM_THEMES
+    });
+  } else {
+    var premLoad = document.getElementById('sks-prem-loading');
+    var premErr = document.getElementById('sks-prem-error');
+    if(premLoad) premLoad.classList.add('hidden');
+    if(premErr) premErr.classList.remove('hidden');
+  }
 })
 .catch(function(e){
   console.log('sks notice (offline/static fallback):', e);
+  var loadEl = document.getElementById('sks-loading');
+  var errEl  = document.getElementById('sks-error');
   if(loadEl) loadEl.classList.add('hidden');
   if(errEl) errEl.classList.remove('hidden');
 });
 
 })();
+
+// ── "Customise This Lab" dropdown toggle ──────────────────────────
+(function(){
+  document.querySelectorAll('.sks-customise-wrap').forEach(function(wrap){
+    var btn = wrap.querySelector('.sks-customise-toggle-btn');
+    var menu = wrap.querySelector('.sks-customise-menu');
+    if(!btn || !menu) return;
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var isVisible = menu.style.display === 'block';
+      document.querySelectorAll('.sks-customise-menu').forEach(function(m){ m.style.display = 'none'; });
+      menu.style.display = isVisible ? 'none' : 'block';
+    });
+  });
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('.sks-customise-wrap')){
+      document.querySelectorAll('.sks-customise-menu').forEach(function(m){ m.style.display = 'none'; });
+    }
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      document.querySelectorAll('.sks-customise-menu').forEach(function(m){ m.style.display = 'none'; });
+    }
+  });
+})();
+
+// ── "Design My Lab" — start session, poll result, show + save ─────
+(function(){
+  var START_URL = '{{ route("lab-design.start") }}';
+  var RESULT_URL = '{{ url("/lab-design/result") }}'; // + /{sessionId}
+  var CSRF = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').content : '{{ csrf_token() }}';
+
+  var modal   = document.getElementById('dml-modal');
+  var body    = document.getElementById('dml-body');
+  var closeBtn= document.getElementById('dml-close');
+  if(!modal || !body) return;
+
+  var dmlBtns = document.querySelectorAll('.btn-trigger-dml, #sks-opt-design');
+  if(!dmlBtns.length) return;
+
+  @guest
+  dmlBtns.forEach(function(btn){
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.location.href = '{{ route("login", ["redirect" => url()->current()]) }}';
+    });
+  });
+  return;
+  @endguest
+
+  var box       = document.getElementById('dml-box');
+  var frameWrap = document.getElementById('dml-frame-wrap');
+  var frame     = document.getElementById('dml-frame');
+  var readyBar  = document.getElementById('dml-ready');
+  var goCart    = document.getElementById('dml-go-cart');
+  var CART_URL  = '{{ url("/club-shop/lab-design-cart") }}';
+
+  function openModal(){ modal.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+  function closeModal(){ modal.style.display = 'none'; document.body.style.overflow = ''; activeSession = null; }
+  // Kalpana runs inside the modal; the modal widens while it is shown.
+  function showFrame(url){
+    box.style.maxWidth = '1200px'; box.style.height = '88vh'; box.style.overflow = 'hidden';
+    frame.src = url; frameWrap.style.display = 'block'; body.style.display = 'none';
+  }
+  function showBody(){
+    box.style.maxWidth = '760px'; box.style.height = ''; box.style.overflow = 'auto';
+    frameWrap.style.display = 'none'; readyBar.style.display = 'none'; body.style.display = 'block';
+  }
+  function resetModal(){ frame.src = 'about:blank'; showBody(); }
+
+  if(closeBtn) closeBtn.addEventListener('click', closeModal);
+  // A stray backdrop click must not discard a design in progress; use the × button instead.
+  modal.addEventListener('click', function(e){ if(e.target === modal && frameWrap.style.display === 'none') closeModal(); });
+
+  function setBody(html){ body.innerHTML = html; }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+  var activeSession = null;
+  window.addEventListener('message', function(e){
+    var d = e.data || {};
+    if (!activeSession || d.sessionId !== activeSession || ['kalpana:quote', 'kalpana:cart', 'kalpana:checkout'].indexOf(d.type) < 0) return;
+    try { if (e.origin !== new URL(frame.src).origin) return; } catch (err) { return; }
+    var sessionId = activeSession;
+    var result = fetch(RESULT_URL + '/' + encodeURIComponent(sessionId), {headers:{'Accept':'application/json'}}).then(function(r){ return r.json(); });
+    if (d.type === 'kalpana:quote') {
+      result.then(function(res){
+        if (!res || res.result !== 1 || !res.data) throw new Error((res && res.message) || 'not ready');
+        attachDesign(res.data, sessionId);
+        closeModal();
+        var target = document.getElementById('planEnquiryForm');
+        if (target) target.scrollIntoView({behavior: 'smooth', block: 'start'});
+        setTimeout(function(){ var school = document.querySelector('#planEnquiryForm [name="school"]'); if (school) school.focus({preventScroll: true}); }, 700);
+      }).catch(function(){ alert('Your design could not be attached. Please try Request quotation again.'); });
+      return;
+    }
+    var target = '/lab-design-cart?session=' + encodeURIComponent(sessionId) + (d.type === 'kalpana:checkout' ? '&next=checkout' : '');
+    var url = '{{ url("/sso/shop") }}?target=' + encodeURIComponent(target);
+    goCart.href = url;
+    readyBar.style.display = 'flex';
+    var go = function(){ window.location.href = url; };
+    result.then(go, go);
+  });
+
+  var ROMAN = {6:'VI',7:'VII',8:'VIII',9:'IX',10:'X',11:'XI',12:'XII'};
+  var SCOPE = {infrastructure_materials:'Complete lab (room fit-out + materials)', materials_only:'Materials only', existing_room:'Existing lab room'};
+  function inr(minor){ return '₹' + (Number(minor || 0) / 100).toLocaleString('en-IN', {maximumFractionDigits: 2}); }
+  function attachDesign(data, sessionId){
+    var form = document.getElementById('planEnquiryForm');
+    if (!form) return;
+    var plan = data.plan || {}, quote = data.quotation || {}, profile = plan.profile || {}, lines = quote.lines || [];
+    var gst = Math.round((quote.total || 0) * (plan.gstBasisPoints || 0) / 10000);
+    var classes = (profile.classes || []).map(function(c){ return ROMAN[c] || c; });
+    var areas = (plan.requiredItems || []).filter(function(item){ return / · (Basic|Advanced|Premium)$/.test(item.name); }).map(function(item){ return item.name.replace(' · ', ' (') + ')'; });
+    var summary = [
+      'Lab designed with Kalpana (reference ' + String(sessionId).slice(0, 8) + ')',
+      [profile.board, classes.length ? 'Classes ' + classes[0] + (classes.length > 1 ? '–' + classes[classes.length - 1] : '') : '', profile.totalStudents ? profile.totalStudents + ' students' : '', (profile.rooms || []).map(function(r){ return r.areaSqFt + ' sq ft'; }).join(' + '), SCOPE[profile.setup] || ''].filter(Boolean).join(' · '),
+      'Overall level: ' + (plan.tier ? plan.tier.charAt(0).toUpperCase() + plan.tier.slice(1) : '—') + (areas.length ? ' · Skill areas: ' + areas.join(', ') : ''),
+      'Products: ' + lines.map(function(l){ return l.name + ' × ' + l.quantity; }).join('; '),
+      'Estimated total: ' + inr(quote.total) + (gst ? ' + GST ' + inr(gst) + ' = ' + inr(quote.total + gst) : '')
+    ].join('\n');
+    var set = function(selector, value){ var el = form.querySelector(selector); if (el) el.value = value; };
+    set('[name="address"]', summary);
+    set('[name="message"]', 'Request Detailed Proposal');
+    set('#planTitle', 'Kalpana custom lab – ' + (plan.title || 'designed lab'));
+    set('#planQuotation', JSON.stringify({
+      source: 'kalpana', session_id: sessionId, gst_estimate: gst / 100,
+      selected_components: lines.map(function(l){ return { title: l.name, category: l.kind === 'course' ? 'MySkool course' : (l.name.split(' – ')[1] ? l.name.split(' – ')[0] : 'Lab essentials'), qty: l.quantity, unit_price: l.unitAmount / 100, subtotal: l.lineAmount / 100 }; })
+    }));
+    form.dataset.kalpana = sessionId;
+    var note = document.getElementById('kalpanaAttached');
+    if (!note) {
+      note = document.createElement('div'); note.id = 'kalpanaAttached';
+      note.style.cssText = 'margin:0 0 16px;padding:12px 14px;border-radius:12px;background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;font-size:13px;line-height:1.6;';
+      form.parentNode.insertBefore(note, form);
+    }
+    note.innerHTML = '<strong><i class="fa-solid fa-circle-check"></i>&nbsp; Your Kalpana design is attached</strong><br>' + esc(lines.length + ' products · estimated ' + inr(quote.total + gst) + (gst ? ' incl. GST' : '')) + '. Add your details below and request the quotation. <a href="#" id="kalpanaReopen" style="color:#047857;font-weight:700;text-decoration:underline;">Change the design</a>';
+    document.getElementById('kalpanaReopen').onclick = function(ev){ ev.preventDefault(); if(dmlBtns[0]) dmlBtns[0].click(); };
+  }
+
+  dmlBtns.forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      document.querySelectorAll('.sks-customise-menu').forEach(function(m){ m.style.display = 'none'; });
+      activeSession = null;
+      resetModal();
+      openModal();
+      setBody('<div style="text-align:center;padding:30px;color:#475569;"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:22px;color:#2563eb;"></i><p style="margin-top:12px;font-size:13px;">Starting your design session…</p></div>');
+
+      var ref = btn.dataset.reference || 'composite-skill-basic';
+      var src = btn.dataset.source || 'labs/stem';
+
+      fetch(START_URL, {
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF,'Accept':'application/json'},
+        body: JSON.stringify({ reference: ref, source: src })
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if(!res || res.result !== 1 || !res.session_id || !res.launch_url){
+          setBody('<div style="text-align:center;padding:30px;color:#b91c1c;"><i class="fa-solid fa-triangle-exclamation" style="font-size:22px;"></i><p style="margin-top:12px;font-size:13px;">'+esc((res&&res.message)||'Could not start the design session.')+'</p></div>');
+          return;
+        }
+        activeSession = res.session_id;
+        showFrame(res.launch_url);
+      })
+      .catch(function(){
+        setBody('<div style="text-align:center;padding:30px;color:#b91c1c;">Network error while starting the session.</div>');
+      });
+    });
+  });
+})();
+
 // ── Custom Package Advisor & Recommender Engine ────────────
     (function () {
       let state = {

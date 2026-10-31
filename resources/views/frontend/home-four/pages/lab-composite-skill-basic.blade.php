@@ -818,14 +818,14 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
     <div class="text-center max-w-2xl mx-auto mb-12">
-      <!-- <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-navy/10 text-brand-navy text-xs font-bold uppercase tracking-wider mb-3">
-        Basic package
-      </div> -->
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-navy/10 text-brand-navy text-xs font-bold uppercase tracking-wider mb-3">
+        Basic Package
+      </div>
       <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
-        Skill Components in the Standard Package(Without Lab Infra)
+        Skill Components in the Basic Package
       </h2>
       <p class="mt-3 text-slate-500 text-sm sm:text-base">
-        Browse the curated equipment, activity items, and consumable resources included in the Skillvation Standard Package.
+        Browse the curated equipment, activity items, and consumable resources included in the Skillvation Basic Package.
       </p>
     </div>
 
@@ -872,13 +872,13 @@
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:10px;">
           {{-- Customise This Lab — dropdown with two options --}}
-          <div style="position:relative;" id="sks-customise-wrap">
-            <button type="button" id="sks-customise-toggle"
+          <div style="position:relative;" class="sks-customise-wrap" id="sks-customise-wrap">
+            <button type="button" class="sks-customise-toggle-btn" id="sks-customise-toggle"
                style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
               <i class="fa-solid fa-sliders" style="font-size:11px;"></i> Customise This Lab
               <i class="fa-solid fa-chevron-down" style="font-size:10px;margin-left:2px;"></i>
             </button>
-            <div id="sks-customise-menu"
+            <div class="sks-customise-menu" id="sks-customise-menu"
                  style="display:none;position:absolute;right:0;bottom:calc(100% + 8px);min-width:230px;background:#fff;border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);overflow:hidden;z-index:50;">
               <a id="sks-opt-cart" href="{{ url('/sso/shop') }}?target=%2Fbasic-cart"
                  style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;border-bottom:1px solid #eef1f6;transition:background .15s;"
@@ -886,7 +886,7 @@
                 <i class="fa-solid fa-cart-shopping" style="color:#f4742b;width:16px;"></i>
                 <span>Buy Standard Basic Lab</span>
               </a>
-              <a id="sks-opt-design" href="javascript:void(0);" role="button"
+              <a id="sks-opt-design" href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/composite-skill-basic" data-reference="composite-skill-basic"
                  style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;transition:background .15s;cursor:pointer;"
                  onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
                 <i class="fa-solid fa-pen-ruler" style="color:#2563eb;width:16px;"></i>
@@ -940,11 +940,11 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
     <div class="text-center max-w-2xl mx-auto mb-12">
-      <!-- <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-600/10 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-3">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-600/10 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-3">
         Advance Package
-      </div> -->
+      </div>
       <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
-        Skill Components in the Standard Package(With Lab Infra)
+        Skill Components in the Advance Package
       </h2>
       <p class="mt-3 text-slate-500 text-sm sm:text-base">
         Browse the curated equipment, activity items, and consumable resources included in the Skillvation Advance Package.
@@ -981,13 +981,35 @@
           <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Explore the Advance Skill Lab kit with upgraded activity modules and enhanced equipment.</p>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <div style="position:relative;" class="sks-customise-wrap">
+            <button type="button" class="sks-customise-toggle-btn"
+               style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
+              <i class="fa-solid fa-sliders" style="font-size:11px;"></i> Customise Advance Lab
+              <i class="fa-solid fa-chevron-down" style="font-size:10px;margin-left:2px;"></i>
+            </button>
+            <div class="sks-customise-menu"
+                 style="display:none;position:absolute;right:0;bottom:calc(100% + 8px);min-width:230px;background:#fff;border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);overflow:hidden;z-index:50;">
+              <a href="{{ url('/sso/shop') }}?target=%2Fadvance-cart"
+                 style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;border-bottom:1px solid #eef1f6;transition:background .15s;"
+                 onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
+                <i class="fa-solid fa-cart-shopping" style="color:#f4742b;width:16px;"></i>
+                <span>Buy Advance Lab</span>
+              </a>
+              <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/composite-skill-basic" data-reference="composite-skill-advance"
+                 style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;transition:background .15s;cursor:pointer;"
+                 onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
+                <i class="fa-solid fa-pen-ruler" style="color:#2563eb;width:16px;"></i>
+                <span>Design My Lab</span>
+              </a>
+            </div>
+          </div>
           <a href="{{ url('/labs/composite-skill-advance') }}"
-             style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
-            <i class="fa-solid fa-arrow-right" style="font-size:11px;"></i> View Advance Lab Page
-          </a>
-          <a href="{{ url('/sso/shop') }}?target=%2Fadvance-cart"
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
-            <i class="fa-solid fa-cart-shopping" style="font-size:11px;"></i> Buy Advance Lab
+            <i class="fa-solid fa-arrow-right" style="font-size:11px;"></i> View Advance Page
+          </a>
+          <a href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section']) }}"
+             style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
+            <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
           </a>
         </div>
       </div>
@@ -1912,6 +1934,27 @@ function buildBox(parentName, parentId, subGroups, theme, productUrl, isCenter){
       var c = el.querySelector('.sks-card-chev');
       if(!b) return;
       var isOpen = el.dataset.open === '1';
+
+      // Auto close any other open category card in the same container
+      var container = el.parentElement;
+      if (container) {
+        var siblings = container.querySelectorAll('.sks-box-card');
+        siblings.forEach(function(otherCard){
+          if (otherCard !== el && otherCard.dataset.open === '1') {
+            var ob = otherCard.querySelector('.sks-card-body');
+            var oc = otherCard.querySelector('.sks-card-chev');
+            if (ob) {
+              ob.style.maxHeight = ob.scrollHeight + 'px';
+              ob.offsetHeight; // force reflow for smooth collapse
+              ob.style.maxHeight = '0';
+            }
+            if (oc) oc.style.transform = 'rotate(0deg)';
+            otherCard.dataset.open = '0';
+            otherCard.style.boxShadow = 'none';
+          }
+        });
+      }
+
       if(isOpen){
         b.style.maxHeight = b.scrollHeight + 'px';
         b.offsetHeight; // force reflow for smooth collapse
@@ -2109,18 +2152,26 @@ Promise.all([
 
 // ── "Customise This Lab" dropdown toggle ──────────────────────────
 (function(){
-  var toggle = document.getElementById('sks-customise-toggle');
-  var menu   = document.getElementById('sks-customise-menu');
-  if(!toggle || !menu) return;
-  toggle.addEventListener('click', function(e){
-    e.stopPropagation();
-    menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+  document.querySelectorAll('.sks-customise-wrap').forEach(function(wrap){
+    var btn = wrap.querySelector('.sks-customise-toggle-btn');
+    var menu = wrap.querySelector('.sks-customise-menu');
+    if(!btn || !menu) return;
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var isVisible = menu.style.display === 'block';
+      document.querySelectorAll('.sks-customise-menu').forEach(function(m){ m.style.display = 'none'; });
+      menu.style.display = isVisible ? 'none' : 'block';
+    });
   });
   document.addEventListener('click', function(e){
-    if(!menu.contains(e.target) && e.target !== toggle){ menu.style.display = 'none'; }
+    if(!e.target.closest('.sks-customise-wrap')){
+      document.querySelectorAll('.sks-customise-menu').forEach(function(m){ m.style.display = 'none'; });
+    }
   });
   document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape'){ menu.style.display = 'none'; }
+    if(e.key === 'Escape'){
+      document.querySelectorAll('.sks-customise-menu').forEach(function(m){ m.style.display = 'none'; });
+    }
   });
 })();
 
@@ -2130,17 +2181,21 @@ Promise.all([
   var RESULT_URL = '{{ url("/lab-design/result") }}'; // + /{sessionId}
   var CSRF = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').content : '{{ csrf_token() }}';
 
-  var openBtn = document.getElementById('sks-opt-design');
   var modal   = document.getElementById('dml-modal');
   var body    = document.getElementById('dml-body');
   var closeBtn= document.getElementById('dml-close');
-  if(!openBtn || !modal || !body) return;
+  if(!modal || !body) return;
+
+  var dmlBtns = document.querySelectorAll('.btn-trigger-dml, #sks-opt-design');
+  if(!dmlBtns.length) return;
 
   @guest
-  openBtn.addEventListener('click', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    window.location.href = '{{ route("login", ["redirect" => url()->current()]) }}';
+  dmlBtns.forEach(function(btn){
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.location.href = '{{ route("login", ["redirect" => url()->current()]) }}';
+    });
   });
   return;
   @endguest
@@ -2236,33 +2291,38 @@ Promise.all([
       form.parentNode.insertBefore(note, form);
     }
     note.innerHTML = '<strong><i class="fa-solid fa-circle-check"></i>&nbsp; Your Kalpana design is attached</strong><br>' + esc(lines.length + ' products · estimated ' + inr(quote.total + gst) + (gst ? ' incl. GST' : '')) + '. Add your details below and request the quotation. <a href="#" id="kalpanaReopen" style="color:#047857;font-weight:700;text-decoration:underline;">Change the design</a>';
-    document.getElementById('kalpanaReopen').onclick = function(ev){ ev.preventDefault(); openBtn.click(); };
+    document.getElementById('kalpanaReopen').onclick = function(ev){ ev.preventDefault(); if(dmlBtns[0]) dmlBtns[0].click(); };
   }
 
-  openBtn.addEventListener('click', function(){
-    var dropdownMenu = document.getElementById('sks-customise-menu');
-    if(dropdownMenu) dropdownMenu.style.display = 'none';
-    activeSession = null;
-    resetModal();
-    openModal();
-    setBody('<div style="text-align:center;padding:30px;color:#475569;"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:22px;color:#2563eb;"></i><p style="margin-top:12px;font-size:13px;">Starting your design session…</p></div>');
+  dmlBtns.forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      document.querySelectorAll('.sks-customise-menu').forEach(function(m){ m.style.display = 'none'; });
+      activeSession = null;
+      resetModal();
+      openModal();
+      setBody('<div style="text-align:center;padding:30px;color:#475569;"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:22px;color:#2563eb;"></i><p style="margin-top:12px;font-size:13px;">Starting your design session…</p></div>');
 
-    fetch(START_URL, {
-      method:'POST',
-      headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF,'Accept':'application/json'},
-      body: JSON.stringify({ reference: 'composite-skill-basic', source: 'labs/composite-skill-basic' })
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(res){
-      if(!res || res.result !== 1 || !res.session_id || !res.launch_url){
-        setBody('<div style="text-align:center;padding:30px;color:#b91c1c;"><i class="fa-solid fa-triangle-exclamation" style="font-size:22px;"></i><p style="margin-top:12px;font-size:13px;">'+esc((res&&res.message)||'Could not start the design session.')+'</p></div>');
-        return;
-      }
-      activeSession = res.session_id;
-      showFrame(res.launch_url);
-    })
-    .catch(function(){
-      setBody('<div style="text-align:center;padding:30px;color:#b91c1c;">Network error while starting the session.</div>');
+      var ref = btn.dataset.reference || 'composite-skill-basic';
+      var src = btn.dataset.source || 'labs/composite-skill-basic';
+
+      fetch(START_URL, {
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF,'Accept':'application/json'},
+        body: JSON.stringify({ reference: ref, source: src })
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if(!res || res.result !== 1 || !res.session_id || !res.launch_url){
+          setBody('<div style="text-align:center;padding:30px;color:#b91c1c;"><i class="fa-solid fa-triangle-exclamation" style="font-size:22px;"></i><p style="margin-top:12px;font-size:13px;">'+esc((res&&res.message)||'Could not start the design session.')+'</p></div>');
+          return;
+        }
+        activeSession = res.session_id;
+        showFrame(res.launch_url);
+      })
+      .catch(function(){
+        setBody('<div style="text-align:center;padding:30px;color:#b91c1c;">Network error while starting the session.</div>');
+      });
     });
   });
 })();
