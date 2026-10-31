@@ -1,5 +1,5 @@
-<div id="wrapper">
-    <div class="container">
+<div class="container">
+        <div id="wrapper">
         <div class="section-affiliate section-affiliate-main">
             <div class="row">
                 <div class="col-md-12 col-lg-6">

@@ -71,10 +71,10 @@ if (!function_exists('getPortalMenuBySlug')) {
                 $linkTrim = trim($m['link'] ?? '', '/');
                 if (($labelLower === 'labs' || $linkTrim === 'labs') && empty($m['child'])) {
                     $m['child'] = [
+                        ['label' => 'Composite Skill Lab', 'link' => '/labs/composite-skill-basic'],
+                        ['label' => 'Skillvation Lab',     'link' => '/labs/stem'],
                         ['label' => 'AI & Robotics Lab',   'link' => '/labs/ai-robotics'],
-                        ['label' => 'STEM Lab',            'link' => '/labs/stem'],
                         ['label' => 'ECEC Lab',            'link' => '/labs/ecec'],
-                        ['label' => 'Composite Skill Lab', 'link' => '/labs/composite-skill'],
                     ];
                 }
             }

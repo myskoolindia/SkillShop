@@ -6,3 +6,4 @@ $planLabel = 'Skillvation Lab Premium';
     get_defined_vars(),
     ['planKey' => $planKey, 'planLabel' => $planLabel]
 )); ?>
+

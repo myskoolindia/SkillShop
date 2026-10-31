@@ -11,9 +11,10 @@
         '/ttt'              => ['image' => asset('designs/img/TTT-1.png'),             'desc' => 'Master trainer & bootcamp program'],
         '/shop'             => ['image' => asset('frontend/img/skillbox/skillbox_banner.png'), 'desc' => 'Interactive kits & learning boxes'],
         '/SkillBox'         => ['image' => asset('frontend/img/skillbox/skillbox_banner.png'), 'desc' => 'Interactive kits & learning boxes'],
-        '/labs'                 => ['image' => 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=400&q=80', 'desc' => 'Hands-on innovation labs'],
-        '/labs/composite-skill' => ['image' => 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=400&q=80', 'desc' => '3D design, making & future-ready skills'],
-        '/labs/stem'            => ['image' => 'https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?auto=format&fit=crop&w=400&q=80', 'desc' => 'Electronics, IoT & project-based learning'],
+        '/labs'                       => ['image' => 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=400&q=80', 'desc' => 'Hands-on innovation labs'],
+        '/labs/composite-skill'       => ['image' => 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=400&q=80', 'desc' => '3D design, making & future-ready skills'],
+        '/labs/composite-skill-basic' => ['image' => 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=400&q=80', 'desc' => 'Composite Skill Lab'],
+        '/labs/stem'                  => ['image' => 'https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?auto=format&fit=crop&w=400&q=80', 'desc' => 'Skillvation Lab'],
         '/labs/ai-robotics'     => ['image' => 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=400&q=80', 'desc' => 'Hands-on robotics, coding & AI experiments'],
         '/labs/ecec'            => ['image' => 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=400&q=80', 'desc' => 'Early childhood exploration & creativity'],
         '/courses'              => ['image' => asset('designs/img/skill2school-3.png'),    'desc' => 'Browse all available courses'],
@@ -151,7 +152,9 @@
         <a class="nav-link px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary" href="{{ route('skill2school') }}">Skill 2 Skool</a>
         <a class="nav-link px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary" href="{{ route('upskill4teacher') }}">Upskill 4 Teacher</a>
         <a class="nav-link px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary" href="{{ route('ttt') }}">TTT</a>
-        <a class="nav-link px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary" href="{{ route('labs') }}">LABS</a>
+        <a class="nav-link px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary" href="{{ url('/shop') }}">Shop</a>
+        <a class="nav-link px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary" href="{{ url('/labs/composite-skill-basic') }}">Composite Skill Lab</a>
+        <a class="nav-link px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary" href="{{ url('/labs/stem') }}">Skillvation Lab</a>
         <a class="nav-link px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary" href="{{ route('courses') }}">Courses</a>
       @endif
     </nav>
@@ -258,11 +261,14 @@
       @else
         {{-- Fallback links when no CMS menu --}}
         @foreach([
-          ['Home',             route('home')],
-          ['Skill 2 Skool',    route('skill2school')],
-          ['Upskill 4 Teacher',route('upskill4teacher')],
-          ['TTT',              route('ttt')],
-          ['Courses',          route('courses')],
+          ['Home',                  route('home')],
+          ['Skill 2 Skool',         route('skill2school')],
+          ['Upskill 4 Teacher',     route('upskill4teacher')],
+          ['TTT',                   route('ttt')],
+          ['Shop',                  url('/shop')],
+          ['Composite Skill Lab',   url('/labs/composite-skill-basic')],
+          ['Skillvation Lab',       url('/labs/stem')],
+          ['Courses',               route('courses')],
         ] as [$label, $href])
           <a href="{{ $href }}"
              class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:text-primary hover:bg-slate-50 transition-colors {{ request()->fullUrlIs($href) ? 'text-primary bg-blue-50 font-bold' : '' }}">

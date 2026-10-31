@@ -12,10 +12,10 @@ if (empty($nav_menu)) {
             'label' => 'Labs',
             'link' => '/labs',
             'child' => [
+                ['label' => 'Composite Skill Lab', 'link' => '/labs/composite-skill-basic'],
+                ['label' => 'Skillvation Lab',     'link' => '/labs/stem'],
                 ['label' => 'AI & Robotics Lab',   'link' => '/labs/ai-robotics'],
-                ['label' => 'STEM Lab',            'link' => '/labs/stem'],
                 ['label' => 'ECEC Lab',            'link' => '/labs/ecec'],
-                ['label' => 'Composite Skill Lab', 'link' => '/labs/composite-skill'],
             ]
         ]
     ];
@@ -28,11 +28,12 @@ $childImageMap = [
     '/ttt'                  => ['image' => mainPortalUrl('designs/img/TTT-1.png'),             'desc' => 'Master trainer & bootcamp'],
     '/shop'                 => ['image' => mainPortalUrl('frontend/img/skillbox/skillbox_banner.png'), 'desc' => 'Interactive kits & learning boxes'],
     '/club-shop'            => ['image' => mainPortalUrl('frontend/img/skillbox/skillbox_banner.png'), 'desc' => 'Interactive kits & learning boxes'],
-    '/labs'                 => ['image' => 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=600&q=80', 'desc' => 'Hands-on innovation labs'],
-    '/labs/ai-robotics'     => ['image' => 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=600&q=80', 'desc' => 'AI & Robotics Lab'],
-    '/labs/stem'            => ['image' => 'https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?auto=format&fit=crop&w=600&q=80', 'desc' => 'STEM Lab'],
-    '/labs/ecec'            => ['image' => 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=600&q=80', 'desc' => 'ECEC Lab'],
-    '/labs/composite-skill' => ['image' => 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=600&q=80', 'desc' => 'Composite Skill Lab'],
+    '/labs'                       => ['image' => 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=600&q=80', 'desc' => 'Hands-on innovation labs'],
+    '/labs/ai-robotics'           => ['image' => 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=600&q=80', 'desc' => 'AI & Robotics Lab'],
+    '/labs/stem'                  => ['image' => 'https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?auto=format&fit=crop&w=600&q=80', 'desc' => 'Skillvation Lab'],
+    '/labs/ecec'                  => ['image' => 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=600&q=80', 'desc' => 'ECEC Lab'],
+    '/labs/composite-skill'       => ['image' => 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=600&q=80', 'desc' => 'Composite Skill Lab'],
+    '/labs/composite-skill-basic' => ['image' => 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=600&q=80', 'desc' => 'Composite Skill Lab'],
     '/courses'              => ['image' => mainPortalUrl('designs/img/skill2school-3.png'),    'desc' => 'Browse all courses'],
     '/blog'                 => ['image' => mainPortalUrl('designs/img/skill2school-4.jpeg'),   'desc' => 'Articles & insights'],
     '/contact'              => ['image' => mainPortalUrl('designs/img/skill2school-5.jpeg'),   'desc' => 'Get in touch'],
