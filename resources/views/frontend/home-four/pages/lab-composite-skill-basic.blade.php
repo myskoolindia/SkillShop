@@ -2050,7 +2050,7 @@ function renderBundleSection(product, allCats, config){
 Promise.all([
   fetch(BASE+'/api/products/slug/cbse-composite-skill-lab-basic-68').then(function(r){if(!r.ok)throw r.status;return r.json();}),
   fetch(BASE+'/api/categories/tree').then(function(r){if(!r.ok)throw r.status;return r.json();}),
-  fetch(BASE+'/api/products/slug/cbse-composite-skill-lab-basic-68-1793453049').then(function(r){if(!r.ok)return null;return r.json();}).catch(function(){ return null; })
+  fetch(BASE+'/api/products/slug/cbse-composite-skill-lab-advanced-72').then(function(r){if(!r.ok)return null;return r.json();}).catch(function(){ return null; })
 ])
 .then(function(res){
   var basicProduct = res[0] ? res[0].data : null;
