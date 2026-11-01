@@ -896,6 +896,73 @@ class CartController extends BaseController
     }
 
     /**
+     * AJAX: Update bundle component quantity / selection from cart view
+     */
+    public function updateBundleItemQuantity()
+    {
+        $cartItemId = (int)inputPost('cart_item_id');
+        $productId = (int)inputPost('product_id');
+        $quantity = max(0, min(99999, (int)inputPost('quantity')));
+
+        $builder = $this->cartModel->builderCartItems;
+        $cartItem = $builder->where('id', $cartItemId)->get()->getRow();
+        if (empty($cartItem) || empty($cartItem->is_bundle)) {
+            return jsonResponse(['result' => 0, 'message' => 'Cart item not found or not a bundle']);
+        }
+
+        $bundleItems = safeJsonDecode($cartItem->bundle_items, true);
+        if (!is_array($bundleItems)) {
+            $bundleItems = [];
+        }
+
+        $found = false;
+        foreach ($bundleItems as &$bi) {
+            if ((int)($bi['product_id'] ?? 0) === $productId || (int)($bi['comp_id'] ?? 0) === $productId) {
+                $bi['qty'] = $quantity;
+                $found = true;
+                break;
+            }
+        }
+        if (!$found && $quantity > 0) {
+            $bundleItems[] = [
+                'comp_id' => 0,
+                'product_id' => $productId,
+                'qty' => $quantity
+            ];
+        }
+
+        $builder->where('id', $cartItemId)->update([
+            'bundle_items' => safeJsonEncode($bundleItems)
+        ]);
+
+        $cart = $this->cartModel->getCart();
+        $itemTotal = 0;
+        $catSubtotals = [];
+        if (!empty($cart) && !empty($cart->items)) {
+            foreach ($cart->items as $item) {
+                if ($item->id == $cartItemId) {
+                    $itemTotal = $item->total_price;
+                    if (!empty($item->bundle_categories)) {
+                        foreach ($item->bundle_categories as $bCat) {
+                            $cKey = $bCat['name'] ?? 'General';
+                            $catSubtotals[$cKey] = priceDecimal($bCat['subtotal'], $cart->currency_code);
+                        }
+                    }
+                }
+            }
+        }
+
+        return jsonResponse([
+            'result'            => 1,
+            'csrfHash'          => csrf_hash(),
+            'quantity'          => $quantity,
+            'item_total_price'  => priceDecimal($itemTotal, $cart->currency_code ?? 'INR'),
+            'cart_total'        => priceDecimal($cart->total ?? $itemTotal, $cart->currency_code ?? 'INR'),
+            'category_subtotals'=> $catSubtotals
+        ]);
+    }
+
+    /**
      * Coupon Code Post
      */
     public function couponCodePost()

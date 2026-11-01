@@ -4076,9 +4076,9 @@
           <i class="fa-solid fa-cart-shopping" style="font-size:15px;"></i>
           <span>Buy Now</span>
         </a>
-        <a id="cpWaBtn" href="#" target="_blank" style="display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border-radius:10px; background:#059669; color:#fff; font-weight:700; text-decoration:none; font-size:13px;">
+        <a id="cpWaBtn" href="#" target="_blank" style="display:none; align-items:center; gap:6px; padding:9px 18px; border-radius:10px; background:#059669; color:#fff; font-weight:700; text-decoration:none; font-size:13px;">
           <i class="fa-brands fa-whatsapp" style="font-size:16px;"></i>
-          <span>Open in WhatsApp</span>
+          <span>Send to WhatsApp</span>
         </a>
       </div>
     </div>
@@ -4626,7 +4626,14 @@ DIY Kits: ${kitsCount}+`;
               if (cpWaBox) cpWaBox.style.display = 'flex';
               if (cpPdfBtn && resp.pdf_url) { cpPdfBtn.href = resp.pdf_url; cpPdfBtn.style.display = 'inline-flex'; }
               if (cpBuyBtn && resp.cart_url) { cpBuyBtn.href = resp.cart_url; cpBuyBtn.style.display = 'inline-flex'; }
-              if (cpWaBtn && resp.whatsapp_url) { cpWaBtn.href = resp.whatsapp_url; cpWaBtn.style.display = 'inline-flex'; }
+              if (cpWaBtn) {
+                if (resp.whatsapp_url) {
+                  cpWaBtn.href = resp.whatsapp_url;
+                  cpWaBtn.style.display = 'inline-flex';
+                } else {
+                  cpWaBtn.style.display = 'none';
+                }
+              }
             }
           })
           .catch(() => {

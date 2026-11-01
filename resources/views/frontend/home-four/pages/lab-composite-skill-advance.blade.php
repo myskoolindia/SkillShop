@@ -1050,7 +1050,7 @@
               </div>
             </div>
 
-            <form class="space-y-4" id="planEnquiryForm" data-source="composite-skill-lab-advance" data-title="Skillvation Advance Composite Skill Lab – Enquiry">
+            <form class="space-y-4" id="planEnquiryForm" data-source="composite-skill-lab-advance" data-title="Composite Skill Lab Advance Package">
               <input type="hidden" name="source"       id="planSource">
               <input type="hidden" name="course_title" id="planTitle">
               <input type="hidden" name="quotation"    id="planQuotation">
@@ -1093,7 +1093,7 @@
               </div>
             </div>
 
-            <form class="space-y-4" id="planEnquiryForm" data-source="composite-skill-lab-advance" data-title="Skillvation Advance Composite Skill Lab – Enquiry">
+            <form class="space-y-4" id="planEnquiryForm" data-source="composite-skill-lab-advance" data-title="Composite Skill Lab Advance Package">
               <input type="hidden" name="source"       id="planSource">
               <input type="hidden" name="course_title" id="planTitle">
               <input type="hidden" name="quotation"    id="planQuotation">
@@ -1161,22 +1161,46 @@
           @endauth
           </div>
 
-          <div id="planEnquirySuccess" style="display:none;" class="text-center py-8">
-            <div class="text-5xl mb-4">🎉</div>
-            <h3 class="text-xl font-black text-brand-navy mb-2">Proposal Sent!</h3>
-            <p class="text-sm text-slate-600 mb-4">Your customized proposal has been sent to your email and WhatsApp.</p>
-            <div id="planWaBox" style="display:none;" class="flex items-center justify-center gap-3 flex-wrap mt-3">
+          <div id="planEnquirySuccess" style="display:none;" class="text-center py-6">
+            <div class="w-14 h-14 mx-auto mb-3 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl font-bold shadow-inner">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <h3 class="text-xl font-black text-brand-navy mb-1">Proposal Sent!</h3>
+            <p class="text-sm text-slate-600 mb-4">Your customized lab proposal has been prepared and dispatched.</p>
+
+            {{-- Summary Card --}}
+            <div class="my-4 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left max-w-md mx-auto space-y-2.5">
+              <div class="flex items-start justify-between gap-2 border-b border-slate-200 pb-2">
+                <div>
+                  <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Requested Package</div>
+                  <div id="planSuccessPackage" class="font-extrabold text-brand-navy text-sm">Composite Skill Lab Advance Package</div>
+                </div>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800">
+                  <i class="fa-solid fa-circle-check text-[10px] mr-1"></i> Generated
+                </span>
+              </div>
+              <div class="flex items-center justify-between gap-2 text-xs text-slate-600">
+                <span class="text-slate-400">Institution:</span>
+                <span id="planSuccessSchool" class="font-bold text-slate-700">—</span>
+              </div>
+              <div class="flex items-center justify-between gap-2 text-xs pt-1.5 border-t border-slate-200">
+                <span class="text-slate-500 font-semibold">Total Estimate:</span>
+                <span id="planSuccessTotal" class="font-extrabold text-emerald-700 text-base">—</span>
+              </div>
+            </div>
+
+            <div id="planWaBox" style="display:none;" class="flex items-center justify-center gap-3 flex-wrap mt-4">
               <a id="planPdfBtn" href="#" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-navy hover:bg-brand-navy/90 text-white font-bold text-sm shadow-md transition-all">
-                <i class="fa-solid fa-file-pdf text-lg"></i>
+                <i class="fa-solid fa-file-pdf text-lg text-rose-400"></i>
                 <span>View Proposal</span>
               </a>
               <a id="planBuyBtn" href="#" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm shadow-md transition-all" style="display:none;">
                 <i class="fa-solid fa-cart-shopping text-lg"></i>
                 <span>Buy Now</span>
               </a>
-              <a id="planWaBtn" href="#" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-all">
+              <a id="planWaBtn" href="#" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-all" style="display:none;">
                 <i class="fa-brands fa-whatsapp text-lg"></i>
-                <span>Open in WhatsApp</span>
+                <span>Send to WhatsApp</span>
               </a>
             </div>
           </div>
@@ -1387,6 +1411,29 @@
       if (container) container.style.display = 'none';
       form.style.display='none';
       success.style.display='block';
+
+      // Populate Proposal Summary
+      var pkgDisplay = (resp && resp.package) ? resp.package : (form.dataset.title || 'Composite Skill Lab Advance Package');
+      var schoolDisplay = (resp && resp.school) ? resp.school : (form.querySelector('[name="school"]') ? form.querySelector('[name="school"]').value : '');
+      var totalDisplay = (resp && resp.total) ? resp.total : '';
+
+      var successPkg = document.getElementById('planSuccessPackage');
+      var successSchool = document.getElementById('planSuccessSchool');
+      var successTotal = document.getElementById('planSuccessTotal');
+      if (successPkg) successPkg.textContent = pkgDisplay;
+      if (successSchool && schoolDisplay) successSchool.textContent = schoolDisplay;
+      if (successTotal) {
+        if (totalDisplay) {
+          successTotal.textContent = totalDisplay;
+        } else if (quotEl && quotEl.value) {
+          try {
+            var qObj = JSON.parse(quotEl.value);
+            if (qObj.grand_total) {
+              successTotal.textContent = '₹' + Number(qObj.grand_total).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+            }
+          } catch(err){}
+        }
+      }
       if (resp && (resp.whatsapp_url || resp.pdf_url || resp.cart_url)) {
         var waBox = document.getElementById('planWaBox');
         var waBtn = document.getElementById('planWaBtn');
@@ -1395,7 +1442,14 @@
         if (waBox) waBox.style.display = 'flex';
         if (pdfBtn && resp.pdf_url) { pdfBtn.href = resp.pdf_url; pdfBtn.style.display = 'inline-flex'; }
         if (buyBtn && resp.cart_url) { buyBtn.href = resp.cart_url; buyBtn.style.display = 'inline-flex'; }
-        if (waBtn && resp.whatsapp_url) { waBtn.href = resp.whatsapp_url; waBtn.style.display = 'inline-flex'; }
+        if (waBtn) {
+          if (resp.whatsapp_url) {
+            waBtn.href = resp.whatsapp_url;
+            waBtn.style.display = 'inline-flex';
+          } else {
+            waBtn.style.display = 'none';
+          }
+        }
       }
     })
     .catch(function(){

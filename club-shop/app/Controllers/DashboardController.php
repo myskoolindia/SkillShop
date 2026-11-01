@@ -346,10 +346,9 @@ class DashboardController extends BaseController
         // Process Bundle Items
         $isBundle = !empty(inputPost('is_bundle')) ? 1 : 0;
         $bundleItems = inputPost('bundle_items');
-        if ($isBundle && is_array($bundleItems)) {
+        if ($isBundle && is_array($bundleItems) && !empty($bundleItems)) {
             $this->bundleModel->saveBundleComponents($product->id, $bundleItems);
         } elseif (!$isBundle) {
-            $this->db->table('product_bundles')->where('bundle_product_id', $product->id)->delete();
             $this->db->table('products')->where('id', $product->id)->update(['is_bundle' => 0]);
         }
 
@@ -416,8 +415,55 @@ class DashboardController extends BaseController
     }
 
     /**
-     * Products
+     * AJAX auto-save bundle items and package pricing
      */
+    public function saveBundleItemsAjax()
+    {
+        if (!authCheck()) {
+            return jsonResponse(['result' => 0, 'message' => 'Unauthorized']);
+        }
+        $productId = (int)inputPost('product_id');
+        $product = $this->productModel->getProduct($productId);
+        if (empty($product) || (!hasPermission('products') && $product->user_id != user()->id)) {
+            return jsonResponse(['result' => 0, 'message' => 'Permission denied']);
+        }
+
+        $isBundle = !empty(inputPost('is_bundle')) ? 1 : 0;
+        $bundleItems = inputPost('bundle_items');
+        $explicitDelete = !empty(inputPost('explicit_delete')) ? 1 : 0;
+
+        if ($isBundle && is_array($bundleItems) && !empty($bundleItems)) {
+            $this->bundleModel->saveBundleComponents($productId, $bundleItems);
+            $this->db->table('products')->where('id', $productId)->update(['is_bundle' => 1]);
+        } elseif (!$isBundle && $explicitDelete) {
+            $this->db->table('product_bundles')->where('bundle_product_id', $productId)->delete();
+            $this->db->table('products')->where('id', $productId)->update(['is_bundle' => 0]);
+        }
+
+        // Auto-update price if provided
+        $applyPrice = inputPost('apply_price');
+        if ($applyPrice !== null && is_numeric($applyPrice) && (float)$applyPrice > 0) {
+            $upPrice = round((float)$applyPrice);
+            $upData = ['price' => $upPrice];
+            $dRate = (float)($product->bundle_discount_rate ?: ($product->discount_rate ?? 0));
+            if ($dRate > 0) {
+                $upData['price_discounted'] = round($upPrice * (1 - ($dRate / 100)));
+            }
+            $this->db->table('products')->where('id', $productId)->update($upData);
+        }
+
+        $metrics = $this->bundleModel->calculateBundleMetrics($productId);
+        resetCacheDataOnChange();
+
+        return jsonResponse([
+            'result'           => 1,
+            'csrfHash'         => csrf_hash(),
+            'total_components' => $metrics['total_components'] ?? 0,
+            'total_units'      => $metrics['total_units'] ?? 0,
+            'max_stock'        => $metrics['max_stock'] ?? 0,
+            'sum_price'        => $metrics['sum_price'] ?? 0
+        ]);
+    }
     public function products()
     {
         $st = inputGet('st');

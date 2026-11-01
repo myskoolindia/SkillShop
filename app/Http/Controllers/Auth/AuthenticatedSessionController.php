@@ -102,22 +102,26 @@ class AuthenticatedSessionController extends Controller
         $notification = __('Logged in successfully.');
         $notification = ['messege' => $notification, 'alert-type' => 'success'];
 
-        $intendedUrl = session()->pull('url.intended');
+        $intendedUrl = null;
 
-        // Check redirect parameter in request or referer
-        if (!$intendedUrl && $request->filled('redirect')) {
+        // Check redirect parameter in request or referer (takes precedence over stale session url)
+        if ($request->filled('redirect')) {
             $intendedUrl = $request->input('redirect');
-        }
-
-        if (!$intendedUrl && $request->headers->get('referer')) {
+            session()->forget('url.intended');
+        } elseif ($request->headers->get('referer')) {
             $referer = $request->headers->get('referer');
             $parsedRef = parse_url($referer);
             if (!empty($parsedRef['query'])) {
                 parse_str($parsedRef['query'], $queryParams);
                 if (!empty($queryParams['redirect'])) {
                     $intendedUrl = $queryParams['redirect'];
+                    session()->forget('url.intended');
                 }
             }
+        }
+
+        if (!$intendedUrl) {
+            $intendedUrl = session()->pull('url.intended');
         }
 
         // Validate intendedUrl is safe (same host or relative, no auth loops)

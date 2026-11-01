@@ -1,6 +1,22 @@
 <?php
 $bundleModel = new \App\Models\BundleModel();
 $bundleComponents = $bundleModel->getBundleComponents($product->id, false);
+
+// Default sort by Category alphabetically, then by component title
+if (!empty($bundleComponents) && is_array($bundleComponents)) {
+    usort($bundleComponents, function($a, $b) {
+        $catA = !empty($a->category_name) ? trim($a->category_name) : 'General';
+        $catB = !empty($b->category_name) ? trim($b->category_name) : 'General';
+        $cmp = strcasecmp($catA, $catB);
+        if ($cmp !== 0) {
+            return $cmp;
+        }
+        $titleA = !empty($a->title) ? trim($a->title) : '';
+        $titleB = !empty($b->title) ? trim($b->title) : '';
+        return strcasecmp($titleA, $titleB);
+    });
+}
+
 $bundleMetrics = $bundleModel->calculateBundleMetrics($product->id);
 $isBundle = !empty($product->is_bundle) ? 1 : 0;
 $pricingType = !empty($product->bundle_pricing_type) ? $product->bundle_pricing_type : 'fixed';
@@ -63,6 +79,19 @@ ksort($categoriesList);
     border-radius: 8px;
     border: 1px solid #e2e8f0;
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+/* Sticky Metrics Header Container */
+.bundle-metrics-sticky-wrapper {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 1010;
+    background: #ffffff;
+    padding: 10px 0 4px 0;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
 }
 
 /* Metric Cards Equal Height & SaaS Layout */
@@ -351,87 +380,103 @@ ksort($categoriesList);
 
         <div class="form-box-body" id="bundle_builder_container" style="<?= $isBundle ? '' : 'display:none;'; ?> padding:20px;">
             
-            <!-- Metrics Bar (Equal Height SaaS Cards) -->
-            <div class="row bundle-metrics-row m-b-20">
-                <div class="col-md-3 col-sm-6 m-b-10">
-                    <div class="bundle-metric-card">
-                        <div class="bundle-metric-header">
-                            <span class="bundle-metric-label">Component Products</span>
-                            <span class="badge" style="background:#eff6ff; color:#2563eb; font-size:10.5px; font-weight:700; padding:2px 6px; border-radius:5px; border:1px solid #dbeafe;">SKUs</span>
-                        </div>
-                        <div class="bundle-metric-body" style="margin:4px 0 8px 0;">
-                            <span class="bundle-metric-value text-primary font-weight-bold" id="badge_total_components"><?= count($bundleComponents); ?></span>
-                            <span style="font-size:11.5px; font-weight:700; color:#334155; background:#f1f5f9; border:1px solid #e2e8f0; padding:3px 8px; border-radius:6px; white-space:nowrap;">
-                                <span id="badge_mand_count" class="text-success font-weight-bold"><?= $mandatoryCount; ?></span> Mand &bull; <span id="badge_opt_count" class="text-secondary font-weight-bold"><?= $optionalCount; ?></span> Opt
-                            </span>
-                        </div>
-                        <div style="font-size:11px; color:#64748b; padding-top:5px; border-top:1px solid #f1f5f9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                            Included in package curation
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-6 m-b-10">
-                    <div class="bundle-metric-card">
-                        <div class="bundle-metric-header">
-                            <span class="bundle-metric-label">Total Package Units</span>
-                            <span class="badge" style="background:#f0fdf4; color:#16a34a; font-size:10.5px; font-weight:700; padding:2px 6px; border-radius:5px; border:1px solid #dcfce7;">QTY</span>
-                        </div>
-                        <div class="bundle-metric-body" style="margin:4px 0 8px 0;">
-                            <span class="bundle-metric-value text-info font-weight-bold" id="badge_total_units"><?= $bundleMetrics['total_units']; ?></span>
-                            <span style="font-size:11.5px; font-weight:700; color:#334155; background:#f1f5f9; border:1px solid #e2e8f0; padding:3px 8px; border-radius:6px; white-space:nowrap;">
-                                <i class="fa fa-cubes text-info"></i> Pieces in 1 Box
-                            </span>
-                        </div>
-                        <div style="font-size:11px; color:#64748b; padding-top:5px; border-top:1px solid #f1f5f9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                            Physical component count
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-6 m-b-10">
-                    <div class="bundle-metric-card" style="border-color:#cbd5e1; background:linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);">
-                        <div class="bundle-metric-header">
-                            <span class="bundle-metric-label">Total Package Value</span>
-                            <span class="badge" style="background:#eff6ff; color:#1e40af; font-size:10.5px; font-weight:700; padding:2px 6px; border-radius:5px; border:1px solid #bfdbfe;">VAL</span>
-                        </div>
-                        <div class="bundle-metric-body" style="margin:4px 0 8px 0; display:flex; align-items:center; justify-content:space-between; gap:6px;">
-                            <span class="bundle-metric-value text-dark font-weight-bold" id="badge_sum_price" style="font-size:19px; font-family:'Segoe UI', 'Consolas', monospace; white-space:nowrap; line-height:1.2;">₹ <?= number_format(round($allSum), 0, '.', ','); ?></span>
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-sm btn-primary font-weight-bold" onclick="applyBundleSumToPrice('total');" style="font-size:10.5px; padding:3px 8px; border-radius:4px 0 0 4px; white-space:nowrap;" title="Apply total package value (₹ <?= number_format(round($allSum), 0, '.', ','); ?>) to product price">
-                                    <i class="fa fa-arrow-up"></i> Apply
-                                </button>
-                                <?php if ($optionalCount > 0): ?>
-                                    <button type="button" class="btn btn-sm btn-outline-primary font-weight-bold" onclick="applyBundleSumToPrice('mandatory');" style="font-size:10.5px; padding:3px 7px; border-radius:0 4px 4px 0; border-left:none; white-space:nowrap; background:#eff6ff;" title="Apply mandatory base sum (₹ <?= number_format(round($mandatorySum), 0, '.', ','); ?>) to product price">
-                                        Base
-                                    </button>
-                                <?php endif; ?>
+            <!-- Sticky Metrics Bar (Equal Height SaaS Cards) -->
+            <div class="bundle-metrics-sticky-wrapper" id="bundle_metrics_sticky_wrapper">
+                <div class="row bundle-metrics-row m-b-0">
+                    <div class="col-md-3 col-sm-6 m-b-10">
+                        <div class="bundle-metric-card">
+                            <div class="bundle-metric-header">
+                                <span class="bundle-metric-label">Component Products</span>
+                                <span class="badge" style="background:#eff6ff; color:#2563eb; font-size:10.5px; font-weight:700; padding:2px 6px; border-radius:5px; border:1px solid #dbeafe;">SKUs</span>
+                            </div>
+                            <div class="bundle-metric-body" style="margin:4px 0 8px 0;">
+                                <span class="bundle-metric-value text-primary font-weight-bold" id="badge_total_components"><?= count($bundleComponents); ?></span>
+                                <span style="font-size:11.5px; font-weight:700; color:#334155; background:#f1f5f9; border:1px solid #e2e8f0; padding:3px 8px; border-radius:6px; white-space:nowrap;">
+                                    <span id="badge_mand_count" class="text-success font-weight-bold"><?= $mandatoryCount; ?></span> Mand &bull; <span id="badge_opt_count" class="text-secondary font-weight-bold"><?= $optionalCount; ?></span> Opt
+                                </span>
+                            </div>
+                            <div style="font-size:11px; color:#64748b; padding-top:5px; border-top:1px solid #f1f5f9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                Included in package curation
                             </div>
                         </div>
-                        <div style="font-size:11px; color:#64748b; padding-top:5px; border-top:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
-                            <span id="card_mand_box" <?= ($optionalCount > 0) ? '' : 'style="display:none;"'; ?> style="white-space:nowrap;">
-                                Base: <strong class="text-dark font-weight-bold" id="card_mand_sum_disp">₹ <?= number_format(round($mandatorySum), 0, '.', ','); ?></strong>
-                            </span>
-                            <span id="card_all_mand_note" style="<?= ($optionalCount > 0) ? 'display:none;' : ''; ?> white-space:nowrap; color:#64748b;">
-                                All items mandatory
-                            </span>
+                    </div>
+                    <div class="col-md-3 col-sm-6 m-b-10">
+                        <div class="bundle-metric-card">
+                            <div class="bundle-metric-header">
+                                <span class="bundle-metric-label">Total Package Units</span>
+                                <span class="badge" style="background:#f0fdf4; color:#16a34a; font-size:10.5px; font-weight:700; padding:2px 6px; border-radius:5px; border:1px solid #dcfce7;">QTY</span>
+                            </div>
+                            <div class="bundle-metric-body" style="margin:4px 0 8px 0;">
+                                <span class="bundle-metric-value text-info font-weight-bold" id="badge_total_units"><?= $bundleMetrics['total_units']; ?></span>
+                                <span style="font-size:11.5px; font-weight:700; color:#334155; background:#f1f5f9; border:1px solid #e2e8f0; padding:3px 8px; border-radius:6px; white-space:nowrap;">
+                                    <i class="fa fa-cubes text-info"></i> Pieces in 1 Box
+                                </span>
+                            </div>
+                            <div style="font-size:11px; color:#64748b; padding-top:5px; border-top:1px solid #f1f5f9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                Physical component count
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-3 col-sm-6 m-b-10">
-                    <div class="bundle-metric-card">
-                        <div class="bundle-metric-header">
-                            <span class="bundle-metric-label">Calculated Stock</span>
-                            <span class="badge" style="background:#fef2f2; color:#dc2626; font-size:10.5px; font-weight:700; padding:2px 6px; border-radius:5px; border:1px solid #fee2e2;">LIMIT</span>
+                    <div class="col-md-3 col-sm-6 m-b-10">
+                        <div class="bundle-metric-card" style="border-color:#cbd5e1; background:linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);">
+                            <div class="bundle-metric-header">
+                                <span class="bundle-metric-label">Total Package Value</span>
+                                <div style="display:inline-flex; align-items:center; gap:4px;">
+                                    <span id="bundle_ajax_sync_status" class="badge badge-light border text-success" style="font-size:10px; padding:2px 6px; font-weight:700;" title="Automatic live sync with package & front-end cart">
+                                        <i class="fa fa-check"></i> Synced
+                                    </span>
+                                    <span class="badge" style="background:#eff6ff; color:#1e40af; font-size:10.5px; font-weight:700; padding:2px 6px; border-radius:5px; border:1px solid #bfdbfe;">VAL</span>
+                                </div>
+                            </div>
+                            <div class="bundle-metric-body" style="margin:4px 0 6px 0; display:flex; align-items:center; justify-content:space-between; gap:6px;">
+                                <span class="bundle-metric-value text-dark font-weight-bold" id="badge_sum_price" style="font-size:19px; font-family:'Segoe UI', 'Consolas', monospace; white-space:nowrap; line-height:1.2;">₹ <?= number_format(round($allSum), 0, '.', ','); ?></span>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-primary font-weight-bold" onclick="applyBundleSumToPrice('total');" style="font-size:10.5px; padding:3px 8px; border-radius:4px 0 0 4px; white-space:nowrap;" title="Apply total package value (₹ <?= number_format(round($allSum), 0, '.', ','); ?>) to product price">
+                                        <i class="fa fa-arrow-up"></i> Apply
+                                    </button>
+                                    <?php if ($optionalCount > 0): ?>
+                                        <button type="button" class="btn btn-sm btn-outline-primary font-weight-bold" onclick="applyBundleSumToPrice('mandatory');" style="font-size:10.5px; padding:3px 7px; border-radius:0 4px 4px 0; border-left:none; white-space:nowrap; background:#eff6ff;" title="Apply mandatory base sum (₹ <?= number_format(round($mandatorySum), 0, '.', ','); ?>) to product price">
+                                            Base
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <div style="font-size:11px; color:#64748b; padding-top:4px; border-top:1px solid #f1f5f9; display:flex; flex-direction:column; gap:2px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span id="card_mand_box" <?= ($optionalCount > 0) ? '' : 'style="display:none;"'; ?> style="white-space:nowrap;">
+                                        Base: <strong class="text-dark font-weight-bold" id="card_mand_sum_disp">₹ <?= number_format(round($mandatorySum), 0, '.', ','); ?></strong>
+                                    </span>
+                                    <span id="card_all_mand_note" style="<?= ($optionalCount > 0) ? 'display:none;' : ''; ?> white-space:nowrap; color:#64748b;">
+                                        All items mandatory
+                                    </span>
+                                    <span style="white-space:nowrap;">
+                                        Markup: <strong class="text-primary font-weight-bold" id="card_markup_disp">₹ <?= number_format(max(0, round($allSum - $mandatorySum)), 0, '.', ','); ?></strong>
+                                    </span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; font-size:10.5px; color:#64748b;">
+                                    <span>Discount: <strong class="text-danger font-weight-bold" id="card_discount_disp"><?= (float)$discountRate; ?>%</strong></span>
+                                    <span id="card_net_box">Net: <strong class="text-success font-weight-bold" id="card_net_disp">₹ <?= number_format(round($allSum * (1 - ($discountRate / 100))), 0, '.', ','); ?></strong></span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="bundle-metric-body" style="margin:4px 0 8px 0;">
-                            <span class="bundle-metric-value <?= $bundleMetrics['max_stock'] > 0 ? 'text-success' : 'text-danger'; ?> font-weight-bold" id="badge_max_stock">
-                                <?= $bundleMetrics['max_stock']; ?> <span style="font-size:13px; font-weight:600; color:#64748b;">pkgs</span>
-                            </span>
-                            <span style="font-size:11.5px; font-weight:600; color:#64748b; background:#f1f5f9; border:1px solid #e2e8f0; padding:3px 8px; border-radius:6px; white-space:nowrap;">
-                                <i class="fa fa-shield text-muted"></i> By component stock
-                            </span>
-                        </div>
-                        <div style="font-size:11px; color:#64748b; padding-top:5px; border-top:1px solid #f1f5f9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                            Max fulfillable from inventory
+                    </div>
+                    <div class="col-md-3 col-sm-6 m-b-10">
+                        <div class="bundle-metric-card">
+                            <div class="bundle-metric-header">
+                                <span class="bundle-metric-label">Calculated Stock</span>
+                                <span class="badge" style="background:#fef2f2; color:#dc2626; font-size:10.5px; font-weight:700; padding:2px 6px; border-radius:5px; border:1px solid #fee2e2;">LIMIT</span>
+                            </div>
+                            <div class="bundle-metric-body" style="margin:4px 0 8px 0;">
+                                <span class="bundle-metric-value <?= $bundleMetrics['max_stock'] > 0 ? 'text-success' : 'text-danger'; ?> font-weight-bold" id="badge_max_stock">
+                                    <?= $bundleMetrics['max_stock']; ?> <span style="font-size:13px; font-weight:600; color:#64748b;">pkgs</span>
+                                </span>
+                                <span style="font-size:11.5px; font-weight:600; color:#64748b; background:#f1f5f9; border:1px solid #e2e8f0; padding:3px 8px; border-radius:6px; white-space:nowrap;">
+                                    <i class="fa fa-shield text-muted"></i> By component stock
+                                </span>
+                            </div>
+                            <div style="font-size:11px; color:#64748b; padding-top:5px; border-top:1px solid #f1f5f9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                Max fulfillable from inventory
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -443,18 +488,15 @@ ksort($categoriesList);
                     <button type="button" class="btn btn-primary font-weight-bold" data-toggle="modal" data-target="#modalAddBundleItem">
                         <i class="fa fa-plus-circle"></i>&nbsp;&nbsp;Add Products / Variations
                     </button>
-                    <button type="button" class="btn btn-outline-secondary" onclick="sortBundleTableByCategory();" title="Sort and group items alphabetically by Category">
-                        <i class="fa fa-sort-alpha-asc"></i>&nbsp;&nbsp;Sort by Category
-                    </button>
                 </div>
                 <div class="col-lg-6 col-md-12 text-lg-right m-b-10" style="display:flex; justify-content:flex-end; align-items:center; flex-wrap:wrap; gap:10px;">
-                    <!-- View Mode Toggle -->
-                    <div class="btn-group btn-group-sm" role="group" aria-label="View Mode">
-                        <button type="button" class="btn btn-outline-secondary active font-weight-bold" id="btn_view_full" onclick="setBundleTableViewMode('full');" title="Smooth full page flow (No nested scrollbars)">
+                    <!-- View Mode Toggle: Full View vs Compact View -->
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Toggle Full View and Compact View" style="box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+                        <button type="button" class="btn btn-outline-secondary active font-weight-bold" id="btn_view_full" onclick="setBundleTableViewMode('full');" title="Smooth full page flow (all rows visible)">
                             <i class="fa fa-arrows-v"></i> Full View
                         </button>
-                        <button type="button" class="btn btn-outline-secondary" id="btn_view_window" onclick="setBundleTableViewMode('window');" title="Contained scroll window">
-                            <i class="fa fa-bars"></i> Compact Window
+                        <button type="button" class="btn btn-outline-secondary" id="btn_view_compact" onclick="setBundleTableViewMode('compact');" title="Contained compact scroll window">
+                            <i class="fa fa-compress"></i> Compact View
                         </button>
                     </div>
 
@@ -478,16 +520,6 @@ ksort($categoriesList);
                     </div>
                     <div class="bundle-filter-pill" id="pill_optional" onclick="setBundleFilterType('optional');">
                         <i class="fa fa-tag text-muted"></i> Optional <span class="badge-count" id="pill_count_opt"><?= $optionalCount; ?></span>
-                    </div>
-
-                    <!-- Optional Products Selected / Unselected Quick Toggle -->
-                    <div class="btn-group btn-group-sm" role="group" aria-label="Toggle Optional Selection" style="box-shadow:0 1px 2px rgba(0,0,0,0.04); margin-left:4px;">
-                        <button type="button" class="btn btn-sm btn-outline-success font-weight-bold px-2 py-1" onclick="toggleAllOptionalSelection(true);" title="Select / Include all optional products (Sets Qty = 1)" style="font-size:11.5px;">
-                            <i class="fa fa-check-circle"></i> Select All Optional
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary font-weight-bold px-2 py-1" onclick="toggleAllOptionalSelection(false);" title="Unselect / Exclude all optional products (Sets Qty = 0)" style="font-size:11.5px;">
-                            <i class="fa fa-circle-o"></i> Unselect All Optional
-                        </button>
                     </div>
                 </div>
 
@@ -557,11 +589,10 @@ ksort($categoriesList);
                                                 <span style="font-size:11.5px; font-weight:700; color:#1e293b; background:#e2e8f0; border:1px solid #cbd5e1; padding:3px 9px; border-radius:12px;">
                                                     <span class="cat-item-count"><?= $cStat['count']; ?></span> <span class="cat-item-count-label"><?= $cStat['count'] == 1 ? 'Product' : 'Products'; ?></span> (<span class="cat-unit-count"><?= $cStat['units']; ?></span> <span class="cat-unit-count-label"><?= $cStat['units'] == 1 ? 'Unit' : 'Units'; ?></span>)
                                                 </span>
-                                                <span class="badge badge-light border text-muted cat-opt-toggle-badge" style="font-size:11px; padding:3px 8px; <?= ($cStat['opt_count'] > 0) ? '' : 'display:none;'; ?>">
-                                                    <span class="cat-opt-count-val"><?= $cStat['opt_count']; ?></span> Optional:
-                                                    <a href="javascript:void(0);" onclick="toggleCategoryOptional(this, true);" class="text-success font-weight-bold ml-1" title="Select all optional in this category"><i class="fa fa-check"></i> Select</a> |
-                                                    <a href="javascript:void(0);" onclick="toggleCategoryOptional(this, false);" class="text-secondary font-weight-bold ml-1" title="Unselect all optional in this category"><i class="fa fa-times"></i> Unselect</a>
-                                                </span>
+                                                <label class="badge border cat-opt-toggle-badge mb-0" style="font-size:11.5px; padding:3px 9px; border-radius:12px; display:inline-flex; align-items:center; gap:5px; background:#fff; cursor:pointer; user-select:none; color:#334155; font-weight:600;" title="Check to mark all products in this category as Optional, uncheck for Mandatory">
+                                                    <input type="checkbox" class="cat-opt-master-chk" style="cursor:pointer; width:14px; height:14px; margin:0;" onchange="toggleCategoryOptional(this, this.checked);" <?= ($cStat['count'] > 0 && $cStat['opt_count'] === $cStat['count']) ? 'checked' : ''; ?>>
+                                                    <span>Optional (<span class="cat-opt-count-val"><?= $cStat['opt_count']; ?></span>)</span>
+                                                </label>
                                             </div>
                                             <div style="display:flex; align-items:center; gap:8px;">
                                                 <span class="cat-mand-wrapper text-muted small" style="font-size:11.5px; <?= ($cStat['opt_count'] > 0) ? '' : 'display:none;'; ?>">
@@ -579,6 +610,8 @@ ksort($categoriesList);
                             <?php endif; ?>
                                 <tr class="bundle-row <?= $isOpt ? 'row-optional' : 'row-mandatory'; ?> <?= ($isOpt && !$isSelected) ? 'row-unselected' : ''; ?>" 
                                     data-id="<?= $comp->id; ?>" 
+                                    data-component-id="<?= $comp->component_product_id; ?>" 
+                                    data-variant-id="<?= $comp->variant_id ?: ''; ?>" 
                                     data-title="<?= esc(strtolower($comp->title)); ?>" 
                                     data-sku="<?= esc(strtolower($comp->sku)); ?>" 
                                     data-category="<?= esc(strtolower($compCat)); ?>"
@@ -606,8 +639,8 @@ ksort($categoriesList);
                                                 <span class="badge badge-info" style="font-size:10px;"><i class="fa fa-tag"></i> <?= esc($comp->variant_name); ?></span>
                                             </div>
                                         <?php endif; ?>
-                                        <input type="hidden" name="bundle_items[<?= $idx; ?>][component_product_id]" value="<?= $comp->component_product_id; ?>">
-                                        <input type="hidden" name="bundle_items[<?= $idx; ?>][variant_id]" value="<?= $comp->variant_id; ?>">
+                                        <input type="hidden" name="bundle_items[<?= $idx; ?>][component_product_id]" class="bundle-comp-id-input" value="<?= $comp->component_product_id; ?>">
+                                        <input type="hidden" name="bundle_items[<?= $idx; ?>][variant_id]" class="bundle-variant-id-input" value="<?= $comp->variant_id; ?>">
                                     </td>
                                     
                                     <!-- SKU -->
@@ -645,7 +678,7 @@ ksort($categoriesList);
                                                class="form-control form-control-sm bundle-price-input text-right" 
                                                value="<?= $formattedUnitPrice; ?>" 
                                                placeholder="0"
-                                               onchange="normalizePriceInput(this); recalculateBundleTotals();"
+                                               onchange="normalizePriceInput(this); recalculateBundleTotals(true);"
                                                onblur="normalizePriceInput(this);"
                                                title="Unit price amount">
                                     </td>
@@ -869,6 +902,7 @@ function debouncedSearchBundle(query) {
     }, 180);
 }
 
+window.bundleInitialLoadComplete = false;
 $(document).ready(function() {
     $('#modalAddBundleItem').on('shown.bs.modal', function() {
         $('#bundle_product_search_query').focus();
@@ -879,30 +913,84 @@ $(document).ready(function() {
         searchProductsForBundle($('#bundle_product_search_query').val() || '');
     });
 
-    recalculateBundleTotals();
+    // Default sort by Category on load (read-only calculation, no AJAX save)
+    sortBundleTableByCategory();
+    recalculateBundleTotals(false);
+
+    setTimeout(function() {
+        window.bundleInitialLoadComplete = true;
+    }, 300);
 });
 
 function toggleBundleSection(checked) {
     if (checked) {
         $('#bundle_builder_container').slideDown(200);
+        if (window.bundleInitialLoadComplete) {
+            autoSaveBundleItemsAjax();
+        }
     } else {
+        if (!confirm('Are you sure you want to disable bundle package for this product?')) {
+            $('#is_bundle_toggle').prop('checked', true);
+            return;
+        }
         $('#bundle_builder_container').slideUp(200);
+        var productId = $('input[name="id"]').val() || '<?= $product->id; ?>';
+        var csrfName = '<?= csrf_token(); ?>';
+        var csrfHash = $('input[name="' + csrfName + '"]').val() || '<?= csrf_hash(); ?>';
+        $.ajax({
+            url: '<?= base_url("dashboard/save-bundle-items-ajax"); ?>',
+            type: 'POST',
+            data: {
+                product_id: productId,
+                is_bundle: 0,
+                explicit_delete: 1,
+                [csrfName]: csrfHash
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response && response.csrfHash) {
+                    $('input[name="' + csrfName + '"]').val(response.csrfHash);
+                }
+            }
+        });
     }
 }
 
-// View Mode: Full Flow vs Compact Window
+// View Mode: Full View vs Compact View Toggle
+window.currentBundleViewMode = 'full';
+
 function setBundleTableViewMode(mode) {
     var $container = $('#bundle_table_container');
-    if (mode === 'window') {
+    if (mode === 'window' || mode === 'compact') {
+        window.currentBundleViewMode = 'compact';
         $container.removeClass('full-view').addClass('windowed-scroll');
-        $('#btn_view_window').addClass('active font-weight-bold');
+        $('#btn_view_compact, #btn_view_window').addClass('active font-weight-bold');
         $('#btn_view_full').removeClass('active font-weight-bold');
     } else {
+        window.currentBundleViewMode = 'full';
         $container.removeClass('windowed-scroll').addClass('full-view');
         $('#btn_view_full').addClass('active font-weight-bold');
-        $('#btn_view_window').removeClass('active font-weight-bold');
+        $('#btn_view_compact, #btn_view_window').removeClass('active font-weight-bold');
     }
 }
+
+function toggleBundleTableViewMode() {
+    if (window.currentBundleViewMode === 'compact') {
+        setBundleTableViewMode('full');
+    } else {
+        setBundleTableViewMode('compact');
+    }
+}
+
+// Clicking the currently active view mode button toggles to the other view
+$(document).on('click', '#btn_view_full.active', function(e) {
+    e.preventDefault();
+    setBundleTableViewMode('compact');
+});
+$(document).on('click', '#btn_view_compact.active, #btn_view_window.active', function(e) {
+    e.preventDefault();
+    setBundleTableViewMode('full');
+});
 
 // Quick Filter: All vs Mandatory vs Optional
 function setBundleFilterType(type) {
@@ -1006,7 +1094,7 @@ function removeBundleRow(btn) {
             $('#table_bundle_components tbody tr.bundle-category-header[data-category="' + cat + '"]').remove();
         }
     }
-    recalculateBundleTotals();
+    recalculateBundleTotals(true);
     if ($('#table_bundle_components tbody tr.bundle-row').length === 0) {
         $('#bundle_components_tbody').html('<tr id="empty_bundle_row"><td colspan="10" class="text-center p-4 text-muted"><i class="fa fa-inbox fa-3x mb-2 text-muted"></i><br><strong>No component items added yet.</strong></td></tr>');
     }
@@ -1306,7 +1394,7 @@ function toggleSingleItemSelection(btn) {
     var newSelected = !isCurrentlySelected;
     
     updateRowSelectionVisual($row, newSelected);
-    recalculateBundleTotals();
+    recalculateBundleTotals(true);
 }
 
 function onBundleOptionalChange(checkbox, skipRecalc) {
@@ -1342,46 +1430,29 @@ function onBundleOptionalChange(checkbox, skipRecalc) {
         }
     }
     if (!skipRecalc) {
-        recalculateBundleTotals();
+        recalculateBundleTotals(true);
     }
 }
 
 // Toggle all optional products selected vs unselected
-function toggleAllOptionalSelection(select) {
-    var hasFilter = (window.currentBundleFilterType !== 'all') || ($('#bundle_category_filter_select').val() !== '') || ($('#bundle_filter_input').val().trim() !== '');
-    var selector = '#table_bundle_components tbody tr.bundle-row';
-    if (hasFilter) {
-        selector += ':visible';
-    }
-    
-    $(selector).each(function() {
-        var isOpt = parseInt($(this).attr('data-is-optional')) || 0;
-        if (isOpt === 1) {
-            updateRowSelectionVisual($(this), select);
-        }
-    });
-
-    recalculateBundleTotals();
-}
-
-// Toggle optional products for a specific category
-function toggleCategoryOptional(link, select) {
-    var $catHeader = $(link).closest('tr.bundle-category-header');
+// Toggle all products in a specific category between Optional and Mandatory
+function toggleCategoryOptional(chk, checked) {
+    var isChecked = (typeof checked === 'boolean') ? checked : $(chk).is(':checked');
+    var $catHeader = $(chk).closest('tr.bundle-category-header');
     var catKey = ($catHeader.attr('data-category') || '').toLowerCase().trim();
     if (!catKey) return;
 
     var $row = $catHeader.next();
     while ($row.length && !$row.hasClass('bundle-category-header')) {
         if ($row.hasClass('bundle-row')) {
-            var isOpt = parseInt($row.attr('data-is-optional')) || 0;
-            if (isOpt === 1) {
-                updateRowSelectionVisual($row, select);
-            }
+            var $rowChk = $row.find('.bundle-optional-checkbox');
+            $rowChk.prop('checked', isChecked);
+            onBundleOptionalChange($rowChk[0], true);
         }
         $row = $row.next();
     }
 
-    recalculateBundleTotals();
+    recalculateBundleTotals(true);
 }
 
 // Master toggle to mark all products as Optional or Mandatory
@@ -1397,7 +1468,7 @@ function toggleAllOptionalCheckboxes(checked) {
         $chk.prop('checked', checked);
         onBundleOptionalChange($chk[0], true);
     });
-    recalculateBundleTotals();
+    recalculateBundleTotals(true);
 }
 
 function onBundleQtyInputChange(input) {
@@ -1407,7 +1478,7 @@ function onBundleQtyInputChange(input) {
         qty = 1;
         $(input).val(1);
     }
-    recalculateBundleTotals();
+    recalculateBundleTotals(true);
 }
 
 function renderBundleComponentRowHtml(item, variantId, variantName, sku, price, stock, qty, isOptional, priceOverride) {
@@ -1431,14 +1502,14 @@ function renderBundleComponentRowHtml(item, variantId, variantName, sku, price, 
         '</button>' +
         '</div>' : '';
 
-    return '<tr class="bundle-row ' + (isOptional ? ('row-optional' + (!isSel ? ' row-unselected' : '')) : 'row-mandatory') + '" data-id="0" data-title="' + (item.title || '').toLowerCase() + '" data-sku="' + (sku || '').toLowerCase() + '" data-category="' + catName.toLowerCase() + '" data-is-optional="' + (isOptional ? 1 : 0) + '">' +
+    return '<tr class="bundle-row ' + (isOptional ? ('row-optional' + (!isSel ? ' row-unselected' : '')) : 'row-mandatory') + '" data-id="0" data-component-id="' + item.id + '" data-variant-id="' + (variantId || '') + '" data-title="' + (item.title || '').toLowerCase() + '" data-sku="' + (sku || '').toLowerCase() + '" data-category="' + catName.toLowerCase() + '" data-is-optional="' + (isOptional ? 1 : 0) + '">' +
         '<td class="text-center text-muted font-weight-bold" style="font-size:12px;">' + ($('#table_bundle_components tbody tr.bundle-row').length + 1) + '</td>' +
         '<td class="text-center" style="padding:4px;">' + imgHtml + '</td>' +
         '<td>' +
         '<div class="font-weight-bold text-dark" style="font-size:13px; line-height:1.3;">' + $('<div>').text(item.title).html() + '</div>' +
         varBadge +
-        '<input type="hidden" name="bundle_items[' + rowIdx + '][component_product_id]" value="' + item.id + '">' +
-        '<input type="hidden" name="bundle_items[' + rowIdx + '][variant_id]" value="' + (variantId || '') + '">' +
+        '<input type="hidden" name="bundle_items[' + rowIdx + '][component_product_id]" class="bundle-comp-id-input" value="' + item.id + '">' +
+        '<input type="hidden" name="bundle_items[' + rowIdx + '][variant_id]" class="bundle-variant-id-input" value="' + (variantId || '') + '">' +
         '</td>' +
         '<td><code style="font-size:11.5px; background:#f8fafc; border:1px solid #e2e8f0; padding:2px 5px; border-radius:4px;">' + (sku || 'N/A') + '</code></td>' +
         '<td class="text-center">' +
@@ -1454,7 +1525,7 @@ function renderBundleComponentRowHtml(item, variantId, variantName, sku, price, 
         '</div>' +
         '</td>' +
         '<td class="text-right">' +
-        '<input type="number" step="any" min="0" name="bundle_items[' + rowIdx + '][price_override]" class="form-control form-control-sm bundle-price-input text-right font-weight-bold" value="' + formattedUnitPrice + '" placeholder="0" onchange="normalizePriceInput(this); recalculateBundleTotals();" onblur="normalizePriceInput(this);" title="Unit price amount">' +
+        '<input type="number" step="any" min="0" name="bundle_items[' + rowIdx + '][price_override]" class="form-control form-control-sm bundle-price-input text-right font-weight-bold" value="' + formattedUnitPrice + '" placeholder="0" onchange="normalizePriceInput(this); recalculateBundleTotals(true);" onblur="normalizePriceInput(this);" title="Unit price amount">' +
         '</td>' +
         '<td class="text-right font-weight-bold text-dark item-row-total" style="font-family:\'Segoe UI\', \'Consolas\', monospace; font-size:13px; white-space:nowrap;">' + formattedTotal + '</td>' +
         '<td class="text-center"><span class="badge ' + (stock >= minQtyVal ? 'badge-success' : 'badge-danger') + '" style="font-size:10.5px; padding:3px 6px;">' + stock + ' in stock</span></td>' +
@@ -1516,7 +1587,8 @@ function addSelectedBundleProducts() {
         newlyAddedIds.push(item.id);
     });
     
-    recalculateBundleTotals();
+    sortBundleTableByCategory();
+    recalculateBundleTotals(true);
     
     window.bundleSelectedMap = {};
     $('#bundle_check_all_products').prop('checked', false);
@@ -1573,7 +1645,8 @@ function quickAddSingleBundleItem(idx) {
     $('#empty_bundle_row').remove();
     var rowHtml = renderBundleComponentRowHtml(item, variantId, variantName, sku, price, stock, qty, isOptional, priceOverride);
     insertBundleRowIntoTable(rowHtml, item.category_name);
-    recalculateBundleTotals();
+    sortBundleTableByCategory();
+    recalculateBundleTotals(true);
     
     delete window.bundleSelectedMap[item.id];
     window.bundleSearchResultsList = window.bundleSearchResultsList.filter(function(it) {
@@ -1608,6 +1681,10 @@ function insertBundleRowIntoTable(rowHtml, catName) {
             '<span style="font-size:11.5px; font-weight:700; color:#1e293b; background:#e2e8f0; border:1px solid #cbd5e1; padding:3px 9px; border-radius:12px;">' +
             '<span class="cat-item-count">1</span> <span class="cat-item-count-label">Product</span> (<span class="cat-unit-count">1</span> <span class="cat-unit-count-label">Unit</span>)' +
             '</span>' +
+            '<label class="badge border cat-opt-toggle-badge mb-0" style="font-size:11.5px; padding:3px 9px; border-radius:12px; display:inline-flex; align-items:center; gap:5px; background:#fff; cursor:pointer; user-select:none; color:#334155; font-weight:600;" title="Check to mark all products in this category as Optional, uncheck for Mandatory">' +
+            '<input type="checkbox" class="cat-opt-master-chk" style="cursor:pointer; width:14px; height:14px; margin:0;" onchange="toggleCategoryOptional(this, this.checked);">' +
+            '<span>Optional (<span class="cat-opt-count-val">0</span>)</span>' +
+            '</label>' +
             '</div>' +
             '<div style="display:flex; align-items:center; gap:8px;">' +
             '<span class="cat-mand-wrapper text-muted small" style="font-size:11.5px; display:none;">' +
@@ -1635,7 +1712,7 @@ function insertBundleRowIntoTable(rowHtml, catName) {
     }
 }
 
-function recalculateBundleTotals() {
+function recalculateBundleTotals(isUserAction) {
     var count = 0;
     var totalUnits = 0;
     var sumPrice = 0;
@@ -1707,18 +1784,32 @@ function recalculateBundleTotals() {
         $(this).find('.cat-unit-count-label').text(catUnit === 1 ? 'Unit' : 'Units');
         $(this).find('.cat-mand-val').text('₹ ' + Math.round(catMand).toLocaleString('en-IN'));
 
+        $(this).find('.cat-opt-count-val').text(catOpt);
+        var $catOptChk = $(this).find('.cat-opt-master-chk');
+        if (catCount > 0 && catOpt === catCount) {
+            $catOptChk.prop('checked', true).prop('indeterminate', false);
+        } else if (catOpt > 0 && catOpt < catCount) {
+            $catOptChk.prop('checked', false).prop('indeterminate', true);
+        } else {
+            $catOptChk.prop('checked', false).prop('indeterminate', false);
+        }
+
         if (catOpt > 0) {
             $(this).find('.cat-mand-wrapper').show();
-            $(this).find('.cat-opt-toggle-badge').show();
-            $(this).find('.cat-opt-count-val').text(catOpt);
         } else {
             $(this).find('.cat-mand-wrapper').hide();
-            $(this).find('.cat-opt-toggle-badge').hide();
         }
     });
 
     // Sync master Optional checkbox state
-    $('#master_bundle_opt_chk').prop('checked', count > 0 && count === optCount);
+    var $masterOptChk = $('#master_bundle_opt_chk');
+    if (count > 0 && count === optCount) {
+        $masterOptChk.prop('checked', true).prop('indeterminate', false);
+    } else if (optCount > 0 && optCount < count) {
+        $masterOptChk.prop('checked', false).prop('indeterminate', true);
+    } else {
+        $masterOptChk.prop('checked', false).prop('indeterminate', false);
+    }
 
     // Update Filter Pill counts
     $('#pill_count_all').text(count);
@@ -1730,12 +1821,26 @@ function recalculateBundleTotals() {
     $('#badge_mand_count').text(mandCount);
     $('#badge_opt_count').text(optCount);
     $('#badge_total_units').text(totalUnits);
+    window.currentBundleSumPrice = sumPrice;
+    window.currentBundleMandSum = mandSum;
+
     $('#badge_sum_price').text('₹ ' + Math.round(sumPrice).toLocaleString('en-IN'));
     $('#card_mand_sum_disp').text('₹ ' + Math.round(mandSum).toLocaleString('en-IN'));
+    
+    // Calculate and update live markup and discount display in card
+    var markupAmount = Math.max(0, Math.round(sumPrice - mandSum));
+    $('#card_markup_disp').text('₹ ' + markupAmount.toLocaleString('en-IN'));
+    var discountRate = parseFloat('<?= (float)$discountRate; ?>') || 0;
+    var netPrice = Math.round(sumPrice * (1 - (discountRate / 100)));
+    $('#card_net_disp').text('₹ ' + netPrice.toLocaleString('en-IN'));
+    $('#card_discount_disp').text(discountRate + '%');
+
     if (optCount > 0) {
         $('#card_mand_box').show();
+        $('#card_all_mand_note').hide();
     } else {
         $('#card_mand_box').hide();
+        $('#card_all_mand_note').show();
     }
     
     // Update Bottom Sticky Bar
@@ -1745,6 +1850,76 @@ function recalculateBundleTotals() {
     
     // If a filter is currently active, re-filter so visible counts match
     filterBundleTable();
+
+    // Auto-save via AJAX ONLY if this recalculation was triggered by a user action and initial load is complete
+    if (isUserAction === true && window.bundleInitialLoadComplete === true) {
+        autoSaveBundleItemsAjax();
+    }
+}
+
+var bundleAjaxTimer = null;
+function autoSaveBundleItemsAjax() {
+    if (!window.bundleInitialLoadComplete) {
+        return; // NEVER auto-save during initial load/refresh!
+    }
+    if (bundleAjaxTimer) clearTimeout(bundleAjaxTimer);
+    bundleAjaxTimer = setTimeout(function() {
+        var items = [];
+        $('#table_bundle_components tbody tr.bundle-row').each(function(idx) {
+            var $row = $(this);
+            var compId = $row.find('.bundle-comp-id-input').val() || $row.attr('data-component-id') || $row.find('input[name*="[component_product_id]"]').val();
+            var variantId = $row.find('.bundle-variant-id-input').val() || $row.attr('data-variant-id') || $row.find('input[name*="[variant_id]"]').val() || null;
+            compId = parseInt(compId) || 0;
+            if (compId <= 0) return; // ignore invalid row
+
+            var isOpt = parseInt($row.attr('data-is-optional')) || 0;
+            var isSel = isOpt ? ($row.find('.bundle-is-selected-input').val() === '1') : true;
+            var qty = parseInt($row.find('.bundle-qty-input').val()) || 1;
+            var price = parseFloat($row.find('.bundle-price-input').val());
+            if (isNaN(price)) price = null;
+
+            items.push({
+                component_product_id: compId,
+                variant_id: variantId,
+                is_optional: isOpt,
+                is_selected: isSel ? 1 : 0,
+                quantity: qty,
+                price_override: price
+            });
+        });
+
+        if (items.length === 0) {
+            return; // Safety guard: DO NOT overwrite if rows are empty!
+        }
+
+        var productId = $('input[name="id"]').val() || '<?= $product->id; ?>';
+        var csrfName = '<?= csrf_token(); ?>';
+        var csrfHash = $('input[name="' + csrfName + '"]').val() || '<?= csrf_hash(); ?>';
+
+        $('#bundle_ajax_sync_status').html('<i class="fa fa-spinner fa-spin text-warning"></i> Syncing...').css('color', '#d97706');
+
+        $.ajax({
+            url: '<?= base_url("dashboard/save-bundle-items-ajax"); ?>',
+            type: 'POST',
+            data: {
+                product_id: productId,
+                is_bundle: $('#is_bundle_toggle').is(':checked') ? 1 : 0,
+                bundle_items: items,
+                apply_price: Math.round(window.currentBundleSumPrice || 0),
+                [csrfName]: csrfHash
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response && response.csrfHash) {
+                    $('input[name="' + csrfName + '"]').val(response.csrfHash);
+                }
+                $('#bundle_ajax_sync_status').html('<i class="fa fa-check text-success"></i> Synced with Cart').css('color', '#16a34a');
+            },
+            error: function() {
+                $('#bundle_ajax_sync_status').html('<i class="fa fa-exclamation-circle text-danger"></i> Sync Error').css('color', '#dc2626');
+            }
+        });
+    }, 400);
 }
 
 function applyBundleSumToPrice(mode) {
@@ -1818,6 +1993,10 @@ function sortBundleTableByCategory() {
                 '<span style="font-size:11.5px; font-weight:700; color:#1e293b; background:#e2e8f0; border:1px solid #cbd5e1; padding:3px 9px; border-radius:12px;">' +
                 '<span class="cat-item-count">0</span> <span class="cat-item-count-label">Products</span> (<span class="cat-unit-count">0</span> <span class="cat-unit-count-label">Units</span>)' +
                 '</span>' +
+                '<label class="badge border cat-opt-toggle-badge mb-0" style="font-size:11.5px; padding:3px 9px; border-radius:12px; display:inline-flex; align-items:center; gap:5px; background:#fff; cursor:pointer; user-select:none; color:#334155; font-weight:600;" title="Check to mark all products in this category as Optional, uncheck for Mandatory">' +
+                '<input type="checkbox" class="cat-opt-master-chk" style="cursor:pointer; width:14px; height:14px; margin:0;" onchange="toggleCategoryOptional(this, this.checked);">' +
+                '<span>Optional (<span class="cat-opt-count-val">0</span>)</span>' +
+                '</label>' +
                 '</div>' +
                 '<div style="display:flex; align-items:center; gap:8px;">' +
                 '<span class="cat-mand-wrapper text-muted small" style="font-size:11.5px; display:none;">' +
@@ -1836,7 +2015,7 @@ function sortBundleTableByCategory() {
         $(row).find('td:first').text(idx + 1);
         tbody.append(row);
     });
-    recalculateBundleTotals();
+    recalculateBundleTotals(false);
     filterBundleTable();
 }
 </script>

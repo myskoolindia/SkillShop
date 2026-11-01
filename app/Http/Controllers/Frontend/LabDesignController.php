@@ -81,41 +81,43 @@ class LabDesignController extends Controller
             ?: ('lab-' . Str::lower(Str::random(8)));
         $source = $request->input('source', 'design-my-lab');
 
-        if (empty($this->baseUrl()) || empty($this->apiKey())) {
+        if (empty($this->baseUrl())) {
             return response()->json(['result' => 0, 'message' => 'Design service is not configured.'], 422);
         }
 
         try {
-            $response = Http::withToken($this->apiKey())
-                ->acceptJson()
-                ->asJson()
-                ->connectTimeout(5)
-                ->timeout(20)
-                ->post($this->baseUrl() . '/api/v1/sessions', [
-                    'reference' => $reference,
-                ]);
+            $sessionId = null;
+            $launchUrl = null;
+            $data = [];
 
-            if (!$response->successful()) {
-                Log::error('[LabDesign] create session failed', [
-                    'status' => $response->status(),
-                    'body'   => $response->body(),
-                ]);
-                return response()->json([
-                    'result'  => 0,
-                    'message' => 'Could not start the design session. Please try again.',
-                ], 502);
+            if (!empty($this->apiKey())) {
+                $response = Http::withoutVerifying()
+                    ->withToken($this->apiKey())
+                    ->acceptJson()
+                    ->asJson()
+                    ->connectTimeout(5)
+                    ->timeout(20)
+                    ->post($this->baseUrl() . '/api/v1/sessions', [
+                        'reference' => $reference,
+                    ]);
+
+                if ($response->successful()) {
+                    $data = $response->json() ?? [];
+                    $sessionId = $data['sessionId'] ?? $data['session_id'] ?? ($data['id'] ?? null);
+                    $launchUrl = $data['launchUrl'] ?? ($data['launch_url'] ?? ($data['url'] ?? null));
+                    $launchUrl = $this->normalizeLaunchUrl($launchUrl);
+                } else {
+                    Log::warning('[LabDesign] Kalpana API session creation returned ' . $response->status() . '; falling back to direct planner URL.', [
+                        'body' => $response->body(),
+                    ]);
+                }
             }
 
-            $data = $response->json() ?? [];
-
-            // Kalpana session API fields (with flexible fallbacks).
-            $sessionId = $data['sessionId'] ?? $data['session_id'] ?? ($data['id'] ?? null);
-            $launchUrl = $data['launchUrl'] ?? ($data['launch_url'] ?? ($data['url'] ?? null));
-
-            // Kalpana builds launchUrl from its own PUBLIC_URL, which may be wrong/unreachable
-            // (e.g. http://localhost:8083/kalpana/...). Rewrite host/scheme to our configured
-            // public base so the browser loads the iframe from the right origin.
-            $launchUrl = $this->normalizeLaunchUrl($launchUrl);
+            // Fallback to direct planner if session API was not configured or returned error
+            if (empty($sessionId) || empty($launchUrl)) {
+                $sessionId = 'direct-' . Str::lower(Str::random(12));
+                $launchUrl = $this->baseUrl() . '/lab-planner?scope=' . urlencode($sessionId) . '&ref=' . urlencode($reference);
+            }
 
             $design = LabDesign::create([
                 'session_id'  => $sessionId,
@@ -124,10 +126,10 @@ class LabDesignController extends Controller
                 'status'      => 'pending',
                 'session_url' => $launchUrl,
                 'result'      => null,
-                'name'        => $request->input('name'),
-                'school'      => $request->input('school'),
-                'email'       => $request->input('email'),
-                'phone'       => $request->input('phone'),
+                'name'        => $request->input('name') ?: auth()->user()?->name,
+                'school'      => $request->input('school') ?: (auth()->user()?->school_name ?? auth()->user()?->school_id),
+                'email'       => $request->input('email') ?: auth()->user()?->email,
+                'phone'       => $request->input('phone') ?: auth()->user()?->phone,
             ]);
 
             return response()->json([
@@ -138,11 +140,29 @@ class LabDesignController extends Controller
                 'raw'         => $data,
             ]);
         } catch (\Throwable $e) {
-            Log::error('[LabDesign] create session exception: ' . $e->getMessage());
+            Log::error('[LabDesign] create session exception: ' . $e->getMessage() . '; falling back to direct planner URL.');
+            $sessionId = 'direct-' . Str::lower(Str::random(12));
+            $launchUrl = $this->baseUrl() . '/lab-planner?scope=' . urlencode($sessionId) . '&ref=' . urlencode($reference);
+
+            $design = LabDesign::create([
+                'session_id'  => $sessionId,
+                'reference'   => $reference,
+                'source'      => $source,
+                'status'      => 'pending',
+                'session_url' => $launchUrl,
+                'result'      => null,
+                'name'        => auth()->user()?->name,
+                'school'      => auth()->user()?->school_name ?? auth()->user()?->school_id,
+                'email'       => auth()->user()?->email,
+                'phone'       => auth()->user()?->phone,
+            ]);
+
             return response()->json([
-                'result'  => 0,
-                'message' => 'The design service is unavailable right now.',
-            ], 502);
+                'result'      => 1,
+                'id'          => $design->id,
+                'session_id'  => $sessionId,
+                'launch_url'  => $launchUrl,
+            ]);
         }
     }
 
@@ -157,7 +177,8 @@ class LabDesignController extends Controller
         }
 
         try {
-            $response = Http::withToken($this->apiKey())
+            $response = Http::withoutVerifying()
+                ->withToken($this->apiKey())
                 ->acceptJson()
                 ->connectTimeout(5)
                 ->timeout(20)

@@ -907,7 +907,9 @@
               </a>
             </div>
           </div>
-          <a id="sks-request-proposal-btn" href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section']) }}"
+          <a id="sks-request-proposal-btn" href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section?package=basic']) }}"
+             data-package="basic"
+             onclick="if(window.setEnquiryPackage){window.setEnquiryPackage('basic');}"
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
             <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
           </a>
@@ -1029,11 +1031,9 @@
               </a>
             </div>
           </div>
-          <a href="{{ url('/labs/composite-skill-advance') }}"
-             style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
-            <i class="fa-solid fa-arrow-right" style="font-size:11px;"></i> View Advance Page
-          </a>
-          <a href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section']) }}"
+          <a id="sks-adv-request-proposal-btn" href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section?package=advance']) }}"
+             data-package="advance"
+             onclick="if(window.setEnquiryPackage){window.setEnquiryPackage('advance');}"
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
             <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
           </a>
@@ -1252,7 +1252,13 @@
       <div class="lg:col-span-6">
         <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200">
           <div class="mb-6">
-            <h3 class="text-xl font-black text-brand-navy">Get Your Skill Lab Proposal</h3>
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <h3 class="text-xl font-black text-brand-navy">Get Your Skill Lab Proposal</h3>
+              <div id="planSelectedPackageBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-xs font-bold text-brand-orange">
+                <i class="fa-solid fa-cube text-[11px]"></i>
+                <span id="planSelectedPackageText">Composite Skill Lab Basic Package</span>
+              </div>
+            </div>
             <p class="text-xs text-slate-500 mt-1">
               @auth
                 Your verified school account details are attached below. Submit with 1 click.
@@ -1292,7 +1298,7 @@
               </div>
             </div>
 
-            <form class="space-y-4" id="planEnquiryForm" data-source="composite-skill-lab-basic" data-title="Standard Composite Skill Lab – Enquiry">
+            <form class="space-y-4" id="planEnquiryForm" data-source="composite-skill-lab-basic" data-title="Composite Skill Lab Basic Package">
               <input type="hidden" name="source"       id="planSource">
               <input type="hidden" name="course_title" id="planTitle">
               <input type="hidden" name="quotation"    id="planQuotation">
@@ -1335,7 +1341,7 @@
               </div>
             </div>
 
-            <form class="space-y-4" id="planEnquiryForm" data-source="composite-skill-lab-basic" data-title="Standard Composite Skill Lab – Enquiry">
+            <form class="space-y-4" id="planEnquiryForm" data-source="composite-skill-lab-basic" data-title="Composite Skill Lab Basic Package">
               <input type="hidden" name="source"       id="planSource">
               <input type="hidden" name="course_title" id="planTitle">
               <input type="hidden" name="quotation"    id="planQuotation">
@@ -1403,22 +1409,46 @@
           @endauth
           </div>
 
-          <div id="planEnquirySuccess" style="display:none;" class="text-center py-8">
-            <div class="text-5xl mb-4">🎉</div>
-            <h3 class="text-xl font-black text-brand-navy mb-2">Proposal Sent!</h3>
-            <p class="text-sm text-slate-600 mb-4">Your customized proposal has been sent to your email and WhatsApp.</p>
-            <div id="planWaBox" style="display:none;" class="flex items-center justify-center gap-3 flex-wrap mt-3">
+          <div id="planEnquirySuccess" style="display:none;" class="text-center py-6">
+            <div class="w-14 h-14 mx-auto mb-3 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl font-bold shadow-inner">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <h3 class="text-xl font-black text-brand-navy mb-1">Proposal Sent!</h3>
+            <p class="text-sm text-slate-600 mb-4">Your customized lab proposal has been prepared and dispatched.</p>
+
+            {{-- Summary Card --}}
+            <div class="my-4 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left max-w-md mx-auto space-y-2.5">
+              <div class="flex items-start justify-between gap-2 border-b border-slate-200 pb-2">
+                <div>
+                  <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Requested Package</div>
+                  <div id="planSuccessPackage" class="font-extrabold text-brand-navy text-sm">Composite Skill Lab Basic Package</div>
+                </div>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800">
+                  <i class="fa-solid fa-circle-check text-[10px] mr-1"></i> Generated
+                </span>
+              </div>
+              <div class="flex items-center justify-between gap-2 text-xs text-slate-600">
+                <span class="text-slate-400">Institution:</span>
+                <span id="planSuccessSchool" class="font-bold text-slate-700">—</span>
+              </div>
+              <div class="flex items-center justify-between gap-2 text-xs pt-1.5 border-t border-slate-200">
+                <span class="text-slate-500 font-semibold">Total Estimate:</span>
+                <span id="planSuccessTotal" class="font-extrabold text-emerald-700 text-base">—</span>
+              </div>
+            </div>
+
+            <div id="planWaBox" style="display:none;" class="flex items-center justify-center gap-3 flex-wrap mt-4">
               <a id="planPdfBtn" href="#" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-navy hover:bg-brand-navy/90 text-white font-bold text-sm shadow-md transition-all">
-                <i class="fa-solid fa-file-pdf text-lg"></i>
+                <i class="fa-solid fa-file-pdf text-lg text-rose-400"></i>
                 <span>View Proposal</span>
               </a>
               <a id="planBuyBtn" href="#" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm shadow-md transition-all" style="display:none;">
                 <i class="fa-solid fa-cart-shopping text-lg"></i>
                 <span>Buy Now</span>
               </a>
-              <a id="planWaBtn" href="#" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-all">
+              <a id="planWaBtn" href="#" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-all" style="display:none;">
                 <i class="fa-brands fa-whatsapp text-lg"></i>
-                <span>Open in WhatsApp</span>
+                <span>Send to WhatsApp</span>
               </a>
             </div>
           </div>
@@ -1562,7 +1592,7 @@
 
 @push('scripts')
 <script>
-// ── Plan Enquiry Form AJAX ────────────────────────────────
+// ── Plan Enquiry Form AJAX & Dynamic Package Selector ───────
 (function () {
   var form    = document.getElementById('planEnquiryForm');
   var btn     = document.getElementById('planEnquiryBtn');
@@ -1572,18 +1602,58 @@
 
   if (!form) return;
 
-  // Populate hidden fields from data attributes
-  if (srcEl) srcEl.value = form.dataset.source  || '';
-  if (ttlEl) ttlEl.value = form.dataset.title   || '';
+  // Active package state: 'basic' | 'advance'
+  window._currentEnquiryPackage = 'basic';
+
+  window.setEnquiryPackage = function (pkgKey) {
+    var isAdv = (pkgKey === 'advance');
+    window._currentEnquiryPackage = isAdv ? 'advance' : 'basic';
+
+    var title = isAdv ? 'Composite Skill Lab Advance Package' : 'Composite Skill Lab Basic Package';
+    var source = isAdv ? 'composite-skill-lab-advance' : 'composite-skill-lab-basic';
+
+    if (srcEl) srcEl.value = source;
+    if (ttlEl) ttlEl.value = title;
+
+    if (form) {
+      form.dataset.source = source;
+      form.dataset.title = title;
+    }
+
+    var badgeText = document.getElementById('planSelectedPackageText');
+    if (badgeText) badgeText.textContent = title;
+
+    var ctaSection = document.getElementById('cta-section');
+    if (ctaSection && window.location.hash !== '#cta-section') {
+      ctaSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  // Populate hidden fields from initial data attributes or active package
+  if (srcEl) srcEl.value = form.dataset.source  || 'composite-skill-lab-basic';
+  if (ttlEl) ttlEl.value = form.dataset.title   || 'Composite Skill Lab Basic Package';
+
+  // Check URL query param or hash on load
+  try {
+    var sp = new URLSearchParams(window.location.search);
+    if (sp.get('package') === 'advance' || window.location.hash.indexOf('package=advance') !== -1) {
+      window.setEnquiryPackage('advance');
+    }
+  } catch(e){}
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
 
     // ── Build quotation from loaded bundle components ──────────
     var quotEl = document.getElementById('planQuotation');
+    var isAdv = (window._currentEnquiryPackage === 'advance');
+    var compSource = (isAdv && window._sksAdvComponents && window._sksAdvComponents.length)
+      ? window._sksAdvComponents
+      : window._sksComponents;
+
     // A design attached from Kalpana keeps its own itemized quotation.
-    if (quotEl && !form.dataset.kalpana && window._sksComponents && window._sksComponents.length) {
-      var rows = window._sksComponents
+    if (quotEl && !form.dataset.kalpana && compSource && compSource.length) {
+      var rows = compSource
         .filter(function(c){ return !c.is_optional && Number(c.required_quantity) > 0; })
         .map(function(c){
           var qty   = Number(c.required_quantity) || 0;
@@ -1599,6 +1669,7 @@
       var grandTotal = rows.reduce(function(s,r){ return s + r.total; }, 0);
       quotEl.value = JSON.stringify({ items: rows, grand_total: grandTotal });
     }
+
     var originalText   = btn.textContent;
     btn.disabled       = true;
     btn.textContent    = 'Submitting…';
@@ -1617,6 +1688,30 @@
       if (container) container.style.display = 'none';
       form.style.display    = 'none';
       success.style.display = 'block';
+
+      // Populate Proposal Summary
+      var pkgDisplay = (resp && resp.package) ? resp.package : (isAdv ? 'Composite Skill Lab Advance Package' : 'Composite Skill Lab Basic Package');
+      var schoolDisplay = (resp && resp.school) ? resp.school : (form.querySelector('[name="school"]') ? form.querySelector('[name="school"]').value : '');
+      var totalDisplay = (resp && resp.total) ? resp.total : '';
+
+      var successPkg = document.getElementById('planSuccessPackage');
+      var successSchool = document.getElementById('planSuccessSchool');
+      var successTotal = document.getElementById('planSuccessTotal');
+      if (successPkg) successPkg.textContent = pkgDisplay;
+      if (successSchool && schoolDisplay) successSchool.textContent = schoolDisplay;
+      if (successTotal) {
+        if (totalDisplay) {
+          successTotal.textContent = totalDisplay;
+        } else if (quotEl && quotEl.value) {
+          try {
+            var qObj = JSON.parse(quotEl.value);
+            if (qObj.grand_total) {
+              successTotal.textContent = '₹' + Number(qObj.grand_total).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+            }
+          } catch(err){}
+        }
+      }
+
       if (resp && (resp.whatsapp_url || resp.pdf_url || resp.cart_url)) {
         var waBox = document.getElementById('planWaBox');
         var waBtn = document.getElementById('planWaBtn');
@@ -1625,7 +1720,14 @@
         if (waBox) waBox.style.display = 'flex';
         if (pdfBtn && resp.pdf_url) { pdfBtn.href = resp.pdf_url; pdfBtn.style.display = 'inline-flex'; }
         if (buyBtn && resp.cart_url) { buyBtn.href = resp.cart_url; buyBtn.style.display = 'inline-flex'; }
-        if (waBtn && resp.whatsapp_url) { waBtn.href = resp.whatsapp_url; waBtn.style.display = 'inline-flex'; }
+        if (waBtn) {
+          if (resp.whatsapp_url) {
+            waBtn.href = resp.whatsapp_url;
+            waBtn.style.display = 'inline-flex';
+          } else {
+            waBtn.style.display = 'none';
+          }
+        }
       }
     })
     .catch(function () {
@@ -2130,6 +2232,9 @@ Promise.all([
 
   // Store globally so the enquiry form can build a quotation
   window._sksComponents = (basicProduct.bundle_components || []).filter(function(c){ return !c.is_optional; });
+  if (advProduct) {
+    window._sksAdvComponents = (advProduct.bundle_components || []).filter(function(c){ return !c.is_optional; });
+  }
 
   // 1. Render Basic Lab Section
   renderBundleSection(basicProduct, allCats, {
@@ -2220,7 +2325,14 @@ Promise.all([
     btn.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
-      window.location.href = '{{ route("login", ["redirect" => url()->current()]) }}';
+      var ref = btn.dataset.reference || 'composite-skill-basic';
+      var src = btn.dataset.source || 'labs/composite-skill-basic';
+      var currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.set('open_dml', '1');
+      currentUrl.searchParams.set('dml_ref', ref);
+      currentUrl.searchParams.set('dml_src', src);
+      var returnPath = currentUrl.pathname + currentUrl.search + currentUrl.hash;
+      window.location.href = '{{ route("login") }}' + '?redirect=' + encodeURIComponent(returnPath);
     });
   });
   return;
@@ -2320,37 +2432,56 @@ Promise.all([
     document.getElementById('kalpanaReopen').onclick = function(ev){ ev.preventDefault(); if(dmlBtns[0]) dmlBtns[0].click(); };
   }
 
+  function startDmlSession(ref, src) {
+    document.querySelectorAll('.sks-customise-menu').forEach(function(m){ m.style.display = 'none'; });
+    activeSession = null;
+    resetModal();
+    openModal();
+    setBody('<div style="text-align:center;padding:30px;color:#475569;"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:22px;color:#2563eb;"></i><p style="margin-top:12px;font-size:13px;">Starting your design session…</p></div>');
+
+    fetch(START_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF,'Accept':'application/json'},
+      body: JSON.stringify({ reference: ref, source: src })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if(!res || res.result !== 1 || !res.session_id || !res.launch_url){
+        setBody('<div style="text-align:center;padding:30px;color:#b91c1c;"><i class="fa-solid fa-triangle-exclamation" style="font-size:22px;"></i><p style="margin-top:12px;font-size:13px;">'+esc((res&&res.message)||'Could not start the design session.')+'</p></div>');
+        return;
+      }
+      activeSession = res.session_id;
+      showFrame(res.launch_url);
+    })
+    .catch(function(){
+      setBody('<div style="text-align:center;padding:30px;color:#b91c1c;">Network error while starting the session.</div>');
+    });
+  }
+
   dmlBtns.forEach(function(btn){
     btn.addEventListener('click', function(e){
       e.preventDefault();
-      document.querySelectorAll('.sks-customise-menu').forEach(function(m){ m.style.display = 'none'; });
-      activeSession = null;
-      resetModal();
-      openModal();
-      setBody('<div style="text-align:center;padding:30px;color:#475569;"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:22px;color:#2563eb;"></i><p style="margin-top:12px;font-size:13px;">Starting your design session…</p></div>');
-
       var ref = btn.dataset.reference || 'composite-skill-basic';
       var src = btn.dataset.source || 'labs/composite-skill-basic';
-
-      fetch(START_URL, {
-        method:'POST',
-        headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF,'Accept':'application/json'},
-        body: JSON.stringify({ reference: ref, source: src })
-      })
-      .then(function(r){ return r.json(); })
-      .then(function(res){
-        if(!res || res.result !== 1 || !res.session_id || !res.launch_url){
-          setBody('<div style="text-align:center;padding:30px;color:#b91c1c;"><i class="fa-solid fa-triangle-exclamation" style="font-size:22px;"></i><p style="margin-top:12px;font-size:13px;">'+esc((res&&res.message)||'Could not start the design session.')+'</p></div>');
-          return;
-        }
-        activeSession = res.session_id;
-        showFrame(res.launch_url);
-      })
-      .catch(function(){
-        setBody('<div style="text-align:center;padding:30px;color:#b91c1c;">Network error while starting the session.</div>');
-      });
+      startDmlSession(ref, src);
     });
   });
+
+  // Automatically launch Design My Lab if returning after login redirect
+  (function(){
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('open_dml') === '1') {
+      var autoRef = urlParams.get('dml_ref') || 'composite-skill-basic';
+      var autoSrc = urlParams.get('dml_src') || 'labs/composite-skill-basic';
+      urlParams.delete('open_dml');
+      urlParams.delete('dml_ref');
+      urlParams.delete('dml_src');
+      var cleanQuery = urlParams.toString();
+      var cleanUrl = window.location.pathname + (cleanQuery ? '?' + cleanQuery : '') + window.location.hash;
+      window.history.replaceState({}, document.title, cleanUrl);
+      startDmlSession(autoRef, autoSrc);
+    }
+  })();
 })();
 
 })();

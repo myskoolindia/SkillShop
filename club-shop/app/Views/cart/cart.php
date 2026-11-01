@@ -314,13 +314,13 @@
                                                                                     }
                                                                                     $isOpt = !empty($bProd->is_optional);
                                                                                 ?>
-                                                                                    <tr style="border-bottom: 1px solid #f8fafc;">
+                                                                                    <tr style="border-bottom: 1px solid #f8fafc;" class="<?= ((int)$bProd->quantity <= 0) ? 'bundle-row-disabled' : ''; ?>" data-cart-item-id="<?= $cartItem->id; ?>" data-product-id="<?= $bProd->product_id; ?>">
                                                                                         <!-- Checkbox Column -->
                                                                                         <td class="text-center" style="padding: 8px 6px; vertical-align: middle;">
                                                                                             <?php if (!$isOpt): ?>
                                                                                                 <input type="checkbox" class="cart-item-select-chk" checked disabled title="Mandatory item (included by default)">
                                                                                             <?php else: ?>
-                                                                                                <input type="checkbox" class="cart-item-select-chk" checked disabled title="Optional item">
+                                                                                                <input type="checkbox" class="cart-item-select-chk bundle-cart-opt-chk" data-cart-item-id="<?= $cartItem->id; ?>" data-product-id="<?= $bProd->product_id; ?>" data-min-qty="1" <?= ((int)$bProd->quantity > 0) ? 'checked' : ''; ?> onchange="onCartBundleItemToggle(this);" style="cursor:pointer; width:16px; height:16px;" title="Check to include, uncheck to exclude optional item">
                                                                                             <?php endif; ?>
                                                                                         </td>
                                                                                         <td style="padding: 8px 12px; vertical-align: middle;">
@@ -343,13 +343,17 @@
                                                                                             <span style="font-weight: 600; color: #334155;"><?= priceDecimal($bProd->unit_price, $cart->currency_code); ?></span>
                                                                                         </td>
                                                                                         <td class="text-center" style="padding: 8px 12px; vertical-align: middle; font-weight: 600; color: #1e293b;">
-                                                                                            <?= $bProd->quantity; ?>
+                                                                                            <div style="display:inline-flex; align-items:center; justify-content:center; gap:4px;">
+                                                                                                <button type="button" class="btn btn-xs btn-outline-secondary" onclick="changeCartBundleQty(this, -1);" style="padding:1px 6px; font-size:11px; font-weight:700; line-height:1.2; border-radius:3px;">-</button>
+                                                                                                <span class="bundle-cart-qty-val" style="min-width:22px; display:inline-block; font-weight:700; text-align:center;"><?= $bProd->quantity; ?></span>
+                                                                                                <button type="button" class="btn btn-xs btn-outline-secondary" onclick="changeCartBundleQty(this, 1);" style="padding:1px 6px; font-size:11px; font-weight:700; line-height:1.2; border-radius:3px;">+</button>
+                                                                                            </div>
                                                                                         </td>
                                                                                         <td class="text-right font-weight-bold" style="padding: 8px 12px; vertical-align: middle; color: #2563eb;">
                                                                                             <?php if (!empty($bProd->has_discount)): ?>
                                                                                                 <del style="font-size: 11px; color: #94a3b8; font-weight: 400; margin-right: 3px;"><?= priceDecimal($bProd->original_total_price, $cart->currency_code); ?></del>
                                                                                             <?php endif; ?>
-                                                                                            <span><?= priceDecimal($bProd->total_price, $cart->currency_code); ?></span>
+                                                                                            <span class="bundle-line-total-disp"><?= priceDecimal($bProd->total_price, $cart->currency_code); ?></span>
                                                                                         </td>
                                                                                     </tr>
                                                                                 <?php endforeach; ?>
@@ -382,12 +386,12 @@
                                                                             }
                                                                             $isOpt = !empty($bProd->is_optional);
                                                                         ?>
-                                                                            <tr style="border-bottom: 1px solid #edf2f7;">
+                                                                            <tr style="border-bottom: 1px solid #edf2f7;" class="<?= ((int)$bProd->quantity <= 0) ? 'bundle-row-disabled' : ''; ?>" data-cart-item-id="<?= $cartItem->id; ?>" data-product-id="<?= $bProd->product_id; ?>">
                                                                                 <td class="text-center" style="padding: 8px 6px; vertical-align: middle;">
                                                                                     <?php if (!$isOpt): ?>
                                                                                         <input type="checkbox" class="cart-item-select-chk" checked disabled title="Mandatory item (included by default)">
                                                                                     <?php else: ?>
-                                                                                        <input type="checkbox" class="cart-item-select-chk" checked disabled title="Optional item">
+                                                                                        <input type="checkbox" class="cart-item-select-chk bundle-cart-opt-chk" data-cart-item-id="<?= $cartItem->id; ?>" data-product-id="<?= $bProd->product_id; ?>" data-min-qty="1" <?= ((int)$bProd->quantity > 0) ? 'checked' : ''; ?> onchange="onCartBundleItemToggle(this);" style="cursor:pointer; width:16px; height:16px;" title="Check to include, uncheck to exclude optional item">
                                                                                     <?php endif; ?>
                                                                                 </td>
                                                                                 <td style="padding: 8px 10px; vertical-align: middle;">
@@ -410,13 +414,17 @@
                                                                                     <span style="font-weight: 600;"><?= priceDecimal($bProd->unit_price, $cart->currency_code); ?></span>
                                                                                 </td>
                                                                                 <td class="text-center" style="padding: 8px 10px; vertical-align: middle; font-weight: 600; color: #2d3748;">
-                                                                                    <?= $bProd->quantity; ?>
+                                                                                    <div style="display:inline-flex; align-items:center; justify-content:center; gap:4px;">
+                                                                                        <button type="button" class="btn btn-xs btn-outline-secondary" onclick="changeCartBundleQty(this, -1);" style="padding:1px 6px; font-size:11px; font-weight:700; line-height:1.2; border-radius:3px;">-</button>
+                                                                                        <span class="bundle-cart-qty-val" style="min-width:22px; display:inline-block; font-weight:700; text-align:center;"><?= $bProd->quantity; ?></span>
+                                                                                        <button type="button" class="btn btn-xs btn-outline-secondary" onclick="changeCartBundleQty(this, 1);" style="padding:1px 6px; font-size:11px; font-weight:700; line-height:1.2; border-radius:3px;">+</button>
+                                                                                    </div>
                                                                                 </td>
                                                                                 <td class="text-right font-weight-bold" style="padding: 8px 10px; vertical-align: middle; color: #2b6cb0;">
                                                                                     <?php if (!empty($bProd->has_discount)): ?>
                                                                                         <del style="font-size: 11px; color: #94a3b8; font-weight: 400; margin-right: 3px;"><?= priceDecimal($bProd->original_total_price, $cart->currency_code); ?></del>
                                                                                     <?php endif; ?>
-                                                                                    <span><?= priceDecimal($bProd->total_price, $cart->currency_code); ?></span>
+                                                                                    <span class="bundle-line-total-disp"><?= priceDecimal($bProd->total_price, $cart->currency_code); ?></span>
                                                                                 </td>
                                                                             </tr>
                                                                         <?php endforeach; ?>
@@ -583,5 +591,72 @@ function toggleCartCategory(catId, toggleEl) {
             }
         });
     }
+}
+
+function onCartBundleItemToggle(chk) {
+    var $chk = $(chk);
+    var cartItemId = $chk.data('cart-item-id');
+    var productId = $chk.data('product-id');
+    var minQty = parseInt($chk.data('min-qty')) || 1;
+    var newQty = $chk.is(':checked') ? minQty : 0;
+    var $row = $chk.closest('tr');
+    $row.find('.bundle-cart-qty-val').text(newQty);
+    if (newQty === 0) {
+        $row.addClass('bundle-row-disabled');
+    } else {
+        $row.removeClass('bundle-row-disabled');
+    }
+    syncBundleItemToCart(cartItemId, productId, newQty);
+}
+
+function changeCartBundleQty(btn, delta) {
+    var $row = $(btn).closest('tr');
+    var $chk = $row.find('.bundle-cart-opt-chk');
+    var cartItemId = $row.data('cart-item-id') || $chk.data('cart-item-id');
+    var productId = $row.data('product-id') || $chk.data('product-id');
+    var $qtySpan = $row.find('.bundle-cart-qty-val');
+    var currentQty = parseInt($qtySpan.text()) || 0;
+    var isOptional = $chk.length > 0;
+    var minAllowed = isOptional ? 0 : 1;
+    var newQty = Math.max(minAllowed, currentQty + delta);
+    if (newQty === currentQty) return;
+    $qtySpan.text(newQty);
+    if ($chk.length) {
+        $chk.prop('checked', newQty > 0);
+        if (newQty === 0) {
+            $row.addClass('bundle-row-disabled');
+        } else {
+            $row.removeClass('bundle-row-disabled');
+        }
+    }
+    syncBundleItemToCart(cartItemId, productId, newQty);
+}
+
+var cartBundleSyncTimer = null;
+function syncBundleItemToCart(cartItemId, productId, qty) {
+    if (cartBundleSyncTimer) clearTimeout(cartBundleSyncTimer);
+    cartBundleSyncTimer = setTimeout(function() {
+        var csrfName = '<?= csrf_token(); ?>';
+        var csrfHash = $('input[name="' + csrfName + '"]').val() || '<?= csrf_hash(); ?>';
+        $.ajax({
+            url: '<?= base_url("cart/update-bundle-item"); ?>',
+            type: 'POST',
+            data: {
+                cart_item_id: cartItemId,
+                product_id: productId,
+                quantity: qty,
+                [csrfName]: csrfHash
+            },
+            dataType: 'json',
+            success: function(res) {
+                if (res && res.csrfHash) {
+                    $('input[name="' + csrfName + '"]').val(res.csrfHash);
+                }
+                if (res && res.result) {
+                    location.reload();
+                }
+            }
+        });
+    }, 300);
 }
 </script>

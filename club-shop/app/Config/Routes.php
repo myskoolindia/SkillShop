@@ -249,6 +249,8 @@ $routes->post('cart/coupon-code-post', 'CartController::couponCodePost');
 
 $routes->post('cart/add-to-cart-bundle', 'CartController::addToCartBundle');
 $routes->post('cart/add-by-barcode', 'CartController::addToCartByBarcode');
+$routes->post('cart/update-bundle-item', 'CartController::updateBundleItemQuantity');
+$routes->post('dashboard/save-bundle-items-ajax', 'DashboardController::saveBundleItemsAjax');
 
 
 

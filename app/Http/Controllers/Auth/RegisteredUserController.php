@@ -152,21 +152,25 @@ class RegisteredUserController extends Controller
         $notification = __('Account created successfully! Welcome to Skillvation.');
         $notification = ['messege' => $notification, 'alert-type' => 'success'];
 
-        $intendedUrl = session()->pull('url.intended');
+        $intendedUrl = null;
 
-        if (!$intendedUrl && $request->filled('redirect')) {
+        if ($request->filled('redirect')) {
             $intendedUrl = $request->input('redirect');
-        }
-
-        if (!$intendedUrl && $request->headers->get('referer')) {
+            session()->forget('url.intended');
+        } elseif ($request->headers->get('referer')) {
             $referer = $request->headers->get('referer');
             $parsedRef = parse_url($referer);
             if (!empty($parsedRef['query'])) {
                 parse_str($parsedRef['query'], $queryParams);
                 if (!empty($queryParams['redirect'])) {
                     $intendedUrl = $queryParams['redirect'];
+                    session()->forget('url.intended');
                 }
             }
+        }
+
+        if (!$intendedUrl) {
+            $intendedUrl = session()->pull('url.intended');
         }
 
         if ($intendedUrl) {

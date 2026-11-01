@@ -88,8 +88,6 @@ class WabaOtpService
             . "Thank you for requesting a proposal for *{$school}*.\n\n"
             . "📋 *Package:* {$package}"
             . $totalLine . "\n\n"
-            . "📄 *View Proposal:*\n{$pdfUrl}\n\n"
-            . "🛒 *Buy Now:*\n{$cartUrl}\n\n"
             . "Our academic coordinator will reach out shortly to assist with campus space planning and setup.\n\n"
             . "_Skillvation — MySkool Learning Private Limited_";
 
@@ -142,8 +140,6 @@ class WabaOtpService
             . "Your proposal for *{$school}* has been prepared:\n\n"
             . "📋 *Package:* {$package}"
             . $totalLine . "\n\n"
-            . "📄 *View Proposal:*\n{$pdfUrl}\n\n"
-            . "🛒 *Buy Now:*\n{$cartUrl}\n\n"
             . "_Skillvation — MySkool Learning Private Limited_";
 
         return "https://api.whatsapp.com/send?phone={$cleanPhone}&text=" . rawurlencode($message);
@@ -262,8 +258,72 @@ class WabaOtpService
         }
 
         $url = "https://graph.facebook.com/v18.0/{$phoneNumberId}/messages";
+        $proposalTpl = config('services.waba.proposal_template', env('WABA_PROPOSAL_TEMPLATE', ''));
 
-        // If PDF URL is present, attempt an interactive CTA URL button
+        // 1. If Meta template with buttons is configured, send the template with URL buttons
+        if (!empty($proposalTpl)) {
+            $name    = $data['name']    ?? 'Representative';
+            $school  = $data['school']  ?? 'Institution';
+            $package = $data['package'] ?? 'Skill Lab';
+            $cartUrl = $data['cart_url'] ?? url('/club-shop');
+
+            $components = [
+                [
+                    'type'       => 'body',
+                    'parameters' => [
+                        ['type' => 'text', 'text' => $name],
+                        ['type' => 'text', 'text' => $package],
+                        ['type' => 'text', 'text' => $school],
+                    ],
+                ],
+            ];
+
+            // Attach dynamic button parameters
+            if (!empty($pdfUrl)) {
+                $components[] = [
+                    'type'     => 'button',
+                    'sub_type' => 'url',
+                    'index'    => '0',
+                    'parameters' => [
+                        ['type' => 'text', 'text' => $pdfUrl],
+                    ],
+                ];
+            }
+            if (!empty($cartUrl)) {
+                $components[] = [
+                    'type'     => 'button',
+                    'sub_type' => 'url',
+                    'index'    => '1',
+                    'parameters' => [
+                        ['type' => 'text', 'text' => $cartUrl],
+                    ],
+                ];
+            }
+
+            try {
+                $response = Http::withToken($token)->timeout(8)->post($url, [
+                    'messaging_product' => 'whatsapp',
+                    'to'                => $phone,
+                    'type'              => 'template',
+                    'template'          => [
+                        'name'       => $proposalTpl,
+                        'language'   => ['code' => 'en'],
+                        'components' => $components,
+                    ],
+                ]);
+
+                if ($response->successful()) {
+                    return [
+                        'success' => true,
+                        'message' => 'Proposal template with buttons sent via WhatsApp.',
+                    ];
+                }
+            } catch (\Throwable $e) {
+                Log::warning('[Meta Template Button Error] ' . $e->getMessage());
+            }
+        }
+
+        // 2. Interactive CTA URL button fallback (native [View Proposal] button)
         if (!empty($pdfUrl)) {
             $name    = $data['name']    ?? 'Representative';
             $school  = $data['school']  ?? 'Institution';

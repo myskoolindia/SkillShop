@@ -89,27 +89,39 @@ class CourseEnquiryController extends Controller
     private function getBundleMetaBySlug(string $slug): array
     {
         return match ($slug) {
+            'skillvation-lab-premium' => [
+                'slug'     => 'skillvation-lab-premium',
+                'label'    => 'Skillvation STEM Premium Package',
+                'page_url' => '/club-shop/skillvation-lab-premium',
+                'cart_url' => '/club-shop/premium-cart',
+            ],
+            'skillvation-lab-advance' => [
+                'slug'     => 'skillvation-lab-advance',
+                'label'    => 'Skillvation STEM Advance Package',
+                'page_url' => '/club-shop/skillvation-lab-advance',
+                'cart_url' => '/club-shop/advance-cart',
+            ],
+            'skillvation-lab' => [
+                'slug'     => 'skillvation-lab',
+                'label'    => 'Skillvation STEM Basic Package',
+                'page_url' => '/club-shop/skillvation-lab',
+                'cart_url' => '/club-shop/basic-cart',
+            ],
             'cbse-composite-skill-lab-premium-73' => [
                 'slug'     => 'cbse-composite-skill-lab-premium-73',
-                'label'    => 'Premium Composite Skill Lab',
+                'label'    => 'Composite Skill Lab Premium Package',
                 'page_url' => '/club-shop/cbse-composite-skill-lab-premium-73',
                 'cart_url' => '/club-shop/premium-cart',
             ],
             'cbse-composite-skill-lab-advanced-72' => [
                 'slug'     => 'cbse-composite-skill-lab-advanced-72',
-                'label'    => 'Advance Composite Skill Lab',
+                'label'    => 'Composite Skill Lab Advance Package',
                 'page_url' => '/club-shop/cbse-composite-skill-lab-advanced-72',
                 'cart_url' => '/club-shop/advance-cart',
             ],
-            'skillvation-lab' => [
-                'slug'     => 'skillvation-lab',
-                'label'    => 'Skillvation Lab',
-                'page_url' => '/club-shop/skillvation-lab',
-                'cart_url' => '/club-shop/skillvation-cart',
-            ],
             default => [
                 'slug'     => 'cbse-composite-skill-lab-basic-68',
-                'label'    => 'Basic Composite Skill Lab',
+                'label'    => 'Composite Skill Lab Basic Package',
                 'page_url' => '/club-shop/cbse-composite-skill-lab-basic-68',
                 'cart_url' => '/club-shop/basic-cart',
             ],
@@ -125,11 +137,17 @@ class CourseEnquiryController extends Controller
         $titleLower  = strtolower($courseTitle ?? '');
         $tierLower   = strtolower(($rawQ['recommended_tier'] ?? '') . ' ' . ($rawQ['budget_category'] ?? ''));
 
-        // 1. Skillvation Lab / STEM pages have top precedence when requested from STEM routes
+        // 1. Skillvation Lab / STEM pages
         if (str_contains($sourceLower, 'skillvation')
             || str_contains($sourceLower, 'stem')
             || str_contains($titleLower, 'skillvation')
             || str_contains($titleLower, 'stem')) {
+            if (str_contains($sourceLower, 'premium') || str_contains($titleLower, 'premium') || str_contains($tierLower, 'premium') || str_contains($tierLower, 'elite')) {
+                return 'skillvation-lab-premium';
+            }
+            if (str_contains($sourceLower, 'advance') || str_contains($titleLower, 'advance') || str_contains($tierLower, 'advance') || str_contains($tierLower, 'growth')) {
+                return 'skillvation-lab-advance';
+            }
             return 'skillvation-lab';
         }
 
@@ -163,7 +181,6 @@ class CourseEnquiryController extends Controller
             return self::PLAN_MAP[$source]['slug'];
         }
 
-        // 6. Default fallback for composite skill lab
         return 'cbse-composite-skill-lab-basic-68';
     }
 
@@ -303,6 +320,7 @@ class CourseEnquiryController extends Controller
             $packageName = !empty($validated['course_title'])
                 ? $validated['course_title']
                 : ($planInfo['label'] ?? $sourceLabel);
+            $packageName = preg_replace('/\s*[-–—]\s*Enquiry\s*$/iu', '', trim($packageName));
 
             // Determine if this is a Skillvation Lab or Composite Skill Lab
             $isSkillvationLab = str_contains(strtolower($source), 'skillvation')
@@ -434,6 +452,9 @@ class CourseEnquiryController extends Controller
         return response()->json([
             'status'       => 'success',
             'message'      => 'Enquiry submitted successfully. Proposal has been sent to your email and WhatsApp.',
+            'package'      => $packageName,
+            'school'       => $validated['school'] ?? ($enquiry->school ?? ''),
+            'total'        => isset($quotationData['grand_total']) ? '₹' . number_format((float) $quotationData['grand_total'], 2) : '',
             'pdf_url'      => $pdfPublicUrl ?? null,
             'whatsapp_url' => $whatsappUrl ?? null,
             'cart_url'     => $cartLink ?: ($productLink ?: url('/club-shop')),
@@ -738,6 +759,7 @@ class CourseEnquiryController extends Controller
         $phone       = htmlspecialchars($data['phone']   ?? '');
         $email       = htmlspecialchars($data['email']);
         $address     = htmlspecialchars($data['address'] ?? '');
+        $packageName = preg_replace('/\s*[-–—]\s*Enquiry\s*$/iu', '', trim($packageName));
         $pkg         = htmlspecialchars($packageName);
         $date        = now()->format('d M Y');
 
@@ -807,9 +829,21 @@ class CourseEnquiryController extends Controller
         // Dynamic content based on lab type & package
         if ($isSkillvationLab) {
             $headerTitle = 'SKILLVATION LAB PROPOSAL';
-            $headerSub1  = 'Turnkey Future-Ready STEM, Robotics, AI &amp; Innovation Lab';
+            if (str_contains($pkgLower, 'premium')) {
+                $headerSub1 = 'Establishment of Skillvation STEM & AI Lab (Premium Package)';
+                $pkgSubject = 'Premium Package';
+            } elseif (str_contains($pkgLower, 'advance')) {
+                $headerSub1 = 'Establishment of Skillvation STEM & Robotics Lab (Advance Package)';
+                $pkgSubject = 'Advance Package';
+            } elseif (str_contains($pkgLower, 'custom')) {
+                $headerSub1 = 'Establishment of Skillvation Future-Ready Lab (Custom Scope)';
+                $pkgSubject = 'Custom Scope';
+            } else {
+                $headerSub1 = 'Establishment of Skillvation STEM & Tinkering Lab (Basic Package)';
+                $pkgSubject = 'Basic Package';
+            }
             $headerSub2  = 'Hands-On Experiential Learning, Coding, IoT &amp; Maker Space for Schools (Grades 1–10/12)';
-            $subjectText = 'Proposal to establish a Future-Ready Skillvation Lab for Grades 1–10/12';
+            $subjectText = 'Proposal to establish a Future-Ready Skillvation Lab (' . $pkgSubject . ') for Grades 1–10/12';
 
             $bodySections = '
   <h2>1. Background &amp; Rationale</h2>
@@ -860,18 +894,22 @@ class CourseEnquiryController extends Controller
             if (str_contains($pkgLower, 'premium')) {
                 $headerSub1 = 'Establishment of CBSE Composite Skill Lab (Premium Package)';
                 $headerSub2 = 'Center of Excellence &amp; Advanced AI/Robotics Hub aligned with CBSE Circular Skill-75/2024 &amp; NEP 2020';
+                $pkgSubject = 'Premium Package';
             } elseif (str_contains($pkgLower, 'advance')) {
                 $headerSub1 = 'Establishment of CBSE Composite Skill Lab (Advance Package)';
                 $headerSub2 = 'Enhanced Multi-Domain Practical &amp; Digital Prototyping Hub aligned with CBSE Circular Skill-75/2024';
+                $pkgSubject = 'Advance Package';
             } elseif (str_contains($pkgLower, 'custom')) {
                 $headerSub1 = 'Establishment of CBSE Composite Skill Lab (Custom Tailored Scope)';
                 $headerSub2 = 'Custom Multi-Domain Practical Skill Hub aligned with CBSE Circular Skill-75/2024 &amp; NEP 2020';
+                $pkgSubject = 'Custom Scope';
             } else {
                 $headerSub1 = 'Establishment of CBSE Standard Composite Skill Lab (Basic Package)';
                 $headerSub2 = 'Turnkey 3 Forms of Work Setup aligned with CBSE Circular Skill-75/2024 &amp; NEP 2020';
+                $pkgSubject = 'Basic Package';
             }
 
-            $subjectText = 'Proposal to establish a CBSE Composite Skill Lab (' . $pkg . ') for Grades 6–10/12';
+            $subjectText = 'Proposal to establish a CBSE Composite Skill Lab (' . $pkgSubject . ') for Grades 6–10/12';
 
             $bodySections = '
   <h2>1. Background &amp; Rationale</h2>

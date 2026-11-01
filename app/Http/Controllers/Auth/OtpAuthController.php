@@ -280,19 +280,23 @@ class OtpAuthController extends Controller
             $user->save();
         }
 
-        $intended = session()->pull('url.intended');
-        if (!$intended && $request->filled('redirect')) {
+        $intended = null;
+        if ($request->filled('redirect')) {
             $intended = $request->input('redirect');
-        }
-        if (!$intended && $request->headers->get('referer')) {
+            session()->forget('url.intended');
+        } elseif ($request->headers->get('referer')) {
             $referer = $request->headers->get('referer');
             $parsed = parse_url($referer);
             if (!empty($parsed['query'])) {
                 parse_str($parsed['query'], $queryParams);
                 if (!empty($queryParams['redirect'])) {
                     $intended = $queryParams['redirect'];
+                    session()->forget('url.intended');
                 }
             }
+        }
+        if (!$intended) {
+            $intended = session()->pull('url.intended');
         }
         if ($intended && !\Illuminate\Support\Str::contains($intended, ['/login', '/register', '/admin'])) {
             $redirectUrl = $intended;

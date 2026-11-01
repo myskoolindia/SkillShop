@@ -460,12 +460,11 @@ class BundleModel extends BaseModel
      */
     public function saveBundleComponents(int $bundleProductId, array $componentsArray): bool
     {
-        $this->db->transStart();
+        if (empty($componentsArray)) {
+            return false;
+        }
 
-        // 1. Clear existing components
-        $this->db->table('product_bundles')->where('bundle_product_id', $bundleProductId)->delete();
-
-        // 2. Prepare batch insert rows
+        // 1. Prepare batch insert rows BEFORE modifying the database
         $batch = [];
         $sort = 1;
         $now = date('Y-m-d H:i:s');
@@ -473,6 +472,10 @@ class BundleModel extends BaseModel
         $seen = [];
         foreach ($componentsArray as $comp) {
             $productId = (int)($comp['component_product_id'] ?? 0);
+            if ($productId <= 0 || $productId === $bundleProductId) {
+                continue;
+            }
+
             $isOptional = !empty($comp['is_optional']) ? 1 : 0;
             $enteredQty = max(1, (int)($comp['quantity'] ?? 1));
 
@@ -500,25 +503,32 @@ class BundleModel extends BaseModel
             }
             $seen[$dedupKey] = true;
 
-            if ($productId > 0) {
-                $batch[] = [
-                    'bundle_product_id'    => $bundleProductId,
-                    'component_product_id' => $productId,
-                    'variant_id'           => $variantId,
-                    'quantity'             => $qty,
-                    'min_quantity'         => $minQty,
-                    'price_override'       => $priceOverride,
-                    'is_optional'          => $isOptional,
-                    'sort_order'           => $sort++,
-                    'created_at'           => $now,
-                    'updated_at'           => $now
-                ];
-            }
+            $batch[] = [
+                'bundle_product_id'    => $bundleProductId,
+                'component_product_id' => $productId,
+                'variant_id'           => $variantId,
+                'quantity'             => $qty,
+                'min_quantity'         => $minQty,
+                'price_override'       => $priceOverride,
+                'is_optional'          => $isOptional,
+                'sort_order'           => $sort++,
+                'created_at'           => $now,
+                'updated_at'           => $now
+            ];
         }
 
-        if (!empty($batch)) {
-            $this->db->table('product_bundles')->insertBatch($batch);
+        // Safety check: if no valid components are prepared, DO NOT wipe existing components!
+        if (empty($batch)) {
+            return false;
         }
+
+        $this->db->transStart();
+
+        // 2. Clear existing components only after confirming valid rows
+        $this->db->table('product_bundles')->where('bundle_product_id', $bundleProductId)->delete();
+
+        // 3. Insert new components batch
+        $this->db->table('product_bundles')->insertBatch($batch);
 
         // 3. Mark parent product as bundle
         $metrics = $this->calculateBundleMetrics($bundleProductId);
