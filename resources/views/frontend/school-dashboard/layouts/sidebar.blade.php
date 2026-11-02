@@ -30,8 +30,8 @@
                     <i class="flaticon-mortarboard"></i>{{ __('Order History') }}</a>
             </li>
 
-            <li class="{{ Route::is('roboquest.*') ? 'active' : '' }}">
-                <a href="{{ route('roboquest.settings') }}">
+            <li>
+                <a href="{{ route('roboquest.launch') }}" target="_blank">
                     <i class="flaticon-mortarboard"></i>{{ __('RoboQuest Lab') }}</a>
             </li>
         </ul>

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\PhoneVerification;
+use App\Models\RoboquestConnection;
+use App\Models\SchoolMember;
 use App\Models\User;
 use App\Rules\CustomRecaptcha;
 use App\Services\MailSenderService;
@@ -45,7 +47,13 @@ class RegisteredUserController extends Controller
             || in_array($request->input('role'), ['school', 'teacher'], true)
             || \Str::contains(strtolower($intended), ['/labs', 'composite-skill', 'skillvation-lab', 'lab-stem', 'stem', 'ecec', 'ai-robotics']);
 
-        return view('auth.register', compact('isLabContext', 'intended'));
+        $schools = User::where('role', 'school')
+            ->where('status', 'active')
+            ->select('id', 'name', 'school_name')
+            ->orderBy('name')
+            ->get();
+
+        return view('auth.register', compact('isLabContext', 'intended', 'schools'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -66,6 +74,7 @@ class RegisteredUserController extends Controller
             // Teacher specific
             'job_title'           => ['nullable', 'string', 'max:255'],
             'short_bio'           => ['nullable', 'string', 'max:1000'],
+            'school_id'           => ['nullable', 'exists:users,id'],
             // Student specific
             'age'                 => ['nullable', 'string', 'max:10'],
             'gender'              => ['nullable', 'in:male,female,other'],
@@ -132,6 +141,40 @@ class RegisteredUserController extends Controller
         }
 
         $user = User::create($userData);
+
+        // Auto-provision DigiLab RoboQuest connection or membership
+        try {
+            if ($role === 'school') {
+                $schoolId = 'school-' . $user->id;
+                $defaultUrl = env('DEFAULT_ROBOQUEST_URL', 'http://localhost:8080');
+                $defaultKey = env('DEFAULT_ROBOQUEST_KEY', '6fc6bcf57baf76cbc26e4e36743a91e6b08b9268e8aff9aceeca2680d2df891a');
+
+                RoboquestConnection::firstOrCreate(
+                    ['school_user_id' => $user->id],
+                    [
+                        'school_id'  => $schoolId,
+                        'base_url'   => rtrim($defaultUrl, '/'),
+                        'shared_key' => $defaultKey,
+                    ]
+                );
+            } elseif ($role === 'teacher') {
+                $targetSchoolId = $request->input('school_id');
+                if (!$targetSchoolId) {
+                    // Fall back to first active school if not explicitly selected
+                    $firstSchool = User::where('role', 'school')->where('status', 'active')->first();
+                    $targetSchoolId = $firstSchool?->id;
+                }
+
+                if ($targetSchoolId) {
+                    SchoolMember::firstOrCreate(
+                        ['school_id' => $targetSchoolId, 'user_id' => $user->id],
+                        ['role_in_school' => 'teacher', 'status' => 'active']
+                    );
+                }
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('Auto RoboQuest provisioning warning: ' . $e->getMessage());
+        }
 
         // Delete or invalidate used verification token
         $verification->delete();

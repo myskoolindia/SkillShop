@@ -400,6 +400,21 @@
                                 {{-- Teacher Specific Fields --}}
                                 <div id="teacher-details-fields" style="display:none;">
                                     <div class="row gutter-20">
+                                        @if(isset($schools) && $schools->count() > 0)
+                                        <div class="col-md-12">
+                                            <div class="form-grp">
+                                                <label for="school_id">{{ __('Select Your School (for DigiLab & Courses)') }}</label>
+                                                <select id="school_id" name="school_id" class="form-control" style="border-radius:8px; height:50px;">
+                                                    <option value="">-- {{ __('Choose your affiliated school') }} --</option>
+                                                    @foreach($schools as $sch)
+                                                        <option value="{{ $sch->id }}" {{ old('school_id') == $sch->id ? 'selected' : '' }}>
+                                                            {{ $sch->school_name ?: $sch->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        @endif
                                         <div class="col-md-12">
                                             <div class="form-grp">
                                                 <label for="job_title">{{ __('Subject / Primary Teaching Domain') }}</label>

@@ -27,7 +27,8 @@ class StudentDashboardController extends Controller {
             return redirect()->route('instructor.dashboard');
         }
 
-        $totalEnrolledCourses = Enrollment::where('user_id', userAuth()->id)->count();
+        $teacherOrderIds = Order::where('buyer_id', userAuth()->id)->where('payment_status', 'paid')->where('status', 'completed')->pluck('id');
+        $totalEnrolledCourses = Enrollment::where('user_id', userAuth()->id)->whereIn('order_id', $teacherOrderIds)->count();
         $totalQuizAttempts = QuizResult::where('user_id', userAuth()->id)->count();
         $totalReviews = CourseReview::where('user_id', userAuth()->id)->count();
         $orders = Order::where('buyer_id', userAuth()->id)->orderBy('id', 'desc')->take(10)->get();
@@ -40,11 +41,16 @@ class StudentDashboardController extends Controller {
     }
 
     function enrolledCourses() {
+        $teacherOrderIds = Order::where('buyer_id', userAuth()->id)->where('payment_status', 'paid')->where('status', 'completed')->pluck('id');
         $enrolls = Enrollment::with(['course' => function ($q) {
             $q->withTrashed()->with(['category.translation', 'instructor', 'reviews']);
-        }])->where('user_id', userAuth()->id)->orderByDesc('id')->paginate(10);
+        }])->where('user_id', userAuth()->id)
+        ->whereIn('order_id', $teacherOrderIds)
+        ->orderByDesc('id')->paginate(10);
 
-        $enrolledCourseIds = Enrollment::where('user_id', userAuth()->id)->pluck('course_id')->filter()->toArray();
+        $enrolledCourseIds = Enrollment::where('user_id', userAuth()->id)
+            ->whereIn('order_id', $teacherOrderIds)
+            ->pluck('course_id')->filter()->toArray();
 
         // Cross-selling: Recommend related active courses not enrolled by the student
         $relatedCourses = Course::where(['is_approved' => 'approved', 'status' => 'active'])

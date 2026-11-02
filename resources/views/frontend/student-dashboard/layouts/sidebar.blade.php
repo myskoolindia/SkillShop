@@ -29,6 +29,10 @@
                 <a href="{{ route('student.quiz-attempts') }}">
                     <i class="flaticon-mortarboard"></i>{{ __('My Quiz Attempts') }}</a>
             </li>
+            <li>
+                <a href="{{ route('roboquest.launch') }}" target="_blank">
+                    <i class="flaticon-mortarboard"></i>{{ __('RoboQuest Lab') }}</a>
+            </li>
         </ul>
     </nav>
     <div class="dashboard__sidebar-title mt-30 mb-20">

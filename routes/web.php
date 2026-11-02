@@ -62,10 +62,10 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
     })->middleware('auth')->name('dashboard');
     Route::get('/roboquest/sign-in', [\App\Http\Controllers\Frontend\RoboquestController::class,'signIn'])->name('roboquest.signin');
     Route::post('/roboquest/sign-in', [\App\Http\Controllers\Auth\AuthenticatedSessionController::class,'store'])->middleware('throttle:10,1')->name('roboquest.signin.store');
+    Route::get('/roboquest/open', [\App\Http\Controllers\Frontend\RoboquestController::class,'launch'])->name('roboquest.launch');
     Route::middleware(['auth','verified'])->group(function () {
         Route::get('/school/roboquest', [\App\Http\Controllers\Frontend\RoboquestController::class,'settings'])->name('roboquest.settings');
         Route::post('/school/roboquest', [\App\Http\Controllers\Frontend\RoboquestController::class,'save'])->name('roboquest.settings.save');
-        Route::get('/roboquest/open', [\App\Http\Controllers\Frontend\RoboquestController::class,'launch'])->name('roboquest.launch');
     });
     Route::get('set-currency', [HomePageController::class, 'setCurrency'])->name('set-currency');
 

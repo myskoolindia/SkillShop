@@ -19,6 +19,12 @@
                 </li>
             @endadminCan
 
+            <li>
+                <a class="nav-link" href="{{ route('roboquest.launch') }}" target="_blank"><i class="fas fa-robot"></i>
+                    <span>{{ __('RoboQuest Lab') }}</span>
+                </a>
+            </li>
+
             @if(checkAdminHasPermission('course.management') || checkAdminHasPermission('course-api.management') || checkAdminHasPermission('course.certificate.management') || checkAdminHasPermission('badge.management') || checkAdminHasPermission('blog.view'))
                 <li class="menu-header">{{ __('Manage Contents') }}</li>
 

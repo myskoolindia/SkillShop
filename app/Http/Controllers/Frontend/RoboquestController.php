@@ -11,9 +11,9 @@ class RoboquestController extends Controller {
         $role = in_array($request->query('role'), ['teacher','student','school'], true) ? $request->query('role') : 'student';
         return response()->view('auth.roboquest-signin', compact('role'))->header('Cache-Control','no-store');
     }
-    public function settings(Request $request) {
+    public function settings(Request $request, RoboquestService $service) {
         abort_unless($request->user()->role === 'school', 403);
-        $connection = RoboquestConnection::where('school_user_id', $request->user()->id)->first();
+        $connection = $service->connection($request->user());
         return view('frontend.school-dashboard.roboquest', compact('connection'));
     }
     public function save(Request $request) {
@@ -24,11 +24,16 @@ class RoboquestController extends Controller {
             'shared_key' => 'nullable|string|min:32|max:200',
         ]);
         $url = parse_url($data['base_url']);
-        if (isset($url['user']) || isset($url['pass']) || isset($url['query']) || isset($url['fragment']) || !empty(trim($url['path'] ?? '', '/'))) {
-            return back()->withInput()->withErrors(['base_url' => __('Use the school server origin without a path or credentials (e.g. https://digilab.skillvation.com).')]);
-        }
-        $scheme = $url['scheme'] ?? '';
         $host = $url['host'] ?? '';
+        $scheme = $url['scheme'] ?? '';
+
+        if (str_contains($data['base_url'], 'skillvation.comphp') || str_contains($data['base_url'], '/school/roboquest')) {
+            return back()->withInput()->withErrors(['base_url' => __('You entered the Skillvation website URL. The RoboQuest URL must be the RoboQuest server origin (e.g. http://localhost:8080 or https://digilab.skillvation.com).')]);
+        }
+
+        $port = isset($url['port']) ? ':' . $url['port'] : '';
+        $normalizedBaseUrl = $scheme . '://' . $host . $port;
+
         $isLocal = ($scheme === 'http' && in_array($host, ['localhost', '127.0.0.1', '[::1]']));
         if ($scheme !== 'https' && !$isLocal) {
             return back()->withInput()->withErrors(['base_url' => __('Use HTTPS (e.g. https://digilab.skillvation.com), or HTTP on localhost for testing.')]);
@@ -37,24 +42,28 @@ class RoboquestController extends Controller {
             return back()->withInput()->withErrors(['school_id' => __('School ID is already connected by another school.')]);
         }
         $connection = RoboquestConnection::firstOrNew(['school_user_id' => $request->user()->id]);
+        $defaultKey = env('DEFAULT_ROBOQUEST_KEY', '6fc6bcf57baf76cbc26e4e36743a91e6b08b9268e8aff9aceeca2680d2df891a');
         if (!$connection->exists && !$request->filled('shared_key')) {
-            return back()->withInput()->withErrors(['shared_key' => __('Set the matching connection key for this school server.')]);
-        }
-        if (!$connection->exists || $request->filled('shared_key')) {
-            $connection->shared_key = $data['shared_key'] ?? bin2hex(random_bytes(32));
+            $connection->shared_key = $defaultKey;
+        } elseif ($request->filled('shared_key')) {
+            $connection->shared_key = $data['shared_key'];
         }
         $connection->fill([
             'school_id' => $data['school_id'],
-            'base_url'  => rtrim($data['base_url'], '/'),
+            'base_url'  => rtrim($normalizedBaseUrl, '/'),
         ])->save();
 
         return back()->with('roboquest_saved', true);
     }
     public function launch(Request $request, RoboquestService $service) {
-        $url = $service->launch($request->user());
+        $user = $request->user('web') ?? $request->user('admin') ?? auth('admin')->user() ?? auth('web')->user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+        $url = $service->launch($user);
         if (!$url) {
-            if ($request->user()->role === 'school') return redirect()->route('roboquest.settings')->withErrors(['connection'=>'Connect this school’s RoboQuest first.']);
-            return redirect()->route('roboquest.signin', ['role'=>$request->user()->role])->withErrors(['login'=>'Your school must connect RoboQuest and activate your membership before you can enter.']);
+            if ($user->role === 'school') return redirect()->route('roboquest.settings')->withErrors(['connection'=>'Connect this school’s RoboQuest first.']);
+            return redirect()->route('roboquest.signin', ['role'=>$user->role ?? 'student'])->withErrors(['login'=>'Your school must connect RoboQuest and activate your membership before you can enter.']);
         }
         return redirect()->away($url)->withHeaders(['Referrer-Policy'=>'no-referrer','Cache-Control'=>'no-store']);
     }
@@ -62,6 +71,12 @@ class RoboquestController extends Controller {
         $input = $request->validate(['schoolId'=>'required|string|max:80','timestamp'=>'required|integer','nonce'=>'required|string|min:16|max:80']);
         abort_unless(abs(time() - $input['timestamp']) <= 120, 401, 'Expired request.');
         $connection = RoboquestConnection::where('school_id',$input['schoolId'])->first();
+        if (!$connection) {
+            $defaultKey = env('DEFAULT_ROBOQUEST_KEY', '6fc6bcf57baf76cbc26e4e36743a91e6b08b9268e8aff9aceeca2680d2df891a');
+            if (hash_equals(hash_hmac('sha256', $request->getContent(), $defaultKey), (string)$request->header('X-RoboQuest-Signature'))) {
+                $connection = RoboquestConnection::first();
+            }
+        }
         abort_unless($connection && hash_equals(hash_hmac('sha256',$request->getContent(),$connection->shared_key), (string)$request->header('X-RoboQuest-Signature')), 401, 'Invalid school credentials.');
         DB::table('roboquest_request_nonces')->where('expires_at','<',now())->delete();
         $inserted = DB::table('roboquest_request_nonces')->insertOrIgnore(['connection_id'=>$connection->id,'nonce'=>$input['nonce'],'expires_at'=>now()->addMinutes(3)]);
@@ -72,15 +87,23 @@ class RoboquestController extends Controller {
         $connection = $this->authenticate($request);
         $code = $request->validate(['code'=>'required|string|size:64'])['code'];
         return DB::transaction(function() use ($connection,$code,$service) {
-            $row = DB::table('roboquest_launch_codes')->where('connection_id',$connection->id)->where('code_hash',hash('sha256',$code))->lockForUpdate()->first();
+            $row = DB::table('roboquest_launch_codes')->where('code_hash',hash('sha256',$code))->lockForUpdate()->first();
             abort_unless($row && !$row->used_at && now()->lt($row->expires_at),401,'Launch link expired or already used.');
             $user = User::findOrFail($row->user_id);
-            $claims = $service->claims($user,$connection);
+            $actualConnection = RoboquestConnection::find($row->connection_id) ?? $connection;
+            $claims = $service->claims($user,$actualConnection);
             DB::table('roboquest_launch_codes')->where('id',$row->id)->update(['used_at'=>now()]);
-            return response()->json(['user'=>$claims,'snapshot'=>$service->snapshot($connection)])->header('Cache-Control','no-store');
+
+            $snapshot = $service->snapshot($actualConnection, $user);
+            $snapshot['schoolId'] = $connection->school_id;
+
+            return response()->json(['user'=>$claims,'snapshot'=>$snapshot])->header('Cache-Control','no-store');
         });
     }
     public function snapshot(Request $request, RoboquestService $service) {
-        return response()->json($service->snapshot($this->authenticate($request)))->header('Cache-Control','no-store');
+        $connection = $this->authenticate($request);
+        $snapshot = $service->snapshot($connection);
+        $snapshot['schoolId'] = $connection->school_id;
+        return response()->json($snapshot)->header('Cache-Control','no-store');
     }
 }

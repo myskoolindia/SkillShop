@@ -98,10 +98,10 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold">{{ __('RoboQuest URL') }} <span class="text-danger">*</span></label>
                         <input class="form-control" name="base_url" type="url" required 
-                               placeholder="https://digilab.skillvation.com" 
-                               value="{{ old('base_url', $connection?->base_url ?? 'https://digilab.skillvation.com') }}">
+                               placeholder="{{ env('DEFAULT_ROBOQUEST_URL', 'http://localhost:8080') }}" 
+                               value="{{ old('base_url', $connection?->base_url ?? env('DEFAULT_ROBOQUEST_URL', 'http://localhost:8080')) }}">
                         <div class="form-text text-muted">
-                            {{ __('The primary URL of the DigiLab RoboQuest server (e.g. https://digilab.skillvation.com). Must use HTTPS without trailing path.') }}
+                            {{ __('The primary URL of the DigiLab RoboQuest server (e.g. http://localhost:8080 for local testing or https://digilab.skillvation.com in production). Do NOT enter the Skillvation portal address.') }}
                         </div>
                     </div>
 
