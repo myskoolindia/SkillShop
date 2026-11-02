@@ -3333,7 +3333,7 @@
                   <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Adjust quantities, add optional modules or custom skill domains to match your school's exact requirements.</p> -->
                 </div>
                 <div style="display:flex;flex-wrap:wrap;gap:10px;">
-                  <div style="position:relative;" class="sks-customise-wrap">
+                  <!-- <div style="position:relative;" class="sks-customise-wrap">
                     <button type="button" class="sks-customise-toggle-btn"
                        style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
                       <i class="fa-solid fa-sliders" style="font-size:11px;"></i> Customise This Lab
@@ -3360,6 +3360,17 @@
                      onclick="if(window.setEnquiryPackage){window.setEnquiryPackage('basic');}"
                      style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
                     <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
+                  </a> -->
+                  {{-- Two direct action buttons: Design My Lab + Request for Proposal --}}
+                  <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="skillvation-lab"
+                     style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;text-decoration:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
+                    <i class="fa-solid fa-pen-ruler" style="font-size:11px;"></i> Design My Lab
+                  </a>
+                  <a href="#demo"
+                     data-package="basic"
+                     onclick="if(window.setEnquiryPackage){window.setEnquiryPackage('basic');}"
+                     style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
+                    <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request for Proposal
                   </a>
                 </div>
               </div>
@@ -3434,7 +3445,7 @@
                   <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Enhanced equipment and deeper activity modules for advanced skill delivery.</p> -->
                 </div>
                 <div style="display:flex;flex-wrap:gap:10px;">
-                  <div style="position:relative;" class="sks-customise-wrap">
+                  <!-- <div style="position:relative;" class="sks-customise-wrap">
                     <button type="button" class="sks-customise-toggle-btn"
                        style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
                       <i class="fa-solid fa-sliders" style="font-size:11px;"></i> Customise Advance Lab
@@ -3461,6 +3472,17 @@
                      onclick="if(window.setEnquiryPackage){window.setEnquiryPackage('advance');}"
                      style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
                     <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
+                  </a> -->
+                  {{-- Two direct action buttons: Design My Lab + Request for Proposal --}}
+                  <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="skillvation-lab-advance"
+                     style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;text-decoration:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
+                    <i class="fa-solid fa-pen-ruler" style="font-size:11px;"></i> Design My Lab
+                  </a>
+                  <a href="#demo"
+                     data-package="advance"
+                     onclick="if(window.setEnquiryPackage){window.setEnquiryPackage('advance');}"
+                     style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
+                    <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request for Proposal
                   </a>
                 </div>
               </div>
@@ -3532,7 +3554,7 @@
                   <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Full turnkey setup with specialized high-tech equipment and future-ready robotics.</p> -->
                 </div>
                 <div style="display:flex;flex-wrap:wrap;gap:10px;">
-                  <div style="position:relative;" class="sks-customise-wrap">
+                  <!-- <div style="position:relative;" class="sks-customise-wrap">
                     <button type="button" class="sks-customise-toggle-btn"
                        style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
                       <i class="fa-solid fa-sliders" style="font-size:11px;"></i> Customise Premium Lab
@@ -3559,6 +3581,17 @@
                      onclick="if(window.setEnquiryPackage){window.setEnquiryPackage('premium');}"
                      style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
                     <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
+                  </a> -->
+                  {{-- Two direct action buttons: Design My Lab + Request for Proposal --}}
+                  <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="skillvation-lab-premium"
+                     style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;text-decoration:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
+                    <i class="fa-solid fa-pen-ruler" style="font-size:11px;"></i> Design My Lab
+                  </a>
+                  <a href="#demo"
+                     data-package="premium"
+                     onclick="if(window.setEnquiryPackage){window.setEnquiryPackage('premium');}"
+                     style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
+                    <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request for Proposal
                   </a>
                 </div>
               </div>
