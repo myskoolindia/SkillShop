@@ -7,8 +7,8 @@ use Modules\Order\app\Models\Enrollment;
 
 class RoboquestService {
     public function connection(User $user): ?RoboquestConnection {
-        $defaultUrl = env('DEFAULT_ROBOQUEST_URL', 'http://localhost:8080');
-        $defaultKey = env('DEFAULT_ROBOQUEST_KEY', '6fc6bcf57baf76cbc26e4e36743a91e6b08b9268e8aff9aceeca2680d2df891a');
+        $defaultUrl = env('DEFAULT_ROBOQUEST_URL');
+        $defaultKey = env('DEFAULT_ROBOQUEST_KEY');
 
         if ($user->role === 'school' || $user->role === 'admin') {
             $connection = RoboquestConnection::where('school_user_id', $user->id)->first();

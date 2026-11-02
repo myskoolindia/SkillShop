@@ -146,8 +146,8 @@ class RegisteredUserController extends Controller
         try {
             if ($role === 'school') {
                 $schoolId = 'school-' . $user->id;
-                $defaultUrl = env('DEFAULT_ROBOQUEST_URL', 'http://localhost:8080');
-                $defaultKey = env('DEFAULT_ROBOQUEST_KEY', '6fc6bcf57baf76cbc26e4e36743a91e6b08b9268e8aff9aceeca2680d2df891a');
+                $defaultUrl = env('DEFAULT_ROBOQUEST_URL');
+                $defaultKey = env('DEFAULT_ROBOQUEST_KEY');
 
                 RoboquestConnection::firstOrCreate(
                     ['school_user_id' => $user->id],
