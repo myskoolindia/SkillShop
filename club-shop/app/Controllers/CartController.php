@@ -337,9 +337,9 @@ class CartController extends BaseController
      */
     public function skilllabCart()
     {
-        $product = $this->productModel->getProductBySlug('skillvation-lab');
+        $product = $this->productModel->getProductBySlug('cbse-composite-skill-lab-basic-68-1793453049');
         if (empty($product)) {
-            $product = $this->productModel->getActiveProduct(74);
+            $product = $this->productModel->getActiveProduct(114);
         }
         if (empty($product)) {
             $product = $this->productModel->getProductBySlug('skillvation-lab');
@@ -370,9 +370,9 @@ class CartController extends BaseController
      */
     public function skilllabAdvanceCart()
     {
-        $product = $this->productModel->getProductBySlug('skillvation-lab-advance');
+        $product = $this->productModel->getProductBySlug('skillvation-lab');
         if (empty($product)) {
-            $product = $this->productModel->getActiveProduct(385);
+            $product = $this->productModel->getActiveProduct(74);
         }
 
         $this->syncSelectedLabCart($product);
@@ -397,9 +397,9 @@ class CartController extends BaseController
      */
     public function skilllabPremiumCart()
     {
-        $product = $this->productModel->getProductBySlug('skillvation-lab-premium');
+        $product = $this->productModel->getProductBySlug('cbse-composite-skill-lab-premium-73');
         if (empty($product)) {
-            $product = $this->productModel->getActiveProduct(386);
+            $product = $this->productModel->getActiveProduct(73);
         }
 
         $this->syncSelectedLabCart($product);

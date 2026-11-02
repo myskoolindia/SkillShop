@@ -546,6 +546,87 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                         </div>
                                     <?php endif; ?>
 
+                                    <?php
+                                    // Skillvation plan carts are proposal-only: no checkout/buy, just "Send Proposal".
+                                    $proposalOnlyPlans = ['skillvation', 'skillvation-advance', 'skillvation-premium', 'basic', 'advance', 'premium'];
+                                    $isProposalOnly = in_array($planKey, $proposalOnlyPlans, true);
+                                    ?>
+
+                                    <?php if ($isProposalOnly):
+                                        // Build the quotation from the current cart (incl. bundle items) to send to Skillvation.
+                                        $proposalItems = [];
+                                        if (!empty($cart->items)) {
+                                            foreach ($cart->items as $ci) {
+                                                if ((int)($ci->quantity ?? 0) <= 0) continue;
+                                                $hasBundle = !empty($ci->is_bundle) && (!empty($ci->bundle_categories) || !empty($ci->bundle_products));
+                                                if ($hasBundle && !empty($ci->bundle_categories)) {
+                                                    foreach ($ci->bundle_categories as $bCat) {
+                                                        $catName = $bCat['name'] ?? 'General';
+                                                        foreach (($bCat['items'] ?? []) as $bp) {
+                                                            $q = (int)($bp->quantity ?? 0);
+                                                            if ($q <= 0) continue;
+                                                            $up = (float)($bp->unit_price ?? 0);
+                                                            $proposalItems[] = ['category'=>$catName,'item'=>(string)($bp->title ?? ''),'qty'=>$q,'unit_price'=>$up,'total'=>$q*$up];
+                                                        }
+                                                    }
+                                                } else {
+                                                    $q = (int)$ci->quantity;
+                                                    $up = (float)($ci->unit_price ?? 0);
+                                                    $proposalItems[] = ['category'=>'Lab','item'=>(string)($ci->title ?? ''),'qty'=>$q,'unit_price'=>$up,'total'=>$q*$up];
+                                                }
+                                            }
+                                        }
+                                        $proposalGrand = array_sum(array_column($proposalItems, 'total'));
+                                        $proposalPayload = json_encode(['items'=>$proposalItems,'grand_total'=>$proposalGrand]);
+                                        $skillvationBase = rtrim(env('LARAVEL_APP_URL', str_replace('/club-shop', '', rtrim(base_url(), '/'))), '/');
+                                    ?>
+                                        <div class="row-custom m-t-24 m-b-15">
+                                            <button type="button" id="sendProposalBtn" class="btn btn-block"
+                                                onclick="sendCartProposal(this)">
+                                                <i class="fa-solid fa-file-lines"></i>&nbsp; Send Proposal
+                                            </button>
+                                            <div id="sendProposalMsg" style="margin-top:10px; font-size:13px; display:none;"></div>
+                                        </div>
+                                        <script>
+                                        (function(){
+                                            window.__cartProposal = {
+                                                url: '<?= $skillvationBase ?>/cart-proposal',
+                                                planKey: '<?= esc($planKey) ?>',
+                                                items: <?= $proposalPayload ?: '[]' ?>
+                                            };
+                                        })();
+                                        function sendCartProposal(btn){
+                                            var cfg = window.__cartProposal || {};
+                                            var msg = document.getElementById('sendProposalMsg');
+                                            var orig = btn.innerHTML;
+                                            btn.disabled = true; btn.innerHTML = 'Sending…';
+                                            var fd = new FormData();
+                                            fd.append('plan_key', cfg.planKey || '');
+                                            fd.append('items', JSON.stringify((cfg.items && cfg.items.items) ? cfg.items.items : []));
+                                            fetch(cfg.url, {
+                                                method: 'POST',
+                                                headers: { 'Accept': 'application/json' },
+                                                credentials: 'include',           // send shared SSO session cookie
+                                                body: fd
+                                            })
+                                            .then(function(r){ return r.json().then(function(j){ return {ok: r.ok, body: j}; }); })
+                                            .then(function(res){
+                                                if (msg) { msg.style.display = 'block'; }
+                                                if (res.ok && res.body && res.body.status === 'success') {
+                                                    if (msg) { msg.style.color = '#15803d'; msg.innerHTML = '<i class="fa-solid fa-circle-check"></i> ' + (res.body.message || 'Proposal sent to your email.'); }
+                                                    btn.innerHTML = 'Proposal Sent';
+                                                } else {
+                                                    if (msg) { msg.style.color = '#b91c1c'; msg.innerHTML = (res.body && res.body.message) ? res.body.message : 'Could not send the proposal. Please sign in and try again.'; }
+                                                    btn.disabled = false; btn.innerHTML = orig;
+                                                }
+                                            })
+                                            .catch(function(){
+                                                if (msg) { msg.style.display = 'block'; msg.style.color = '#b91c1c'; msg.innerHTML = 'Network error. Please try again.'; }
+                                                btn.disabled = false; btn.innerHTML = orig;
+                                            });
+                                        }
+                                        </script>
+                                    <?php else: ?>
                                     <div class="row-custom m-t-24 m-b-15">
                                         <?php if (empty($cart->is_valid)): ?>
                                             <a href="javascript:void(0)" class="btn btn-block"><?= trans("continue_to_checkout"); ?></a>
@@ -567,8 +648,11 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                             <?php endif;
                                         endif; ?>
                                     </div>
+                                    <?php endif; ?>
 
                                     <div class="clearfix"></div>
+
+                                    <?php if (!$isProposalOnly): // Hide the discount coupon on proposal-only (skillvation) carts ?>
                                     <hr class="m-t-30 m-b-30">
 
                                     <form action="<?= base_url('cart/coupon-code-post'); ?>" method="post" id="form_validate" class="m-0">
@@ -584,6 +668,7 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                             <div class="text-danger"><?= helperGetSession('error_coupon_code'); ?></div>
                                         <?php endif; ?>
                                     </div>
+                                    <?php endif; ?>
 
                                 </div>
                             </div>

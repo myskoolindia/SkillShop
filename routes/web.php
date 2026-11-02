@@ -508,6 +508,8 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
     Route::get('contact', [ContactController::class, 'index'])->name('contact.index');
     Route::post('contact/send-mail', [ContactController::class, 'sendMail'])->name('contact.send-mail');
     Route::post('course-enquiry', [CourseEnquiryController::class, 'store'])->name('course.enquiry.store');
+    // Send a proposal from a club-shop plan cart (CSRF-exempt; auth via shared SSO session).
+    Route::post('cart-proposal', [CourseEnquiryController::class, 'cartProposal'])->middleware('throttle:20,1')->name('cart.proposal');
 
     /** Phone OTP (WhatsApp) */
     Route::post('phone-otp/send',   [PhoneOtpController::class, 'send'])->name('phone.otp.send');

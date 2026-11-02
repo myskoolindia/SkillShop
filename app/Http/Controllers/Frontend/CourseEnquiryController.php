@@ -247,6 +247,76 @@ class CourseEnquiryController extends Controller
         ];
     }
 
+    /**
+     * Send a proposal straight from a club-shop plan cart.
+     * Auth-required (SSO session); reuses the full store() pipeline
+     * (PDF + email to enquirer & admin + WhatsApp + LeadDemo).
+     * The cart items become the quotation so the proposal reflects the
+     * user's actual (possibly edited) cart, not just the default bundle.
+     */
+    public function cartProposal(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['status' => 'error', 'message' => 'Please sign in to request a proposal.'], 401);
+        }
+
+        // Map the cart's planKey → enquiry source + human package label.
+        $planKey = (string) $request->input('plan_key', '');
+        $planMap = [
+            // Skillvation (STEM) carts
+            'skillvation'         => ['source' => 'skillvation-lab-stem',         'label' => 'Skillvation Lab'],
+            'skillvation-advance' => ['source' => 'skillvation-lab-stem-advance', 'label' => 'Skillvation Lab Advance'],
+            'skillvation-premium' => ['source' => 'skillvation-lab-stem-premium', 'label' => 'Skillvation Lab Premium'],
+            // Composite Skill Lab carts
+            'basic'               => ['source' => 'composite-skill-lab-basic',    'label' => 'Basic Composite Skill Lab'],
+            'advance'             => ['source' => 'composite-skill-lab-advance',  'label' => 'Advance Composite Skill Lab'],
+            'premium'             => ['source' => 'composite-skill-lab-premium',  'label' => 'Premium Composite Skill Lab'],
+        ];
+        $plan = $planMap[$planKey] ?? $planMap['skillvation'];
+
+        // Build (and sanitize) the quotation from the posted cart items.
+        // Prices/items come from the request but are re-normalized here; the
+        // proposal is informational (no payment), so this is acceptable.
+        $rawItems = $request->input('items', []);
+        if (is_string($rawItems)) {
+            $decoded = json_decode($rawItems, true);
+            $rawItems = is_array($decoded) ? $decoded : [];
+        }
+        $items = [];
+        $grandTotal = 0.0;
+        foreach ((array) $rawItems as $it) {
+            $title = trim((string) ($it['item'] ?? $it['title'] ?? $it['name'] ?? ''));
+            if ($title === '') continue;
+            $qty   = max(0, (int) ($it['qty'] ?? $it['quantity'] ?? 0));
+            $price = max(0, (float) ($it['unit_price'] ?? $it['price'] ?? 0));
+            $total = isset($it['total']) ? (float) $it['total'] : ($qty * $price);
+            $items[] = [
+                'category'   => trim((string) ($it['category'] ?? 'General')) ?: 'General',
+                'item'       => mb_substr($title, 0, 255),
+                'qty'        => $qty,
+                'unit_price' => $price,
+                'total'      => $total,
+            ];
+            $grandTotal += $total;
+        }
+
+        $quotation = !empty($items)
+            ? json_encode(['items' => $items, 'grand_total' => $grandTotal])
+            : null;
+
+        // Forge the inputs store() expects, then delegate to the shared pipeline.
+        $request->merge([
+            'source'       => $plan['source'],
+            'course_title' => $plan['label'],
+            'message'      => 'Request Detailed Proposal',
+            'quotation'    => $quotation,
+            // name/email/school/etc. are auto-filled from the user inside store().
+        ]);
+
+        return $this->store($request);
+    }
+
     public function store(Request $request)
     {
         $source = (string) $request->input('source', '');

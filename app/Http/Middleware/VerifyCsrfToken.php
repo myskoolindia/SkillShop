@@ -20,5 +20,6 @@ class VerifyCsrfToken extends Middleware
         '*auth/send-otp*',
         '*auth/verify-otp*',
         '*auth/login-otp*',
+        'cart-proposal',
     ];
 }

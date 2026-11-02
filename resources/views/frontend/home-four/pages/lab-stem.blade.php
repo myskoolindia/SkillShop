@@ -3361,10 +3361,10 @@
                      style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
                     <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
                   </a> -->
-                  {{-- Two direct action buttons: Design My Lab + Request for Proposal --}}
-                  <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="skillvation-lab"
+                  {{-- Two direct action buttons: Design My Lab (→ Skillvation cart, id 74) + Request for Proposal --}}
+                  <a href="{{ url('/sso/shop') }}?target=%2Fskillvation-cart"
                      style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;text-decoration:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
-                    <i class="fa-solid fa-pen-ruler" style="font-size:11px;"></i> Design My Lab
+                    <i class="fa-solid fa-pen-ruler" style="font-size:11px;"></i> Buy Skillvation Lab
                   </a>
                   <a href="#demo"
                      data-package="basic"
@@ -3444,7 +3444,7 @@
                   <!-- <h4 style="font-size:17px;font-weight:800;color:#fff;margin:0 0 6px;">Explore the Advance Configuration</h4>
                   <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Enhanced equipment and deeper activity modules for advanced skill delivery.</p> -->
                 </div>
-                <div style="display:flex;flex-wrap:gap:10px;">
+                <div style="display:flex;flex-wrap:wrap;gap:10px;">
                   <!-- <div style="position:relative;" class="sks-customise-wrap">
                     <button type="button" class="sks-customise-toggle-btn"
                        style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
@@ -3473,10 +3473,10 @@
                      style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
                     <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
                   </a> -->
-                  {{-- Two direct action buttons: Design My Lab + Request for Proposal --}}
-                  <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="skillvation-lab-advance"
+                  {{-- Two direct action buttons: Customize My Lab (→ Advance cart) + Request for Proposal --}}
+                  <a href="{{ url('/sso/shop') }}?target=%2Fskillvation-advance-cart"
                      style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;text-decoration:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
-                    <i class="fa-solid fa-pen-ruler" style="font-size:11px;"></i> Design My Lab
+                    <i class="fa-solid fa-pen-ruler" style="font-size:11px;"></i> Buy Skillvation Lab
                   </a>
                   <a href="#demo"
                      data-package="advance"
@@ -3582,10 +3582,10 @@
                      style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
                     <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
                   </a> -->
-                  {{-- Two direct action buttons: Design My Lab + Request for Proposal --}}
-                  <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="skillvation-lab-premium"
+                  {{-- Two direct action buttons: Customize My Lab (→ Premium cart) + Request for Proposal --}}
+                  <a href="{{ url('/sso/shop') }}?target=%2Fskillvation-premium-cart"
                      style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;text-decoration:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
-                    <i class="fa-solid fa-pen-ruler" style="font-size:11px;"></i> Design My Lab
+                    <i class="fa-solid fa-pen-ruler" style="font-size:11px;"></i> Buy Skillvation Lab
                   </a>
                   <a href="#demo"
                      data-package="premium"

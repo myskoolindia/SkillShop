@@ -911,10 +911,10 @@
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
             <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
           </a> -->
-          {{-- Two direct action buttons: Design My Lab + Request for Proposal --}}
-          <a id="sks-opt-design" href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/composite-skill-basic" data-reference="composite-skill-basic"
+          {{-- Two direct action buttons: Buy Skill Lab (→ Basic cart) + Request for Proposal --}}
+          <a href="{{ url('/sso/shop') }}?target=%2Fbasic-cart"
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;text-decoration:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
-            <i class="fa-solid fa-pen-ruler" style="font-size:11px;"></i> Design My Lab
+            <i class="fa-solid fa-cart-shopping" style="font-size:11px;"></i> Buy Skill Lab
           </a>
           <a id="sks-request-proposal-btn" href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section?package=basic']) }}"
              data-package="basic"
@@ -1045,10 +1045,10 @@
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
             <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
           </a> -->
-          {{-- Two direct action buttons: Design My Lab + Request for Proposal --}}
-          <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/composite-skill-basic" data-reference="composite-skill-advance"
+          {{-- Two direct action buttons: Buy Skill Lab (→ Advance cart) + Request for Proposal --}}
+          <a href="{{ url('/sso/shop') }}?target=%2Fadvance-cart"
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;text-decoration:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
-            <i class="fa-solid fa-pen-ruler" style="font-size:11px;"></i> Design My Lab
+            <i class="fa-solid fa-cart-shopping" style="font-size:11px;"></i> Buy Skill Lab
           </a>
           <a id="sks-adv-request-proposal-btn" href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section?package=advance']) }}"
              data-package="advance"
