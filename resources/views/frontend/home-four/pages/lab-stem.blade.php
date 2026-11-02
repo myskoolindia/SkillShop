@@ -412,7 +412,7 @@
 
   /* ==================== SECTIONS & HEADINGS ==================== */
   .vl-section {
-    padding: 92px 0;
+    /* padding: 92px 0; */
     position: relative;
   }
 
@@ -3248,10 +3248,10 @@
   <section class="vl-section bg-peach" id="plans">
     <div class="vidyalab-wrap">
       <div class="vl-section-head center">
-        <div class="vl-eyebrow purple">
+        <!-- <div class="vl-eyebrow purple">
           <span>★</span> Skillvation Lab Packages
         </div>
-        <h3>Explore Components in the Skillvation Lab Kit</h3>
+        <h3>Explore Components in the Skillvation Lab Kit</h3> -->
         <!-- <h2>{{ ($setting->lab_customization_status ?? 'active') == 'active' ? 'Choose or customize the right lab package for' : 'Choose the right lab package for' }} <span class="vl-grad-violet">your campus</span></h2> -->
         <!-- <p>Every tier includes complete hardware setup, curriculum integration, and teacher certification.{{ ($setting->lab_customization_status ?? 'active') == 'active' ? ' Select a standard plan or use our intelligent advisor to tailor by your budget & student cohort.' : '' }}</p> -->
       </div>
@@ -3275,7 +3275,7 @@
       {{-- VIEW 1: Standard Turnkey Packages --}}
       <div id="fixedPackagesView">
         {{-- Quick Jump Navigation Pills --}}
-        <div style="display:flex;justify-content:center;gap:12px;margin:32px auto 20px;flex-wrap:wrap;">
+        <!-- <div style="display:flex;justify-content:center;gap:12px;margin:32px auto 20px;flex-wrap:wrap;">
           <a href="#skill-sectors-section" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#eff6ff;color:#1e40af;font-size:13px;font-weight:700;border:1px solid #bfdbfe;text-decoration:none;transition:all .2s;">
             <i class="fa-solid fa-cube text-blue-600"></i> Skillvation Lab Basic
           </a>
@@ -3288,21 +3288,19 @@
           <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="skillvation-lab" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#fff7ed;color:#c2410c;font-size:13px;font-weight:700;border:1px solid #fed7aa;text-decoration:none;transition:all .2s;cursor:pointer;">
             <i class="fa-solid fa-pen-ruler text-orange-500"></i> Design My Lab
           </a>
-        </div>
+        </div> -->
 
         {{-- 1. BASIC PACKAGE (Skillvation Lab - 74) --}}
-        <div id="skill-sectors-section" style="margin-top:36px;padding-bottom:48px;">
+        <div id="skill-sectors-section" style="margin-top:36px;">
           <div class="max-w-7xl mx-auto">
             <div class="text-center max-w-2xl mx-auto mb-12">
-              <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-navy/10 text-brand-navy text-xs font-bold uppercase tracking-wider mb-3">
+              <!-- <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-navy/10 text-brand-navy text-xs font-bold uppercase tracking-wider mb-3">
                 Basic Package
-              </div>
-              <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
-                Skillvation Lab Basic Package
-              </h2>
-              <p class="mt-3 text-slate-500 text-sm sm:text-base">
+              </div> -->
+              <h2 id="sks-heading" class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight"></h2>
+              <!-- <p class="mt-3 text-slate-500 text-sm sm:text-base">
                 Browse the curated equipment, activity items, and consumable resources included in the Skillvation Lab Basic Package.
-              </p>
+              </p> -->
             </div>
 
             {{-- Loading Indicator --}}
@@ -3331,8 +3329,8 @@
               {{-- CTA Bar inside Kit Box --}}
               <div style="margin-top:40px;border-radius:16px;background:linear-gradient(135deg,#0b2545 0%,#1e3a8a 100%);padding:28px 32px;display:flex;flex-wrap:wrap;align-items:center;gap:20px;box-shadow:0 8px 30px rgba(11,37,69,.25);">
                 <div style="flex:1;min-width:220px;">
-                  <h4 style="font-size:17px;font-weight:800;color:#fff;margin:0 0 6px;">Need a Tailored Configuration?</h4>
-                  <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Adjust quantities, add optional modules or custom skill domains to match your school's exact requirements.</p>
+                  <!-- <h4 style="font-size:17px;font-weight:800;color:#fff;margin:0 0 6px;">Need a Tailored Configuration?</h4>
+                  <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Adjust quantities, add optional modules or custom skill domains to match your school's exact requirements.</p> -->
                 </div>
                 <div style="display:flex;flex-wrap:wrap;gap:10px;">
                   <div style="position:relative;" class="sks-customise-wrap">
@@ -3379,10 +3377,10 @@
         </div>
 
         {{-- 2. ADVANCE PACKAGE (Skillvation Lab Advance - 385) --}}
-        <div id="skill-sectors-section-advance" style="margin-top:48px;padding-top:48px;padding-bottom:48px;border-top:1px solid #e2e8f0;">
+        <div id="skill-sectors-section-advance" style="margin-top:48px;padding-top:48px;border-top:1px solid #e2e8f0;">
           <div class="max-w-7xl mx-auto">
             {{-- Quick Jump Navigation Pills --}}
-            <div style="display:flex;justify-content:center;gap:12px;margin:0 auto 24px;flex-wrap:wrap;">
+            <!-- <div style="display:flex;justify-content:center;gap:12px;margin:0 auto 24px;flex-wrap:wrap;">
               <a href="#skill-sectors-section" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#eff6ff;color:#1e40af;font-size:13px;font-weight:700;border:1px solid #bfdbfe;text-decoration:none;transition:all .2s;">
                 <i class="fa-solid fa-cube text-blue-600"></i> Skillvation Lab Basic
               </a>
@@ -3395,17 +3393,15 @@
               <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="skillvation-lab-advance" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#fff7ed;color:#c2410c;font-size:13px;font-weight:700;border:1px solid #fed7aa;text-decoration:none;transition:all .2s;cursor:pointer;">
                 <i class="fa-solid fa-pen-ruler text-orange-500"></i> Design My Lab
               </a>
-            </div>
+            </div> -->
             <div class="text-center max-w-2xl mx-auto mb-12">
-              <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-600/10 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-3">
+              <!-- <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-600/10 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-3">
                 Advance Package
-              </div>
-              <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
-                Skillvation Lab Advance Package
-              </h2>
-              <p class="mt-3 text-slate-500 text-sm sm:text-base">
+              </div> -->
+              <h2 id="sks-adv-heading" class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight"></h2>
+              <!-- <p class="mt-3 text-slate-500 text-sm sm:text-base">
                 Browse the curated equipment, activity items, and consumable resources included in the Skillvation Lab Advance Package.
-              </p>
+              </p> -->
             </div>
 
             {{-- Loading Indicator --}}
@@ -3434,8 +3430,8 @@
               {{-- CTA Bar inside Kit Box --}}
               <div style="margin-top:40px;border-radius:16px;background:linear-gradient(135deg,#0b2545 0%,#047857 100%);padding:28px 32px;display:flex;flex-wrap:wrap;align-items:center;gap:20px;box-shadow:0 8px 30px rgba(11,37,69,.25);">
                 <div style="flex:1;min-width:220px;">
-                  <h4 style="font-size:17px;font-weight:800;color:#fff;margin:0 0 6px;">Explore the Advance Configuration</h4>
-                  <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Enhanced equipment and deeper activity modules for advanced skill delivery.</p>
+                  <!-- <h4 style="font-size:17px;font-weight:800;color:#fff;margin:0 0 6px;">Explore the Advance Configuration</h4>
+                  <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Enhanced equipment and deeper activity modules for advanced skill delivery.</p> -->
                 </div>
                 <div style="display:flex;flex-wrap:gap:10px;">
                   <div style="position:relative;" class="sks-customise-wrap">
@@ -3466,16 +3462,23 @@
                      style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
                     <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
                   </a>
-            </div>
+                </div>
+              </div>
 
-          </div>
+              {{-- Count Badge --}}
+              <div style="text-align:center;margin-top:20px;">
+                <span style="display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:20px;background:rgba(11,37,69,.05);border:1px solid rgba(11,37,69,.1);color:#0b2545;font-size:11px;font-weight:700;">
+                  <i class="fa-solid fa-circle-check" style="color:#22c55e;"></i>
+                  <span id="sks-adv-count">…</span> categories · <span id="sks-adv-items">…</span> items in this lab
+                </span>
+              </div>
         </div>
 
         {{-- 3. PREMIUM PACKAGE (Skillvation Lab Premium - 386) --}}
-        <div id="skill-sectors-section-premium" style="margin-top:48px;padding-top:48px;padding-bottom:48px;border-top:1px solid #e2e8f0;">
+        <div id="skill-sectors-section-premium" style="margin-top:48px;padding-top:48px;border-top:1px solid #e2e8f0;">
           <div class="max-w-7xl mx-auto">
             {{-- Quick Jump Navigation Pills --}}
-            <div style="display:flex;justify-content:center;gap:12px;margin:0 auto 24px;flex-wrap:wrap;">
+            <!-- <div style="display:flex;justify-content:center;gap:12px;margin:0 auto 24px;flex-wrap:wrap;">
               <a href="#skill-sectors-section" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#eff6ff;color:#1e40af;font-size:13px;font-weight:700;border:1px solid #bfdbfe;text-decoration:none;transition:all .2s;">
                 <i class="fa-solid fa-cube text-blue-600"></i> Skillvation Lab Basic
               </a>
@@ -3488,17 +3491,15 @@
               <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/stem" data-reference="skillvation-lab-premium" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#fff7ed;color:#c2410c;font-size:13px;font-weight:700;border:1px solid #fed7aa;text-decoration:none;transition:all .2s;cursor:pointer;">
                 <i class="fa-solid fa-pen-ruler text-orange-500"></i> Design My Lab
               </a>
-            </div>
+            </div> -->
             <div class="text-center max-w-2xl mx-auto mb-12">
-              <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-600/10 text-purple-700 text-xs font-bold uppercase tracking-wider mb-3">
+              <!-- <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-600/10 text-purple-700 text-xs font-bold uppercase tracking-wider mb-3">
                 Premium Package
-              </div>
-              <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
-                Skillvation Lab Premium Package
-              </h2>
-              <p class="mt-3 text-slate-500 text-sm sm:text-base">
+              </div> -->
+              <h2 id="sks-prem-heading" class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight"></h2>
+              <!-- <p class="mt-3 text-slate-500 text-sm sm:text-base">
                 Browse the comprehensive equipment, activity items, and advanced innovation modules included in the Skillvation Lab Premium Package.
-              </p>
+              </p> -->
             </div>
 
             {{-- Loading Indicator --}}
@@ -3527,8 +3528,8 @@
               {{-- CTA Bar inside Kit Box --}}
               <div style="margin-top:40px;border-radius:16px;background:linear-gradient(135deg,#0b2545 0%,#581c87 100%);padding:28px 32px;display:flex;flex-wrap:wrap;align-items:center;gap:20px;box-shadow:0 8px 30px rgba(11,37,69,.25);">
                 <div style="flex:1;min-width:220px;">
-                  <h4 style="font-size:17px;font-weight:800;color:#fff;margin:0 0 6px;">Flagship Premium Innovation Hub</h4>
-                  <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Full turnkey setup with specialized high-tech equipment and future-ready robotics.</p>
+                  <!-- <h4 style="font-size:17px;font-weight:800;color:#fff;margin:0 0 6px;">Flagship Premium Innovation Hub</h4>
+                  <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Full turnkey setup with specialized high-tech equipment and future-ready robotics.</p> -->
                 </div>
                 <div style="display:flex;flex-wrap:wrap;gap:10px;">
                   <div style="position:relative;" class="sks-customise-wrap">
@@ -3559,10 +3560,18 @@
                      style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
                     <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
                   </a>
-            </div>
+                </div>
+              </div>
 
-          </div>
-        </div>
+              {{-- Count Badge --}}
+              <div style="text-align:center;margin-top:20px;">
+                <span style="display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:20px;background:rgba(11,37,69,.05);border:1px solid rgba(11,37,69,.1);color:#0b2545;font-size:11px;font-weight:700;">
+                  <i class="fa-solid fa-circle-check" style="color:#22c55e;"></i>
+                  <span id="sks-prem-count">…</span> categories · <span id="sks-prem-items">…</span> items in this lab
+                </span>
+              </div>
+
+            </div>
 
         {{-- Design My Lab modal --}}
         <div id="dml-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(11,37,69,.55);align-items:center;justify-content:center;padding:16px;">
@@ -4819,6 +4828,13 @@ function getThemeByIndex(idx, palette){
 
 function renderBundleSection(product, allCats, config){
   if(!product || !config || !config.boxesEl) return;
+
+  // Drive the section heading from the live product title (falls back to the
+  // static text already in the markup if the API has no title).
+  if(config.headingEl && product.title){
+    config.headingEl.textContent = product.title;
+  }
+
   var components = product.bundle_components || [];
   // Exclude optional items — only mandatory components are listed.
   components = components.filter(function(c){ return !c.is_optional; });
@@ -4927,10 +4943,10 @@ function renderBundleSection(product, allCats, config){
 }
 
 Promise.all([
-  fetch(BASE+'/api/products/slug/skillvation-lab').then(function(r){if(!r.ok)throw r.status;return r.json();}),
+  fetch(BASE+'/api/products/slug/cbse-composite-skill-lab-basic-68-1793453049').then(function(r){if(!r.ok)throw r.status;return r.json();}),
   fetch(BASE+'/api/categories/tree').then(function(r){if(!r.ok)throw r.status;return r.json();}),
-  fetch(BASE+'/api/products/slug/skillvation-lab-advance').then(function(r){if(!r.ok)return null;return r.json();}).catch(function(){ return null; }),
-  fetch(BASE+'/api/products/slug/skillvation-lab-premium').then(function(r){if(!r.ok)return null;return r.json();}).catch(function(){ return null; })
+  fetch(BASE+'/api/products/slug/skillvation-lab').then(function(r){if(!r.ok)return null;return r.json();}).catch(function(){ return null; }),
+  fetch(BASE+'/api/products/slug/cbse-composite-skill-lab-premium-73').then(function(r){if(!r.ok)return null;return r.json();}).catch(function(){ return null; })
 ])
 .then(function(res){
   var basicProduct = res[0] ? res[0].data : null;
@@ -4951,6 +4967,7 @@ Promise.all([
 
   // 1. Render Basic Lab Section (Skillvation Lab)
   renderBundleSection(basicProduct, allCats, {
+    headingEl: document.getElementById('sks-heading'),
     loadEl: document.getElementById('sks-loading'),
     errEl: document.getElementById('sks-error'),
     contentEl: document.getElementById('sks-content'),
@@ -4965,6 +4982,7 @@ Promise.all([
   // 2. Render Advance Lab Section (Skillvation Lab Advance)
   if(advProduct){
     renderBundleSection(advProduct, allCats, {
+      headingEl: document.getElementById('sks-adv-heading'),
       loadEl: document.getElementById('sks-adv-loading'),
       errEl: document.getElementById('sks-adv-error'),
       contentEl: document.getElementById('sks-adv-content'),
@@ -4985,6 +5003,7 @@ Promise.all([
   // 3. Render Premium Lab Section (Skillvation Lab Premium)
   if(premProduct){
     renderBundleSection(premProduct, allCats, {
+      headingEl: document.getElementById('sks-prem-heading'),
       loadEl: document.getElementById('sks-prem-loading'),
       errEl: document.getElementById('sks-prem-error'),
       contentEl: document.getElementById('sks-prem-content'),
@@ -5710,7 +5729,7 @@ Promise.all([
       function buildCatalogFromShop() {
         const BASE = '<?= rtrim(env("APP_URL"), "/") ?>/club-shop';
 
-        return fetch(BASE + '/api/products/slug/skillvation-lab')
+        return fetch(BASE + '/api/products/slug/cbse-composite-skill-lab-basic-68-1793453049')
           .then(r => r.ok ? r.json() : null)
           .then(res => {
             const comps = (res && res.data && Array.isArray(res.data.bundle_components))
@@ -6497,7 +6516,7 @@ Promise.all([
       function hydrateFromLiveShop() {
         const BASE = '<?= rtrim(env("APP_URL"), "/") ?>/club-shop';
         Promise.all([
-          fetch(BASE + '/api/products/slug/skillvation-lab').then(r => r.ok ? r.json() : null).catch(() => null)
+          fetch(BASE + '/api/products/slug/cbse-composite-skill-lab-basic-68-1793453049').then(r => r.ok ? r.json() : null).catch(() => null)
         ]).then(([basicRes, advRes, premRes]) => {
           let updated = 0;
           const syncPrices = (res) => {

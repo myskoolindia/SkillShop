@@ -3248,10 +3248,10 @@
   <section class="vl-section bg-peach" id="plans">
     <div class="vidyalab-wrap">
       <div class="vl-section-head center">
-        <div class="vl-eyebrow purple">
+        <!-- <div class="vl-eyebrow purple">
           <span>★</span> Skillvation Lab Packages
         </div>
-        <h3>Explore Components in the Skillvation Lab Kit</h3>
+        <h3>Explore Components in the Skillvation Lab Kit</h3> -->
         <!-- <h2>{{ ($setting->lab_customization_status ?? 'active') == 'active' ? 'Choose or customize the right lab package for' : 'Choose the right lab package for' }} <span class="vl-grad-violet">your campus</span></h2> -->
         <!-- <p>Every tier includes complete hardware setup, curriculum integration, and teacher certification.{{ ($setting->lab_customization_status ?? 'active') == 'active' ? ' Select a standard plan or use our intelligent advisor to tailor by your budget & student cohort.' : '' }}</p> -->
       </div>

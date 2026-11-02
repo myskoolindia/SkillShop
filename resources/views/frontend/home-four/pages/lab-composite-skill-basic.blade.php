@@ -814,11 +814,11 @@
 {{-- =====================================================================
      7. DYNAMIC KIT EXPLORER (Live Category & Component Inventory)
      ===================================================================== --}}
-<section class="py-16 lg:py-20 bg-white" id="skill-sectors-section">
+<section class="py-16 lg:py-10 bg-white" id="skill-sectors-section">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
     {{-- Quick Jump Navigation Pills --}}
-    <div style="display:flex;justify-content:center;gap:12px;margin:0 auto 32px;flex-wrap:wrap;">
+    <!-- <div style="display:flex;justify-content:center;gap:12px;margin:0 auto 32px;flex-wrap:wrap;">
       <a href="#skill-sectors-section" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#eff6ff;color:#1e40af;font-size:13px;font-weight:700;border:1px solid #bfdbfe;text-decoration:none;transition:all .2s;">
         <i class="fa-solid fa-cube text-blue-600"></i> Composite Skill Lab Basic
       </a>
@@ -828,18 +828,16 @@
       <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/composite-skill-basic" data-reference="composite-skill-basic" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#fff7ed;color:#c2410c;font-size:13px;font-weight:700;border:1px solid #fed7aa;text-decoration:none;transition:all .2s;cursor:pointer;">
         <i class="fa-solid fa-pen-ruler text-orange-500"></i> Design My Lab
       </a>
-    </div>
+    </div> -->
 
     <div class="text-center max-w-2xl mx-auto mb-12">
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-navy/10 text-brand-navy text-xs font-bold uppercase tracking-wider mb-3">
+      <!-- <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-navy/10 text-brand-navy text-xs font-bold uppercase tracking-wider mb-3">
         Basic Package
-      </div>
-      <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
-        Composite Skill Lab Basic Package
-      </h2>
-      <p class="mt-3 text-slate-500 text-sm sm:text-base">
+      </div> -->
+      <h2 id="sks-heading" class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight"></h2>
+      <!-- <p class="mt-3 text-slate-500 text-sm sm:text-base">
         Browse the curated equipment, activity items, and consumable resources included in the Composite Skill Lab Basic Package.
-      </p>
+      </p> -->
     </div>
 
     {{-- Loading Indicator --}}
@@ -880,12 +878,12 @@
       {{-- CTA Bar inside Kit Box --}}
       <div style="margin-top:40px;border-radius:16px;background:linear-gradient(135deg,#0b2545 0%,#1e3a8a 100%);padding:28px 32px;display:flex;flex-wrap:wrap;align-items:center;gap:20px;box-shadow:0 8px 30px rgba(11,37,69,.25);">
         <div style="flex:1;min-width:220px;">
-          <h4 style="font-size:17px;font-weight:800;color:#fff;margin:0 0 6px;">Need a Tailored Configuration?</h4>
-          <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Adjust quantities, add optional modules or custom skill domains to match your school's exact requirements.</p>
+          <!-- <h4 style="font-size:17px;font-weight:800;color:#fff;margin:0 0 6px;">Need a Tailored Configuration?</h4>
+          <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Adjust quantities, add optional modules or custom skill domains to match your school's exact requirements.</p> -->
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:10px;">
           {{-- Customise This Lab — dropdown with two options --}}
-          <div style="position:relative;" class="sks-customise-wrap" id="sks-customise-wrap">
+          <!-- <div style="position:relative;" class="sks-customise-wrap" id="sks-customise-wrap">
             <button type="button" class="sks-customise-toggle-btn" id="sks-customise-toggle"
                style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
               <i class="fa-solid fa-sliders" style="font-size:11px;"></i> Customise This Lab
@@ -912,7 +910,19 @@
              onclick="if(window.setEnquiryPackage){window.setEnquiryPackage('basic');}"
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
             <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
+          </a> -->
+          {{-- Two direct action buttons: Design My Lab + Request for Proposal --}}
+          <a id="sks-opt-design" href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/composite-skill-basic" data-reference="composite-skill-basic"
+             style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;text-decoration:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
+            <i class="fa-solid fa-pen-ruler" style="font-size:11px;"></i> Design My Lab
           </a>
+          <a id="sks-request-proposal-btn" href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section?package=basic']) }}"
+             data-package="basic"
+             onclick="if(window.setEnquiryPackage){window.setEnquiryPackage('basic');}"
+             style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
+            <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request for Proposal
+          </a>
+
         </div>
       </div>
 
@@ -951,11 +961,11 @@
 {{-- =====================================================================
      7B. DYNAMIC KIT EXPLORER (Advance Package - cbse-composite-skill-lab-advanced-72)
      ===================================================================== --}}
-<section class="py-16 lg:py-20 bg-slate-50 border-t border-slate-200" id="skill-sectors-section-advance">
+<section class="py-16 lg:py-10 bg-slate-50 border-t border-slate-200" id="skill-sectors-section-advance">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
     {{-- Quick Jump Navigation Pills --}}
-    <div style="display:flex;justify-content:center;gap:12px;margin:0 auto 32px;flex-wrap:wrap;">
+    <!-- <div style="display:flex;justify-content:center;gap:12px;margin:0 auto 32px;flex-wrap:wrap;">
       <a href="#skill-sectors-section" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#eff6ff;color:#1e40af;font-size:13px;font-weight:700;border:1px solid #bfdbfe;text-decoration:none;transition:all .2s;">
         <i class="fa-solid fa-cube text-blue-600"></i> Composite Skill Lab Basic
       </a>
@@ -965,18 +975,16 @@
       <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/composite-skill-basic" data-reference="composite-skill-advance" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#fff7ed;color:#c2410c;font-size:13px;font-weight:700;border:1px solid #fed7aa;text-decoration:none;transition:all .2s;cursor:pointer;">
         <i class="fa-solid fa-pen-ruler text-orange-500"></i> Design My Lab
       </a>
-    </div>
+    </div> -->
 
     <div class="text-center max-w-2xl mx-auto mb-12">
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-600/10 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-3">
+      <!-- <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-600/10 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-3">
         Advance Package
-      </div>
-      <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight">
-        Composite Skill Lab Advance Package
-      </h2>
-      <p class="mt-3 text-slate-500 text-sm sm:text-base">
+      </div> -->
+      <h2 id="sks-adv-heading" class="text-2xl sm:text-3xl font-extrabold text-brand-navy leading-tight"></h2>
+      <!-- <p class="mt-3 text-slate-500 text-sm sm:text-base">
         Browse the curated equipment, activity items, and consumable resources included in the Composite Skill Lab Advance Package.
-      </p>
+      </p> -->
     </div>
 
     {{-- Loading Indicator --}}
@@ -1005,11 +1013,11 @@
       {{-- CTA Bar inside Kit Box --}}
       <div style="margin-top:40px;border-radius:16px;background:linear-gradient(135deg,#0b2545 0%,#047857 100%);padding:28px 32px;display:flex;flex-wrap:wrap;align-items:center;gap:20px;box-shadow:0 8px 30px rgba(11,37,69,.25);">
         <div style="flex:1;min-width:220px;">
-          <h4 style="font-size:17px;font-weight:800;color:#fff;margin:0 0 6px;">Looking for the Advance Configuration?</h4>
-          <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Explore the Advance Skill Lab kit with upgraded activity modules and enhanced equipment.</p>
+          <!-- <h4 style="font-size:17px;font-weight:800;color:#fff;margin:0 0 6px;">Looking for the Advance Configuration?</h4>
+          <p style="font-size:13px;color:#bfdbfe;margin:0;line-height:1.6;">Explore the Advance Skill Lab kit with upgraded activity modules and enhanced equipment.</p> -->
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:10px;">
-          <div style="position:relative;" class="sks-customise-wrap">
+          <!-- <div style="position:relative;" class="sks-customise-wrap">
             <button type="button" class="sks-customise-toggle-btn"
                style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
               <i class="fa-solid fa-sliders" style="font-size:11px;"></i> Customise Advance Lab
@@ -1036,7 +1044,19 @@
              onclick="if(window.setEnquiryPackage){window.setEnquiryPackage('advance');}"
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
             <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
+          </a> -->
+          {{-- Two direct action buttons: Design My Lab + Request for Proposal --}}
+          <a href="javascript:void(0);" role="button" class="btn-trigger-dml" data-source="labs/composite-skill-basic" data-reference="composite-skill-advance"
+             style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;text-decoration:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
+            <i class="fa-solid fa-pen-ruler" style="font-size:11px;"></i> Design My Lab
           </a>
+          <a id="sks-adv-request-proposal-btn" href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section?package=advance']) }}"
+             data-package="advance"
+             onclick="if(window.setEnquiryPackage){window.setEnquiryPackage('advance');}"
+             style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
+            <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request for Proposal
+          </a>
+
         </div>
       </div>
 
@@ -2110,6 +2130,13 @@ function buildBox(parentName, parentId, subGroups, theme, productUrl, isCenter){
 
 function renderBundleSection(product, allCats, config){
   if(!product || !config || !config.boxesEl) return;
+
+  // Drive the section heading from the live product title (falls back to the
+  // static text already in the markup if the API has no title).
+  if(config.headingEl && product.title){
+    config.headingEl.textContent = product.title;
+  }
+
   var components = product.bundle_components || [];
   // Exclude optional items — only mandatory components are listed.
   components = components.filter(function(c){ return !c.is_optional; });
@@ -2238,6 +2265,7 @@ Promise.all([
 
   // 1. Render Basic Lab Section
   renderBundleSection(basicProduct, allCats, {
+    headingEl: document.getElementById('sks-heading'),
     loadEl: document.getElementById('sks-loading'),
     errEl: document.getElementById('sks-error'),
     contentEl: document.getElementById('sks-content'),
@@ -2257,6 +2285,7 @@ Promise.all([
   // 2. Render Advance Lab Section (from /labs/composite-skill-advance)
   if(advProduct){
     renderBundleSection(advProduct, allCats, {
+      headingEl: document.getElementById('sks-adv-heading'),
       loadEl: document.getElementById('sks-adv-loading'),
       errEl: document.getElementById('sks-adv-error'),
       contentEl: document.getElementById('sks-adv-content'),
