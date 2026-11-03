@@ -5,7 +5,8 @@ use Illuminate\Http\Request;
 class ShopAudience {
     public function handle(Request $request, Closure $next) {
         $path = strtolower(trim($request->path(), '/'));
-        $student = preg_match('~^(productdetails|product-details|api/shop-products|api/shop-categories|api/product-details|api/shop-orders)(/|$)~',$path);
+        // $student = preg_match('~^(productdetails|product-details|api/shop-products|api/shop-categories|api/product-details|api/shop-orders)(/|$)~',$path);
+        $student = in_array($path,['shop','skillbox']) || preg_match('~^(productdetails|product-details|api/shop-products|api/shop-categories|api/product-details|api/shop-orders)(/|$)~',$path);
         $staff = preg_match('~^(lab-design(/|$))~', $path);
         if (!$student && !$staff) return $next($request);
         $user = $request->user();
