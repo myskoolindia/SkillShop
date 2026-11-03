@@ -3472,7 +3472,19 @@
                      onclick="if(window.setEnquiryPackage){window.setEnquiryPackage('advance');}"
                      style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
                     <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
+                  </a>-->
+                  {{-- Two direct action buttons: Design My Lab (→ Skillvation advance cart, id 74) + Request for Proposal --}}
+                  <a href="{{ url('/sso/shop') }}?target=%2Fskillvation-advance-cart"
+                     style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;text-decoration:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
+                    <i class="fa-solid fa-pen-ruler" style="font-size:11px;"></i> Buy Skillvation Lab
                   </a>
+                  <a href="#demo"
+                     data-package="advance"
+                     onclick="if(window.setEnquiryPackage){window.setEnquiryPackage('advance');}"
+                     style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
+                    <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request for Proposal
+                  </a>
+                </div>
             </div>
 
               {{-- Count Badge --}}
@@ -3488,7 +3500,7 @@
         <div id="skill-sectors-section-premium" style="margin-top:48px;padding-top:48px;border-top:1px solid #e2e8f0;">
           <div class="max-w-7xl mx-auto">
             {{-- Quick Jump Navigation Pills --}}
-            <!-- <div style="display:flex;justify-content:center;gap:12px;margin:0 auto 24px;flex-wrap:wrap;">
+            <!--<div style="display:flex;justify-content:center;gap:12px;margin:0 auto 24px;flex-wrap:wrap;">
               <a href="#skill-sectors-section" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:24px;background:#eff6ff;color:#1e40af;font-size:13px;font-weight:700;border:1px solid #bfdbfe;text-decoration:none;transition:all .2s;">
                 <i class="fa-solid fa-cube text-blue-600"></i> Skillvation Lab Basic
               </a>
@@ -3569,7 +3581,19 @@
                      onclick="if(window.setEnquiryPackage){window.setEnquiryPackage('premium');}"
                      style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
                     <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
+                  </a> -->
+                  {{-- Two direct action buttons: Design My Lab (→ Skillvation premium cart, id 74) + Request for Proposal --}}
+                  <a href="{{ url('/sso/shop') }}?target=%2Fskillvation-premium-cart"
+                     style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;text-decoration:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
+                    <i class="fa-solid fa-pen-ruler" style="font-size:11px;"></i> Buy Skillvation Lab
                   </a>
+                  <a href="#demo"
+                     data-package="premium"
+                     onclick="if(window.setEnquiryPackage){window.setEnquiryPackage('premium');}"
+                     style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
+                    <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request for Proposal
+                  </a>
+                </div>
             </div>
 
               {{-- Count Badge --}}
