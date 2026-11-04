@@ -173,6 +173,19 @@
                 </div>
                 <div class="row row-product-details">
                     <div class="col-md-3 col-sm-12">
+                        <label class="control-label">Flat Discount Amount</label>
+                    </div>
+                    <div class="col-md-9 col-sm-12 right">
+                        <?php 
+                        $pDiscAmt = isset($product->discount_amount) && (float)$product->discount_amount > 0 
+                            ? (float)$product->discount_amount 
+                            : (((float)$product->price > (float)$product->price_discounted) ? ((float)$product->price - (float)$product->price_discounted) : 0);
+                        ?>
+                        <strong><?= priceFormatted($pDiscAmt, $product->currency) . ' ' . $product->currency; ?></strong>
+                    </div>
+                </div>
+                <div class="row row-product-details">
+                    <div class="col-md-3 col-sm-12">
                         <label class="control-label"><?= trans('discount_rate'); ?></label>
                     </div>
                     <div class="col-md-9 col-sm-12 right">

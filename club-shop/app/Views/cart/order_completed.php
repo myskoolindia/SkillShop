@@ -8,6 +8,11 @@
                     </div>
                     <h1 class="title text-success"><?= trans("msg_order_completed"); ?></h1>
                     <p class="p-order-number"><?= trans("order"); ?>:&nbsp;#<?= esc($order->order_number); ?></p>
+                    <div style="margin: 20px 0;">
+                        <a href="<?= mainAppUrl('roboquest/open'); ?>" class="btn btn-primary font-weight-bold" style="padding:10px 28px; border-radius:30px; font-size:14px; box-shadow:0 4px 14px rgba(37,99,235,0.25);">
+                            <i class="fa fa-graduation-cap mr-2"></i> Launch RoboQuest Lab
+                        </a>
+                    </div>
                     <?php if($order->payment_method == 'bank_transfer'): ?>
                         <p class="p-order-number"><?= trans("total"); ?>:&nbsp;<?= priceFormatted($order->price_total, $order->price_currency); ?></p>
                         <p class="p-complete-payment"><?= trans("msg_bank_transfer_text_order_completed"); ?></p>

@@ -342,19 +342,32 @@ class HomeController extends BaseController
                 $bundleCheck = true;
             }
 
-            if ($bundleCheck && !empty($bMetrics['total_components']) && $bMetrics['total_components'] > 0 && $bMetrics['sum_price'] > 0) {
-                $origSum = (float)$bMetrics['sum_price'];
-                $bundleDiscountRate = !empty($product->bundle_discount_rate) ? (float)$product->bundle_discount_rate : (!empty($product->discount_rate) ? (float)$product->discount_rate : 0);
+            if ($bundleCheck && !empty($bMetrics['total_components']) && $bMetrics['total_components'] > 0) {
+                // If product has its own defined package price, use that as authoritative package amount
+                $origSum = (!empty($product->price) && (float)$product->price > 0) ? (float)$product->price : (float)($bMetrics['sum_price'] ?? 0);
+                $discountedSum = (!empty($product->price_discounted) && (float)$product->price_discounted > 0) ? (float)$product->price_discounted : $origSum;
 
-                if ($bundleDiscountRate > 0) {
-                    $discountedSum = round($origSum * (1 - ($bundleDiscountRate / 100)), 2);
+                $fixedDiscount = 0.0;
+                if (isset($product->discount_amount) && (float)$product->discount_amount > 0) {
+                    $fixedDiscount = (float)$product->discount_amount;
+                } elseif ($origSum > $discountedSum) {
+                    $fixedDiscount = $origSum - $discountedSum;
+                } elseif (!empty($product->discount_rate) && (float)$product->discount_rate > 0) {
+                    $fixedDiscount = round($origSum * ((float)$product->discount_rate / 100), 2);
+                } elseif (!empty($product->bundle_discount_rate) && (float)$product->bundle_discount_rate > 0) {
+                    $fixedDiscount = round($origSum * ((float)$product->bundle_discount_rate / 100), 2);
+                }
+
+                if ($fixedDiscount > 0 && ($origSum - $fixedDiscount) > 0) {
+                    $discountedSum = max(0, round($origSum - $fixedDiscount, 2));
+                    $discountRate = round(($fixedDiscount / $origSum) * 100);
                     $data['productPrice'] = priceFormatted($origSum, $product->currency, $convertCurrency);
                     $data['productPriceDiscounted'] = priceFormatted($discountedSum, $product->currency, $convertCurrency);
-                    $data['productDiscountRate'] = $bundleDiscountRate;
+                    $data['productDiscountRate'] = $discountRate;
                 } else {
                     $data['productPrice'] = priceFormatted($origSum, $product->currency, $convertCurrency);
-                    $data['productPriceDiscounted'] = priceFormatted($origSum, $product->currency, $convertCurrency);
-                    $data['productDiscountRate'] = 0;
+                    $data['productPriceDiscounted'] = priceFormatted($discountedSum, $product->currency, $convertCurrency);
+                    $data['productDiscountRate'] = calculateDiscount($origSum, $discountedSum);
                 }
                 $data['productStock'] = $bMetrics['max_stock'];
             } else {
@@ -472,23 +485,37 @@ class HomeController extends BaseController
 
             if (!empty($editingCartItem)) {
                 $itemUnitPrice = (float)$editingCartItem->unit_price;
-                $data['productPrice'] = priceFormatted($itemUnitPrice, $product->currency, $convertCurrency);
+                $itemOrigUnitPrice = (float)($editingCartItem->original_unit_price ?? $itemUnitPrice);
+                $data['productPrice'] = priceFormatted($itemOrigUnitPrice, $product->currency, $convertCurrency);
                 $data['productPriceDiscounted'] = priceFormatted($itemUnitPrice, $product->currency, $convertCurrency);
-                $data['productDiscountRate'] = 0;
+                $data['productDiscountRate'] = ($itemOrigUnitPrice > $itemUnitPrice) ? round((($itemOrigUnitPrice - $itemUnitPrice) / $itemOrigUnitPrice) * 100) : 0;
             } elseif (!empty($product->is_bundle)) {
                 $bundleModel = new \App\Models\BundleModel();
                 $bMetrics = $bundleModel->calculateBundleMetrics($product->id);
-                $bSum = (float)($bMetrics['sum_price'] ?? $product->price);
-                $bDiscount = !empty($product->bundle_discount_rate) ? (float)$product->bundle_discount_rate : 0;
-                if ($bDiscount > 0) {
-                    $bDiscounted = $bSum * (1 - ($bDiscount / 100));
+                $bSum = (!empty($product->price) && (float)$product->price > 0) ? (float)$product->price : (float)($bMetrics['sum_price'] ?? 0);
+                $bDiscounted = (!empty($product->price_discounted) && (float)$product->price_discounted > 0) ? (float)$product->price_discounted : $bSum;
+
+                $fixedDiscount = 0.0;
+                if (isset($product->discount_amount) && (float)$product->discount_amount > 0) {
+                    $fixedDiscount = (float)$product->discount_amount;
+                } elseif ($bSum > $bDiscounted) {
+                    $fixedDiscount = $bSum - $bDiscounted;
+                } elseif (!empty($product->discount_rate) && (float)$product->discount_rate > 0) {
+                    $fixedDiscount = round($bSum * ((float)$product->discount_rate / 100), 2);
+                } elseif (!empty($product->bundle_discount_rate) && (float)$product->bundle_discount_rate > 0) {
+                    $fixedDiscount = round($bSum * ((float)$product->bundle_discount_rate / 100), 2);
+                }
+
+                if ($fixedDiscount > 0 && ($bSum - $fixedDiscount) > 0) {
+                    $bDiscounted = max(0, round($bSum - $fixedDiscount, 2));
+                    $discountRate = round(($fixedDiscount / $bSum) * 100);
                     $data['productPrice'] = priceFormatted($bSum, $product->currency, $convertCurrency);
                     $data['productPriceDiscounted'] = priceFormatted($bDiscounted, $product->currency, $convertCurrency);
-                    $data['productDiscountRate'] = $bDiscount;
+                    $data['productDiscountRate'] = $discountRate;
                 } else {
                     $data['productPrice'] = priceFormatted($bSum, $product->currency, $convertCurrency);
-                    $data['productPriceDiscounted'] = priceFormatted($bSum, $product->currency, $convertCurrency);
-                    $data['productDiscountRate'] = 0;
+                    $data['productPriceDiscounted'] = priceFormatted($bDiscounted, $product->currency, $convertCurrency);
+                    $data['productDiscountRate'] = calculateDiscount($bSum, $bDiscounted);
                 }
             }
 
@@ -598,19 +625,32 @@ class HomeController extends BaseController
                 $bundleCheck = true;
             }
 
-            if ($bundleCheck && !empty($bMetrics['total_components']) && $bMetrics['total_components'] > 0 && $bMetrics['sum_price'] > 0) {
-                $origSum = (float)$bMetrics['sum_price'];
-                $bundleDiscountRate = !empty($product->bundle_discount_rate) ? (float)$product->bundle_discount_rate : (!empty($product->discount_rate) ? (float)$product->discount_rate : 0);
+            if ($bundleCheck && !empty($bMetrics['total_components']) && $bMetrics['total_components'] > 0) {
+                // If product has its own defined package price, use that as authoritative package amount
+                $origSum = (!empty($product->price) && (float)$product->price > 0) ? (float)$product->price : (float)($bMetrics['sum_price'] ?? 0);
+                $discountedSum = (!empty($product->price_discounted) && (float)$product->price_discounted > 0) ? (float)$product->price_discounted : $origSum;
 
-                if ($bundleDiscountRate > 0) {
-                    $discountedSum = round($origSum * (1 - ($bundleDiscountRate / 100)), 2);
+                $fixedDiscount = 0.0;
+                if (isset($product->discount_amount) && (float)$product->discount_amount > 0) {
+                    $fixedDiscount = (float)$product->discount_amount;
+                } elseif ($origSum > $discountedSum) {
+                    $fixedDiscount = $origSum - $discountedSum;
+                } elseif (!empty($product->discount_rate) && (float)$product->discount_rate > 0) {
+                    $fixedDiscount = round($origSum * ((float)$product->discount_rate / 100), 2);
+                } elseif (!empty($product->bundle_discount_rate) && (float)$product->bundle_discount_rate > 0) {
+                    $fixedDiscount = round($origSum * ((float)$product->bundle_discount_rate / 100), 2);
+                }
+
+                if ($fixedDiscount > 0 && ($origSum - $fixedDiscount) > 0) {
+                    $discountedSum = max(0, round($origSum - $fixedDiscount, 2));
+                    $discountRate = round(($fixedDiscount / $origSum) * 100);
                     $data['productPrice'] = priceFormatted($origSum, $product->currency, $convertCurrency);
                     $data['productPriceDiscounted'] = priceFormatted($discountedSum, $product->currency, $convertCurrency);
-                    $data['productDiscountRate'] = $bundleDiscountRate;
+                    $data['productDiscountRate'] = $discountRate;
                 } else {
                     $data['productPrice'] = priceFormatted($origSum, $product->currency, $convertCurrency);
-                    $data['productPriceDiscounted'] = priceFormatted($origSum, $product->currency, $convertCurrency);
-                    $data['productDiscountRate'] = 0;
+                    $data['productPriceDiscounted'] = priceFormatted($discountedSum, $product->currency, $convertCurrency);
+                    $data['productDiscountRate'] = calculateDiscount($origSum, $discountedSum);
                 }
                 $data['productStock'] = $bMetrics['max_stock'];
             } else {
@@ -728,23 +768,37 @@ class HomeController extends BaseController
 
             if (!empty($editingCartItem)) {
                 $itemUnitPrice = (float)$editingCartItem->unit_price;
-                $data['productPrice'] = priceFormatted($itemUnitPrice, $product->currency, $convertCurrency);
+                $itemOrigUnitPrice = (float)($editingCartItem->original_unit_price ?? $itemUnitPrice);
+                $data['productPrice'] = priceFormatted($itemOrigUnitPrice, $product->currency, $convertCurrency);
                 $data['productPriceDiscounted'] = priceFormatted($itemUnitPrice, $product->currency, $convertCurrency);
-                $data['productDiscountRate'] = 0;
+                $data['productDiscountRate'] = ($itemOrigUnitPrice > $itemUnitPrice) ? round((($itemOrigUnitPrice - $itemUnitPrice) / $itemOrigUnitPrice) * 100) : 0;
             } elseif (!empty($product->is_bundle)) {
                 $bundleModel = new \App\Models\BundleModel();
                 $bMetrics = $bundleModel->calculateBundleMetrics($product->id);
-                $bSum = (float)($bMetrics['sum_price'] ?? $product->price);
-                $bDiscount = !empty($product->bundle_discount_rate) ? (float)$product->bundle_discount_rate : 0;
-                if ($bDiscount > 0) {
-                    $bDiscounted = $bSum * (1 - ($bDiscount / 100));
+                $bSum = (!empty($product->price) && (float)$product->price > 0) ? (float)$product->price : (float)($bMetrics['sum_price'] ?? 0);
+                $bDiscounted = (!empty($product->price_discounted) && (float)$product->price_discounted > 0) ? (float)$product->price_discounted : $bSum;
+
+                $fixedDiscount = 0.0;
+                if (isset($product->discount_amount) && (float)$product->discount_amount > 0) {
+                    $fixedDiscount = (float)$product->discount_amount;
+                } elseif ($bSum > $bDiscounted) {
+                    $fixedDiscount = $bSum - $bDiscounted;
+                } elseif (!empty($product->discount_rate) && (float)$product->discount_rate > 0) {
+                    $fixedDiscount = round($bSum * ((float)$product->discount_rate / 100), 2);
+                } elseif (!empty($product->bundle_discount_rate) && (float)$product->bundle_discount_rate > 0) {
+                    $fixedDiscount = round($bSum * ((float)$product->bundle_discount_rate / 100), 2);
+                }
+
+                if ($fixedDiscount > 0 && ($bSum - $fixedDiscount) > 0) {
+                    $bDiscounted = max(0, round($bSum - $fixedDiscount, 2));
+                    $discountRate = round(($fixedDiscount / $bSum) * 100);
                     $data['productPrice'] = priceFormatted($bSum, $product->currency, $convertCurrency);
                     $data['productPriceDiscounted'] = priceFormatted($bDiscounted, $product->currency, $convertCurrency);
-                    $data['productDiscountRate'] = $bDiscount;
+                    $data['productDiscountRate'] = $discountRate;
                 } else {
                     $data['productPrice'] = priceFormatted($bSum, $product->currency, $convertCurrency);
-                    $data['productPriceDiscounted'] = priceFormatted($bSum, $product->currency, $convertCurrency);
-                    $data['productDiscountRate'] = 0;
+                    $data['productPriceDiscounted'] = priceFormatted($bDiscounted, $product->currency, $convertCurrency);
+                    $data['productDiscountRate'] = calculateDiscount($bSum, $bDiscounted);
                 }
             }
 

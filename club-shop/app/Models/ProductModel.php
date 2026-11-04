@@ -37,6 +37,7 @@ class ProductModel extends BaseModel
             'sku' => '',
             'price' => 0,
             'price_discounted' => 0,
+            'discount_amount' => 0,
             'currency' => '',
             'discount_rate' => 0,
             'vat_rate' => 0,
@@ -151,29 +152,34 @@ class ProductModel extends BaseModel
         }
 
         $price = numToDecimal(inputPost('price') ?? 0);
+        $discountAmount = numToDecimal(inputPost('discount_amount') ?? 0);
         $priceDiscounted = numToDecimal(inputPost('price_discounted') ?? 0);
 
-        if (empty($priceDiscounted) || $priceDiscounted > $price) {
-            $priceDiscounted = $price;
+        $noDiscount = !empty(inputPost('checkbox_has_discount'));
+        if ($discountAmount > 0 && $price > 0) {
+            $noDiscount = false;
+            $priceDiscounted = max(0, round($price - $discountAmount, 2));
         }
 
-        $discountRate = 0;
-        if ($price != 0 && $priceDiscounted < $price) {
+        if (!$noDiscount && $price > 0 && $priceDiscounted > 0 && $priceDiscounted < $price) {
             $discountRate = @intval((($price - $priceDiscounted) * 100) / $price);
             if (empty($discountRate)) {
                 $discountRate = 0;
             }
-        }
-
-        if (!empty(inputPost('checkbox_has_discount'))) {
+            if ($discountAmount <= 0) {
+                $discountAmount = round($price - $priceDiscounted, 2);
+            }
+        } else {
             $priceDiscounted = $price;
             $discountRate = 0;
+            $discountAmount = 0;
         }
 
         $data = [
             'sku' => inputPost('sku'),
             'price' => $price,
             'price_discounted' => $priceDiscounted,
+            'discount_amount' => $discountAmount,
             'discount_rate' => $discountRate,
             'currency' => inputPost('currency'),
             'vat_rate' => !empty(inputPost('vat_rate')) ? inputPost('vat_rate') : 0,

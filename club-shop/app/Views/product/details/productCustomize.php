@@ -482,6 +482,14 @@
                                                         <div id="div-product-discount-rate" style="<?= $prdtDiscountRate > 0 ? 'display:inline-block; margin-left:8px;' : 'display:none;'; ?>">
                                                             <span class="discount-rate">-<?= discountRateFormat($prdtDiscountRate); ?></span>
                                                         </div>
+                                                        <?php 
+                                                        $itemDiscAmt = isset($item->discount_amount) && (float)$item->discount_amount > 0 ? (float)$item->discount_amount : (((float)($item->price ?? 0) > (float)($item->price_discounted ?? 0)) ? ((float)$item->price - (float)$item->price_discounted) : 0);
+                                                        ?>
+                                                        <div id="div-product-discount-amount" style="<?= ($prdtDiscountRate > 0 && $itemDiscAmt > 0) ? 'display:inline-block; margin-left:8px;' : 'display:none;'; ?>">
+                                                            <span class="badge badge-success" style="background:#dcfce7; color:#15803d; font-size:12px; font-weight:700; border:1px solid #bbf7d0; padding:3px 8px; border-radius:4px; vertical-align:middle;">
+                                                                Save <span class="discount-amount-val"><?= priceFormatted($itemDiscAmt, $item->currency); ?></span>
+                                                            </span>
+                                                        </div>
                                                     <?php endif;
                                                 endif; ?>
                                             </div>

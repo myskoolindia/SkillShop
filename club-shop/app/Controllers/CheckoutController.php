@@ -1290,7 +1290,7 @@ class CheckoutController extends BaseController
 
         $session=session();
         $return=\App\Libraries\RoboquestPaymentReturn::destination($data['order'],[
-            'auth_user_id'=>$session->get('auth_user_id'),
+            'auth_user_id'=>$session->get('auth_user_id') ?: $data['order']->buyer_id,
             'roboquest_shop_user_id'=>$session->get('roboquest_shop_user_id'),
             'roboquest_shop_role'=>$session->get('roboquest_shop_role'),
             'roboquest_shop_role_expires'=>$session->get('roboquest_shop_role_expires'),

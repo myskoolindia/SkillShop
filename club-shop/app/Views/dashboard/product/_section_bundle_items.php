@@ -20,7 +20,13 @@ if (!empty($bundleComponents) && is_array($bundleComponents)) {
 $bundleMetrics = $bundleModel->calculateBundleMetrics($product->id);
 $isBundle = !empty($product->is_bundle) ? 1 : 0;
 $pricingType = !empty($product->bundle_pricing_type) ? $product->bundle_pricing_type : 'fixed';
-$discountRate = !empty($product->bundle_discount_rate) ? $product->bundle_discount_rate : 0;
+$discountRate = !empty($product->bundle_discount_rate) ? $product->bundle_discount_rate : (!empty($product->discount_rate) ? $product->discount_rate : 0);
+$bundleFixedDiscount = 0.0;
+if (isset($product->discount_amount) && (float)$product->discount_amount > 0) {
+    $bundleFixedDiscount = (float)$product->discount_amount;
+} elseif (!empty($product->price) && !empty($product->price_discounted) && (float)$product->price > (float)$product->price_discounted) {
+    $bundleFixedDiscount = (float)$product->price - (float)$product->price_discounted;
+}
 
 // Gather category statistics for quick-filters and category totals
 $categoryStats = [];
@@ -454,8 +460,8 @@ ksort($categoriesList);
                                     </span>
                                 </div>
                                 <div style="display:flex; justify-content:space-between; align-items:center; font-size:10.5px; color:#64748b;">
-                                    <span>Discount: <strong class="text-danger font-weight-bold" id="card_discount_disp"><?= (float)$discountRate; ?>%</strong></span>
-                                    <span id="card_net_box">Net: <strong class="text-success font-weight-bold" id="card_net_disp">₹ <?= number_format(round($allSum * (1 - ($discountRate / 100))), 0, '.', ','); ?></strong></span>
+                                    <span>Discount: <strong class="text-danger font-weight-bold" id="card_discount_disp"><?= (float)$discountRate; ?>%</strong><?php if ($bundleFixedDiscount > 0): ?> (₹ <span id="card_discount_amt_disp"><?= number_format($bundleFixedDiscount, 0, '.', ','); ?></span>)<?php endif; ?></span>
+                                    <span id="card_net_box">Net: <strong class="text-success font-weight-bold" id="card_net_disp">₹ <?= number_format(max(0, round($allSum - $bundleFixedDiscount)), 0, '.', ','); ?></strong></span>
                                 </div>
                             </div>
                         </div>
@@ -1831,9 +1837,16 @@ function recalculateBundleTotals(isUserAction) {
     var markupAmount = Math.max(0, Math.round(sumPrice - mandSum));
     $('#card_markup_disp').text('₹ ' + markupAmount.toLocaleString('en-IN'));
     var discountRate = parseFloat('<?= (float)$discountRate; ?>') || 0;
-    var netPrice = Math.round(sumPrice * (1 - (discountRate / 100)));
+    var fixedDiscount = parseFloat('<?= (float)$bundleFixedDiscount; ?>') || 0;
+    if (fixedDiscount <= 0 && discountRate > 0) {
+        fixedDiscount = Math.round(sumPrice * (discountRate / 100));
+    }
+    var netPrice = Math.max(0, Math.round(sumPrice - fixedDiscount));
     $('#card_net_disp').text('₹ ' + netPrice.toLocaleString('en-IN'));
     $('#card_discount_disp').text(discountRate + '%');
+    if ($('#card_discount_amt_disp').length) {
+        $('#card_discount_amt_disp').text(Math.round(fixedDiscount).toLocaleString('en-IN'));
+    }
 
     if (optCount > 0) {
         $('#card_mand_box').show();

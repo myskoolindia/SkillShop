@@ -45,7 +45,7 @@ if (!empty($bundleComponents)) {
         }
         $groupedComponents[$catKey]['items'][] = $comp;
         $isOpt = !empty($comp->is_optional);
-        $pkgQty = $isOpt ? 0 : max(1, (int)$comp->required_quantity);
+        $pkgQty = $isOpt ? ((int)$comp->required_quantity > 0 ? (int)$comp->required_quantity : 0) : max(1, (int)$comp->required_quantity);
         $savedConfig = $editItemMap['c_' . $comp->id] ?? ($editItemMap['p_' . $comp->component_product_id] ?? null);
         if (!empty($savedConfig) && isset($savedConfig['qty']) && (int)$savedConfig['qty'] >= ($isOpt ? 0 : 1)) {
             $pkgQty = (int)$savedConfig['qty'];
@@ -66,14 +66,14 @@ if (!empty($bundleComponents)) {
             $aOpt = !empty($a->is_optional);
             $bOpt = !empty($b->is_optional);
 
-            $aQty = $aOpt ? 0 : max(1, (int)$a->required_quantity);
+            $aQty = $aOpt ? ((int)$a->required_quantity > 0 ? (int)$a->required_quantity : 0) : max(1, (int)$a->required_quantity);
             $aSaved = $editItemMap['c_' . $a->id] ?? ($editItemMap['p_' . $a->component_product_id] ?? null);
             if (!empty($aSaved) && isset($aSaved['qty'])) {
                 $aQty = (int)$aSaved['qty'];
             }
             $aChecked = (!$aOpt || $aQty > 0) ? 1 : 0;
 
-            $bQty = $bOpt ? 0 : max(1, (int)$b->required_quantity);
+            $bQty = $bOpt ? ((int)$b->required_quantity > 0 ? (int)$b->required_quantity : 0) : max(1, (int)$b->required_quantity);
             $bSaved = $editItemMap['c_' . $b->id] ?? ($editItemMap['p_' . $b->component_product_id] ?? null);
             if (!empty($bSaved) && isset($bSaved['qty'])) {
                 $bQty = (int)$bSaved['qty'];
@@ -1031,20 +1031,54 @@ function recalculateStorefrontBundleTotals() {
     $('#storefront_bundle_total_units').text(totalUnits);
     $('#storefront_footer_total_units').text(totalUnits + ' units');
 
-    var formattedPrice = formatBundleCurrency(totalPrice);
-    $('#storefront_bundle_total_price').text(formattedPrice);
-    $('#storefront_footer_total_price').text(formattedPrice);
+    <?php
+    $bundleFixedDiscount = 0.0;
+    if (isset($product->discount_amount) && (float)$product->discount_amount > 0) {
+        $bundleFixedDiscount = (float)$product->discount_amount;
+    } elseif (!empty($product->price) && !empty($product->price_discounted) && (float)$product->price_discounted < (float)$product->price) {
+        $bundleFixedDiscount = (float)$product->price - (float)$product->price_discounted;
+    } elseif (!empty($product->discount_rate) && (float)$product->discount_rate > 0) {
+        $bundleFixedDiscount = round((float)($product->price ?? 0) * ((float)$product->discount_rate / 100), 2);
+    } elseif (!empty($product->bundle_discount_rate) && (float)$product->bundle_discount_rate > 0) {
+        $bundleFixedDiscount = round((float)($product->price ?? 0) * ((float)$product->bundle_discount_rate / 100), 2);
+    }
+    ?>
+    var fixedDiscountPerBundle = <?= (float)$bundleFixedDiscount; ?>;
+
+    // Package amount is the exact sum of all active/selected components in the bundle table
+    var currentPackageAmount = Math.max(0, Math.round(totalPrice));
+    var currentSellingPrice = currentPackageAmount;
+
+    if (fixedDiscountPerBundle > 0 && currentPackageAmount > fixedDiscountPerBundle) {
+        currentSellingPrice = Math.max(0, Math.round(currentPackageAmount - fixedDiscountPerBundle));
+    }
+
+    var effectiveDiscountAmount = (currentPackageAmount > currentSellingPrice) ? fixedDiscountPerBundle : 0;
+    var effectiveDiscountRate = (effectiveDiscountAmount > 0 && currentPackageAmount > 0) ? Math.round((effectiveDiscountAmount / currentPackageAmount) * 100) : 0;
+
+    // Update package header and table footer totals
+    var formattedPackagePrice = formatBundleCurrency(currentPackageAmount);
+    var formattedSellingPrice = formatBundleCurrency(currentSellingPrice);
+    $('#storefront_bundle_total_price').text(formattedSellingPrice);
+
+    if (effectiveDiscountAmount > 0 && currentPackageAmount > currentSellingPrice) {
+        var footerHtml = '<del style="font-size: 13px; color: #94a3b8; font-weight: normal; margin-right: 6px;">' + formattedPackagePrice + '</del><span class="text-success font-weight-bold">' + formattedSellingPrice + '</span><span class="badge badge-success" style="background:#dcfce7; color:#15803d; font-size:11px; font-weight:700; border:1px solid #bbf7d0; padding:2px 6px; border-radius:4px; margin-left:6px;">Save ' + formatBundleCurrency(effectiveDiscountAmount) + '</span>';
+        $('#storefront_footer_total_price').html(footerHtml);
+    } else {
+        $('#storefront_footer_total_price').text(formattedSellingPrice);
+    }
 
     // Update main product price container on the page
     var mainQty = parseInt($('#input_product_quantity').val()) || 1;
-    var totalActualPrice = totalPrice * mainQty;
-    var bundleDiscountRate = <?= !empty($product->bundle_discount_rate) ? (float)$product->bundle_discount_rate : 0; ?>;
+    var totalActualPrice = currentPackageAmount * mainQty;
+    var totalSellingPrice = currentSellingPrice * mainQty;
+    var totalDiscountAmount = effectiveDiscountAmount * mainQty;
 
-    if (bundleDiscountRate > 0) {
-        var discountedActualPrice = totalActualPrice * (1 - (bundleDiscountRate / 100));
-        var formattedDiscountedPrice = formatBundleCurrency(discountedActualPrice);
+    if (totalDiscountAmount > 0 && totalActualPrice > totalSellingPrice) {
+        var formattedDiscountedPrice = formatBundleCurrency(totalSellingPrice);
         var formattedOrigPrice = formatBundleCurrency(totalActualPrice);
 
+        // Selling Price (Discounted)
         if ($('#div-product-discounted-price .final-price').length) {
             $('#div-product-discounted-price .final-price, .product-price-container .final-price').text(formattedDiscountedPrice);
         } else if ($('#div-product-discounted-price').length) {
@@ -1052,19 +1086,29 @@ function recalculateStorefrontBundleTotals() {
         }
         $('#div-product-discounted-price').addClass('text-product-discounted').show();
 
+        // Amount (Original Price Strikethrough)
         if ($('#div-product-price .original-price').length) {
             $('#div-product-price .original-price').text(formattedOrigPrice);
         } else if ($('#div-product-price').length) {
-            $('#div-product-price').html('<span class="original-price">' + formattedOrigPrice + '</span>');
+            $('#div-product-price').html('<del class="original-price" style="font-size:18px; color:#868e96; text-decoration:line-through;">' + formattedOrigPrice + '</del>');
         }
         $('#div-product-price').show();
 
+        // Discount Rate Badge
         if ($('#div-product-discount-rate .discount-rate').length) {
-            $('#div-product-discount-rate .discount-rate').text('-' + Math.round(bundleDiscountRate) + '%');
+            $('#div-product-discount-rate .discount-rate').text('-' + effectiveDiscountRate + '%');
         } else if ($('#div-product-discount-rate').length) {
-            $('#div-product-discount-rate').html('<span class="discount-rate">-' + Math.round(bundleDiscountRate) + '%</span>');
+            $('#div-product-discount-rate').html('<span class="discount-rate">-' + effectiveDiscountRate + '%</span>');
         }
         $('#div-product-discount-rate').show();
+
+        // Discount Amount Badge
+        if ($('#div-product-discount-amount .discount-amount-val').length) {
+            $('#div-product-discount-amount .discount-amount-val').text(formatBundleCurrency(totalDiscountAmount));
+        } else if ($('#div-product-discount-amount').length) {
+            $('#div-product-discount-amount').html('<span class="badge badge-success" style="background:#dcfce7; color:#15803d; font-size:12px; font-weight:700; border:1px solid #bbf7d0; padding:3px 8px; border-radius:4px; vertical-align:middle;">Save <span class="discount-amount-val">' + formatBundleCurrency(totalDiscountAmount) + '</span></span>');
+        }
+        $('#div-product-discount-amount').show();
     } else {
         var formattedMainPrice = formatBundleCurrency(totalActualPrice);
         if ($('#div-product-discounted-price .final-price').length) {
@@ -1075,6 +1119,7 @@ function recalculateStorefrontBundleTotals() {
         $('#div-product-discounted-price').removeClass('text-product-discounted').show();
         $('#div-product-price').hide();
         $('#div-product-discount-rate').hide();
+        $('#div-product-discount-amount').hide();
     }
 
     // Sync hidden inputs in the Add-to-Cart form with actual modified quantities and price
@@ -1085,8 +1130,17 @@ function recalculateStorefrontBundleTotals() {
     if ($('#hidden_bundle_total_price').length === 0) {
         $('#form-add-to-cart').append('<input type="hidden" name="bundle_total_price" id="hidden_bundle_total_price">');
     }
+    if ($('#hidden_bundle_original_price').length === 0) {
+        $('#form-add-to-cart').append('<input type="hidden" name="bundle_original_price" id="hidden_bundle_original_price">');
+    }
+    if ($('#hidden_bundle_discount_amount').length === 0) {
+        $('#form-add-to-cart').append('<input type="hidden" name="bundle_discount_amount" id="hidden_bundle_discount_amount">');
+    }
+
     $('#hidden_bundle_components_data').val(bundleJson);
-    $('#hidden_bundle_total_price').val(Math.round(totalPrice));
+    $('#hidden_bundle_total_price').val(currentSellingPrice);
+    $('#hidden_bundle_original_price').val(currentPackageAmount);
+    $('#hidden_bundle_discount_amount').val(effectiveDiscountAmount);
 }
 
 window.recalculateStorefrontBundleTotals = recalculateStorefrontBundleTotals;

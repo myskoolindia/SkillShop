@@ -39,6 +39,7 @@
                                                         <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5"/>
                                                         <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
                                                     </svg>&nbsp;&nbsp;<?= trans('view_invoice'); ?></a>
+                                                    <a href="<?= mainAppUrl('roboquest/open'); ?>" target="_blank" class="btn btn-primary m-b-5 font-weight-bold" style="background:#2563eb; border-color:#2563eb; color:#ffffff;"><i class="fa fa-graduation-cap"></i>&nbsp;&nbsp;RoboQuest Lab</a>
                                             <?php else: ?>
                                                 <?php if (!$isThereShippedProductOrder):
                                                     if ($order->payment_method != "cash_on_delivery" || ($order->payment_method == 'cash_on_delivery' && dateDifferenceInHours(date('Y-m-d H:i:s'), $order->created_at) <= 24)): ?>

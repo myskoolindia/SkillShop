@@ -565,6 +565,31 @@ class CartModel extends BaseModel
             }
         }
 
+        $postedSellingPrice = (float)inputPost('bundle_total_price');
+        $bundleSellingPrice = $bundleTotal;
+        if ($isBundle) {
+            $bundleFixedDiscount = 0.0;
+            if (isset($product->discount_amount) && (float)$product->discount_amount > 0) {
+                $bundleFixedDiscount = (float)$product->discount_amount;
+            } elseif (!empty($product->price) && !empty($product->price_discounted) && (float)$product->price_discounted < (float)$product->price) {
+                $bundleFixedDiscount = (float)$product->price - (float)$product->price_discounted;
+            } elseif (!empty($product->discount_rate) && (float)$product->discount_rate > 0) {
+                $bundleFixedDiscount = round((float)$product->price * ((float)$product->discount_rate / 100), 2);
+            } elseif (!empty($product->bundle_discount_rate) && (float)$product->bundle_discount_rate > 0) {
+                $bundleFixedDiscount = round((float)$product->price * ((float)$product->bundle_discount_rate / 100), 2);
+            }
+
+            if ($postedSellingPrice > 0) {
+                $bundleSellingPrice = $postedSellingPrice;
+            } elseif (!empty($product->price) && (float)$product->price > 0) {
+                $bundleSellingPrice = max(0.0, round((float)$product->price - $bundleFixedDiscount, 2));
+            } elseif ($bundleTotal > 0) {
+                $bundleSellingPrice = max(0.0, round($bundleTotal - $bundleFixedDiscount, 2));
+            } elseif (!empty($product->price_discounted) && (float)$product->price_discounted > 0) {
+                $bundleSellingPrice = (float)$product->price_discounted;
+            }
+        }
+
         $bundleHash = !empty($bundleItems) ? md5(safeJsonEncode($bundleItems)) : '';
         $itemHash = md5($product->id . $variantHash . $extraOptionsHash . $bundleHash);
 
@@ -580,9 +605,9 @@ class CartModel extends BaseModel
                     'product_options_snapshot' => !empty($variantId) ? $productOptionsModel->getVariantSnapshot($variantId, $extraOptions) : '',
                     'is_bundle' => $isBundle,
                     'bundle_items' => !empty($bundleItems) ? safeJsonEncode($bundleItems) : null,
-                    'unit_price' => $isBundle && $bundleTotal > 0 ? $bundleTotal : null,
-                    'unit_price_base' => $isBundle && $bundleTotal > 0 ? $bundleTotal : null,
-                    'total_price' => $isBundle && $bundleTotal > 0 ? ($bundleTotal * $quantity) : null
+                    'unit_price' => $isBundle && $bundleSellingPrice > 0 ? $bundleSellingPrice : null,
+                    'unit_price_base' => $isBundle && $bundleSellingPrice > 0 ? $bundleSellingPrice : null,
+                    'total_price' => $isBundle && $bundleSellingPrice > 0 ? ($bundleSellingPrice * $quantity) : null
                 ];
                 $this->builderCartItems->where('id', $targetItem->id)->update($cartItemUpdate);
                 return $targetItem->id;
@@ -611,9 +636,9 @@ class CartModel extends BaseModel
             'product_options_snapshot' => !empty($variantId) ? $productOptionsModel->getVariantSnapshot($variantId, $extraOptions) : '',
             'is_bundle' => $isBundle,
             'bundle_items' => !empty($bundleItems) ? safeJsonEncode($bundleItems) : null,
-            'unit_price' => $isBundle && $bundleTotal > 0 ? $bundleTotal : null,
-            'unit_price_base' => $isBundle && $bundleTotal > 0 ? $bundleTotal : null,
-            'total_price' => $isBundle && $bundleTotal > 0 ? ($bundleTotal * $quantity) : null,
+            'unit_price' => $isBundle && $bundleSellingPrice > 0 ? $bundleSellingPrice : null,
+            'unit_price_base' => $isBundle && $bundleSellingPrice > 0 ? $bundleSellingPrice : null,
+            'total_price' => $isBundle && $bundleSellingPrice > 0 ? ($bundleSellingPrice * $quantity) : null,
             'markup_rate' => $product->markup_rate ?? getProductMarkupRate($product)
         ];
 
@@ -827,18 +852,31 @@ class CartModel extends BaseModel
                 }
             }
 
-            // Apply bundle discount rate if set explicitly on bundle product
-            $bundleDiscountRate = !empty($product->bundle_discount_rate) ? (float)$product->bundle_discount_rate : 0.0;
-            if ($bundleDiscountRate > 0 && $bundleTotal > 0) {
-                $bundleOriginalTotal = max($bundleOriginalTotal, $bundleTotal);
-                $bundleTotal = round($bundleTotal * (1 - ($bundleDiscountRate / 100)), 2);
+            // Apply fixed discount amount for bundle product (kept fixed on any component quantity modification)
+            $bundleFixedDiscount = 0.0;
+            if (isset($product->discount_amount) && (float)$product->discount_amount > 0) {
+                $bundleFixedDiscount = (float)$product->discount_amount;
+            } elseif (!empty($product->price) && !empty($product->price_discounted) && (float)$product->price_discounted < (float)$product->price) {
+                $bundleFixedDiscount = (float)$product->price - (float)$product->price_discounted;
+            } elseif (!empty($product->discount_rate) && (float)$product->discount_rate > 0) {
+                $bundleFixedDiscount = round((float)($product->price ?? 0) * ((float)$product->discount_rate / 100), 2);
+            } elseif (!empty($product->bundle_discount_rate) && (float)$product->bundle_discount_rate > 0) {
+                $bundleFixedDiscount = round((float)($product->price ?? 0) * ((float)$product->bundle_discount_rate / 100), 2);
+            }
+
+            // Bundle original total is the exact sum of all active component items
+            $bundleOriginalTotal = max(0, round($bundleTotal, 2));
+            if ($bundleFixedDiscount > 0 && $bundleOriginalTotal > $bundleFixedDiscount) {
+                $bundleTotal = max(0, round($bundleOriginalTotal - $bundleFixedDiscount, 2));
+            } else {
+                $bundleTotal = $bundleOriginalTotal;
             }
 
             if ($bundleTotal <= 0) {
                 $bundleTotal = !empty($cartItem->unit_price) && (float)$cartItem->unit_price > 0 ? (float)$cartItem->unit_price : (float)($product->price_discounted > 0 ? $product->price_discounted : $product->price);
             }
             if ($bundleOriginalTotal <= 0) {
-                $bundleOriginalTotal = (float)($product->price > 0 ? $product->price : $bundleTotal);
+                $bundleOriginalTotal = (float)($product->price > 0 ? $product->price : ($bundleTotal + $bundleFixedDiscount));
             }
             if (empty($liveComps) && (float)$product->price > $bundleOriginalTotal) {
                 $bundleOriginalTotal = max($bundleOriginalTotal, (float)$product->price);

@@ -59,6 +59,22 @@ class OrderController extends BaseController
         if ($data['order']->buyer_id != $this->userId) {
             return redirect()->to(langBaseUrl());
         }
+
+        // If this order was just completed and payment was received, redirect to RoboQuest for schools/teachers
+        $justCompleted = session()->get('just_completed_order');
+        if ($justCompleted && $justCompleted == $data['order']->order_number) {
+            session()->remove('just_completed_order');
+            $session = session();
+            $return = \App\Libraries\RoboquestPaymentReturn::destination($data['order'], [
+                'auth_user_id'                => $session->get('auth_user_id') ?: $this->userId,
+                'roboquest_shop_user_id'      => $session->get('roboquest_shop_user_id'),
+                'roboquest_shop_role'         => $session->get('roboquest_shop_role'),
+                'roboquest_shop_role_expires' => $session->get('roboquest_shop_role_expires'),
+            ], mainAppUrl('roboquest/open'));
+            if ($return) {
+                return redirect()->to($return)->setHeader('Cache-Control', 'no-store')->setHeader('Referrer-Policy', 'no-referrer');
+            }
+        }
         $data['orderProducts'] = $this->orderModel->getOrderItems($data['order']->id);
 
         $data['lastBankTransferStatus'] = '';

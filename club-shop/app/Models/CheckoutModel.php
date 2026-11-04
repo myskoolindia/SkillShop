@@ -549,6 +549,7 @@ class CheckoutModel extends BaseModel
         if ($isGuest) {
             helperSetSession('mds_show_order_completed_page', 1);
         }
+        session()->set('just_completed_order', $order->order_number);
 
         return [
             'status' => 1,
@@ -741,6 +742,7 @@ class CheckoutModel extends BaseModel
                 if ($isGuest) {
                     helperSetSession('mds_show_order_completed_page', 1);
                 }
+                session()->set('just_completed_order', $order->order_number);
 
                 setSuccessMessage(trans("msg_order_completed"));
                 $redirectRoute = $isGuest ? 'order_completed' : 'order_details';

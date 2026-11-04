@@ -48,6 +48,9 @@
                 $thousandsSep = ($defaultCurrency->currency_format == 'european') ? '.' : ',';
                 $decimalSep   = ($defaultCurrency->currency_format == 'european') ? ',' : '.';
                 $spaceMoneySymbol = $defaultCurrency->space_money_symbol;
+                $productDiscountAmount = isset($product->discount_amount) && (float)$product->discount_amount > 0 
+                    ? (float)$product->discount_amount 
+                    : (((float)$product->price > (float)$product->price_discounted && (int)$product->discount_rate > 0) ? ((float)$product->price - (float)$product->price_discounted) : 0);
                 ?>
 
                 <div id="price_input_container" class="form-group"
@@ -65,23 +68,37 @@
                         </div>
 
                         <div class="col-xs-12 col-sm-4 m-b-sm-15">
+                            <label class="font-600">Flat Discount Amount (<?= $defaultCurrency->symbol; ?>)</label>
+                            <div id="discount_amount_input_container">
+                                <?= renderPriceInput('discount_amount', $productDiscountAmount, ['class' => 'form-control price-input', 'id' => 'product_discount_amount_input', 'placeholder' => '0.00']); ?>
+                            </div>
+                            <div id="container_discount_rate_pill" class="m-t-5" style="<?= ($product->discount_rate == 0 && empty($productDiscountAmount)) ? 'display:none;' : ''; ?>">
+                                <span class="badge" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px;">
+                                    <i class="fa fa-tag"></i> <span id="badge_discount_rate_val"><?= $product->discount_rate; ?></span>% OFF
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-4 m-b-sm-15">
                             <div class="row align-items-center">
                                 <div class="col-sm-12">
                                     <label class="font-600"><?= trans("discounted_price"); ?></label>
-                                    <div id="discount_input_container" class="<?= $product->discount_rate == 0 ? 'display-none' : ''; ?>">
+                                    <div id="discount_input_container">
                                         <?= renderPriceInput('price_discounted', $product->price_discounted, ['class' => 'form-control price-input', 'id' => 'product_discounted_price_input', 'placeholder' => $paymentSettings->default_currency]); ?>
                                     </div>
                                 </div>
                                 <div class="col-sm-12 m-t-10">
                                     <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" name="checkbox_has_discount" id="checkbox_discount_rate" <?= $product->discount_rate == 0 ? 'checked' : ''; ?>>
+                                        <input type="checkbox" class="custom-control-input" name="checkbox_has_discount" id="checkbox_discount_rate" <?= ($product->discount_rate == 0 && empty($productDiscountAmount)) ? 'checked' : ''; ?>>
                                         <label for="checkbox_discount_rate" class="custom-control-label"><?= trans("no_discount"); ?></label>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <?php if ($paymentSettings->vat_status == 1): ?>
+                    <?php if ($paymentSettings->vat_status == 1): ?>
+                        <div class="row m-t-15">
                             <div class="col-xs-12 col-sm-4">
                                 <div class="row align-items-center">
                                     <div class="col-sm-12">
@@ -102,7 +119,8 @@
                                     </div>
                                 </div>
                             </div>
-                        <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
 
                         <div class="col-sm-12 m-t-30" id="calculated_amount_container">
                             <p class="calculated-price">
@@ -178,11 +196,17 @@
                                     endif; ?>
                                 </select>
                             </div>
-                            <div class="col-xs-12 col-md-4 col-lg-3 m-b-sm-15">
+                            <div class="col-xs-12 col-md-3 m-b-sm-15">
                                 <label class="font-600"><?= trans("price"); ?></label>
                                 <?= renderPriceInput('price', $product->price, ['id' => 'product_price_input', 'required' => $product->is_free_product == 1 ? false : true], false); ?>
                             </div>
-                            <div class="col-xs-12 col-md-4 col-lg-3">
+                            <div class="col-xs-12 col-md-3 m-b-sm-15">
+                                <label class="font-600">Flat Discount Amount</label>
+                                <div id="discount_amount_input_container_ord" class="<?= $product->discount_rate == 0 ? 'display-none' : ''; ?>">
+                                    <?= renderPriceInput('discount_amount', $productDiscountAmount, ['id' => 'product_discount_amount_input'], false); ?>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-md-3">
                                 <div class="row align-items-center">
                                     <div class="col-sm-12">
                                         <label class="font-600"><?= trans("discounted_price"); ?></label>
@@ -238,18 +262,111 @@ if ($product->listing_type == 'sell_on_site' || $product->listing_type == 'licen
             const decimalSep = $container.attr('data-decimal-separator') || '.';
             const useSpace = $container.attr('data-space-symbol') == '1';
 
-            // Recalculate whenever the price inputs change
-            $(document).on('input change keyup', '#product_price_input, #product_discounted_price_input', function() {
+            var isSyncingInputs = false;
+
+            // Recalculate whenever Price changes
+            $(document).on('input change keyup', '#product_price_input', function() {
+                if (isSyncingInputs) return;
+                var price = getNumericValue($(this).val());
+                var isNoDiscount = $('#checkbox_discount_rate').is(':checked');
+
+                if (!isNoDiscount && price > 0) {
+                    var discountAmount = getNumericValue($('#product_discount_amount_input').val());
+                    if (discountAmount > 0) {
+                        if (discountAmount > price) {
+                            discountAmount = price;
+                            isSyncingInputs = true;
+                            $('#product_discount_amount_input').val(formatNumber(discountAmount));
+                            isSyncingInputs = false;
+                        }
+                        var discountedPrice = Math.max(0, price - discountAmount);
+                        isSyncingInputs = true;
+                        $('#product_discounted_price_input').val(formatNumber(discountedPrice));
+                        isSyncingInputs = false;
+                    } else {
+                        var discountedPrice = getNumericValue($('#product_discounted_price_input').val());
+                        if (discountedPrice > 0 && discountedPrice < price) {
+                            var discAmt = price - discountedPrice;
+                            isSyncingInputs = true;
+                            $('#product_discount_amount_input').val(formatNumber(discAmt));
+                            isSyncingInputs = false;
+                        }
+                    }
+                }
                 calculateEarnings();
             });
 
-            // Toggle visibility of the discounted price input based on checkbox state
+            // Recalculate whenever Flat Discount Amount changes
+            $(document).on('input change keyup', '#product_discount_amount_input', function() {
+                if (isSyncingInputs) return;
+                var price = getNumericValue($('#product_price_input').val());
+                var discountAmount = getNumericValue($(this).val());
+
+                if (price > 0 && discountAmount > 0) {
+                    $('#checkbox_discount_rate').prop('checked', false);
+                    if (discountAmount > price) {
+                        discountAmount = price;
+                    }
+                    var discountedPrice = Math.max(0, price - discountAmount);
+                    isSyncingInputs = true;
+                    $('#product_discounted_price_input').val(formatNumber(discountedPrice));
+                    isSyncingInputs = false;
+
+                    var discountRate = Math.round((discountAmount / price) * 100);
+                    $('#badge_discount_rate_val').text(discountRate);
+                    $('#container_discount_rate_pill').show();
+                } else {
+                    isSyncingInputs = true;
+                    if (price > 0 && discountAmount === 0) {
+                        $('#product_discounted_price_input').val(formatNumber(price));
+                    }
+                    isSyncingInputs = false;
+                    $('#badge_discount_rate_val').text('0');
+                    $('#container_discount_rate_pill').hide();
+                }
+                calculateEarnings();
+            });
+
+            // Recalculate whenever Discounted Price changes directly
+            $(document).on('input change keyup', '#product_discounted_price_input', function() {
+                if (isSyncingInputs) return;
+                var price = getNumericValue($('#product_price_input').val());
+                var discountedPrice = getNumericValue($(this).val());
+
+                if (price > 0 && discountedPrice > 0 && discountedPrice < price) {
+                    var discountAmount = Math.max(0, price - discountedPrice);
+                    isSyncingInputs = true;
+                    $('#product_discount_amount_input').val(formatNumber(discountAmount));
+                    isSyncingInputs = false;
+
+                    var discountRate = Math.round((discountAmount / price) * 100);
+                    $('#badge_discount_rate_val').text(discountRate);
+                    $('#container_discount_rate_pill').show();
+                } else {
+                    isSyncingInputs = true;
+                    if (discountedPrice >= price) {
+                        $('#product_discount_amount_input').val('');
+                    }
+                    isSyncingInputs = false;
+                    $('#badge_discount_rate_val').text('0');
+                    $('#container_discount_rate_pill').hide();
+                }
+                calculateEarnings();
+            });
+
+            // Toggle discount based on checkbox state
             $(document).on('change', '#checkbox_discount_rate', function() {
                 if ($(this).is(':checked')) {
-                    $('#discount_input_container').hide();
-                    $('#product_discounted_price_input').val('');
+                    $('#product_discount_amount_input').val('');
+                    $('#container_discount_rate_pill').hide();
+                    var price = getNumericValue($('#product_price_input').val());
+                    $('#product_discounted_price_input').val(price > 0 ? formatNumber(price) : '');
                 } else {
-                    $('#discount_input_container').show();
+                    var price = getNumericValue($('#product_price_input').val());
+                    var discPrice = getNumericValue($('#product_discounted_price_input').val());
+                    if (price > 0 && (!discPrice || discPrice >= price)) {
+                        $('#product_discounted_price_input').val(formatNumber(price));
+                    }
                 }
                 calculateEarnings();
             });
@@ -277,8 +394,25 @@ if ($product->listing_type == 'sell_on_site' || $product->listing_type == 'licen
                 if (earnedAmount < 0) earnedAmount = 0;
 
                 $('#span_discount_rate').text(discountRate + '%');
+                $('#badge_discount_rate_val').text(discountRate);
+                if (discountRate > 0 && !isNoDiscount) {
+                    $('#container_discount_rate_pill').show();
+                } else {
+                    $('#container_discount_rate_pill').hide();
+                }
 
                 $('#span_earned_amount').text(formatMoney(earnedAmount));
+            }
+
+            // Custom Number Formatter (Numeric without Currency Symbol for inputs)
+            function formatNumber(amount) {
+                if (amount === undefined || amount === null || isNaN(amount)) return '';
+                let decimals = (amount % 1 === 0) ? 0 : 2;
+                let fixedAmount = Number(amount).toFixed(decimals).toString();
+                let parts = fixedAmount.split('.');
+                let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandsSep);
+                let decimalPart = parts.length > 1 ? parts[1] : '';
+                return decimals > 0 && decimalPart ? (integerPart + decimalSep + decimalPart) : integerPart;
             }
 
             // Custom Money Formatter (Manual Implementation)
@@ -286,24 +420,19 @@ if ($product->listing_type == 'sell_on_site' || $product->listing_type == 'licen
                 let decimals = (amount % 1 === 0) ? 0 : 2;
                 let fixedAmount = amount.toFixed(decimals).toString();
 
-                // Separate integer and decimal parts based on standard '.' from toFixed()
                 let parts = fixedAmount.split('.');
                 let integerPart = parts[0];
                 let decimalPart = parts.length > 1 ? parts[1] : '';
 
-                // Add thousands separator regex
                 integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, thousandsSep);
 
-                // Construct the number string
                 let result = integerPart;
                 if (decimals > 0) {
                     result += decimalSep + decimalPart;
                 }
 
-                // Determine space string based on settings
                 let spaceStr = useSpace ? ' ' : '';
 
-                // Append/Prepend Symbol based on direction and spacing
                 if (symbolDirection === 'left') {
                     return currencySymbol + spaceStr + result;
                 } else {
@@ -320,16 +449,11 @@ if ($product->listing_type == 'sell_on_site' || $product->listing_type == 'licen
                 let lastDot = clean.lastIndexOf('.');
                 let lastComma = clean.lastIndexOf(',');
 
-                // Case: 1.250,50 (European)
                 if (lastComma > lastDot) {
                     clean = clean.replace(/\./g, '').replace(',', '.');
-                }
-                // Case: 1,250.50 (US)
-                else if (lastDot > lastComma) {
+                } else if (lastDot > lastComma) {
                     clean = clean.replace(/,/g, '');
-                }
-                // Case: 12,50 (Only comma)
-                else if (lastComma > -1) {
+                } else if (lastComma > -1) {
                     clean = clean.replace(',', '.');
                 }
 
@@ -339,16 +463,6 @@ if ($product->listing_type == 'sell_on_site' || $product->listing_type == 'licen
     </script>
 <?php endif; ?>
 <script>
-    $('#checkbox_discount_rate').change(function () {
-        if (!this.checked) {
-            $("#discount_input_container").show();
-        } else {
-            var priceStr = $('#product_price_input').val();
-            price = parseFloat(priceStr.replace(',', '.'));
-            $('#product_discounted_price_input').val(price);
-            $("#discount_input_container").hide();
-        }
-    });
     $('#checkbox_no_vat').change(function () {
         if (!this.checked) {
             $("#vat_input_container").show();

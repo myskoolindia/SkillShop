@@ -6,6 +6,13 @@
     $productPrice          = $productPrice          ?? $price          ?? '';
     $productPriceDiscounted = $productPriceDiscounted ?? $priceDiscounted ?? $productPrice;
     $productDiscountRate   = $productDiscountRate   ?? $discountRate   ?? 0;
+
+    $productDiscountAmount = 0.0;
+    if (isset($product->discount_amount) && (float)$product->discount_amount > 0) {
+        $productDiscountAmount = (float)$product->discount_amount;
+    } elseif (!empty($product->price) && !empty($product->price_discounted) && (float)$product->price > (float)$product->price_discounted) {
+        $productDiscountAmount = (float)$product->price - (float)$product->price_discounted;
+    }
     ?>
     <?php if ($product->is_free_product): ?>
         <div id="div-product-price" class="text-product-discounted">
@@ -25,6 +32,11 @@
             </div>
             <div id="div-product-discount-rate" style="<?= $productDiscountRate > 0 ? 'display:inline-block; margin-left:8px;' : 'display:none;'; ?>">
                 <span class="discount-rate">-<?= discountRateFormat($productDiscountRate); ?></span>
+            </div>
+            <div id="div-product-discount-amount" style="<?= ($productDiscountRate > 0 && $productDiscountAmount > 0) ? 'display:inline-block; margin-left:8px;' : 'display:none;'; ?>">
+                <span class="badge badge-success" style="background:#dcfce7; color:#15803d; font-size:12px; font-weight:700; border:1px solid #bbf7d0; padding:3px 8px; border-radius:4px; vertical-align:middle;">
+                    Save <span class="discount-amount-val"><?= priceFormatted($productDiscountAmount, $product->currency); ?></span>
+                </span>
             </div>
         <?php endif;
     endif; ?>
