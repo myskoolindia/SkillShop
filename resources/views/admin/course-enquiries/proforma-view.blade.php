@@ -588,13 +588,13 @@
                                     {{ $pQty }}
                                 </td>
                                 <td style="text-align: right; color: #64748b; text-decoration: line-through;">
-                                    ₹{{ number_format($pOrig, 2) }}
+                                    ₹{{ number_format(round($pOrig)) }}
                                 </td>
                                 <td style="text-align: right; font-weight: 700; color: #15803d;">
-                                    ₹{{ number_format($pUnit, 2) }}
+                                    ₹{{ number_format(round($pUnit)) }}
                                 </td>
                                 <td style="text-align: right; font-weight: 800; color: #0f172a;">
-                                    ₹{{ number_format($pTot, 2) }}
+                                    ₹{{ number_format(round($pTot)) }}
                                 </td>
                             </tr>
                         @endforeach
@@ -677,10 +677,10 @@
                             {{ $it['qty'] }}
                         </td>
                         <td style="text-align: right;">
-                            ₹{{ number_format($it['unit_price'], 2) }}
+                            ₹{{ number_format(round($it['unit_price'])) }}
                         </td>
                         <td style="text-align: right; font-weight: 700; color: #0f172a;">
-                            ₹{{ number_format($it['total'], 2) }}
+                            ₹{{ number_format(round($it['total'])) }}
                         </td>
                     </tr>
                 @empty
@@ -739,29 +739,29 @@
                 <table class="calc-table">
                     <tr>
                         <td class="label-col">{{ __('Subtotal:') }}</td>
-                        <td class="val-col">₹{{ number_format($subtotal, 2) }}</td>
+                        <td class="val-col">₹{{ number_format(round($subtotal)) }}</td>
                     </tr>
                     @if($discount > 0)
                         <tr>
                             <td class="label-col" style="color: #dc2626;">{{ __('Discount:') }}</td>
-                            <td class="val-col" style="color: #dc2626;">-₹{{ number_format($discount, 2) }}</td>
+                            <td class="val-col" style="color: #dc2626;">-₹{{ number_format(round($discount)) }}</td>
                         </tr>
                     @endif
                     @if($taxPercent > 0)
                         <tr>
                             <td class="label-col">{{ __('GST (:rate%):', ['rate' => $taxPercent]) }}</td>
-                            <td class="val-col">₹{{ number_format($taxAmount, 2) }}</td>
+                            <td class="val-col">₹{{ number_format(round($taxAmount)) }}</td>
                         </tr>
                     @endif
                     @if($shipping > 0)
                         <tr>
                             <td class="label-col">{{ __('Freight & Insurance:') }}</td>
-                            <td class="val-col">₹{{ number_format($shipping, 2) }}</td>
+                            <td class="val-col">₹{{ number_format(round($shipping)) }}</td>
                         </tr>
                     @endif
                     <tr class="grand-total-row">
                         <td>{{ __('Total Payable:') }}</td>
-                        <td class="val-col" style="color:#065f46;">₹{{ number_format($grandTotal, 2) }}</td>
+                        <td class="val-col" style="color:#065f46;">₹{{ number_format(round($grandTotal)) }}</td>
                     </tr>
                 </table>
 

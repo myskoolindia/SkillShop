@@ -568,10 +568,10 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                                     'product_id'     => (int)($ci->product_id ?? 0),
                                                     'title'          => $pkgTitle,
                                                     'quantity'       => $pkgQty,
-                                                    'unit_price'     => $unitPrice,
-                                                    'total_price'    => (float)($ci->total_price ?? ($unitPrice * $pkgQty)),
-                                                    'original_price' => $origPrice,
-                                                    'discount_amount'=> $discAmt
+                                                    'unit_price'     => round($unitPrice),
+                                                    'total_price'    => round((float)($ci->total_price ?? ($unitPrice * $pkgQty))),
+                                                    'original_price' => round($origPrice),
+                                                    'discount_amount'=> round($discAmt)
                                                 ];
 
                                                 $hasBundle = !empty($ci->is_bundle) && (!empty($ci->bundle_categories) || !empty($ci->bundle_products));
@@ -611,7 +611,7 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                         $cartSubtotal = (float)($cart->totals->subtotal ?? $rawItemTotal);
                                         $cartSavings  = (float)($cart->totals->total_savings ?? 0);
                                         $cartVat      = (float)($cart->totals->vat ?? 0);
-                                        $cartGrand    = (float)($cart->totals->total_before_shipping ?? max(0, $cartSubtotal - $cartSavings + $cartVat));
+                                        $cartGrand    = (float)($cart->totals->total_before_shipping ?? ($cartSubtotal + $cartVat));
                                         $gstRateVal   = !empty($cartGst['is_interstate'])
                                             ? (float)($cartGst['igst_rate'] ?? 10.0)
                                             : (!empty($cartGst['cgst_rate']) ? (float)($cartGst['cgst_rate'] + $cartGst['sgst_rate']) : 10.0);
@@ -619,12 +619,12 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                         $proposalPayload = json_encode([
                                             'items'        => $proposalItems,
                                             'packages'     => $proposalPackages,
-                                            'raw_total'    => $rawItemTotal,
-                                            'subtotal'     => $cartSubtotal,
-                                            'discount'     => $cartSavings,
-                                            'tax_amount'   => $cartVat,
+                                            'raw_total'    => round($rawItemTotal),
+                                            'subtotal'     => round($cartSubtotal),
+                                            'discount'     => round($cartSavings),
+                                            'tax_amount'   => round($cartVat),
                                             'tax_percent'  => $gstRateVal,
-                                            'grand_total'  => $cartGrand
+                                            'grand_total'  => round($cartGrand)
                                         ]);
                                         $skillvationBase = rtrim(env('LARAVEL_APP_URL', str_replace('/club-shop', '', rtrim(base_url(), '/'))), '/');
                                     ?>
