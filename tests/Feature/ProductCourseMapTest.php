@@ -84,7 +84,7 @@ class ProductCourseMapTest extends TestCase {
         // Purchases are per buyer: the school's snapshot does not include a teacher's lab, the teacher's does.
         $this->assertSame([],$this->snapshot($connection)['courses']);
         $own=$this->snapshot($connection,$teacher)['courses'];
-        $this->assertSame(['lab-course-120'],array_column($own,'id'));$this->assertSame((string)$teacher->id,$own[0]['buyerUserId']);
+        $this->assertSame(['lab-course-120-u'.$teacher->id],array_column($own,'id'),'a teacher copy never shares the school record ID');$this->assertSame((string)$teacher->id,$own[0]['buyerUserId']);
         // The master's content check covers the school and its active teachers, not former teachers.
         $this->entitlements()->assertOk()->assertJsonPath('courseIds',['120']);
     }

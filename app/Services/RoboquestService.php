@@ -124,9 +124,12 @@ class RoboquestService {
         // Courses included with this buyer's paid Club Shop lab products (Mapper API). A direct course purchase takes precedence.
         // Lesson content for these courses comes from the RoboQuest platform Content Studio.
         $owned = $courses->pluck('api_course_id')->filter()->map(fn($id) => (string)$id)->all();
+        // RoboQuest stores a teacher's snapshot courses by ID next to the school's, so a teacher's copy gets its own ID
+        // and never replaces the school's record of the same lab course.
+        $suffix = (int)$buyerId === (int)$connection->school_user_id ? '' : '-u'.$buyerId;
         foreach ($this->labCourses([(int)$buyerId]) as $courseId => $mapped) {
             if (in_array((string)$courseId, $owned, true)) continue;
-            $list[] = ['id'=>'lab-course-'.$courseId, 'externalCourseId'=>$courseId, 'buyerUserId'=>(string)$buyerId, 'title'=>$mapped['title'],
+            $list[] = ['id'=>'lab-course-'.$courseId.$suffix, 'externalCourseId'=>$courseId, 'buyerUserId'=>(string)$buyerId, 'title'=>$mapped['title'],
                 'summary'=>'Included with '.implode(', ', array_column($mapped['labProducts'], 'title')),
                 'capacity'=>null, 'chapters'=>[], 'source'=>'lab-product', 'labProducts'=>$mapped['labProducts']];
         }
