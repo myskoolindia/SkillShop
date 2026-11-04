@@ -522,6 +522,15 @@ if ($product->listing_type == 'sell_on_site' || $product->listing_type == 'licen
                     isSyncingInputs = true;
                     $('#product_discounted_price_input').val(formatNumber(discountedPrice));
                     isSyncingInputs = false;
+                    var dRate = Math.round((discountAmount / targetAmount) * 100);
+                    $('#product_discount_rate_input').val(dRate);
+                } else if (!isNoDiscount && getNumericValue($('#product_discount_rate_input').val()) > 0) {
+                    var rate = getNumericValue($('#product_discount_rate_input').val());
+                    var discAmt = Math.round(targetAmount * (rate / 100));
+                    var discountedPrice = Math.max(0, targetAmount - discAmt);
+                    isSyncingInputs = true;
+                    $('#product_discounted_price_input').val(formatNumber(discountedPrice));
+                    isSyncingInputs = false;
                 } else if (isNoDiscount) {
                     isSyncingInputs = true;
                     $('#product_discounted_price_input').val(formatNumber(targetAmount));

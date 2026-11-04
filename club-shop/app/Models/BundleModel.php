@@ -521,7 +521,33 @@ class BundleModel extends BaseModel
             }
 
             $variantId = !empty($comp['variant_id']) ? (int)$comp['variant_id'] : null;
-            $priceOverride = isset($comp['price_override']) && is_numeric($comp['price_override']) ? (float)$comp['price_override'] : null;
+            $priceOverride = null;
+            if (isset($comp['price_override']) && is_numeric($comp['price_override'])) {
+                $enteredPrice = (float)$comp['price_override'];
+                $hasBase = isset($comp['base_price_override']) && is_numeric($comp['base_price_override']) && (float)$comp['base_price_override'] > 0;
+                $origUnit = isset($comp['orig_unit_price']) && is_numeric($comp['orig_unit_price']) ? (float)$comp['orig_unit_price'] : null;
+
+                if ($hasBase && $origUnit !== null && abs($enteredPrice - $origUnit) < 0.5) {
+                    // Price was NOT edited by user; retain the exact base override
+                    $priceOverride = (float)$comp['base_price_override'];
+                } else {
+                    // Price was changed or entered directly: convert final price to base price using store markup & discount
+                    $compProd = $this->db->table('products')->where('id', $productId)->get()->getRow();
+                    $mult = 1.0;
+                    if (!empty($compProd)) {
+                        $isMarkupActive = isStoreMarkupActive();
+                        $isDiscountActive = isStoreDiscountActive();
+                        $mRate = $isMarkupActive ? getProductMarkupRate($compProd) : 0.0;
+                        $dRate = 0.0;
+                        if ($isDiscountActive) {
+                            $catDisc = !empty($compProd->category_id) ? getCategoryDiscountRate($compProd->category_id) : null;
+                            $dRate = ($catDisc !== null) ? (float)$catDisc : getGlobalDiscountRate();
+                        }
+                        $mult = (1 + ($mRate / 100)) * (1 - ($dRate / 100));
+                    }
+                    $priceOverride = ($mult > 0) ? round($enteredPrice / $mult, 2) : $enteredPrice;
+                }
+            }
 
             $dedupKey = $productId . '_' . ($variantId ?? '0');
             if (isset($seen[$dedupKey])) {

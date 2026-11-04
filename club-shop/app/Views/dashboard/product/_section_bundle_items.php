@@ -47,9 +47,7 @@ foreach ($bundleComponents as $c) {
             'mand_total' => 0.0,
         ];
     }
-    $effectiveUnitPrice = ($c->price_override !== null && $c->price_override !== '') 
-        ? (float)$c->price_override 
-        : (float)$c->unit_price;
+    $effectiveUnitPrice = (float)($c->unit_price > 0 ? $c->unit_price : ($c->price_override ?? 0));
     $isOpt = !empty($c->is_optional) ? 1 : 0;
     $isSelected = empty($isOpt) || ((int)$c->required_quantity > 0);
     $minQtyVal = !empty($c->min_quantity) ? (int)$c->min_quantity : max(1, (int)$c->required_quantity);
@@ -573,9 +571,7 @@ ksort($categoriesList);
                                 $minQtyVal = !empty($comp->min_quantity) ? (int)$comp->min_quantity : max(1, (int)$comp->required_quantity);
                                 
                                 // Price override formatting: Whole numbers without decimals
-                                $effectiveUnitPrice = ($comp->price_override !== null && $comp->price_override !== '') 
-                                    ? (float)$comp->price_override 
-                                    : (float)$comp->unit_price;
+                                $effectiveUnitPrice = (float)($comp->unit_price > 0 ? $comp->unit_price : ($comp->price_override ?? 0));
                                 $formattedUnitPrice = ($effectiveUnitPrice > 0) ? (string)(int)round($effectiveUnitPrice) : '0';
                                 $activeQty = $isSelected ? $minQtyVal : 0;
                                 $lineTotal = $effectiveUnitPrice * $activeQty;
@@ -679,10 +675,13 @@ ksort($categoriesList);
                                     
                                     <!-- Unit Price (Clean full amount, no rupee symbol) -->
                                     <td class="text-right">
+                                        <input type="hidden" name="bundle_items[<?= $idx; ?>][base_price_override]" class="bundle-base-price-input" value="<?= ($comp->base_price_override !== null) ? (float)$comp->base_price_override : (($comp->price_override !== null) ? (float)$comp->price_override : ''); ?>">
+                                        <input type="hidden" name="bundle_items[<?= $idx; ?>][orig_unit_price]" class="bundle-orig-unit-price-input" value="<?= $formattedUnitPrice; ?>">
                                         <input type="number" step="any" min="0" 
                                                name="bundle_items[<?= $idx; ?>][price_override]" 
                                                class="form-control form-control-sm bundle-price-input text-right" 
                                                value="<?= $formattedUnitPrice; ?>" 
+                                               data-orig-unit-price="<?= $formattedUnitPrice; ?>"
                                                placeholder="0"
                                                onchange="normalizePriceInput(this); recalculateBundleTotals(true);"
                                                onblur="normalizePriceInput(this);"
@@ -1895,6 +1894,8 @@ function autoSaveBundleItemsAjax() {
             var qty = parseInt($row.find('.bundle-qty-input').val()) || 1;
             var price = parseFloat($row.find('.bundle-price-input').val());
             if (isNaN(price)) price = null;
+            var baseOverride = $row.find('.bundle-base-price-input').val();
+            var origUnitPrice = $row.find('.bundle-orig-unit-price-input').val();
 
             items.push({
                 component_product_id: compId,
@@ -1902,7 +1903,9 @@ function autoSaveBundleItemsAjax() {
                 is_optional: isOpt,
                 is_selected: isSel ? 1 : 0,
                 quantity: qty,
-                price_override: price
+                price_override: price,
+                base_price_override: baseOverride,
+                orig_unit_price: origUnitPrice
             });
         });
 
