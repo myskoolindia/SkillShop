@@ -6,6 +6,7 @@ use Illuminate\Support\Str;
 use Modules\Order\app\Models\Enrollment;
 
 class RoboquestService {
+    public function __construct(private ProductCourseMapService $productCourses) {}
     public function connection(User $user): ?RoboquestConnection {
         $defaultUrl = env('DEFAULT_ROBOQUEST_URL');
         $defaultKey = env('DEFAULT_ROBOQUEST_KEY');
@@ -108,7 +109,7 @@ class RoboquestService {
             $url=parse_url((string)$value);
             return filter_var($value,FILTER_VALIDATE_URL) && ($url['scheme']??'')==='https' && !isset($url['user']) && !isset($url['pass']) ? $value : null;
         };
-        return ['schoolId'=>$connection->school_id, 'buyerId'=>(string)$buyerId, 'members'=>$members, 'courses'=>$courses->map(function($course) use ($plain,$video,$buyerId) {
+        $list = $courses->map(function($course) use ($plain,$video,$buyerId) {
             return ['id'=>(string)$course->id, 'externalCourseId'=>$course->api_course_id, 'buyerUserId'=>(string)$buyerId, 'title'=>$course->title,
                 'summary'=>$plain($course->description), 'capacity'=>$course->capacity > 0 ? (int)$course->capacity : null,
                 'chapters'=>$course->chapters->where('status', 'active')->sortBy('order')->values()->map(fn($chapter)=>[
@@ -119,6 +120,31 @@ class RoboquestService {
                         'videoUrl'=>$video($item->lesson),
                     ])->values(),
                 ])];
-        })->values(), 'updatedAt'=>now()->toIso8601String()];
+        })->values()->all();
+        // Courses included with this buyer's paid Club Shop lab products (Mapper API). A direct course purchase takes precedence.
+        // Lesson content for these courses comes from the RoboQuest platform Content Studio.
+        $owned = $courses->pluck('api_course_id')->filter()->map(fn($id) => (string)$id)->all();
+        foreach ($this->labCourses([(int)$buyerId]) as $courseId => $mapped) {
+            if (in_array((string)$courseId, $owned, true)) continue;
+            $list[] = ['id'=>'lab-course-'.$courseId, 'externalCourseId'=>$courseId, 'buyerUserId'=>(string)$buyerId, 'title'=>$mapped['title'],
+                'summary'=>'Included with '.implode(', ', array_column($mapped['labProducts'], 'title')),
+                'capacity'=>null, 'chapters'=>[], 'source'=>'lab-product', 'labProducts'=>$mapped['labProducts']];
+        }
+        return ['schoolId'=>$connection->school_id, 'buyerId'=>(string)$buyerId, 'members'=>$members, 'courses'=>$list, 'updatedAt'=>now()->toIso8601String()];
+    }
+    /**
+     * Provider course ID => mapped course, for the paid Club Shop lab products of these portal users.
+     * Fails closed (503) so a mapper or Club Shop outage never removes or grants access.
+     */
+    public function labCourses(array $portalUserIds): array {
+        try { return $this->productCourses->coursesForBuyers($portalUserIds); }
+        catch (\Throwable $error) {
+            report($error);
+            abort(503, 'Lab course access is temporarily unavailable. Existing access is unchanged; try again shortly.');
+        }
+    }
+    /** Lab-mapped course IDs for the school and its active teachers, for the master's content check. */
+    public function schoolLabCourseIds(RoboquestConnection $connection): array {
+        return array_keys($this->labCourses($this->productCourses->schoolBuyerIds($connection)));
     }
 }

@@ -22,6 +22,8 @@ class RoboquestBridgeTest extends TestCase {
         Schema::create('course_chapter_items',function(Blueprint $t){$t->id();$t->foreignId('chapter_id');$t->integer('order')->default(0);});
         Schema::create('course_chapter_lessons',function(Blueprint $t){$t->id();$t->foreignId('chapter_item_id');$t->string('title');$t->text('description')->nullable();$t->text('material_required')->nullable();$t->text('video_url')->nullable();});
         $migration=require database_path('migrations/2026_10_27_000001_create_roboquest_connections.php');$migration->up();
+        // Lab-mapped courses are covered by ProductCourseMapTest; these tests have no Club Shop database.
+        config(['services.collab.lab_course_access'=>false]);
     }
     private function user(string $email,string $role='school'): User {
         return User::withoutEvents(fn()=>User::create(['name'=>$role,'email'=>$email,'role'=>$role,'password'=>Hash::make('Test-Only-Password-2026!'),'status'=>'active','is_banned'=>'no','email_verified_at'=>now()]));
