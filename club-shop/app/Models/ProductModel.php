@@ -151,24 +151,22 @@ class ProductModel extends BaseModel
             return false;
         }
 
-        $price = numToDecimal(inputPost('price') ?? 0);
-        $discountAmount = numToDecimal(inputPost('discount_amount') ?? 0);
-        $priceDiscounted = numToDecimal(inputPost('price_discounted') ?? 0);
+        $price = (float)numToDecimal(inputPost('price') ?? 0);
+        $discountAmount = (float)numToDecimal(inputPost('discount_amount') ?? 0);
+        $priceDiscounted = (float)numToDecimal(inputPost('price_discounted') ?? 0);
 
         $noDiscount = !empty(inputPost('checkbox_has_discount'));
         if ($discountAmount > 0 && $price > 0) {
             $noDiscount = false;
-            $priceDiscounted = max(0, round($price - $discountAmount, 2));
         }
 
-        if (!$noDiscount && $price > 0 && $priceDiscounted > 0 && $priceDiscounted < $price) {
-            $discountRate = @intval((($price - $priceDiscounted) * 100) / $price);
-            if (empty($discountRate)) {
-                $discountRate = 0;
+        if (!$noDiscount && $price > 0 && ($discountAmount > 0 || ($priceDiscounted > 0 && $priceDiscounted < $price))) {
+            if ($discountAmount > 0) {
+                $priceDiscounted = max(0, round($price - $discountAmount, 2));
+            } else {
+                $discountAmount = max(0, round($price - $priceDiscounted, 2));
             }
-            if ($discountAmount <= 0) {
-                $discountAmount = round($price - $priceDiscounted, 2);
-            }
+            $discountRate = ($price > 0) ? (int)round((($price - $priceDiscounted) * 100) / $price) : 0;
         } else {
             $priceDiscounted = $price;
             $discountRate = 0;
@@ -206,10 +204,14 @@ class ProductModel extends BaseModel
             $bMetrics = $bundleModel->calculateBundleMetrics($id);
             if (!empty($bMetrics['total_components']) && $bMetrics['total_components'] > 0) {
                 $data['stock'] = $bMetrics['max_stock'];
-                if ($price <= 0 && !empty($bMetrics['sum_price']) && $bMetrics['sum_price'] > 0) {
-                    $data['price'] = $bMetrics['sum_price'];
-                    $data['price_discounted'] = $bMetrics['sum_price'];
-                    $data['discount_rate'] = 0;
+                if ($price <= 0) {
+                    $pkgVal = !empty($bMetrics['all_sum_price']) ? $bMetrics['all_sum_price'] : ($bMetrics['sum_price'] ?? 0);
+                    if ($pkgVal > 0) {
+                        $data['price'] = $pkgVal;
+                        $data['price_discounted'] = $pkgVal;
+                        $data['discount_rate'] = 0;
+                        $data['discount_amount'] = 0;
+                    }
                 }
             }
         }

@@ -1016,24 +1016,41 @@ if (!function_exists('getVendorPages')) {
 if (!function_exists('numToDecimal')) {
     function numToDecimal($price)
     {
-        if ($price === null || trim($price) === '') {
+        if ($price === null || trim((string)$price) === '') {
             return 0;
         }
 
-        $sanitized = preg_replace('/[^\d.,-]/', '', $price);
+        $sanitized = preg_replace('/[^\d.,-]/', '', (string)$price);
+
+        $defaultCurrency = getContextValue('defaultCurrency');
+        $isEuropean = (!empty($defaultCurrency->currency_format) && $defaultCurrency->currency_format === 'european');
 
         $lastCommaPos = strrpos($sanitized, ',');
         $lastDotPos = strrpos($sanitized, '.');
 
         if ($lastCommaPos !== false && $lastDotPos !== false) {
             if ($lastCommaPos > $lastDotPos) {
+                // e.g. 1.234,56
                 $sanitized = str_replace('.', '', $sanitized);
                 $sanitized = str_replace(',', '.', $sanitized);
             } else {
+                // e.g. 1,234.56
                 $sanitized = str_replace(',', '', $sanitized);
             }
         } elseif ($lastCommaPos !== false) {
-            $sanitized = str_replace(',', '.', $sanitized);
+            if ($isEuropean) {
+                $sanitized = str_replace(',', '.', $sanitized);
+            } else {
+                // In US/Indian format, comma is thousands separator: "121,170" -> "121170", "9,909" -> "9909"
+                $sanitized = str_replace(',', '', $sanitized);
+            }
+        } elseif ($lastDotPos !== false) {
+            if ($isEuropean) {
+                // In European format, if dot is thousands separator with 3 digits after it, e.g. "1.234" -> "1234"
+                if (strlen($sanitized) - $lastDotPos - 1 === 3) {
+                    $sanitized = str_replace('.', '', $sanitized);
+                }
+            }
         }
 
         if (!is_numeric($sanitized)) {

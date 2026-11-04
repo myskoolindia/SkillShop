@@ -1292,6 +1292,15 @@ if (!function_exists('applyProductMarkup')) {
             return $product;
         }
 
+        if (!empty($product->is_bundle)) {
+            // Bundle package pricing is calculated from its components (which already reflect individual markups/discounts)
+            // or explicit package pricing; prevent secondary compound markup.
+            $product->base_price = (float)($product->price ?? 0);
+            $product->base_price_discounted = (float)($product->price_discounted ?? 0);
+            $product->is_markup_applied = 1;
+            return $product;
+        }
+
         $markupRate = getProductMarkupRate($product);
         $product->base_price = (float)($product->price ?? 0);
         $product->base_price_discounted = (float)($product->price_discounted ?? 0);

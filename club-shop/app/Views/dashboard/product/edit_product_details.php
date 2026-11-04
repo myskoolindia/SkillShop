@@ -38,7 +38,7 @@ if ($showShippingOptionsWarning): ?>
 <div class="row">
     <div class="col-sm-12">
         <?php if ($product->is_draft != 1): ?>
-            <h1 class="product-form-title"><?= trans("edit_product"); ?></h1>
+            <h1 class="product-form-title"><?= trans("edit_product"); ?><?= !empty($productTitle) ? ' (' . esc($productTitle) . ')' : ''; ?></h1>
         <?php endif; ?>
 
         <?= view('dashboard/product/_section_digital'); ?>

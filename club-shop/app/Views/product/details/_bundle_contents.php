@@ -1035,14 +1035,10 @@ function recalculateStorefrontBundleTotals() {
     $bundleFixedDiscount = 0.0;
     if (isset($product->discount_amount) && (float)$product->discount_amount > 0) {
         $bundleFixedDiscount = (float)$product->discount_amount;
-    } elseif (isStoreDiscountActive()) {
-        if (!empty($product->price) && !empty($product->price_discounted) && (float)$product->price_discounted < (float)$product->price) {
-            $bundleFixedDiscount = (float)$product->price - (float)$product->price_discounted;
-        } elseif (!empty($product->discount_rate) && (float)$product->discount_rate > 0) {
-            $bundleFixedDiscount = round((float)($product->price ?? 0) * ((float)$product->discount_rate / 100), 2);
-        } elseif (!empty($product->bundle_discount_rate) && (float)$product->bundle_discount_rate > 0) {
-            $bundleFixedDiscount = round((float)($product->price ?? 0) * ((float)$product->bundle_discount_rate / 100), 2);
-        }
+    } elseif (!empty($product->bundle_discount_rate) && (float)$product->bundle_discount_rate > 0) {
+        $bundleFixedDiscount = round((float)($initialGrandTotalPrice ?? 0) * ((float)$product->bundle_discount_rate / 100), 2);
+    } elseif (!empty($product->discount_rate) && (float)$product->discount_rate > 0) {
+        $bundleFixedDiscount = round((float)($initialGrandTotalPrice ?? 0) * ((float)$product->discount_rate / 100), 2);
     }
     ?>
     var fixedDiscountPerBundle = <?= (float)$bundleFixedDiscount; ?>;
@@ -1147,7 +1143,7 @@ function recalculateStorefrontBundleTotals() {
 
 window.recalculateStorefrontBundleTotals = recalculateStorefrontBundleTotals;
 
-$(document).ready(function() {
+function initBundleStorefront($) {
     applyBundleStorefrontFilters();
 
     $('.bundle-storefront-qty-input').each(function() {
@@ -1270,7 +1266,28 @@ $(document).ready(function() {
             }, 250);
         }
     }
-});
+}
+
+if (typeof jQuery !== 'undefined' && typeof $ !== 'undefined') {
+    $(document).ready(function() {
+        initBundleStorefront(jQuery);
+    });
+} else {
+    var checkJqInterval = setInterval(function() {
+        if (typeof jQuery !== 'undefined' && typeof $ !== 'undefined') {
+            clearInterval(checkJqInterval);
+            jQuery(document).ready(function() {
+                initBundleStorefront(jQuery);
+            });
+        }
+    }, 25);
+    window.addEventListener('load', function() {
+        clearInterval(checkJqInterval);
+        if (typeof jQuery !== 'undefined') {
+            initBundleStorefront(jQuery);
+        }
+    });
+}
 
 function selectBundleVariant(pill) {
     var $pill    = $(pill);

@@ -51,6 +51,14 @@
                 $productDiscountAmount = isset($product->discount_amount) && (float)$product->discount_amount > 0 
                     ? (float)$product->discount_amount 
                     : (((float)$product->price > (float)$product->price_discounted) ? ((float)$product->price - (float)$product->price_discounted) : 0);
+
+                $initialDiscountRate = 0;
+                if (!empty($product->price) && (float)$product->price > 0 && !empty($productDiscountAmount) && (float)$productDiscountAmount > 0) {
+                    $calcRate = round(((float)$productDiscountAmount / (float)$product->price) * 100);
+                    $initialDiscountRate = ($calcRate == 0) ? '<1' : (int)$calcRate;
+                } elseif (!empty($product->discount_rate)) {
+                    $initialDiscountRate = (int)$product->discount_rate;
+                }
                 ?>
 
                 <div id="price_input_container" class="form-group"
@@ -72,9 +80,9 @@
                             <div id="discount_amount_input_container">
                                 <?= renderPriceInput('discount_amount', $productDiscountAmount, ['class' => 'form-control price-input', 'id' => 'product_discount_amount_input', 'placeholder' => '0.00']); ?>
                             </div>
-                            <div id="container_discount_rate_pill" class="m-t-5" style="<?= ($product->discount_rate == 0 && empty($productDiscountAmount)) ? 'display:none;' : ''; ?>">
+                            <div id="container_discount_rate_pill" class="m-t-5" style="<?= (empty($initialDiscountRate) && empty($productDiscountAmount)) ? 'display:none;' : ''; ?>">
                                 <span class="badge" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px;">
-                                    <i class="fa fa-tag"></i> <span id="badge_discount_rate_val"><?= ($product->discount_rate == 0 && !empty($productDiscountAmount)) ? '<1' : $product->discount_rate; ?></span>% OFF
+                                    <i class="fa fa-tag"></i> <span id="badge_discount_rate_val"><?= $initialDiscountRate; ?></span>% OFF
                                 </span>
                             </div>
                         </div>
@@ -521,6 +529,27 @@ if ($product->listing_type == 'sell_on_site' || $product->listing_type == 'licen
                 }
                 calculateEarnings();
             };
+
+            // Ensure inputs submit clean raw unformatted numbers without thousands separators
+            $('form').has('#product_price_input').on('submit', function() {
+                var p = getNumericValue($('#product_price_input').val());
+                var da = getNumericValue($('#product_discount_amount_input').val());
+                var dp = getNumericValue($('#product_discounted_price_input').val());
+                var isNoDisc = $('#checkbox_discount_rate').is(':checked');
+
+                if (p > 0) {
+                    $('#product_price_input').val(p);
+                }
+                if (!isNoDisc && da > 0) {
+                    $('#product_discount_amount_input').val(da);
+                    if (dp >= 0 && dp <= p) {
+                        $('#product_discounted_price_input').val(dp);
+                    }
+                } else if (isNoDisc) {
+                    $('#product_discount_amount_input').val(0);
+                    $('#product_discounted_price_input').val(p);
+                }
+            });
         });
     </script>
 <?php endif; ?>

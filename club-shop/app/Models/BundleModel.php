@@ -331,9 +331,9 @@ class BundleModel extends BaseModel
                 }
                 $origPrice = $markedPrice;
 
-                // 2. Apply discount if store discount is active and bundle doesn't have package-level discount
+                // 2. Apply discount if store discount is active
                 $overrideDiscountRate = 0.0;
-                if ($isDiscountActive && !$hasBundleDiscount) {
+                if ($isDiscountActive) {
                     $catDisc = !empty($prod->category_id) ? getCategoryDiscountRate($prod->category_id) : null;
                     if ($catDisc !== null) {
                         $overrideDiscountRate = (float)$catDisc;
@@ -359,7 +359,7 @@ class BundleModel extends BaseModel
                 $markedVariantPrice = ($variantMarkupRate > 0) ? calculateMarkupPrice($baseVariantPrice, $variantMarkupRate) : $baseVariantPrice;
                 $origPrice = $markedVariantPrice;
 
-                $childDiscountRate = ($isDiscountActive && !$hasBundleDiscount) ? getProductDiscountRate($prod) : 0.0;
+                $childDiscountRate = $isDiscountActive ? getProductDiscountRate($prod) : 0.0;
                 if ($childDiscountRate > 0) {
                     $discountAmt = round($markedVariantPrice * ($childDiscountRate / 100), 2);
                     $unitPrice = max(0, round($markedVariantPrice - $discountAmt, 2));
@@ -371,9 +371,9 @@ class BundleModel extends BaseModel
                 $item->discount_rate = $childDiscountRate;
             } else {
                 $origPrice = (float)($prod->price > 0 ? $prod->price : $prod->base_price);
-                $unitPrice = (float)(($isDiscountActive && !$hasBundleDiscount && $prod->price_discounted > 0) ? $prod->price_discounted : ($prod->price > 0 ? $prod->price : $prod->base_price));
+                $unitPrice = (float)(($isDiscountActive && $prod->price_discounted > 0) ? $prod->price_discounted : ($prod->price > 0 ? $prod->price : $prod->base_price));
                 $item->price_override = null;
-                $childDiscountRate = ($isDiscountActive && !$hasBundleDiscount) ? getProductDiscountRate($prod) : 0.0;
+                $childDiscountRate = $isDiscountActive ? getProductDiscountRate($prod) : 0.0;
                 $item->markup_rate = $prod->markup_rate ?? ($isMarkupActive ? getProductMarkupRate($prod) : 0.0);
                 $item->discount_rate = $childDiscountRate;
             }
@@ -439,14 +439,24 @@ class BundleModel extends BaseModel
         $minStock = null;
         $sumPrice = 0.00;
         $totalUnits = 0;
+        $allSumPrice = 0.00;
+        $allUnits = 0;
 
         foreach ($components as $component) {
+            $compQty = (int)$component->required_quantity;
+            $compLineTotal = (float)$component->total_price;
+
+            if ($compQty > 0) {
+                $allUnits += $compQty;
+                $allSumPrice += $compLineTotal;
+            }
+
             if (!empty($component->is_optional)) {
                 continue;
             }
 
-            $totalUnits += $component->required_quantity;
-            $sumPrice += $component->total_price;
+            $totalUnits += $compQty;
+            $sumPrice += $compLineTotal;
 
             $maxBundlesFromComponent = $component->max_possible_bundles;
             if ($minStock === null || $maxBundlesFromComponent < $minStock) {
@@ -461,6 +471,8 @@ class BundleModel extends BaseModel
             'total_units' => $totalUnits,
             'max_stock' => $maxStock,
             'sum_price' => round($sumPrice, 2),
+            'all_units' => $allUnits,
+            'all_sum_price' => round($allSumPrice, 2),
             'is_in_stock' => $maxStock > 0
         ];
     }

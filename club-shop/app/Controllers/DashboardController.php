@@ -170,9 +170,15 @@ class DashboardController extends BaseController
         if ($product->user_id != $this->userId && !hasPermission('products')) {
             return redirect()->to(dashboardUrl());
         }
+        $productDetails = getProductDetails($product->id, $this->activeLang->id);
+        $productTitle = !empty($productDetails->title) ? $productDetails->title : '';
         $title = $product->is_draft == 1 ? trans('add_product') : trans('edit_product');
+        if (!empty($productTitle)) {
+            $title .= ' (' . $productTitle . ')';
+        }
         $data = $this->setMetaData($title);
         $data['product'] = $product;
+        $data['productTitle'] = $productTitle;
         $data['category'] = $this->categoryModel->getCategory($product->category_id);
         $data['productImages'] = $this->fileModel->getProductImages($product->id);
         $data['fileManagerImages'] = $this->fileModel->getUserFileManagerImages($this->userId);
@@ -262,9 +268,15 @@ class DashboardController extends BaseController
             return redirect()->to(generateDashUrl('edit_product') . '/' . $product->id);
         }
         $category = getCategory($product->category_id);
+        $productDetails = getProductDetails($product->id, $this->activeLang->id);
+        $productTitle = !empty($productDetails->title) ? $productDetails->title : '';
         $title = $product->is_draft == 1 ? trans('add_product') : trans('edit_product');
+        if (!empty($productTitle)) {
+            $title .= ' (' . $productTitle . ')';
+        }
         $data = $this->setMetaData($title);
         $data['product'] = $product;
+        $data['productTitle'] = $productTitle;
         $fieldModel = new FieldModel();
         $data["customFields"] = $fieldModel->getCustomFieldsByCategory($product->category_id);
 
@@ -445,9 +457,20 @@ class DashboardController extends BaseController
         if ($applyPrice !== null && is_numeric($applyPrice) && (float)$applyPrice > 0) {
             $upPrice = round((float)$applyPrice);
             $upData = ['price' => $upPrice];
+            $flatDisc = isset($product->discount_amount) && (float)$product->discount_amount > 0 ? (float)$product->discount_amount : 0.0;
             $dRate = (float)($product->bundle_discount_rate ?: ($product->discount_rate ?? 0));
-            if ($dRate > 0) {
+
+            if ($flatDisc > 0 && $upPrice > $flatDisc) {
+                $upData['discount_amount'] = $flatDisc;
+                $upData['price_discounted'] = max(0, round($upPrice - $flatDisc, 2));
+                $upData['discount_rate'] = (int)round(($flatDisc * 100) / $upPrice);
+            } elseif ($dRate > 0) {
                 $upData['price_discounted'] = round($upPrice * (1 - ($dRate / 100)));
+                $upData['discount_rate'] = (int)round($dRate);
+            } else {
+                $upData['price_discounted'] = $upPrice;
+                $upData['discount_rate'] = 0;
+                $upData['discount_amount'] = 0;
             }
             $this->db->table('products')->where('id', $productId)->update($upData);
         }
