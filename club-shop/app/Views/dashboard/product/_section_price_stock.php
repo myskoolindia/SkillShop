@@ -50,7 +50,7 @@
                 $spaceMoneySymbol = $defaultCurrency->space_money_symbol;
                 $productDiscountAmount = isset($product->discount_amount) && (float)$product->discount_amount > 0 
                     ? (float)$product->discount_amount 
-                    : (((float)$product->price > (float)$product->price_discounted && (int)$product->discount_rate > 0) ? ((float)$product->price - (float)$product->price_discounted) : 0);
+                    : (((float)$product->price > (float)$product->price_discounted) ? ((float)$product->price - (float)$product->price_discounted) : 0);
                 ?>
 
                 <div id="price_input_container" class="form-group"
@@ -74,7 +74,7 @@
                             </div>
                             <div id="container_discount_rate_pill" class="m-t-5" style="<?= ($product->discount_rate == 0 && empty($productDiscountAmount)) ? 'display:none;' : ''; ?>">
                                 <span class="badge" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px;">
-                                    <i class="fa fa-tag"></i> <span id="badge_discount_rate_val"><?= $product->discount_rate; ?></span>% OFF
+                                    <i class="fa fa-tag"></i> <span id="badge_discount_rate_val"><?= ($product->discount_rate == 0 && !empty($productDiscountAmount)) ? '<1' : $product->discount_rate; ?></span>% OFF
                                 </span>
                             </div>
                         </div>
@@ -313,7 +313,11 @@ if ($product->listing_type == 'sell_on_site' || $product->listing_type == 'licen
                     isSyncingInputs = false;
 
                     var discountRate = Math.round((discountAmount / price) * 100);
-                    $('#badge_discount_rate_val').text(discountRate);
+                    var rateLabel = discountRate;
+                    if (discountRate === 0 && discountAmount > 0) {
+                        rateLabel = '<1';
+                    }
+                    $('#badge_discount_rate_val').text(rateLabel);
                     $('#container_discount_rate_pill').show();
                 } else {
                     isSyncingInputs = true;
@@ -340,7 +344,11 @@ if ($product->listing_type == 'sell_on_site' || $product->listing_type == 'licen
                     isSyncingInputs = false;
 
                     var discountRate = Math.round((discountAmount / price) * 100);
-                    $('#badge_discount_rate_val').text(discountRate);
+                    var rateLabel = discountRate;
+                    if (discountRate === 0 && discountAmount > 0) {
+                        rateLabel = '<1';
+                    }
+                    $('#badge_discount_rate_val').text(rateLabel);
                     $('#container_discount_rate_pill').show();
                 } else {
                     isSyncingInputs = true;
@@ -393,9 +401,15 @@ if ($product->listing_type == 'sell_on_site' || $product->listing_type == 'licen
                 // Prevent negative earnings
                 if (earnedAmount < 0) earnedAmount = 0;
 
-                $('#span_discount_rate').text(discountRate + '%');
-                $('#badge_discount_rate_val').text(discountRate);
-                if (discountRate > 0 && !isNoDiscount) {
+                var discAmount = price - finalPrice;
+                var rateLabel = discountRate;
+                if (discountRate === 0 && discAmount > 0) {
+                    rateLabel = '<1';
+                }
+
+                $('#span_discount_rate').text(rateLabel + '%');
+                $('#badge_discount_rate_val').text(rateLabel);
+                if ((discountRate > 0 || discAmount > 0) && !isNoDiscount) {
                     $('#container_discount_rate_pill').show();
                 } else {
                     $('#container_discount_rate_pill').hide();
@@ -442,23 +456,71 @@ if ($product->listing_type == 'sell_on_site' || $product->listing_type == 'licen
 
             // Smart Input Parser
             function getNumericValue(value) {
-                if (!value) return 0;
-                let clean = value.toString().replace(/[^0-9.,-]/g, '');
+                if (value === undefined || value === null) return 0;
+                let clean = value.toString().trim();
                 if (clean === '') return 0;
 
-                let lastDot = clean.lastIndexOf('.');
-                let lastComma = clean.lastIndexOf(',');
+                clean = clean.replace(/[^0-9.,-]/g, '');
+                if (clean === '') return 0;
 
-                if (lastComma > lastDot) {
-                    clean = clean.replace(/\./g, '').replace(',', '.');
-                } else if (lastDot > lastComma) {
+                // Handle known currency format
+                if (thousandsSep === ',' && decimalSep === '.') {
                     clean = clean.replace(/,/g, '');
-                } else if (lastComma > -1) {
-                    clean = clean.replace(',', '.');
+                } else if (thousandsSep === '.' && decimalSep === ',') {
+                    clean = clean.replace(/\./g, '').replace(',', '.');
+                } else {
+                    let lastDot = clean.lastIndexOf('.');
+                    let lastComma = clean.lastIndexOf(',');
+                    if (lastDot > -1 && lastComma > -1) {
+                        if (lastComma > lastDot) {
+                            clean = clean.replace(/\./g, '').replace(',', '.');
+                        } else {
+                            clean = clean.replace(/,/g, '');
+                        }
+                    } else if (lastComma > -1 && lastDot === -1) {
+                        if (clean.length - lastComma - 1 === 3) {
+                            clean = clean.replace(/,/g, '');
+                        } else {
+                            clean = clean.replace(',', '.');
+                        }
+                    }
                 }
 
-                return parseFloat(clean) || 0;
+                let num = parseFloat(clean);
+                return isNaN(num) ? 0 : num;
             }
+
+            // Global function to auto-apply bundle sum (mandatory + optional selected) to price input
+            window.applyCalculatedBundlePrice = function(targetAmount) {
+                if (!targetAmount || targetAmount <= 0) return;
+                targetAmount = Math.round(targetAmount);
+                var currentPrice = getNumericValue($('#product_price_input').val());
+                if (currentPrice === targetAmount) return;
+
+                isSyncingInputs = true;
+                $('#product_price_input').val(formatNumber(targetAmount));
+                isSyncingInputs = false;
+
+                var discountAmount = getNumericValue($('#product_discount_amount_input').val());
+                var isNoDiscount = $('#checkbox_discount_rate').is(':checked');
+                if (!isNoDiscount && discountAmount > 0) {
+                    if (discountAmount > targetAmount) {
+                        discountAmount = targetAmount;
+                        isSyncingInputs = true;
+                        $('#product_discount_amount_input').val(formatNumber(discountAmount));
+                        isSyncingInputs = false;
+                    }
+                    var discountedPrice = Math.max(0, targetAmount - discountAmount);
+                    isSyncingInputs = true;
+                    $('#product_discounted_price_input').val(formatNumber(discountedPrice));
+                    isSyncingInputs = false;
+                } else if (isNoDiscount) {
+                    isSyncingInputs = true;
+                    $('#product_discounted_price_input').val(formatNumber(targetAmount));
+                    isSyncingInputs = false;
+                }
+                calculateEarnings();
+            };
         });
     </script>
 <?php endif; ?>

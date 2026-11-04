@@ -126,6 +126,20 @@ class BundleModel extends BaseModel
             return [];
         }
 
+        $bundleProduct = $this->db->table('products')->where('id', $bundleProductId)->get()->getRow();
+        $hasBundleDiscount = false;
+        if (!empty($bundleProduct)) {
+            if (isset($bundleProduct->discount_amount) && (float)$bundleProduct->discount_amount > 0) {
+                $hasBundleDiscount = true;
+            } elseif (!empty($bundleProduct->bundle_discount_rate) && (float)$bundleProduct->bundle_discount_rate > 0) {
+                $hasBundleDiscount = true;
+            } elseif (!empty($bundleProduct->discount_rate) && (float)$bundleProduct->discount_rate > 0) {
+                $hasBundleDiscount = true;
+            } elseif (!empty($bundleProduct->price) && !empty($bundleProduct->price_discounted) && (float)$bundleProduct->price_discounted < (float)$bundleProduct->price) {
+                $hasBundleDiscount = true;
+            }
+        }
+
         $productIds = [];
         $variantIds = [];
 
@@ -317,9 +331,9 @@ class BundleModel extends BaseModel
                 }
                 $origPrice = $markedPrice;
 
-                // 2. Apply discount if store discount is active
+                // 2. Apply discount if store discount is active and bundle doesn't have package-level discount
                 $overrideDiscountRate = 0.0;
-                if ($isDiscountActive) {
+                if ($isDiscountActive && !$hasBundleDiscount) {
                     $catDisc = !empty($prod->category_id) ? getCategoryDiscountRate($prod->category_id) : null;
                     if ($catDisc !== null) {
                         $overrideDiscountRate = (float)$catDisc;
@@ -345,7 +359,7 @@ class BundleModel extends BaseModel
                 $markedVariantPrice = ($variantMarkupRate > 0) ? calculateMarkupPrice($baseVariantPrice, $variantMarkupRate) : $baseVariantPrice;
                 $origPrice = $markedVariantPrice;
 
-                $childDiscountRate = $isDiscountActive ? getProductDiscountRate($prod) : 0.0;
+                $childDiscountRate = ($isDiscountActive && !$hasBundleDiscount) ? getProductDiscountRate($prod) : 0.0;
                 if ($childDiscountRate > 0) {
                     $discountAmt = round($markedVariantPrice * ($childDiscountRate / 100), 2);
                     $unitPrice = max(0, round($markedVariantPrice - $discountAmt, 2));
@@ -357,9 +371,9 @@ class BundleModel extends BaseModel
                 $item->discount_rate = $childDiscountRate;
             } else {
                 $origPrice = (float)($prod->price > 0 ? $prod->price : $prod->base_price);
-                $unitPrice = (float)(($isDiscountActive && $prod->price_discounted > 0) ? $prod->price_discounted : $prod->price);
+                $unitPrice = (float)(($isDiscountActive && !$hasBundleDiscount && $prod->price_discounted > 0) ? $prod->price_discounted : ($prod->price > 0 ? $prod->price : $prod->base_price));
                 $item->price_override = null;
-                $childDiscountRate = $isDiscountActive ? getProductDiscountRate($prod) : 0.0;
+                $childDiscountRate = ($isDiscountActive && !$hasBundleDiscount) ? getProductDiscountRate($prod) : 0.0;
                 $item->markup_rate = $prod->markup_rate ?? ($isMarkupActive ? getProductMarkupRate($prod) : 0.0);
                 $item->discount_rate = $childDiscountRate;
             }

@@ -1832,6 +1832,11 @@ function recalculateBundleTotals(isUserAction) {
 
     $('#badge_sum_price').text('₹ ' + Math.round(sumPrice).toLocaleString('en-IN'));
     $('#card_mand_sum_disp').text('₹ ' + Math.round(mandSum).toLocaleString('en-IN'));
+
+    // Auto-calculate and apply mandatory + optional selected to Product Price input
+    if (typeof window.applyCalculatedBundlePrice === 'function' && sumPrice > 0) {
+        window.applyCalculatedBundlePrice(sumPrice);
+    }
     
     // Calculate and update live markup and discount display in card
     var markupAmount = Math.max(0, Math.round(sumPrice - mandSum));
