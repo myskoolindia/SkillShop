@@ -953,16 +953,25 @@ class DashboardController extends BaseController
         $id = inputPost('id');
         $quoteRequest = $biddingModel->getQuoteRequest($id);
         if ($biddingModel->submitQuote($quoteRequest)) {
+            // refresh updated quote request data
+            $quoteRequest = $biddingModel->getQuoteRequest($id);
             //send email
             $buyer = getUser($quoteRequest->buyer_id);
             if (!empty($buyer) && getEmailOptionStatus($this->generalSettings, 'bidding_system') == 1) {
+                $content = trans("your_quote_request_replied") . "<br>" . trans("quote") . ": <strong>#" . $quoteRequest->id . "</strong>";
+                if (!empty($quoteRequest->product_title)) {
+                    $content .= "<br>" . trans("product") . ": <strong>" . esc($quoteRequest->product_title) . "</strong>";
+                }
+                if (!empty($quoteRequest->price_offered)) {
+                    $content .= "<br>" . trans("price") . ": <strong>" . priceFormatted($quoteRequest->price_offered, $quoteRequest->price_currency) . "</strong>";
+                }
                 $emailData = [
                     'email_type' => 'quote',
                     'email_address' => $buyer->email,
                     'email_subject' => trans("quote_request"),
                     'template_path' => 'email/main',
                     'email_data' => serialize([
-                        'content' => trans("your_quote_request_replied") . "<br>" . trans("quote") . ": " . "<strong>#" . $quoteRequest->id . "</strong>",
+                        'content' => $content,
                         'url' => generateUrl('quote_requests'),
                         'buttonText' => trans("view_details")
                     ])

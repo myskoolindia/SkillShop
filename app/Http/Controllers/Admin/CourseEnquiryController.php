@@ -13,9 +13,15 @@ use Illuminate\Support\Facades\Log;
 class CourseEnquiryController extends Controller
 {
     private const PLAN_SLUG_MAP = [
-        'composite-skill-lab-basic'   => 'cbse-composite-skill-lab-basic-68',
-        'composite-skill-lab-advance' => 'cbse-composite-skill-lab-advanced-72',
-        'composite-skill-lab-premium' => 'cbse-composite-skill-lab-premium-73',
+        'composite-skill-lab-basic'    => 'cbse-composite-skill-lab-basic-68',
+        'composite-skill-lab-advance'  => 'cbse-composite-skill-lab-advanced-72',
+        'composite-skill-lab-premium'  => 'cbse-composite-skill-lab-premium-73',
+        'skillvation-lab-stem'         => 'skillvation-lab',
+        'skillvation-lab-stem-advance' => 'skillvation-lab-advance',
+        'skillvation-lab-stem-premium' => 'skillvation-lab-premium',
+        'skillvation-lab'              => 'skillvation-lab',
+        'skillvation-lab-advance'      => 'skillvation-lab-advance',
+        'skillvation-lab-premium'      => 'skillvation-lab-premium',
     ];
 
     public function index(Request $request)
@@ -114,11 +120,19 @@ class CourseEnquiryController extends Controller
                         'total'      => $total,
                     ];
                 }
+                $bundleSlug = self::PLAN_SLUG_MAP[$enquiry->source];
+                $bundleRow = DB::connection('clubshop')->table('products')->where('slug', $bundleSlug)->first();
+                $discount = 0.0;
+                if ($bundleRow && (float)($bundleRow->discount_amount ?? 0) > 0) {
+                    $discount = (float)$bundleRow->discount_amount;
+                }
                 $quotation['items']       = $items;
                 $quotation['subtotal']    = $subtotal;
+                $quotation['discount']    = $discount;
                 $taxRate                  = (float) ($quotation['tax_percent'] ?? 18);
-                $quotation['tax_amount']  = round($subtotal * ($taxRate / 100), 2);
-                $quotation['grand_total'] = round($subtotal + $quotation['tax_amount'], 2);
+                $netSubtotal              = max(0, $subtotal - $discount);
+                $quotation['tax_amount']  = round($netSubtotal * ($taxRate / 100), 2);
+                $quotation['grand_total'] = round($netSubtotal + $quotation['tax_amount'], 2);
             }
         }
 
@@ -872,7 +886,22 @@ class CourseEnquiryController extends Controller
                 ->where('is_deleted', 0)
                 ->first();
 
+            if (!$bundle && is_numeric($slug)) {
+                $bundle = DB::connection('clubshop')
+                    ->table('products')
+                    ->where('id', (int)$slug)
+                    ->where('is_deleted', 0)
+                    ->first();
+            }
+
             if (!$bundle) return [];
+
+            // Check store markup setting
+            $markupRate = 0.0;
+            $paySetting = DB::connection('clubshop')->table('payment_settings')->where('id', 1)->first();
+            if ($paySetting && (int)($paySetting->seller_markup_status ?? 0) === 1) {
+                $markupRate = (float)($paySetting->seller_markup_rate ?? 0);
+            }
 
             $rows = DB::connection('clubshop')
                 ->table('product_bundles as pb')
@@ -886,6 +915,9 @@ class CourseEnquiryController extends Controller
                 })
                 ->where('pb.bundle_product_id', $bundle->id)
                 ->where('p.is_deleted', 0)
+                ->where(function($q) {
+                    $q->where('pb.quantity', '>', 0)->orWhere('pb.is_optional', 0);
+                })
                 ->orderBy('cl.name', 'asc')
                 ->orderBy('pb.sort_order', 'asc')
                 ->orderBy('pd.title', 'asc')
@@ -893,6 +925,8 @@ class CourseEnquiryController extends Controller
                     'p.id as product_id',
                     'p.sku',
                     'p.price as regular_price',
+                    'p.is_markup_set',
+                    'p.markup_rate as product_markup_rate',
                     'pb.quantity',
                     'pb.price_override',
                     'pd.title',
@@ -902,7 +936,13 @@ class CourseEnquiryController extends Controller
 
             $components = [];
             foreach ($rows as $r) {
-                $unitPrice = (float) (!empty($r->price_override) && (float) $r->price_override > 0 ? $r->price_override : $r->regular_price);
+                $basePrice = (float) (!empty($r->price_override) && (float) $r->price_override > 0 ? $r->price_override : $r->regular_price);
+                $compMarkup = $markupRate;
+                if (!empty($r->is_markup_set) && (int)$r->is_markup_set === 1) {
+                    $compMarkup = (float)$r->product_markup_rate;
+                }
+                $unitPrice = $compMarkup > 0 ? round($basePrice * (1 + $compMarkup / 100), 2) : $basePrice;
+
                 $qty = (int) ($r->quantity ?? 1);
                 if ($qty <= 0 || empty($r->title)) continue;
 

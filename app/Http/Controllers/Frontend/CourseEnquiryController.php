@@ -68,11 +68,35 @@ class CourseEnquiryController extends Controller
             'page_url' => '/club-shop/skillvation-lab',
             'cart_url' => '/club-shop/skillvation-cart',
         ],
+        'skillvation-lab-stem-advance' => [
+            'slug'     => 'skillvation-lab-advance',
+            'label'    => 'Skillvation Lab Advance',
+            'page_url' => '/club-shop/skillvation-lab-advance',
+            'cart_url' => '/club-shop/advance-cart',
+        ],
+        'skillvation-lab-stem-premium' => [
+            'slug'     => 'skillvation-lab-premium',
+            'label'    => 'Skillvation Lab Premium',
+            'page_url' => '/club-shop/skillvation-lab-premium',
+            'cart_url' => '/club-shop/premium-cart',
+        ],
         'skillvation-lab'              => [
             'slug'     => 'skillvation-lab',
             'label'    => 'Skillvation Lab',
             'page_url' => '/club-shop/skillvation-lab',
             'cart_url' => '/club-shop/skillvation-cart',
+        ],
+        'skillvation-lab-advance'      => [
+            'slug'     => 'skillvation-lab-advance',
+            'label'    => 'Skillvation Lab Advance',
+            'page_url' => '/club-shop/skillvation-lab-advance',
+            'cart_url' => '/club-shop/advance-cart',
+        ],
+        'skillvation-lab-premium'      => [
+            'slug'     => 'skillvation-lab-premium',
+            'label'    => 'Skillvation Lab Premium',
+            'page_url' => '/club-shop/skillvation-lab-premium',
+            'cart_url' => '/club-shop/premium-cart',
         ],
         // Course detail quote form
         'course-detail-quote'          => [
@@ -240,9 +264,33 @@ class CourseEnquiryController extends Controller
 
         if (empty($items)) return null;
 
+        $computedTotal = array_sum(array_column($items, 'total'));
+        $subtotal = isset($raw['subtotal']) && (float)$raw['subtotal'] > 0
+            ? (float)$raw['subtotal']
+            : $computedTotal;
+
+        $discount   = (float)($raw['discount'] ?? ($raw['discount_amount'] ?? 0));
+        $taxPercent = (float)($raw['tax_percent'] ?? 0);
+        $taxAmount  = (float)($raw['tax_amount'] ?? 0);
+        $shipping   = (float)($raw['shipping'] ?? 0);
+
+        if (isset($raw['grand_total']) && (float)$raw['grand_total'] > 0) {
+            $grandTotal = (float)$raw['grand_total'];
+            if ($discount <= 0 && $taxAmount <= 0 && $shipping <= 0 && $subtotal > $grandTotal) {
+                $discount = round($subtotal - $grandTotal, 2);
+            }
+        } else {
+            $grandTotal = max(0, round($subtotal - $discount + $taxAmount + $shipping, 2));
+        }
+
         return [
             'items'       => $items,
             'grouped'     => $grouped,
+            'subtotal'    => $subtotal,
+            'discount'    => $discount,
+            'tax_percent' => $taxPercent,
+            'tax_amount'  => $taxAmount,
+            'shipping'    => $shipping,
             'grand_total' => $grandTotal,
         ];
     }
@@ -301,8 +349,14 @@ class CourseEnquiryController extends Controller
             $grandTotal += $total;
         }
 
+        $subtotal = $grandTotal;
+        $discount = max(0, (float)$request->input('discount', $request->input('discount_amount', 0)));
+        if ($discount > 0) {
+            $grandTotal = max(0, $subtotal - $discount);
+        }
+
         $quotation = !empty($items)
-            ? json_encode(['items' => $items, 'grand_total' => $grandTotal])
+            ? json_encode(['items' => $items, 'subtotal' => $subtotal, 'discount' => $discount, 'grand_total' => $grandTotal])
             : null;
 
         // Forge the inputs store() expects, then delegate to the shared pipeline.
@@ -403,8 +457,19 @@ class CourseEnquiryController extends Controller
 
             if (!$quotationData) {
                 // ── Fetch bundle items server-side from Club Shop API / DB ─
-                $bundleComponents = $this->fetchBundleComponents($targetSlug);
-                $quotationData    = $this->buildQuotationData($bundleComponents);
+                $bundleFetch   = $this->fetchBundleComponents($targetSlug);
+                $components    = $bundleFetch['components'] ?? (is_array($bundleFetch) && isset($bundleFetch[0]) ? $bundleFetch : []);
+                $bundleInfo    = $bundleFetch['bundle'] ?? null;
+                $quotationData = $this->buildQuotationData($components, $bundleInfo);
+            } elseif (!empty($targetSlug) && (empty($quotationData['discount']) || (float)$quotationData['discount'] <= 0)) {
+                // If quotation was passed without discount, check if package has flat discount in clubshop
+                try {
+                    $bundleRow = DB::connection('clubshop')->table('products')->where('slug', $targetSlug)->where('is_deleted', 0)->first();
+                    if ($bundleRow && (float)($bundleRow->discount_amount ?? 0) > 0) {
+                        $quotationData['discount'] = (float)$bundleRow->discount_amount;
+                        $quotationData['grand_total'] = max(0, round($quotationData['subtotal'] - $quotationData['discount'], 2));
+                    }
+                } catch (\Throwable $e) {}
             }
 
             // ── Push to LeadDemo CRM ──────────────────────────────────
@@ -538,11 +603,44 @@ class CourseEnquiryController extends Controller
     {
         if (!$slug) return [];
 
-        // 1. Direct query against clubshop DB
+        // 1. Try local or configured API first (uses full BundleModel with exact markup, optional item handling & discounts)
         try {
-            $bundle = DB::connection('clubshop')->table('products')->where('slug', $slug)->first();
+            $localUrl = url('/club-shop/api/products/slug/' . $slug);
+            $response = Http::timeout(6)->get($localUrl);
+
+            if ($response->successful() && !empty($response->json('data.bundle_components'))) {
+                $data = $response->json('data');
+                return [
+                    'bundle' => [
+                        'id'               => $data['id'] ?? null,
+                        'title'            => $data['title'] ?? '',
+                        'price'            => (float)($data['price'] ?? 0),
+                        'discount_amount'  => (float)($data['discount_amount'] ?? 0),
+                        'discount_rate'    => (int)($data['discount_rate'] ?? 0),
+                        'price_discounted' => (float)($data['price_discounted'] ?? ($data['price'] ?? 0)),
+                    ],
+                    'components' => $data['bundle_components'],
+                ];
+            }
+        } catch (\Throwable $e) {
+            Log::warning('[CourseEnquiry] Bundle API fetch failed: ' . $e->getMessage());
+        }
+
+        // 2. Direct query against clubshop DB
+        try {
+            $bundle = DB::connection('clubshop')->table('products')->where('slug', $slug)->where('is_deleted', 0)->first();
+            if (!$bundle && is_numeric($slug)) {
+                $bundle = DB::connection('clubshop')->table('products')->where('id', (int)$slug)->where('is_deleted', 0)->first();
+            }
             if ($bundle) {
-                $components = DB::connection('clubshop')->table('product_bundles as pb')
+                // Check store markup setting
+                $markupRate = 0.0;
+                $paySetting = DB::connection('clubshop')->table('payment_settings')->where('id', 1)->first();
+                if ($paySetting && (int)($paySetting->seller_markup_status ?? 0) === 1) {
+                    $markupRate = (float)($paySetting->seller_markup_rate ?? 0);
+                }
+
+                $rows = DB::connection('clubshop')->table('product_bundles as pb')
                     ->join('products as p', 'p.id', '=', 'pb.component_product_id')
                     ->leftJoin('product_details as pd', function($j) {
                         $j->on('pd.product_id', '=', 'p.id')->where('pd.lang_id', '=', 1);
@@ -552,71 +650,116 @@ class CourseEnquiryController extends Controller
                         $j->on('cl.category_id', '=', 'c.id')->where('cl.lang_id', '=', 1);
                     })
                     ->where('pb.bundle_product_id', $bundle->id)
-                    ->where('pb.is_optional', 0)
+                    ->where('p.is_deleted', 0)
+                    ->where(function($q) {
+                        $q->where('pb.quantity', '>', 0)->orWhere('pb.is_optional', 0);
+                    })
                     ->orderBy('pb.sort_order')
                     ->select(
                         'p.id',
+                        'p.price as raw_price',
+                        'p.is_markup_set',
+                        'p.markup_rate as product_markup_rate',
                         'pd.title',
                         'cl.name as category_name',
                         'pb.quantity as required_quantity',
-                        DB::raw('COALESCE(pb.price_override, p.price) as unit_price')
+                        'pb.price_override'
                     )
                     ->get();
 
-                if ($components->isNotEmpty()) {
-                    return $components->map(fn($item) => (array) $item)->toArray();
+                if ($rows->isNotEmpty()) {
+                    $components = [];
+                    foreach ($rows as $r) {
+                        $qty = (int)($r->required_quantity ?? 1);
+                        if ($qty <= 0) continue;
+                        $baseVal = !empty($r->price_override) && (float)$r->price_override > 0
+                            ? (float)$r->price_override
+                            : (float)$r->raw_price;
+
+                        $compMarkup = $markupRate;
+                        if (!empty($r->is_markup_set) && (int)$r->is_markup_set === 1) {
+                            $compMarkup = (float)$r->product_markup_rate;
+                        }
+
+                        $unitPrice = $compMarkup > 0 ? round($baseVal * (1 + $compMarkup / 100), 2) : $baseVal;
+
+                        $components[] = [
+                            'id'                => $r->id,
+                            'title'             => $r->title,
+                            'category_name'     => $r->category_name ?? 'General',
+                            'required_quantity' => $qty,
+                            'unit_price'        => $unitPrice,
+                        ];
+                    }
+
+                    return [
+                        'bundle' => [
+                            'id'               => $bundle->id,
+                            'title'            => $bundle->slug,
+                            'price'            => (float)$bundle->price,
+                            'discount_amount'  => (float)($bundle->discount_amount ?? 0),
+                            'discount_rate'    => (int)($bundle->discount_rate ?? 0),
+                            'price_discounted' => (float)($bundle->price_discounted ?? $bundle->price),
+                        ],
+                        'components' => $components,
+                    ];
                 }
             }
         } catch (\Throwable $e) {
             Log::warning('[CourseEnquiry] clubshop DB fetch failed: ' . $e->getMessage());
         }
 
-        // 2. HTTP fallback
-        try {
-            $apiBase  = rtrim(env('SHOP_API_BASE_URL', 'https://test.myskill.club/api/'), '/');
-            $localUrl = url('/club-shop/api/products/slug/' . $slug);
-
-            $response = Http::timeout(5)->get($localUrl);
-
-            if ($response->successful() && !empty($response->json('data.bundle_components'))) {
-                return $response->json('data.bundle_components', []);
-            }
-
-            $response = Http::timeout(5)->get($apiBase . '/products/slug/' . $slug);
-            return $response->successful() ? $response->json('data.bundle_components', []) : [];
-
-        } catch (\Throwable $e) {
-            Log::warning('[CourseEnquiry] Bundle HTTP fetch failed: ' . $e->getMessage());
-            return [];
-        }
+        return [];
     }
 
     // ──────────────────────────────────────────────────────────────
     // Build structured quotation data from bundle components
     // ──────────────────────────────────────────────────────────────
-    private function buildQuotationData(array $components): array
+    private function buildQuotationData(array $components, ?array $bundleInfo = null): array
     {
-        $grouped    = [];
-        $grandTotal = 0;
-        $items      = [];
+        $grouped       = [];
+        $computedTotal = 0.0;
+        $items         = [];
 
         foreach ($components as $c) {
-            if (empty($c['title'])) continue;
-            $qty   = (int)   ($c['required_quantity'] ?? 0);
-            $price = (float) ($c['unit_price'] ?? 0);
+            $title = $c['title'] ?? ($c['item'] ?? ($c['name'] ?? null));
+            if (empty($title)) continue;
+            $qty   = (int) ($c['required_quantity'] ?? ($c['qty'] ?? 1));
+            $price = (float) ($c['unit_price'] ?? ($c['price'] ?? 0));
             if ($qty <= 0) continue;
 
-            $cat   = $c['category_name'] ?? 'General';
-            $total = $price * $qty;
-            $grandTotal += $total;
+            $cat   = $c['category_name'] ?? ($c['category'] ?? ($c['cat'] ?? 'General'));
+            $total = (float) ($c['total_price'] ?? ($c['total'] ?? ($price * $qty)));
+            $computedTotal += $total;
 
-            $items[]       = compact('cat', 'qty', 'price', 'total') + ['item' => $c['title']];
+            $items[]       = compact('cat', 'qty', 'price', 'total') + ['item' => $title];
             $grouped[$cat] = ($grouped[$cat] ?? 0) + $total;
+        }
+
+        $subtotal = $computedTotal;
+        $discount = 0.0;
+        $grandTotal = $computedTotal;
+
+        if (!empty($bundleInfo)) {
+            if (isset($bundleInfo['price']) && (float)$bundleInfo['price'] > 0) {
+                $subtotal = (float)$bundleInfo['price'];
+            }
+            if (isset($bundleInfo['discount_amount']) && (float)$bundleInfo['discount_amount'] > 0) {
+                $discount = (float)$bundleInfo['discount_amount'];
+            } elseif (isset($bundleInfo['price_discounted']) && (float)$bundleInfo['price_discounted'] > 0 && (float)$bundleInfo['price_discounted'] < $subtotal) {
+                $discount = round($subtotal - (float)$bundleInfo['price_discounted'], 2);
+            }
+            $grandTotal = max(0, round($subtotal - $discount, 2));
         }
 
         return [
             'items'       => $items,
             'grouped'     => $grouped,
+            'subtotal'    => $subtotal,
+            'discount'    => $discount,
+            'tax_percent' => 0,
+            'tax_amount'  => 0,
+            'shipping'    => 0,
             'grand_total' => $grandTotal,
         ];
     }
@@ -626,11 +769,22 @@ class CourseEnquiryController extends Controller
     // ──────────────────────────────────────────────────────────────
     private function renderQuotationTable(array $data): string
     {
-        $items = $data['items']       ?? [];
-        $grand = $data['grand_total'] ?? 0;
+        $items    = $data['items']       ?? [];
+        $subtotal = (float) ($data['subtotal'] ?? 0);
+        $discount = (float) ($data['discount'] ?? 0);
+        $taxAmt   = (float) ($data['tax_amount'] ?? 0);
+        $shipping = (float) ($data['shipping'] ?? 0);
+        $grand    = (float) ($data['grand_total'] ?? 0);
 
         if (empty($items)) {
             return '<p style="color:#94a3b8;font-size:13px;">No bundle items found.</p>';
+        }
+
+        if ($subtotal <= 0) {
+            $subtotal = array_sum(array_column($items, 'total'));
+        }
+        if ($grand <= 0) {
+            $grand = max(0, $subtotal - $discount + $taxAmt + $shipping);
         }
 
         // Group rows by category
@@ -662,6 +816,38 @@ class CourseEnquiryController extends Controller
                 . '</tr>';
         }
 
+        $tfoot = '';
+        if ($discount > 0 || $taxAmt > 0 || $shipping > 0) {
+            $tfoot .= '<tr style="background:#f8fafc;">'
+                . '<td colspan="5" style="padding:8px 10px;text-align:right;font-weight:700;color:#475569;border:1px solid #e2e8f0;">Package Subtotal</td>'
+                . '<td style="padding:8px 10px;text-align:right;font-weight:700;color:#1e293b;border:1px solid #e2e8f0;">&#8377;' . number_format($subtotal, 2) . '</td>'
+                . '</tr>';
+            if ($discount > 0) {
+                $tfoot .= '<tr style="background:#f0fdf4;">'
+                    . '<td colspan="5" style="padding:8px 10px;text-align:right;font-weight:700;color:#15803d;border:1px solid #e2e8f0;">Package Discount</td>'
+                    . '<td style="padding:8px 10px;text-align:right;font-weight:800;color:#15803d;border:1px solid #e2e8f0;">-&#8377;' . number_format($discount, 2) . '</td>'
+                    . '</tr>';
+            }
+            if ($taxAmt > 0) {
+                $taxLabel = !empty($data['tax_percent']) ? 'GST / Tax (' . $data['tax_percent'] . '%)' : 'GST / Tax';
+                $tfoot .= '<tr style="background:#f8fafc;">'
+                    . '<td colspan="5" style="padding:8px 10px;text-align:right;font-weight:700;color:#475569;border:1px solid #e2e8f0;">' . $taxLabel . '</td>'
+                    . '<td style="padding:8px 10px;text-align:right;font-weight:700;color:#1e293b;border:1px solid #e2e8f0;">&#8377;' . number_format($taxAmt, 2) . '</td>'
+                    . '</tr>';
+            }
+            if ($shipping > 0) {
+                $tfoot .= '<tr style="background:#f8fafc;">'
+                    . '<td colspan="5" style="padding:8px 10px;text-align:right;font-weight:700;color:#475569;border:1px solid #e2e8f0;">Shipping</td>'
+                    . '<td style="padding:8px 10px;text-align:right;font-weight:700;color:#1e293b;border:1px solid #e2e8f0;">&#8377;' . number_format($shipping, 2) . '</td>'
+                    . '</tr>';
+            }
+        }
+
+        $tfoot .= '<tr style="background:#1e1b4b;">'
+            . '<td colspan="5" style="padding:10px;text-align:right;font-weight:800;color:#fff;font-size:14px;">Grand Total</td>'
+            . '<td style="padding:10px;text-align:right;font-weight:800;color:#fbbf24;font-size:15px;">&#8377;' . number_format($grand, 2) . '</td>'
+            . '</tr>';
+
         return '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;">'
             . '<thead><tr style="background:#1e1b4b;">'
             . '<th style="padding:8px 10px;color:#fff;text-align:center;width:35px;">#</th>'
@@ -672,10 +858,7 @@ class CourseEnquiryController extends Controller
             . '<th style="padding:8px 10px;color:#fff;text-align:right;width:110px;">Total</th>'
             . '</tr></thead>'
             . '<tbody>' . $rows . '</tbody>'
-            . '<tfoot><tr style="background:#1e1b4b;">'
-            . '<td colspan="5" style="padding:10px;text-align:right;font-weight:800;color:#fff;font-size:14px;">Grand Total</td>'
-            . '<td style="padding:10px;text-align:right;font-weight:800;color:#fbbf24;font-size:15px;">&#8377;' . number_format($grand, 2) . '</td>'
-            . '</tr></tfoot>'
+            . '<tfoot>' . $tfoot . '</tfoot>'
             . '</table>';
     }
 
@@ -725,8 +908,18 @@ class CourseEnquiryController extends Controller
         }
 
         if (!$quotationData) {
-            $bundleComponents = $this->fetchBundleComponents($targetSlug);
-            $quotationData    = $this->buildQuotationData($bundleComponents);
+            $bundleFetch   = $this->fetchBundleComponents($targetSlug);
+            $components    = $bundleFetch['components'] ?? (is_array($bundleFetch) && isset($bundleFetch[0]) ? $bundleFetch : []);
+            $bundleInfo    = $bundleFetch['bundle'] ?? null;
+            $quotationData = $this->buildQuotationData($components, $bundleInfo);
+        } elseif (!empty($targetSlug) && (empty($quotationData['discount']) || (float)$quotationData['discount'] <= 0)) {
+            try {
+                $bundleRow = DB::connection('clubshop')->table('products')->where('slug', $targetSlug)->where('is_deleted', 0)->first();
+                if ($bundleRow && (float)($bundleRow->discount_amount ?? 0) > 0) {
+                    $quotationData['discount'] = (float)$bundleRow->discount_amount;
+                    $quotationData['grand_total'] = max(0, round($quotationData['subtotal'] - $quotationData['discount'], 2));
+                }
+            } catch (\Throwable $e) {}
         }
 
         $quotationHtml = $this->renderQuotationTable($quotationData);
@@ -875,6 +1068,44 @@ class CourseEnquiryController extends Controller
                 . '</tr>';
         }
 
+        $subtotal = (float) ($quotationData['subtotal'] ?? 0);
+        $discount = (float) ($quotationData['discount'] ?? 0);
+        $taxAmt   = (float) ($quotationData['tax_amount'] ?? 0);
+        $grand    = (float) ($quotationData['grand_total'] ?? 0);
+
+        if ($subtotal <= 0 && !empty($quotationData['items'])) {
+            $subtotal = array_sum(array_column($quotationData['items'], 'total'));
+        }
+        if ($grand <= 0) {
+            $grand = max(0, $subtotal - $discount + $taxAmt);
+        }
+
+        $pdfFoot = '';
+        if ($discount > 0 || $taxAmt > 0) {
+            $pdfFoot .= '<tr style="background:#f8fafc;">'
+                . '<td colspan="5" style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#475569;">Package Subtotal</td>'
+                . '<td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1e293b;">Rs. ' . number_format($subtotal, 2) . '</td>'
+                . '</tr>';
+            if ($discount > 0) {
+                $pdfFoot .= '<tr style="background:#f0fdf4;">'
+                    . '<td colspan="5" style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;">Package Discount</td>'
+                    . '<td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;">-Rs. ' . number_format($discount, 2) . '</td>'
+                    . '</tr>';
+            }
+            if ($taxAmt > 0) {
+                $taxLabel = !empty($quotationData['tax_percent']) ? 'GST / Tax (' . $quotationData['tax_percent'] . '%)' : 'GST / Tax';
+                $pdfFoot .= '<tr style="background:#f8fafc;">'
+                    . '<td colspan="5" style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#475569;">' . $taxLabel . '</td>'
+                    . '<td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1e293b;">Rs. ' . number_format($taxAmt, 2) . '</td>'
+                    . '</tr>';
+            }
+        }
+
+        $pdfFoot .= '<tr style="background:#1e1b4b;">'
+            . '<td colspan="5" style="padding:8px;text-align:right;font-weight:bold;color:#fff;font-size:10pt;">Grand Total</td>'
+            . '<td style="padding:8px;text-align:right;font-weight:bold;font-size:11pt;color:#fbbf24;">Rs. ' . number_format($grand, 2) . '</td>'
+            . '</tr>';
+
         $quotTable = $qRows
             ? '<table style="width:100%;border-collapse:collapse;font-size:9pt;">'
               . '<thead><tr style="background:#1e1b4b;">'
@@ -885,10 +1116,7 @@ class CourseEnquiryController extends Controller
               . '<th style="padding:7px 8px;color:#fff;text-align:right;width:90px;">Unit Price</th>'
               . '<th style="padding:7px 8px;color:#fff;text-align:right;width:100px;">Total</th>'
               . '</tr></thead><tbody>' . $qRows . '</tbody>'
-              . '<tfoot><tr style="background:#1e1b4b;">'
-              . '<td colspan="5" style="padding:8px;text-align:right;font-weight:bold;color:#fff;font-size:10pt;">Grand Total</td>'
-              . '<td style="padding:8px;text-align:right;font-weight:bold;font-size:11pt;color:#fbbf24;">Rs. ' . number_format($grand, 2) . '</td>'
-              . '</tr></tfoot></table>'
+              . '<tfoot>' . $pdfFoot . '</tfoot></table>'
             : '<p style="color:#94a3b8;">No bundle items available.</p>';
 
         $productLinkHtml = $productLink
