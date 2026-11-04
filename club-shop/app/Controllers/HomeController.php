@@ -498,12 +498,14 @@ class HomeController extends BaseController
                 $fixedDiscount = 0.0;
                 if (isset($product->discount_amount) && (float)$product->discount_amount > 0) {
                     $fixedDiscount = (float)$product->discount_amount;
-                } elseif ($bSum > $bDiscounted) {
-                    $fixedDiscount = $bSum - $bDiscounted;
-                } elseif (!empty($product->discount_rate) && (float)$product->discount_rate > 0) {
-                    $fixedDiscount = round($bSum * ((float)$product->discount_rate / 100), 2);
-                } elseif (!empty($product->bundle_discount_rate) && (float)$product->bundle_discount_rate > 0) {
-                    $fixedDiscount = round($bSum * ((float)$product->bundle_discount_rate / 100), 2);
+                } elseif (isStoreDiscountActive()) {
+                    if ($bSum > $bDiscounted) {
+                        $fixedDiscount = $bSum - $bDiscounted;
+                    } elseif (!empty($product->discount_rate) && (float)$product->discount_rate > 0) {
+                        $fixedDiscount = round($bSum * ((float)$product->discount_rate / 100), 2);
+                    } elseif (!empty($product->bundle_discount_rate) && (float)$product->bundle_discount_rate > 0) {
+                        $fixedDiscount = round($bSum * ((float)$product->bundle_discount_rate / 100), 2);
+                    }
                 }
 
                 if ($fixedDiscount > 0 && ($bSum - $fixedDiscount) > 0) {
@@ -514,8 +516,8 @@ class HomeController extends BaseController
                     $data['productDiscountRate'] = $discountRate;
                 } else {
                     $data['productPrice'] = priceFormatted($bSum, $product->currency, $convertCurrency);
-                    $data['productPriceDiscounted'] = priceFormatted($bDiscounted, $product->currency, $convertCurrency);
-                    $data['productDiscountRate'] = calculateDiscount($bSum, $bDiscounted);
+                    $data['productPriceDiscounted'] = priceFormatted($bSum, $product->currency, $convertCurrency);
+                    $data['productDiscountRate'] = isStoreDiscountActive() ? calculateDiscount($bSum, $bDiscounted) : 0;
                 }
             }
 
@@ -781,12 +783,14 @@ class HomeController extends BaseController
                 $fixedDiscount = 0.0;
                 if (isset($product->discount_amount) && (float)$product->discount_amount > 0) {
                     $fixedDiscount = (float)$product->discount_amount;
-                } elseif ($bSum > $bDiscounted) {
-                    $fixedDiscount = $bSum - $bDiscounted;
-                } elseif (!empty($product->discount_rate) && (float)$product->discount_rate > 0) {
-                    $fixedDiscount = round($bSum * ((float)$product->discount_rate / 100), 2);
-                } elseif (!empty($product->bundle_discount_rate) && (float)$product->bundle_discount_rate > 0) {
-                    $fixedDiscount = round($bSum * ((float)$product->bundle_discount_rate / 100), 2);
+                } elseif (isStoreDiscountActive()) {
+                    if ($bSum > $bDiscounted) {
+                        $fixedDiscount = $bSum - $bDiscounted;
+                    } elseif (!empty($product->discount_rate) && (float)$product->discount_rate > 0) {
+                        $fixedDiscount = round($bSum * ((float)$product->discount_rate / 100), 2);
+                    } elseif (!empty($product->bundle_discount_rate) && (float)$product->bundle_discount_rate > 0) {
+                        $fixedDiscount = round($bSum * ((float)$product->bundle_discount_rate / 100), 2);
+                    }
                 }
 
                 if ($fixedDiscount > 0 && ($bSum - $fixedDiscount) > 0) {
@@ -797,8 +801,8 @@ class HomeController extends BaseController
                     $data['productDiscountRate'] = $discountRate;
                 } else {
                     $data['productPrice'] = priceFormatted($bSum, $product->currency, $convertCurrency);
-                    $data['productPriceDiscounted'] = priceFormatted($bDiscounted, $product->currency, $convertCurrency);
-                    $data['productDiscountRate'] = calculateDiscount($bSum, $bDiscounted);
+                    $data['productPriceDiscounted'] = priceFormatted($bSum, $product->currency, $convertCurrency);
+                    $data['productDiscountRate'] = isStoreDiscountActive() ? calculateDiscount($bSum, $bDiscounted) : 0;
                 }
             }
 

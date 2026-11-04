@@ -1310,7 +1310,12 @@ if (!function_exists('applyProductMarkup')) {
         $catDiscount = !empty($categoryId) ? getCategoryDiscountRate($categoryId) : null;
         $globalDiscount = getGlobalDiscountRate();
 
-        if (!$isDiscountActive) {
+        if (isset($product->discount_amount) && (float)$product->discount_amount > 0 && (float)$product->price > (float)$product->discount_amount) {
+            // Product has explicit flat discount amount configured
+            $flatAmt = (float)$product->discount_amount;
+            $product->price_discounted = max(0, round((float)$product->price - $flatAmt, 2));
+            $product->discount_rate = (int)round(($flatAmt * 100) / (float)$product->price);
+        } elseif (!$isDiscountActive) {
             // Discounts disabled globally
             $product->price_discounted = $product->price;
             $product->discount_rate = 0;

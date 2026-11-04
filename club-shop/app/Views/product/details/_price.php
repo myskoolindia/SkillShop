@@ -10,8 +10,10 @@
     $productDiscountAmount = 0.0;
     if (isset($product->discount_amount) && (float)$product->discount_amount > 0) {
         $productDiscountAmount = (float)$product->discount_amount;
-    } elseif (!empty($product->price) && !empty($product->price_discounted) && (float)$product->price > (float)$product->price_discounted) {
-        $productDiscountAmount = (float)$product->price - (float)$product->price_discounted;
+    } elseif (isStoreDiscountActive()) {
+        if (!empty($product->price) && !empty($product->price_discounted) && (float)$product->price > (float)$product->price_discounted) {
+            $productDiscountAmount = (float)$product->price - (float)$product->price_discounted;
+        }
     }
     ?>
     <?php if ($product->is_free_product): ?>
