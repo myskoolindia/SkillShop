@@ -554,6 +554,59 @@
             </div>
         @endif
 
+        {{-- Ordered Products / Packages Summary --}}
+        @if(!empty($proforma['packages']) && count($proforma['packages']) > 0)
+            <div style="margin-bottom: 22px;">
+                <div style="font-size: 14px; font-weight: 800; color: #1e293b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+                    <i class="fas fa-boxes mr-1 text-primary"></i> {{ __('Ordered Products / Packages') }}
+                </div>
+                <table class="items-table" style="margin-bottom: 12px;">
+                    <thead>
+                        <tr>
+                            <th style="width: 45px; text-align: center;">#</th>
+                            <th>{{ __('Product / Package Description') }}</th>
+                            <th style="width: 80px; text-align: center;">{{ __('Qty') }}</th>
+                            <th style="width: 140px; text-align: right;">{{ __('Unit Price (MRP) (₹)') }}</th>
+                            <th style="width: 140px; text-align: right;">{{ __('Offered Price (₹)') }}</th>
+                            <th style="width: 140px; text-align: right;">{{ __('Total Amount (₹)') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($proforma['packages'] as $pIdx => $pkg)
+                            @php
+                                $pQty = (int)($pkg['quantity'] ?? 1);
+                                $pOrig = (float)($pkg['original_price'] ?? ($pkg['unit_price'] ?? 0));
+                                $pUnit = (float)($pkg['unit_price'] ?? 0);
+                                $pTot  = (float)($pkg['total_price'] ?? ($pUnit * $pQty));
+                            @endphp
+                            <tr>
+                                <td style="text-align: center; color: #94a3b8;">{{ $loop->iteration }}</td>
+                                <td>
+                                    <strong style="color: #0f172a; font-size: 14px;">{{ $pkg['title'] ?? 'Package' }}</strong>
+                                </td>
+                                <td style="text-align: center; font-weight: 700; font-size: 14px;">
+                                    {{ $pQty }}
+                                </td>
+                                <td style="text-align: right; color: #64748b; text-decoration: line-through;">
+                                    ₹{{ number_format($pOrig, 2) }}
+                                </td>
+                                <td style="text-align: right; font-weight: 700; color: #15803d;">
+                                    ₹{{ number_format($pUnit, 2) }}
+                                </td>
+                                <td style="text-align: right; font-weight: 800; color: #0f172a;">
+                                    ₹{{ number_format($pTot, 2) }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="font-size: 14px; font-weight: 800; color: #1e293b; margin-top: 25px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+                <i class="fas fa-list-ul mr-1 text-primary"></i> {{ __('Detailed Bill of Materials (Component Breakdown)') }}
+            </div>
+        @endif
+
         {{-- Items Table --}}
         <table class="items-table">
             <thead>

@@ -560,14 +560,18 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                             foreach ($cart->items as $ci) {
                                                 if ((int)($ci->quantity ?? 0) <= 0) continue;
                                                 $pkgTitle = (string)($ci->title ?? 'Package');
+                                                $origPrice = (float)($ci->original_unit_price ?? ($ci->original_price ?? $ci->unit_price ?? 0));
+                                                $unitPrice = (float)($ci->unit_price ?? 0);
+                                                $pkgQty    = (int)$ci->quantity;
+                                                $discAmt   = (float)($ci->discount_amount ?? max(0, ($origPrice - $unitPrice) * $pkgQty));
                                                 $proposalPackages[] = [
                                                     'product_id'     => (int)($ci->product_id ?? 0),
                                                     'title'          => $pkgTitle,
-                                                    'quantity'       => (int)$ci->quantity,
-                                                    'unit_price'     => (float)($ci->unit_price ?? 0),
-                                                    'total_price'    => (float)($ci->total_price ?? 0),
-                                                    'original_price' => (float)($ci->original_price ?? 0),
-                                                    'discount_amount'=> (float)($ci->discount_amount ?? 0)
+                                                    'quantity'       => $pkgQty,
+                                                    'unit_price'     => $unitPrice,
+                                                    'total_price'    => (float)($ci->total_price ?? ($unitPrice * $pkgQty)),
+                                                    'original_price' => $origPrice,
+                                                    'discount_amount'=> $discAmt
                                                 ];
 
                                                 $hasBundle = !empty($ci->is_bundle) && (!empty($ci->bundle_categories) || !empty($ci->bundle_products));

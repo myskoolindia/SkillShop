@@ -953,6 +953,86 @@ class CourseEnquiryController extends Controller
             . '<td style="padding:10px;text-align:right;font-weight:800;color:#fbbf24;font-size:15px;">&#8377;' . number_format($grand, 2) . '</td>'
             . '</tr>';
 
+        $packages = $data['packages'] ?? [];
+        if (empty($packages) && !empty($items)) {
+            $distinctPackages = [];
+            foreach ($items as $it) {
+                $pkgName = trim((string)($it['package'] ?? ''));
+                if ($pkgName !== '') {
+                    if (!isset($distinctPackages[$pkgName])) {
+                        $distinctPackages[$pkgName] = [
+                            'title'          => $pkgName,
+                            'quantity'       => 1,
+                            'unit_price'     => 0,
+                            'original_price' => 0,
+                            'total_price'    => 0,
+                        ];
+                    }
+                    $distinctPackages[$pkgName]['total_price'] += (float)($it['total'] ?? 0);
+                    $distinctPackages[$pkgName]['unit_price'] = $distinctPackages[$pkgName]['total_price'];
+                    $distinctPackages[$pkgName]['original_price'] = $distinctPackages[$pkgName]['total_price'];
+                }
+            }
+            if (count($distinctPackages) > 1) {
+                $packages = array_values($distinctPackages);
+            }
+        }
+
+        $packagesHtml = '';
+        if (!empty($packages) && is_array($packages)) {
+            $pRows = '';
+            $pSno = 0;
+            foreach ($packages as $pkg) {
+                $pSno++;
+                $pTitle = htmlspecialchars($pkg['title'] ?? 'Package');
+                $pQty = (int)($pkg['quantity'] ?? 1);
+                $pOrigPrice = (float)($pkg['original_price'] ?? ($pkg['unit_price'] ?? 0));
+                $pUnitPrice = (float)($pkg['unit_price'] ?? 0);
+                $pTotal = (float)($pkg['total_price'] ?? ($pUnitPrice * $pQty));
+
+                $bg = ($pSno % 2 === 0) ? 'background:#f8fafc;' : '';
+                $pRows .= '<tr style="' . $bg . '">'
+                    . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:center;">' . $pSno . '</td>'
+                    . '<td style="padding:7px 10px;border:1px solid #e2e8f0;font-weight:700;color:#0f172a;">' . $pTitle . '</td>'
+                    . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:center;font-weight:700;">' . $pQty . '</td>'
+                    . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:right;color:#64748b;">&#8377;' . number_format($pOrigPrice, 2) . '</td>'
+                    . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:right;font-weight:700;color:#15803d;">&#8377;' . number_format($pUnitPrice, 2) . '</td>'
+                    . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:right;font-weight:700;color:#0f172a;">&#8377;' . number_format($pTotal, 2) . '</td>'
+                    . '</tr>';
+            }
+
+            $packagesHtml = '<div style="margin-bottom:20px;">'
+                . '<div style="font-weight:800;font-size:14px;color:#1e293b;margin-bottom:8px;">Ordered Products / Packages</div>'
+                . '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px;">'
+                . '<thead><tr style="background:#1e1b4b;color:#ffffff;">'
+                . '<th style="padding:8px 10px;color:#fff;text-align:center;width:35px;">#</th>'
+                . '<th style="padding:8px 10px;color:#fff;text-align:left;">Product / Package Description</th>'
+                . '<th style="padding:8px 10px;color:#fff;text-align:center;width:55px;">Qty</th>'
+                . '<th style="padding:8px 10px;color:#fff;text-align:right;width:110px;">Unit Price (MRP)</th>'
+                . '<th style="padding:8px 10px;color:#fff;text-align:right;width:110px;">Offered Price</th>'
+                . '<th style="padding:8px 10px;color:#fff;text-align:right;width:120px;">Total</th>'
+                . '</tr></thead>'
+                . '<tbody>' . $pRows . '</tbody>'
+                . '<tfoot>' . $tfoot . '</tfoot>'
+                . '</table></div>';
+        }
+
+        if ($packagesHtml !== '') {
+            return $packagesHtml
+                . '<div style="margin-top:20px;margin-bottom:8px;font-weight:800;font-size:14px;color:#1e293b;">Detailed Bill of Materials (Component Breakdown)</div>'
+                . '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:4px;">'
+                . '<thead><tr style="background:#334155;color:#ffffff;">'
+                . '<th style="padding:8px 10px;color:#fff;text-align:center;width:35px;">#</th>'
+                . '<th style="padding:8px 10px;color:#fff;text-align:left;">Category</th>'
+                . '<th style="padding:8px 10px;color:#fff;text-align:left;">Item / Description</th>'
+                . '<th style="padding:8px 10px;color:#fff;text-align:center;width:50px;">Qty</th>'
+                . '<th style="padding:8px 10px;color:#fff;text-align:right;width:100px;">Unit Price</th>'
+                . '<th style="padding:8px 10px;color:#fff;text-align:right;width:110px;">Total</th>'
+                . '</tr></thead>'
+                . '<tbody>' . $rows . '</tbody>'
+                . '</table>';
+        }
+
         return '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;">'
             . '<thead><tr style="background:#1e1b4b;">'
             . '<th style="padding:8px 10px;color:#fff;text-align:center;width:35px;">#</th>'
@@ -1268,6 +1348,66 @@ class CourseEnquiryController extends Controller
             . '<td style="padding:6px 8px;text-align:right;font-weight:bold;font-size:10.5pt;color:#fbbf24;">Rs. ' . number_format($grand, 2) . '</td>'
             . '</tr>';
 
+        $packages = $quotationData['packages'] ?? [];
+        if (empty($packages) && !empty($quotationData['items'])) {
+            $distinctPackages = [];
+            foreach ($quotationData['items'] as $it) {
+                $pkgName = trim((string)($it['package'] ?? ''));
+                if ($pkgName !== '') {
+                    if (!isset($distinctPackages[$pkgName])) {
+                        $distinctPackages[$pkgName] = [
+                            'title'          => $pkgName,
+                            'quantity'       => 1,
+                            'unit_price'     => 0,
+                            'original_price' => 0,
+                            'total_price'    => 0,
+                        ];
+                    }
+                    $distinctPackages[$pkgName]['total_price'] += (float)($it['total'] ?? 0);
+                    $distinctPackages[$pkgName]['unit_price'] = $distinctPackages[$pkgName]['total_price'];
+                    $distinctPackages[$pkgName]['original_price'] = $distinctPackages[$pkgName]['total_price'];
+                }
+            }
+            if (count($distinctPackages) > 1) {
+                $packages = array_values($distinctPackages);
+            }
+        }
+
+        $packagesHtml = '';
+        if (!empty($packages) && is_array($packages)) {
+            $pRows = '';
+            $pSno = 0;
+            foreach ($packages as $pkgItem) {
+                $pSno++;
+                $pTitle = htmlspecialchars($pkgItem['title'] ?? 'Package');
+                $pQty = (int)($pkgItem['quantity'] ?? 1);
+                $pOrigPrice = (float)($pkgItem['original_price'] ?? ($pkgItem['unit_price'] ?? 0));
+                $pUnitPrice = (float)($pkgItem['unit_price'] ?? 0);
+                $pTotal = (float)($pkgItem['total_price'] ?? ($pUnitPrice * $pQty));
+
+                $bg = ($pSno % 2 === 0) ? 'background:#f8fafc;' : 'background:#ffffff;';
+                $pRows .= '<tr style="' . $bg . '">'
+                    . '<td style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;">' . $pSno . '</td>'
+                    . '<td style="padding:5px 6px;border:1px solid #e2e8f0;font-weight:bold;color:#0f172a;">' . $pTitle . '</td>'
+                    . '<td style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:bold;">' . $pQty . '</td>'
+                    . '<td style="padding:5px 6px;border:1px solid #e2e8f0;text-align:right;color:#64748b;">Rs. ' . number_format($pOrigPrice, 2) . '</td>'
+                    . '<td style="padding:5px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;">Rs. ' . number_format($pUnitPrice, 2) . '</td>'
+                    . '<td style="padding:5px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#0f172a;">Rs. ' . number_format($pTotal, 2) . '</td>'
+                    . '</tr>';
+            }
+
+            $packagesHtml = '<table class="dt" style="width:100%;border-collapse:collapse;font-size:8.5pt;margin-bottom:10px;">'
+                . '<thead><tr style="background:#1e1b4b;color:#ffffff;">'
+                . '<th style="padding:5px 6px;text-align:center;width:25px;color:#fff;">#</th>'
+                . '<th style="padding:5px 6px;text-align:left;color:#fff;">Product / Package Description</th>'
+                . '<th style="padding:5px 6px;text-align:center;width:40px;color:#fff;">Qty</th>'
+                . '<th style="padding:5px 6px;text-align:right;width:85px;color:#fff;">Unit Price (MRP)</th>'
+                . '<th style="padding:5px 6px;text-align:right;width:85px;color:#fff;">Offered Price</th>'
+                . '<th style="padding:5px 6px;text-align:right;width:95px;color:#fff;">Total Amount</th>'
+                . '</tr></thead><tbody>' . $pRows . '</tbody>'
+                . '<tfoot>' . $pdfFoot . '</tfoot></table>';
+        }
+
         $quotTable = $qRows
             ? '<table style="width:100%;border-collapse:collapse;font-size:8.5pt;">'
               . '<thead><tr style="background:#1e1b4b;">'
@@ -1278,7 +1418,7 @@ class CourseEnquiryController extends Controller
               . '<th style="padding:5px 6px;color:#fff;text-align:right;width:80px;">Unit Price</th>'
               . '<th style="padding:5px 6px;color:#fff;text-align:right;width:90px;">Total</th>'
               . '</tr></thead><tbody>' . $qRows . '</tbody>'
-              . '<tfoot>' . $pdfFoot . '</tfoot></table>'
+              . '<tfoot>' . ($packagesHtml ? '' : $pdfFoot) . '</tfoot></table>'
             : '<p style="color:#94a3b8;">No bundle items available.</p>';
 
         $productLinkHtml = $productLink
@@ -1420,6 +1560,33 @@ class CourseEnquiryController extends Controller
             $conclusionText = 'Skillvation offers the school a structured, CBSE-aligned way to give students hands-on exposure across a broad range of skill domains. We request approval to proceed to the detailed planning and procurement stage.';
         }
 
+        if ($packagesHtml !== '') {
+            $commercialAndBomSections = '
+  <h2>8. Commercial Quotation — ' . $pkg . '</h2>
+  ' . $packagesHtml . '
+  <div class="note">
+    A detailed, itemized budget and implementation schedule will be finalized upon domain priority sign-off.
+    Phased procurement can be scheduled across budget cycles to meet institutional milestones.
+  </div>
+
+  <h2>9. Detailed Bill of Materials (Component Breakdown)</h2>
+  ' . $quotTable . '
+
+  <h2>10. Conclusion</h2>
+  <p>' . $conclusionText . '</p>';
+        } else {
+            $commercialAndBomSections = '
+  <h2>8. Quotation &amp; Bill of Materials — ' . $pkg . '</h2>
+  ' . $quotTable . '
+  <div class="note">
+    A detailed, itemized budget and implementation schedule will be finalized upon domain priority sign-off.
+    Phased procurement can be scheduled across budget cycles to meet institutional milestones.
+  </div>
+
+  <h2>9. Conclusion</h2>
+  <p>' . $conclusionText . '</p>';
+        }
+
         $html = '<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1486,15 +1653,7 @@ class CourseEnquiryController extends Controller
   <h2>7. Product &amp; Curriculum Details</h2>
   ' . $productLinkHtml . '
 
-  <h2>8. Quotation &amp; Bill of Materials — ' . $pkg . '</h2>
-  ' . $quotTable . '
-  <div class="note">
-    A detailed, itemized budget and implementation schedule will be finalized upon domain priority sign-off.
-    Phased procurement can be scheduled across budget cycles to meet institutional milestones.
-  </div>
-
-  <h2>9. Conclusion</h2>
-  <p>' . $conclusionText . '</p>
+  ' . $commercialAndBomSections . '
 
   <div class="footer">
     <strong>MYSKOOL LEARNING PRIVATE LIMITED</strong><br>
