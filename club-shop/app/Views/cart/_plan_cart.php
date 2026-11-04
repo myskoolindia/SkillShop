@@ -555,9 +555,21 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                     <?php if ($isProposalOnly):
                                         // Build the quotation from the current cart (incl. bundle items) to send to Skillvation.
                                         $proposalItems = [];
+                                        $proposalPackages = [];
                                         if (!empty($cart->items)) {
                                             foreach ($cart->items as $ci) {
                                                 if ((int)($ci->quantity ?? 0) <= 0) continue;
+                                                $pkgTitle = (string)($ci->title ?? 'Package');
+                                                $proposalPackages[] = [
+                                                    'product_id'     => (int)($ci->product_id ?? 0),
+                                                    'title'          => $pkgTitle,
+                                                    'quantity'       => (int)$ci->quantity,
+                                                    'unit_price'     => (float)($ci->unit_price ?? 0),
+                                                    'total_price'    => (float)($ci->total_price ?? 0),
+                                                    'original_price' => (float)($ci->original_price ?? 0),
+                                                    'discount_amount'=> (float)($ci->discount_amount ?? 0)
+                                                ];
+
                                                 $hasBundle = !empty($ci->is_bundle) && (!empty($ci->bundle_categories) || !empty($ci->bundle_products));
                                                 if ($hasBundle && !empty($ci->bundle_categories)) {
                                                     foreach ($ci->bundle_categories as $bCat) {
@@ -566,18 +578,50 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                                             $q = (int)($bp->quantity ?? 0);
                                                             if ($q <= 0) continue;
                                                             $up = (float)($bp->unit_price ?? 0);
-                                                            $proposalItems[] = ['category'=>$catName,'item'=>(string)($bp->title ?? ''),'qty'=>$q,'unit_price'=>$up,'total'=>$q*$up];
+                                                            $proposalItems[] = [
+                                                                'package'    => $pkgTitle,
+                                                                'category'   => $catName,
+                                                                'item'       => (string)($bp->title ?? ''),
+                                                                'qty'        => $q,
+                                                                'unit_price' => $up,
+                                                                'total'      => $q * $up
+                                                            ];
                                                         }
                                                     }
                                                 } else {
                                                     $q = (int)$ci->quantity;
                                                     $up = (float)($ci->unit_price ?? 0);
-                                                    $proposalItems[] = ['category'=>'Lab','item'=>(string)($ci->title ?? ''),'qty'=>$q,'unit_price'=>$up,'total'=>$q*$up];
+                                                    $proposalItems[] = [
+                                                        'package'    => $pkgTitle,
+                                                        'category'   => 'Lab',
+                                                        'item'       => $pkgTitle,
+                                                        'qty'        => $q,
+                                                        'unit_price' => $up,
+                                                        'total'      => $q * $up
+                                                    ];
                                                 }
                                             }
                                         }
-                                        $proposalGrand = array_sum(array_column($proposalItems, 'total'));
-                                        $proposalPayload = json_encode(['items'=>$proposalItems,'grand_total'=>$proposalGrand]);
+
+                                        $rawItemTotal = array_sum(array_column($proposalItems, 'total'));
+                                        $cartSubtotal = (float)($cart->totals->subtotal ?? $rawItemTotal);
+                                        $cartSavings  = (float)($cart->totals->total_savings ?? 0);
+                                        $cartVat      = (float)($cart->totals->vat ?? 0);
+                                        $cartGrand    = (float)($cart->totals->total_before_shipping ?? max(0, $cartSubtotal - $cartSavings + $cartVat));
+                                        $gstRateVal   = !empty($cartGst['is_interstate'])
+                                            ? (float)($cartGst['igst_rate'] ?? 10.0)
+                                            : (!empty($cartGst['cgst_rate']) ? (float)($cartGst['cgst_rate'] + $cartGst['sgst_rate']) : 10.0);
+
+                                        $proposalPayload = json_encode([
+                                            'items'        => $proposalItems,
+                                            'packages'     => $proposalPackages,
+                                            'raw_total'    => $rawItemTotal,
+                                            'subtotal'     => $cartSubtotal,
+                                            'discount'     => $cartSavings,
+                                            'tax_amount'   => $cartVat,
+                                            'tax_percent'  => $gstRateVal,
+                                            'grand_total'  => $cartGrand
+                                        ]);
                                         $skillvationBase = rtrim(env('LARAVEL_APP_URL', str_replace('/club-shop', '', rtrim(base_url(), '/'))), '/');
                                     ?>
                                         <div class="row-custom m-t-24 m-b-15">
@@ -602,7 +646,18 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                             btn.disabled = true; btn.innerHTML = 'Sending…';
                                             var fd = new FormData();
                                             fd.append('plan_key', cfg.planKey || '');
-                                            fd.append('items', JSON.stringify((cfg.items && cfg.items.items) ? cfg.items.items : []));
+                                            var pData = cfg.items || {};
+                                            fd.append('items', JSON.stringify(pData.items || []));
+                                            fd.append('packages', JSON.stringify(pData.packages || []));
+                                            if (pData.subtotal !== undefined) fd.append('subtotal', pData.subtotal);
+                                            if (pData.discount !== undefined) {
+                                                fd.append('discount', pData.discount);
+                                                fd.append('discount_amount', pData.discount);
+                                            }
+                                            if (pData.tax_amount !== undefined) fd.append('tax_amount', pData.tax_amount);
+                                            if (pData.tax_percent !== undefined) fd.append('tax_percent', pData.tax_percent);
+                                            if (pData.grand_total !== undefined) fd.append('grand_total', pData.grand_total);
+                                            if (pData.raw_total !== undefined) fd.append('raw_total', pData.raw_total);
                                             fetch(cfg.url, {
                                                 method: 'POST',
                                                 headers: { 'Accept': 'application/json' },
