@@ -27,8 +27,8 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-grp">
-                                <label for="password">{{ __('Password') }} <small class="text-muted">({{ __('Default: 123456') }})</small></label>
-                                <input type="text" id="password" name="password" value="{{ old('password') }}" placeholder="{{ __('Enter password (min 4 chars) or leave blank for 123456') }}">
+                                <label for="password">{{ __('Password') }} <small class="text-muted">({{ __('optional') }})</small></label>
+                                <input type="text" id="password" name="password" value="" minlength="8" maxlength="128" autocomplete="new-password" placeholder="{{ __('At least 8 characters, or leave blank to generate one') }}">
                                 <x-frontend.validation-error name="password" />
                             </div>
                         </div>

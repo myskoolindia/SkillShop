@@ -615,6 +615,7 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
         Route::get('teachers', [SchoolTeacherController::class, 'index'])->name('teachers.index');
         Route::get('teachers/create', [SchoolTeacherController::class, 'create'])->name('teachers.create');
         Route::get('teachers/download-template', [SchoolTeacherController::class, 'downloadTemplate'])->name('teachers.download-template');
+        Route::get('teachers/login-details', [SchoolTeacherController::class, 'downloadCredentials'])->name('teachers.login-details');
         Route::get('teachers/{member}', [SchoolTeacherController::class, 'show'])->name('teachers.show');
         Route::post('teachers', [SchoolTeacherController::class, 'store'])->name('teachers.store');
         Route::post('teachers/import', [SchoolTeacherController::class, 'import'])->name('teachers.import');
@@ -625,6 +626,7 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
         Route::get('students', [SchoolStudentController::class, 'index'])->name('students.index');
         Route::get('students/create', [SchoolStudentController::class, 'create'])->name('students.create');
         Route::get('students/download-template', [SchoolStudentController::class, 'downloadTemplate'])->name('students.download-template');
+        Route::get('students/login-details', [SchoolStudentController::class, 'downloadCredentials'])->name('students.login-details');
         Route::get('students/{member}', [SchoolStudentController::class, 'show'])->name('students.show');
         Route::post('students', [SchoolStudentController::class, 'store'])->name('students.store');
         Route::post('students/import', [SchoolStudentController::class, 'import'])->name('students.import');
