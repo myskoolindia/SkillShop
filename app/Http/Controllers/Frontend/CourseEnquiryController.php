@@ -1335,31 +1335,31 @@ class CourseEnquiryController extends Controller
         $pdfFoot = '';
         if ($rawTotal > $subtotal || $discount > 0) {
             $pdfFoot .= '<tr style="background:#f8fafc;">'
-                . '<td colspan="5" style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#64748b;">Component List Total (MRP)</td>'
-                . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#64748b;">Rs. ' . number_format($rawTotal) . '</td>'
+                . '<td colspan="2" style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#64748b;">Component List Total (MRP)</td>'
+                . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#64748b;white-space:nowrap;">Rs. ' . number_format($rawTotal) . '</td>'
                 . '</tr>';
         }
         if ($discount > 0) {
             $pdfFoot .= '<tr style="background:#f0fdf4;">'
-                . '<td colspan="5" style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;">Package Discount / Savings</td>'
-                . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;">-Rs. ' . number_format($discount) . '</td>'
+                . '<td colspan="2" style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;">Package Discount / Savings</td>'
+                . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;white-space:nowrap;">-Rs. ' . number_format($discount) . '</td>'
                 . '</tr>';
         }
         $pdfFoot .= '<tr style="background:#f8fafc;">'
-            . '<td colspan="5" style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1e293b;">Offered Subtotal</td>'
-            . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1e293b;">Rs. ' . number_format($subtotal) . '</td>'
+            . '<td colspan="2" style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1e293b;">Offered Subtotal</td>'
+            . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1e293b;white-space:nowrap;">Rs. ' . number_format($subtotal) . '</td>'
             . '</tr>';
         if ($taxAmt > 0) {
             $taxLabel = !empty($quotationData['tax_percent']) ? 'GST (' . $quotationData['tax_percent'] . '%)' : 'GST';
             $pdfFoot .= '<tr style="background:#f8fafc;">'
-                . '<td colspan="5" style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#475569;">' . $taxLabel . '</td>'
-                . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1e293b;">Rs. ' . number_format($taxAmt) . '</td>'
+                . '<td colspan="2" style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#475569;">' . $taxLabel . '</td>'
+                . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1e293b;white-space:nowrap;">Rs. ' . number_format($taxAmt) . '</td>'
                 . '</tr>';
         }
 
         $pdfFoot .= '<tr style="background:#1e1b4b;">'
-            . '<td colspan="5" style="padding:6px 8px;text-align:right;font-weight:bold;color:#fff;font-size:9.5pt;">Grand Total (Inclusive of all taxes)</td>'
-            . '<td style="padding:6px 8px;text-align:right;font-weight:bold;font-size:10.5pt;color:#fbbf24;">Rs. ' . number_format($grand) . '</td>'
+            . '<td colspan="2" style="padding:6px 8px;text-align:right;font-weight:bold;color:#fff;font-size:9.5pt;">Grand Total (Inclusive of all taxes)</td>'
+            . '<td style="padding:6px 8px;text-align:right;font-weight:bold;font-size:10.5pt;color:#fbbf24;white-space:nowrap;">Rs. ' . number_format($grand) . '</td>'
             . '</tr>';
 
         $packagesHtml = '';
@@ -1370,29 +1370,20 @@ class CourseEnquiryController extends Controller
                 $pSno++;
                 $pTitle = htmlspecialchars($pkgItem['title'] ?? 'Package');
                 $pQty = (int)($pkgItem['quantity'] ?? 1);
-                $pOrigPrice = round((float)($pkgItem['original_price'] ?? ($pkgItem['unit_price'] ?? 0)));
-                $pUnitPrice = round((float)($pkgItem['unit_price'] ?? 0));
-                $pTotal = round((float)($pkgItem['total_price'] ?? ($pUnitPrice * $pQty)));
 
                 $bg = ($pSno % 2 === 0) ? 'background:#f8fafc;' : 'background:#ffffff;';
                 $pRows .= '<tr style="' . $bg . '">'
                     . '<td style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;">' . $pSno . '</td>'
                     . '<td style="padding:5px 6px;border:1px solid #e2e8f0;font-weight:bold;color:#0f172a;">' . $pTitle . '</td>'
                     . '<td style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:bold;">' . $pQty . '</td>'
-                    . '<td style="padding:5px 6px;border:1px solid #e2e8f0;text-align:right;color:#64748b;">Rs. ' . number_format($pOrigPrice) . '</td>'
-                    . '<td style="padding:5px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;">Rs. ' . number_format($pUnitPrice) . '</td>'
-                    . '<td style="padding:5px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#0f172a;">Rs. ' . number_format($pTotal) . '</td>'
                     . '</tr>';
             }
 
             $packagesHtml = '<table class="dt" style="width:100%;border-collapse:collapse;font-size:8.5pt;margin-bottom:10px;">'
                 . '<thead><tr style="background:#1e1b4b;color:#ffffff;">'
-                . '<th style="padding:5px 6px;text-align:center;width:25px;color:#fff;">#</th>'
+                . '<th style="padding:5px 6px;text-align:center;width:30px;color:#fff;">#</th>'
                 . '<th style="padding:5px 6px;text-align:left;color:#fff;">Product / Package Description</th>'
-                . '<th style="padding:5px 6px;text-align:center;width:40px;color:#fff;">Qty</th>'
-                . '<th style="padding:5px 6px;text-align:right;width:85px;color:#fff;">Unit Price (MRP)</th>'
-                . '<th style="padding:5px 6px;text-align:right;width:85px;color:#fff;">Offered Price</th>'
-                . '<th style="padding:5px 6px;text-align:right;width:95px;color:#fff;">Total Amount</th>'
+                . '<th style="padding:5px 6px;text-align:center;width:110px;color:#fff;">Qty</th>'
                 . '</tr></thead><tbody>' . $pRows . '</tbody>'
                 . '<tfoot>' . $pdfFoot . '</tfoot></table>';
         }
