@@ -286,7 +286,11 @@ class CourseEnquiryController extends Controller
                 $discount = round($subtotal - $grandTotal, 2);
             }
         } else {
-            $grandTotal = max(0, round($subtotal - $discount + $taxAmount + $shipping, 2));
+            if ($discount > 0 && abs(($subtotal + $discount) - $rawTotal) < 1.0) {
+                $grandTotal = max(0, round($subtotal + $taxAmount + $shipping, 2));
+            } else {
+                $grandTotal = max(0, round($subtotal - $discount + $taxAmount + $shipping, 2));
+            }
         }
 
         return [
@@ -389,9 +393,16 @@ class CourseEnquiryController extends Controller
         $discount   = max(0, (float)$request->input('discount', $request->input('discount_amount', 0)));
         $taxAmount  = (float)$request->input('tax_amount', 0);
         $taxPercent = (float)$request->input('tax_percent', 0);
-        $grandTotal = $request->has('grand_total')
+        $grandTotal = $request->has('grand_total') && (float)$request->input('grand_total') > 0
             ? (float)$request->input('grand_total')
-            : max(0, round($subtotal - $discount + $taxAmount, 2));
+            : 0.0;
+        if ($grandTotal <= 0) {
+            if ($discount > 0 && abs(($subtotal + $discount) - $rawTotal) < 1.0) {
+                $grandTotal = max(0, round($subtotal + $taxAmount, 2));
+            } else {
+                $grandTotal = max(0, round($subtotal - $discount + $taxAmount, 2));
+            }
+        }
 
         $quotation = !empty($items)
             ? json_encode([
@@ -830,11 +841,16 @@ class CourseEnquiryController extends Controller
         if ($subtotal <= 0) {
             $subtotal = array_sum(array_column($items, 'total'));
         }
+        $rawTotal = (float)($data['raw_total'] ?? array_sum(array_column($items, 'total')));
         if ($grand <= 0) {
-            $grand = max(0, $subtotal - $discount + $taxAmt + $shipping);
+            if ($discount > 0 && abs(($subtotal + $discount) - $rawTotal) < 1.0) {
+                $grand = round($subtotal + $taxAmt + $shipping, 2);
+            } else {
+                $grand = max(0, round($subtotal - $discount + $taxAmt + $shipping, 2));
+            }
         }
 
-        // Group rows by package if multiple packages exist, else by category
+        // Check if multiple packages exist
         $distinctPkgs = [];
         foreach ($items as $row) {
             $p = trim((string)($row['package'] ?? ''));
@@ -842,82 +858,35 @@ class CourseEnquiryController extends Controller
                 $distinctPkgs[$p] = true;
             }
         }
-        $hasPackages = count($distinctPkgs) > 1;
 
-        $rows = '';
-        $sno  = 0;
-
-        if ($hasPackages) {
-            $pkgGrouped = [];
-            foreach ($items as $row) {
-                $pkgKey = trim((string)($row['package'] ?? '')) ?: 'Package';
-                $pkgGrouped[$pkgKey][$row['cat']][] = $row;
-            }
-
-            foreach ($pkgGrouped as $pkgName => $categories) {
-                $pkgTotal = 0;
-                $rows .= '<tr style="background:#0f172a;color:#ffffff;">'
-                    . '<td colspan="6" style="padding:9px 10px;font-weight:bold;font-size:13px;color:#ffffff;border:1px solid #0f172a;">'
-                    . 'Package: ' . htmlspecialchars($pkgName)
-                    . '</td></tr>';
-
-                foreach ($categories as $cat => $catItems) {
-                    $catTotal = array_sum(array_column($catItems, 'total'));
-                    $pkgTotal += $catTotal;
-                    foreach ($catItems as $row) {
-                        $sno++;
-                        $bg = ($sno % 2 === 0) ? 'background:#f8fafc;' : '';
-                        $rows .= '<tr style="' . $bg . '">'
-                            . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:center;">' . $sno . '</td>'
-                            . '<td style="padding:7px 10px;border:1px solid #e2e8f0;">' . htmlspecialchars($cat) . '</td>'
-                            . '<td style="padding:7px 10px;border:1px solid #e2e8f0;font-weight:600;">' . htmlspecialchars($row['item']) . '</td>'
-                            . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:center;">' . $row['qty'] . '</td>'
-                            . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:right;">&#8377;' . number_format($row['price'], 2) . '</td>'
-                            . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:right;font-weight:700;">&#8377;' . number_format($row['total'], 2) . '</td>'
-                            . '</tr>';
+        $packages = $data['packages'] ?? [];
+        if (empty($packages) && !empty($items)) {
+            $distinctPackages = [];
+            foreach ($items as $it) {
+                $pkgName = trim((string)($it['package'] ?? ''));
+                if ($pkgName !== '') {
+                    if (!isset($distinctPackages[$pkgName])) {
+                        $distinctPackages[$pkgName] = [
+                            'title'          => $pkgName,
+                            'quantity'       => 1,
+                            'unit_price'     => 0,
+                            'original_price' => 0,
+                            'total_price'    => 0,
+                        ];
                     }
-                    $rows .= '<tr style="background:#f1f5f9;">'
-                        . '<td colspan="5" style="padding:7px 10px;border:1px solid #e2e8f0;text-align:right;font-weight:700;color:#64748b;">'
-                        . htmlspecialchars($cat) . ' Subtotal</td>'
-                        . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:right;font-weight:800;color:#1d6fa4;">&#8377;' . number_format($catTotal, 2) . '</td>'
-                        . '</tr>';
+                    $distinctPackages[$pkgName]['total_price'] += (float)($it['total'] ?? 0);
+                    $distinctPackages[$pkgName]['unit_price'] = $distinctPackages[$pkgName]['total_price'];
+                    $distinctPackages[$pkgName]['original_price'] = $distinctPackages[$pkgName]['total_price'];
                 }
-                $rows .= '<tr style="background:#e2e8f0;">'
-                    . '<td colspan="5" style="padding:8px 10px;border:1px solid #cbd5e1;text-align:right;font-weight:bold;color:#334155;">'
-                    . htmlspecialchars($pkgName) . ' Total</td>'
-                    . '<td style="padding:8px 10px;border:1px solid #cbd5e1;text-align:right;font-weight:800;color:#0f172a;">&#8377;' . number_format($pkgTotal, 2) . '</td>'
-                    . '</tr>';
             }
-        } else {
-            $grouped = [];
-            foreach ($items as $row) {
-                $grouped[$row['cat']][] = $row;
-            }
-
-            foreach ($grouped as $cat => $catItems) {
-                $catTotal = array_sum(array_column($catItems, 'total'));
-                foreach ($catItems as $row) {
-                    $sno++;
-                    $bg = ($sno % 2 === 0) ? 'background:#f8fafc;' : '';
-                    $rows .= '<tr style="' . $bg . '">'
-                        . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:center;">' . $sno . '</td>'
-                        . '<td style="padding:7px 10px;border:1px solid #e2e8f0;">' . htmlspecialchars($cat) . '</td>'
-                        . '<td style="padding:7px 10px;border:1px solid #e2e8f0;font-weight:600;">' . htmlspecialchars($row['item']) . '</td>'
-                        . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:center;">' . $row['qty'] . '</td>'
-                        . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:right;">&#8377;' . number_format($row['price'], 2) . '</td>'
-                        . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:right;font-weight:700;">&#8377;' . number_format($row['total'], 2) . '</td>'
-                        . '</tr>';
-                }
-                $rows .= '<tr style="background:#f1f5f9;">'
-                    . '<td colspan="5" style="padding:7px 10px;border:1px solid #e2e8f0;text-align:right;font-weight:700;color:#64748b;">'
-                    . htmlspecialchars($cat) . ' Subtotal</td>'
-                    . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:right;font-weight:800;color:#1d6fa4;">&#8377;' . number_format($catTotal, 2) . '</td>'
-                    . '</tr>';
+            if (count($distinctPackages) > 1) {
+                $packages = array_values($distinctPackages);
             }
         }
 
+        $hasPackages = count($distinctPkgs) > 1 || (is_array($packages) && count($packages) > 1);
+
         $tfoot = '';
-        $rawTotal = (float)($data['raw_total'] ?? array_sum(array_column($items, 'total')));
         if ($rawTotal > $subtotal || $discount > 0) {
             $tfoot .= '<tr style="background:#f8fafc;">'
                 . '<td colspan="5" style="padding:8px 10px;text-align:right;font-weight:700;color:#64748b;border:1px solid #e2e8f0;">Component List Total (MRP)</td>'
@@ -952,31 +921,6 @@ class CourseEnquiryController extends Controller
             . '<td colspan="5" style="padding:10px;text-align:right;font-weight:800;color:#fff;font-size:14px;">Grand Total</td>'
             . '<td style="padding:10px;text-align:right;font-weight:800;color:#fbbf24;font-size:15px;">&#8377;' . number_format($grand, 2) . '</td>'
             . '</tr>';
-
-        $packages = $data['packages'] ?? [];
-        if (empty($packages) && !empty($items)) {
-            $distinctPackages = [];
-            foreach ($items as $it) {
-                $pkgName = trim((string)($it['package'] ?? ''));
-                if ($pkgName !== '') {
-                    if (!isset($distinctPackages[$pkgName])) {
-                        $distinctPackages[$pkgName] = [
-                            'title'          => $pkgName,
-                            'quantity'       => 1,
-                            'unit_price'     => 0,
-                            'original_price' => 0,
-                            'total_price'    => 0,
-                        ];
-                    }
-                    $distinctPackages[$pkgName]['total_price'] += (float)($it['total'] ?? 0);
-                    $distinctPackages[$pkgName]['unit_price'] = $distinctPackages[$pkgName]['total_price'];
-                    $distinctPackages[$pkgName]['original_price'] = $distinctPackages[$pkgName]['total_price'];
-                }
-            }
-            if (count($distinctPackages) > 1) {
-                $packages = array_values($distinctPackages);
-            }
-        }
 
         $packagesHtml = '';
         if (!empty($packages) && is_array($packages)) {
@@ -1017,11 +961,110 @@ class CourseEnquiryController extends Controller
                 . '</table></div>';
         }
 
-        if ($packagesHtml !== '') {
-            return $packagesHtml
-                . '<div style="margin-top:20px;margin-bottom:8px;font-weight:800;font-size:14px;color:#1e293b;">Detailed Bill of Materials (Component Breakdown)</div>'
-                . '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:4px;">'
-                . '<thead><tr style="background:#334155;color:#ffffff;">'
+        $bomHtml = '';
+        if ($hasPackages) {
+            $pkgGrouped = [];
+            foreach ($items as $row) {
+                $pkgKey = trim((string)($row['package'] ?? '')) ?: 'Package';
+                $pkgGrouped[$pkgKey][$row['cat']][] = $row;
+            }
+
+            $pkgMetaMap = [];
+            if (!empty($packages) && is_array($packages)) {
+                foreach ($packages as $pMeta) {
+                    $mTitle = trim((string)($pMeta['title'] ?? ''));
+                    if ($mTitle !== '') {
+                        $pkgMetaMap[$mTitle] = $pMeta;
+                    }
+                }
+            }
+
+            foreach ($pkgGrouped as $pkgName => $categories) {
+                $pMeta = $pkgMetaMap[$pkgName] ?? null;
+                $pQty = $pMeta ? (int)($pMeta['quantity'] ?? 1) : 1;
+                $pOffered = $pMeta ? (float)($pMeta['unit_price'] ?? 0) : 0;
+
+                $pkgSno = 0;
+                $pkgTotal = 0;
+                $pRows = '';
+                foreach ($categories as $cat => $catItems) {
+                    $catTotal = array_sum(array_column($catItems, 'total'));
+                    $pkgTotal += $catTotal;
+                    foreach ($catItems as $row) {
+                        $pkgSno++;
+                        $bg = ($pkgSno % 2 === 0) ? 'background:#f8fafc;' : '';
+                        $pRows .= '<tr style="' . $bg . '">'
+                            . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:center;">' . $pkgSno . '</td>'
+                            . '<td style="padding:7px 10px;border:1px solid #e2e8f0;">' . htmlspecialchars($cat) . '</td>'
+                            . '<td style="padding:7px 10px;border:1px solid #e2e8f0;font-weight:600;">' . htmlspecialchars($row['item']) . '</td>'
+                            . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:center;">' . $row['qty'] . '</td>'
+                            . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:right;">&#8377;' . number_format($row['price'], 2) . '</td>'
+                            . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:right;font-weight:700;">&#8377;' . number_format($row['total'], 2) . '</td>'
+                            . '</tr>';
+                    }
+                    $pRows .= '<tr style="background:#f1f5f9;">'
+                        . '<td colspan="5" style="padding:7px 10px;border:1px solid #e2e8f0;text-align:right;font-weight:700;color:#64748b;">'
+                        . htmlspecialchars($cat) . ' Subtotal</td>'
+                        . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:right;font-weight:800;color:#1d6fa4;">&#8377;' . number_format($catTotal, 2) . '</td>'
+                        . '</tr>';
+                }
+
+                $metaBadge = 'Qty: ' . $pQty;
+                if ($pOffered > 0) {
+                    $metaBadge .= ' &nbsp;|&nbsp; Offered Price: &#8377;' . number_format($pOffered, 2);
+                }
+
+                $bomHtml .= '<div style="margin-bottom:20px;border:1px solid #cbd5e1;border-radius:6px;overflow:hidden;">'
+                    . '<div style="background:#1e1b4b;color:#ffffff;padding:9px 12px;font-weight:bold;font-size:13.5px;display:flex;justify-content:space-between;align-items:center;">'
+                    . '<span>Product: ' . htmlspecialchars($pkgName) . '</span>'
+                    . '<span style="color:#fbbf24;font-size:12.5px;">' . $metaBadge . '</span>'
+                    . '</div>'
+                    . '<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+                    . '<thead><tr style="background:#334155;color:#ffffff;">'
+                    . '<th style="padding:7px 10px;color:#fff;text-align:center;width:35px;">#</th>'
+                    . '<th style="padding:7px 10px;color:#fff;text-align:left;width:140px;">Category</th>'
+                    . '<th style="padding:7px 10px;color:#fff;text-align:left;">Component Description</th>'
+                    . '<th style="padding:7px 10px;color:#fff;text-align:center;width:45px;">Qty</th>'
+                    . '<th style="padding:7px 10px;color:#fff;text-align:right;width:100px;">Unit Price</th>'
+                    . '<th style="padding:7px 10px;color:#fff;text-align:right;width:110px;">Total</th>'
+                    . '</tr></thead>'
+                    . '<tbody>' . $pRows . '</tbody>'
+                    . '<tfoot><tr style="background:#e2e8f0;">'
+                    . '<td colspan="5" style="padding:8px 10px;border:1px solid #cbd5e1;text-align:right;font-weight:bold;color:#334155;">'
+                    . htmlspecialchars($pkgName) . ' Component Total</td>'
+                    . '<td style="padding:8px 10px;border:1px solid #cbd5e1;text-align:right;font-weight:800;color:#0f172a;">&#8377;' . number_format($pkgTotal, 2) . '</td>'
+                    . '</tr></tfoot></table></div>';
+            }
+        } else {
+            $grouped = [];
+            foreach ($items as $row) {
+                $grouped[$row['cat']][] = $row;
+            }
+            $sno = 0;
+            $rows = '';
+            foreach ($grouped as $cat => $catItems) {
+                $catTotal = array_sum(array_column($catItems, 'total'));
+                foreach ($catItems as $row) {
+                    $sno++;
+                    $bg = ($sno % 2 === 0) ? 'background:#f8fafc;' : '';
+                    $rows .= '<tr style="' . $bg . '">'
+                        . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:center;">' . $sno . '</td>'
+                        . '<td style="padding:7px 10px;border:1px solid #e2e8f0;">' . htmlspecialchars($cat) . '</td>'
+                        . '<td style="padding:7px 10px;border:1px solid #e2e8f0;font-weight:600;">' . htmlspecialchars($row['item']) . '</td>'
+                        . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:center;">' . $row['qty'] . '</td>'
+                        . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:right;">&#8377;' . number_format($row['price'], 2) . '</td>'
+                        . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:right;font-weight:700;">&#8377;' . number_format($row['total'], 2) . '</td>'
+                        . '</tr>';
+                }
+                $rows .= '<tr style="background:#f1f5f9;">'
+                    . '<td colspan="5" style="padding:7px 10px;border:1px solid #e2e8f0;text-align:right;font-weight:700;color:#64748b;">'
+                    . htmlspecialchars($cat) . ' Subtotal</td>'
+                    . '<td style="padding:7px 10px;border:1px solid #e2e8f0;text-align:right;font-weight:800;color:#1d6fa4;">&#8377;' . number_format($catTotal, 2) . '</td>'
+                    . '</tr>';
+            }
+
+            $bomHtml = '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;">'
+                . '<thead><tr style="background:#1e1b4b;">'
                 . '<th style="padding:8px 10px;color:#fff;text-align:center;width:35px;">#</th>'
                 . '<th style="padding:8px 10px;color:#fff;text-align:left;">Category</th>'
                 . '<th style="padding:8px 10px;color:#fff;text-align:left;">Item / Description</th>'
@@ -1030,21 +1073,17 @@ class CourseEnquiryController extends Controller
                 . '<th style="padding:8px 10px;color:#fff;text-align:right;width:110px;">Total</th>'
                 . '</tr></thead>'
                 . '<tbody>' . $rows . '</tbody>'
+                . '<tfoot>' . ($packagesHtml !== '' ? '' : $tfoot) . '</tfoot>'
                 . '</table>';
         }
 
-        return '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;">'
-            . '<thead><tr style="background:#1e1b4b;">'
-            . '<th style="padding:8px 10px;color:#fff;text-align:center;width:35px;">#</th>'
-            . '<th style="padding:8px 10px;color:#fff;text-align:left;">Category</th>'
-            . '<th style="padding:8px 10px;color:#fff;text-align:left;">Item / Description</th>'
-            . '<th style="padding:8px 10px;color:#fff;text-align:center;width:50px;">Qty</th>'
-            . '<th style="padding:8px 10px;color:#fff;text-align:right;width:100px;">Unit Price</th>'
-            . '<th style="padding:8px 10px;color:#fff;text-align:right;width:110px;">Total</th>'
-            . '</tr></thead>'
-            . '<tbody>' . $rows . '</tbody>'
-            . '<tfoot>' . $tfoot . '</tfoot>'
-            . '</table>';
+        if ($packagesHtml !== '') {
+            return $packagesHtml
+                . '<div style="margin-top:20px;margin-bottom:8px;font-weight:800;font-size:14px;color:#1e293b;">Detailed Bill of Materials (Component Breakdown)</div>'
+                . $bomHtml;
+        }
+
+        return $bomHtml;
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -1225,6 +1264,31 @@ class CourseEnquiryController extends Controller
         $cartLink    = $planInfo ? $baseUrl . $planInfo['cart_url']  : '';
 
         // Build PDF-specific quotation table
+        $packages = $quotationData['packages'] ?? [];
+        if (empty($packages) && !empty($quotationData['items'])) {
+            $distinctPackages = [];
+            foreach ($quotationData['items'] as $it) {
+                $pkgName = trim((string)($it['package'] ?? ''));
+                if ($pkgName !== '') {
+                    if (!isset($distinctPackages[$pkgName])) {
+                        $distinctPackages[$pkgName] = [
+                            'title'          => $pkgName,
+                            'quantity'       => 1,
+                            'unit_price'     => 0,
+                            'original_price' => 0,
+                            'total_price'    => 0,
+                        ];
+                    }
+                    $distinctPackages[$pkgName]['total_price'] += (float)($it['total'] ?? 0);
+                    $distinctPackages[$pkgName]['unit_price'] = $distinctPackages[$pkgName]['total_price'];
+                    $distinctPackages[$pkgName]['original_price'] = $distinctPackages[$pkgName]['total_price'];
+                }
+            }
+            if (count($distinctPackages) > 1) {
+                $packages = array_values($distinctPackages);
+            }
+        }
+
         $distinctPkgs = [];
         foreach (($quotationData['items'] ?? []) as $row) {
             $p = trim((string)($row['package'] ?? ''));
@@ -1232,78 +1296,7 @@ class CourseEnquiryController extends Controller
                 $distinctPkgs[$p] = true;
             }
         }
-        $hasPackages = count($distinctPkgs) > 1;
-
-        $qRows = '';
-        $sno   = 0;
-
-        if ($hasPackages) {
-            $pkgGrouped = [];
-            foreach (($quotationData['items'] ?? []) as $row) {
-                $pkgKey = trim((string)($row['package'] ?? '')) ?: 'Package';
-                $pkgGrouped[$pkgKey][$row['cat']][] = $row;
-            }
-
-            foreach ($pkgGrouped as $pkgName => $categories) {
-                $pkgTotal = 0;
-                $qRows .= '<tr style="background:#0f172a;color:#ffffff;">'
-                    . '<td colspan="6" style="padding:6px 8px;font-weight:bold;font-size:9.5pt;color:#ffffff;border:1px solid #0f172a;">'
-                    . 'Package: ' . htmlspecialchars($pkgName)
-                    . '</td></tr>';
-
-                foreach ($categories as $cat => $catItems) {
-                    $catTotal = array_sum(array_column($catItems, 'total'));
-                    $pkgTotal += $catTotal;
-                    foreach ($catItems as $row) {
-                        $sno++;
-                        $bg = ($sno % 2 === 0) ? 'background:#f8fafc;' : 'background:#ffffff;';
-                        $qRows .= '<tr style="' . $bg . '">'
-                            . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">' . $sno . '</td>'
-                            . '<td style="padding:4px 6px;border:1px solid #e2e8f0;">' . htmlspecialchars($cat) . '</td>'
-                            . '<td style="padding:4px 6px;border:1px solid #e2e8f0;font-weight:bold;">' . htmlspecialchars($row['item']) . '</td>'
-                            . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">' . $row['qty'] . '</td>'
-                            . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;">Rs. ' . number_format($row['price'], 2) . '</td>'
-                            . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;">Rs. ' . number_format($row['total'], 2) . '</td>'
-                            . '</tr>';
-                    }
-                    $qRows .= '<tr style="background:#f1f5f9;">'
-                        . '<td colspan="5" style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#475569;">'
-                        . htmlspecialchars($cat) . ' Subtotal</td>'
-                        . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1d6fa4;">Rs. ' . number_format($catTotal, 2) . '</td>'
-                        . '</tr>';
-                }
-                $qRows .= '<tr style="background:#e2e8f0;">'
-                    . '<td colspan="5" style="padding:5px 6px;border:1px solid #cbd5e1;text-align:right;font-weight:bold;color:#334155;">'
-                    . htmlspecialchars($pkgName) . ' Total</td>'
-                    . '<td style="padding:5px 6px;border:1px solid #cbd5e1;text-align:right;font-weight:bold;color:#0f172a;">Rs. ' . number_format($pkgTotal, 2) . '</td>'
-                    . '</tr>';
-            }
-        } else {
-            $grouped = [];
-            foreach (($quotationData['items'] ?? []) as $row) {
-                $grouped[$row['cat']][] = $row;
-            }
-            foreach ($grouped as $cat => $catItems) {
-                $catTotal = array_sum(array_column($catItems, 'total'));
-                foreach ($catItems as $row) {
-                    $sno++;
-                    $bg = ($sno % 2 === 0) ? 'background:#f8fafc;' : 'background:#ffffff;';
-                    $qRows .= '<tr style="' . $bg . '">'
-                        . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">' . $sno . '</td>'
-                        . '<td style="padding:4px 6px;border:1px solid #e2e8f0;">' . htmlspecialchars($cat) . '</td>'
-                        . '<td style="padding:4px 6px;border:1px solid #e2e8f0;font-weight:bold;">' . htmlspecialchars($row['item']) . '</td>'
-                        . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">' . $row['qty'] . '</td>'
-                        . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;">Rs. ' . number_format($row['price'], 2) . '</td>'
-                        . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;">Rs. ' . number_format($row['total'], 2) . '</td>'
-                        . '</tr>';
-                }
-                $qRows .= '<tr style="background:#f1f5f9;">'
-                    . '<td colspan="5" style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#475569;">'
-                    . htmlspecialchars($cat) . ' Subtotal</td>'
-                    . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1d6fa4;">Rs. ' . number_format($catTotal, 2) . '</td>'
-                    . '</tr>';
-            }
-        }
+        $hasPackages = count($distinctPkgs) > 1 || (is_array($packages) && count($packages) > 1);
 
         $rawTotal = (float)($quotationData['raw_total'] ?? array_sum(array_column($quotationData['items'] ?? [], 'total')));
         $subtotal = (float) ($quotationData['subtotal'] ?? 0);
@@ -1315,7 +1308,11 @@ class CourseEnquiryController extends Controller
             $subtotal = array_sum(array_column($quotationData['items'], 'total'));
         }
         if ($grand <= 0) {
-            $grand = max(0, $subtotal - $discount + $taxAmt);
+            if ($discount > 0 && abs(($subtotal + $discount) - $rawTotal) < 1.0) {
+                $grand = round($subtotal + $taxAmt, 2);
+            } else {
+                $grand = max(0, round($subtotal - $discount + $taxAmt, 2));
+            }
         }
 
         $pdfFoot = '';
@@ -1347,31 +1344,6 @@ class CourseEnquiryController extends Controller
             . '<td colspan="5" style="padding:6px 8px;text-align:right;font-weight:bold;color:#fff;font-size:9.5pt;">Grand Total (Inclusive of all taxes)</td>'
             . '<td style="padding:6px 8px;text-align:right;font-weight:bold;font-size:10.5pt;color:#fbbf24;">Rs. ' . number_format($grand, 2) . '</td>'
             . '</tr>';
-
-        $packages = $quotationData['packages'] ?? [];
-        if (empty($packages) && !empty($quotationData['items'])) {
-            $distinctPackages = [];
-            foreach ($quotationData['items'] as $it) {
-                $pkgName = trim((string)($it['package'] ?? ''));
-                if ($pkgName !== '') {
-                    if (!isset($distinctPackages[$pkgName])) {
-                        $distinctPackages[$pkgName] = [
-                            'title'          => $pkgName,
-                            'quantity'       => 1,
-                            'unit_price'     => 0,
-                            'original_price' => 0,
-                            'total_price'    => 0,
-                        ];
-                    }
-                    $distinctPackages[$pkgName]['total_price'] += (float)($it['total'] ?? 0);
-                    $distinctPackages[$pkgName]['unit_price'] = $distinctPackages[$pkgName]['total_price'];
-                    $distinctPackages[$pkgName]['original_price'] = $distinctPackages[$pkgName]['total_price'];
-                }
-            }
-            if (count($distinctPackages) > 1) {
-                $packages = array_values($distinctPackages);
-            }
-        }
 
         $packagesHtml = '';
         if (!empty($packages) && is_array($packages)) {
@@ -1408,18 +1380,126 @@ class CourseEnquiryController extends Controller
                 . '<tfoot>' . $pdfFoot . '</tfoot></table>';
         }
 
-        $quotTable = $qRows
-            ? '<table style="width:100%;border-collapse:collapse;font-size:8.5pt;">'
-              . '<thead><tr style="background:#1e1b4b;">'
-              . '<th style="padding:5px 6px;color:#fff;text-align:center;width:25px;">#</th>'
-              . '<th style="padding:5px 6px;color:#fff;text-align:left;">Category</th>'
-              . '<th style="padding:5px 6px;color:#fff;text-align:left;">Item / Description</th>'
-              . '<th style="padding:5px 6px;color:#fff;text-align:center;width:35px;">Qty</th>'
-              . '<th style="padding:5px 6px;color:#fff;text-align:right;width:80px;">Unit Price</th>'
-              . '<th style="padding:5px 6px;color:#fff;text-align:right;width:90px;">Total</th>'
-              . '</tr></thead><tbody>' . $qRows . '</tbody>'
-              . '<tfoot>' . ($packagesHtml ? '' : $pdfFoot) . '</tfoot></table>'
-            : '<p style="color:#94a3b8;">No bundle items available.</p>';
+        $quotTable = '';
+        if ($hasPackages) {
+            $pkgGrouped = [];
+            foreach (($quotationData['items'] ?? []) as $row) {
+                $pkgKey = trim((string)($row['package'] ?? '')) ?: 'Package';
+                $pkgGrouped[$pkgKey][$row['cat']][] = $row;
+            }
+
+            $pkgMetaMap = [];
+            if (!empty($packages) && is_array($packages)) {
+                foreach ($packages as $pMeta) {
+                    $mTitle = trim((string)($pMeta['title'] ?? ''));
+                    if ($mTitle !== '') {
+                        $pkgMetaMap[$mTitle] = $pMeta;
+                    }
+                }
+            }
+
+            foreach ($pkgGrouped as $pkgName => $categories) {
+                $pMeta = $pkgMetaMap[$pkgName] ?? null;
+                $pQty = $pMeta ? (int)($pMeta['quantity'] ?? 1) : 1;
+                $pOffered = $pMeta ? (float)($pMeta['unit_price'] ?? 0) : 0;
+
+                $pkgSno = 0;
+                $pkgTotal = 0;
+                $pRows = '';
+                foreach ($categories as $cat => $catItems) {
+                    $catTotal = array_sum(array_column($catItems, 'total'));
+                    $pkgTotal += $catTotal;
+                    foreach ($catItems as $row) {
+                        $pkgSno++;
+                        $bg = ($pkgSno % 2 === 0) ? 'background:#f8fafc;' : 'background:#ffffff;';
+                        $pRows .= '<tr style="' . $bg . '">'
+                            . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">' . $pkgSno . '</td>'
+                            . '<td style="padding:4px 6px;border:1px solid #e2e8f0;">' . htmlspecialchars($cat) . '</td>'
+                            . '<td style="padding:4px 6px;border:1px solid #e2e8f0;font-weight:bold;">' . htmlspecialchars($row['item']) . '</td>'
+                            . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">' . $row['qty'] . '</td>'
+                            . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;">Rs. ' . number_format($row['price'], 2) . '</td>'
+                            . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;">Rs. ' . number_format($row['total'], 2) . '</td>'
+                            . '</tr>';
+                    }
+                    $pRows .= '<tr style="background:#f1f5f9;">'
+                        . '<td colspan="5" style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#475569;">'
+                        . htmlspecialchars($cat) . ' Subtotal</td>'
+                        . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1d6fa4;">Rs. ' . number_format($catTotal, 2) . '</td>'
+                        . '</tr>';
+                }
+
+                $metaBadge = 'Qty: ' . $pQty;
+                if ($pOffered > 0) {
+                    $metaBadge .= ' &nbsp;|&nbsp; Offered Price: Rs. ' . number_format($pOffered, 2);
+                }
+
+                $quotTable .= '<div style="margin-bottom:14px;page-break-inside:avoid;">'
+                    . '<table class="dt" style="width:100%;border-collapse:collapse;font-size:8.5pt;margin-bottom:0;">'
+                    . '<thead>'
+                    . '<tr style="background:#1e1b4b;color:#ffffff;">'
+                    . '<th colspan="4" style="padding:5px 7px;font-size:9pt;font-weight:bold;color:#ffffff;text-align:left;">'
+                    . htmlspecialchars($pkgName)
+                    . '</th>'
+                    . '<th colspan="2" style="padding:5px 7px;font-size:8.5pt;font-weight:bold;color:#fbbf24;text-align:right;">'
+                    . $metaBadge
+                    . '</th>'
+                    . '</tr>'
+                    . '<tr style="background:#334155;color:#ffffff;">'
+                    . '<th style="padding:4px 6px;color:#fff;text-align:center;width:25px;">#</th>'
+                    . '<th style="padding:4px 6px;color:#fff;text-align:left;width:120px;">Category</th>'
+                    . '<th style="padding:4px 6px;color:#fff;text-align:left;">Component Description</th>'
+                    . '<th style="padding:4px 6px;color:#fff;text-align:center;width:35px;">Qty</th>'
+                    . '<th style="padding:4px 6px;color:#fff;text-align:right;width:80px;">Unit Price</th>'
+                    . '<th style="padding:4px 6px;color:#fff;text-align:right;width:90px;">Total</th>'
+                    . '</tr></thead>'
+                    . '<tbody>' . $pRows . '</tbody>'
+                    . '<tfoot><tr style="background:#e2e8f0;">'
+                    . '<td colspan="5" style="padding:4px 6px;border:1px solid #cbd5e1;text-align:right;font-weight:bold;color:#334155;">'
+                    . htmlspecialchars($pkgName) . ' Component Total</td>'
+                    . '<td style="padding:4px 6px;border:1px solid #cbd5e1;text-align:right;font-weight:bold;color:#0f172a;">Rs. ' . number_format($pkgTotal, 2) . '</td>'
+                    . '</tr></tfoot></table></div>';
+            }
+        } else {
+            $grouped = [];
+            foreach (($quotationData['items'] ?? []) as $row) {
+                $grouped[$row['cat']][] = $row;
+            }
+            $sno = 0;
+            $qRows = '';
+            foreach ($grouped as $cat => $catItems) {
+                $catTotal = array_sum(array_column($catItems, 'total'));
+                foreach ($catItems as $row) {
+                    $sno++;
+                    $bg = ($sno % 2 === 0) ? 'background:#f8fafc;' : 'background:#ffffff;';
+                    $qRows .= '<tr style="' . $bg . '">'
+                        . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">' . $sno . '</td>'
+                        . '<td style="padding:4px 6px;border:1px solid #e2e8f0;">' . htmlspecialchars($cat) . '</td>'
+                        . '<td style="padding:4px 6px;border:1px solid #e2e8f0;font-weight:bold;">' . htmlspecialchars($row['item']) . '</td>'
+                        . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">' . $row['qty'] . '</td>'
+                        . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;">Rs. ' . number_format($row['price'], 2) . '</td>'
+                        . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;">Rs. ' . number_format($row['total'], 2) . '</td>'
+                        . '</tr>';
+                }
+                $qRows .= '<tr style="background:#f1f5f9;">'
+                    . '<td colspan="5" style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#475569;">'
+                    . htmlspecialchars($cat) . ' Subtotal</td>'
+                    . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1d6fa4;">Rs. ' . number_format($catTotal, 2) . '</td>'
+                    . '</tr>';
+            }
+
+            $quotTable = $qRows
+                ? '<table style="width:100%;border-collapse:collapse;font-size:8.5pt;">'
+                  . '<thead><tr style="background:#1e1b4b;">'
+                  . '<th style="padding:5px 6px;color:#fff;text-align:center;width:25px;">#</th>'
+                  . '<th style="padding:5px 6px;color:#fff;text-align:left;">Category</th>'
+                  . '<th style="padding:5px 6px;color:#fff;text-align:left;">Item / Description</th>'
+                  . '<th style="padding:5px 6px;color:#fff;text-align:center;width:35px;">Qty</th>'
+                  . '<th style="padding:5px 6px;color:#fff;text-align:right;width:80px;">Unit Price</th>'
+                  . '<th style="padding:5px 6px;color:#fff;text-align:right;width:90px;">Total</th>'
+                  . '</tr></thead><tbody>' . $qRows . '</tbody>'
+                  . '<tfoot>' . ($packagesHtml ? '' : $pdfFoot) . '</tfoot></table>'
+                : '<p style="color:#94a3b8;">No bundle items available.</p>';
+        }
 
         $productLinkHtml = $productLink
             ? '<p style="margin:4px 0;font-size:9pt;"><strong>View Product &amp; Curriculum:</strong> <span style="color:#1d6fa4;">' . $productLink . '</span></p>'

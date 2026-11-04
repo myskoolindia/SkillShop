@@ -616,15 +616,33 @@
             </thead>
             <tbody>
                 @php
-                    $sortedItems = collect($items)->sortBy(function($it) {
-                        return [strtoupper($it['category'] ?? 'General'), strtoupper($it['item'] ?? '')];
+                    $hasMultiplePkgs = collect($items)->pluck('package')->filter()->unique()->count() > 1;
+                    $sortedItems = collect($items)->sortBy(function($it) use ($hasMultiplePkgs) {
+                        return [
+                            $hasMultiplePkgs ? strtoupper($it['package'] ?? 'Package') : '',
+                            strtoupper($it['category'] ?? 'General'),
+                            strtoupper($it['item'] ?? '')
+                        ];
                     })->values();
+                    $currentPkg = null;
                     $currentCat = null;
                 @endphp
                 @forelse($sortedItems as $idx => $it)
                     @php
                         $itemCat = !empty($it['category']) ? trim($it['category']) : 'General';
+                        $itemPkg = !empty($it['package']) ? trim($it['package']) : 'Package';
                     @endphp
+                    @if($hasMultiplePkgs && $itemPkg !== $currentPkg)
+                        @php
+                            $currentPkg = $itemPkg;
+                            $currentCat = null;
+                        @endphp
+                        <tr class="package-header-row" style="background: #1e1b4b; border-top: 2px solid #0f172a;">
+                            <td colspan="7" style="padding: 9px 14px; font-weight: 800; color: #ffffff; font-size: 13px;">
+                                <i class="fas fa-boxes mr-2 text-warning"></i> Product / Package: {{ $currentPkg }}
+                            </td>
+                        </tr>
+                    @endif
                     @if($itemCat !== $currentCat)
                         @php $currentCat = $itemCat; @endphp
                         <tr class="category-header-row" style="background: #f1f5f9; border-top: 2px solid #cbd5e1; border-bottom: 1px solid #cbd5e1;">

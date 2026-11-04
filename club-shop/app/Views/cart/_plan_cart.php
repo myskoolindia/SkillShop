@@ -559,7 +559,7 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                         if (!empty($cart->items)) {
                                             foreach ($cart->items as $ci) {
                                                 if ((int)($ci->quantity ?? 0) <= 0) continue;
-                                                $pkgTitle = (string)($ci->title ?? 'Package');
+                                                $pkgTitle = (string)(!empty($ci->product_title) ? $ci->product_title : (!empty($ci->title) ? $ci->title : 'Package'));
                                                 $origPrice = (float)($ci->original_unit_price ?? ($ci->original_price ?? $ci->unit_price ?? 0));
                                                 $unitPrice = (float)($ci->unit_price ?? 0);
                                                 $pkgQty    = (int)$ci->quantity;
