@@ -1536,46 +1536,41 @@ class CourseEnquiryController extends Controller
             $headerSub2  = 'Hands-On Experiential Learning, Coding, IoT &amp; Maker Space for Schools (Grades 1–10/12)';
             $subjectText = 'Proposal to establish a Future-Ready Skillvation Lab (' . $pkgSubject . ') for Grades 1–10/12';
 
-            $bodySections = '
-  <h2>1. Background &amp; Rationale</h2>
-  <p>Modern schooling requires a decisive transition from passive textbook learning into hands-on innovation and applied technology. In alignment with national pedagogical reforms (NEP 2020) and global STEM frameworks, the <strong>Skillvation Lab</strong> is designed as a premier, future-ready experiential space. It equips students from primary through senior grades with critical 21st-century competencies: computational thinking, robotics, sensor electronics, Artificial Intelligence (AI), Internet of Things (IoT), and human-centered Design Thinking.</p>
+            $bodySections = "
+                <h2>1. About Skillvation Lab</h2>
+                <p>Skillvation's offerings, <strong>Skillvation Labs</strong>, are designed primarily for State Board and ICSE schools that want to strengthen their skill education infrastructure and provide students with meaningful, experiential learning opportunities.</p>
 
-  <h2>2. Objectives &amp; Vision</h2>
-  <ul>
-    <li>Provide every student structured, age-appropriate experiential exposure to STEM, Robotics, IoT, and Artificial Intelligence.</li>
-    <li>Cultivate computational logic, creative problem solving, scientific inquiry, and collaborative engineering through design-build challenges.</li>
-    <li>Establish a state-of-the-art innovation and maker hub inside the school campus with zero operational friction.</li>
-    <li>Prepare school teams for national and international robotics leagues, hackathons, and ATL-aligned innovation showcases.</li>
-  </ul>
+                <p><strong>Skillvation Lab</strong> is a school-based, hands-on learning solution developed by Skillvation to help schools provide practical, activity-based skill education to students.</p>
 
-  <h2>3. Lab Infrastructure &amp; Space Planning</h2>
-  <ul>
-    <li>Recommended space: <strong>600 to 1,000 sq. ft.</strong> dedicated innovation space with modular student workbenches and ergonomic seating.</li>
-    <li>Infrastructure zones: Mechanical Fabrication &amp; Maker Bench, Electronics &amp; Soldering Workstations, Robotics Testing Arena &amp; Track, and Digital Computing/AI Stations.</li>
-    <li>Electrical &amp; safety: Safe multi-point surge-protected power strips, component storage organizers, and lab safety apparatus.</li>
-  </ul>
+                <h2>2. Objectives of Skillvation Lab</h2>
+                <ul>
+                    <li><strong>Promote Experiential Learning:</strong> Encourage learning through hands-on activities, experiments, and practical projects.</li>
+                    <li><strong>Develop Critical Thinking and Problem-Solving Skills:</strong> Encourage students to analyse challenges and develop effective solutions.</li>
+                    <li><strong>Foster Creativity and Innovation:</strong> Promote exploration, experimentation, design thinking, and project development.</li>
+                    <li><strong>Bridge the Gap Between Theory and Practice:</strong> Connect classroom concepts with real-life applications.</li>
+                    <li><strong>Build Future-Ready Skills:</strong> Develop technological awareness, collaboration, communication, and decision-making abilities.</li>
+                    <li><strong>Encourage Holistic Student Development:</strong> Nurture confidence, independent learning, practical competencies, and lifelong learning.</li>
+                </ul>
 
-  <h2>4. Curriculum &amp; Graded Learning Tracks</h2>
-  <ul>
-    <li><strong>Grades 1–3 (Early Explorers):</strong> Foundational mechanics, paper circuits, tactile block construction, visual sequencing.</li>
-    <li><strong>Grades 4–5 (Young Engineers):</strong> Introductory visual coding (Scratch/Blockly), mechanical linkages, motorized builds, basic sensors.</li>
-    <li><strong>Grades 6–8 (Maker &amp; IoT Innovators):</strong> Microcontroller architectures (Arduino, ESP32), sensor interfacing, circuit prototyping, introductory IoT and 3D design.</li>
-    <li><strong>Grades 9–12 (Applied AI &amp; Advanced Robotics):</strong> Embedded C/Python programming, machine vision, autonomous systems, edge AI applications, and capstone engineering challenges.</li>
-  </ul>
+                <h2>3. Curriculum Integration</h2>
+                <ul>
+                    <li>Structured curriculum aligned with selected skill domains and school objectives.</li>
+                    <li>Grade-wise curriculum and clearly defined learning outcomes.</li>
+                    <li>Detailed lesson plans and teacher guides.</li>
+                    <li>Activity-based learning modules and practical project guides.</li>
+                    <li>Teaching and learning resources, worksheets, and activity materials.</li>
+                    <li>Assessment tools to evaluate student learning and practical competencies.</li>
+                </ul>
 
-  <h2>5. Faculty Enablement &amp; Ongoing Support</h2>
-  <ul>
-    <li>Comprehensive multi-day masterclass certification for nominated science, computer, and STEM teachers.</li>
-    <li>Complete instructional package: grade-wise lesson manuals, student activity workbooks, project assessment rubrics, and video walkthroughs.</li>
-    <li>Dedicated academic coordinator and periodic virtual mentor sessions to ensure sustained lab utilization.</li>
-  </ul>
-
-  <h2>6. Measurable Institutional Outcomes</h2>
-  <ul>
-    <li>Turnkey transformation into a premier, technologically distinguished institution in the region.</li>
-    <li>Verifiable growth in student analytical reasoning, digital dexterity, and collaborative problem solving.</li>
-    <li>Student-built portfolio of working models, hardware prototypes, and innovation projects for science showcases and competitions.</li>
-  </ul>';
+                <h2>4. Expected Outcomes of Skillvation Lab</h2>
+                <ul>
+                    <li>Improved practical knowledge and application of concepts.</li>
+                    <li>Enhanced creativity, innovation, and critical thinking.</li>
+                    <li>Stronger problem-solving and decision-making abilities.</li>
+                    <li>Development of technical, vocational, and hands-on skills.</li>
+                    <li>Improved teamwork, collaboration, and communication.</li>
+                    <li>Increased student confidence, independence, and readiness for real-world challenges.</li>
+                </ul>";
 
             $conclusionText = 'The Skillvation Lab represents a comprehensive, turnkey investment in your school\'s academic future, providing students with the technological tools and mindset needed to excel in an AI-driven world. We look forward to partnering with your institution to establish this flagship innovation center.';
         } else {
@@ -1607,43 +1602,43 @@ class CourseEnquiryController extends Controller
             $subjectText = 'Proposal to establish a CBSE Composite Skill Lab (' . $pkgSubject . ') for Grades 6–10/12';
 
             $bodySections = '
-  <h2>1. Background &amp; Rationale</h2>
-  <p>CBSE has directed all affiliated schools to establish Composite Skill Labs in line with <strong>NEP 2020</strong> and <strong>NCF-SE</strong>, ensuring students gain mandatory hands-on, multi-sector vocational exposure alongside formal academics. This turnkey proposal presents a dedicated, CBSE-compliant Composite Skill Lab branded <strong>"Skillvation"</strong>, providing multi-disciplinary practical skills across Grades 6–12.</p>
+            <h2>1. Background &amp; Rationale</h2>
+            <p>CBSE has directed all affiliated schools to establish Composite Skill Labs in line with <strong>NEP 2020</strong> and <strong>NCF-SE</strong>, ensuring students gain mandatory hands-on, multi-sector vocational exposure alongside formal academics. This turnkey proposal presents a dedicated, CBSE-compliant Composite Skill Lab branded <strong>"Skillvation"</strong>, providing multi-disciplinary practical skills across Grades 6–12.</p>
 
-  <h2>2. Objectives &amp; Regulatory Alignment</h2>
-  <ul>
-    <li>Provide every student in Grades 6–12 structured, hands-on exposure across multiple skill sectors in one integrated space.</li>
-    <li>Build foundational competencies across all 3 NCF-SE Forms of Work: Life Forms, Machines &amp; Materials, and Human Services.</li>
-    <li>Ensure 100% compliance with CBSE Composite Skill Lab mandates (Circulars Skill-75/2024 &amp; Skill-01/2025) in an efficient turnkey format.</li>
-    <li>Develop critical thinking, practical problem solving, and vocational readiness through authentic project-based assessments.</li>
-  </ul>
+            <h2>2. Objectives &amp; Regulatory Alignment</h2>
+            <ul>
+                <li>Provide every student in Grades 6–12 structured, hands-on exposure across multiple skill sectors in one integrated space.</li>
+                <li>Build foundational competencies across all 3 NCF-SE Forms of Work: Life Forms, Machines &amp; Materials, and Human Services.</li>
+                <li>Ensure 100% compliance with CBSE Composite Skill Lab mandates (Circulars Skill-75/2024 &amp; Skill-01/2025) in an efficient turnkey format.</li>
+                <li>Develop critical thinking, practical problem solving, and vocational readiness through authentic project-based assessments.</li>
+            </ul>
 
-  <h2>3. Infrastructure &amp; Spatial Specifications</h2>
-  <ul>
-    <li>Dedicated space: <strong>600 sq. ft.</strong> (single composite lab) or <strong>two separate labs of 400 sq. ft. each</strong>, as prescribed by CBSE guidelines.</li>
-    <li>Workstations: Modular heavy-duty work tables, dedicated domain storage cabinets, and safety-compliant electrical wiring with fire safety gear.</li>
-  </ul>
+            <h2>3. Infrastructure &amp; Spatial Specifications</h2>
+            <ul>
+                <li>Dedicated space: <strong>600 sq. ft.</strong> (single composite lab) or <strong>two separate labs of 400 sq. ft. each</strong>, as prescribed by CBSE guidelines.</li>
+                <li>Workstations: Modular heavy-duty work tables, dedicated domain storage cabinets, and safety-compliant electrical wiring with fire safety gear.</li>
+            </ul>
 
-  <h2>4. Curriculum Integration &amp; 3 Forms of Work</h2>
-  <ul>
-    <li><strong>Form 1 — Work with Life Forms:</strong> Agriculture, hydroponics, health &amp; wellness, food preservation, and herbal gardening.</li>
-    <li><strong>Form 2 — Work with Machines &amp; Materials:</strong> Electronics, robotics, carpentry, electrical tools, mechanical mechanisms, and 3D printing.</li>
-    <li><strong>Form 3 — Work in Human Services:</strong> Retail, financial literacy, tourism, graphic communication, and digital media skills.</li>
-    <li>Grade 6–8: foundational exploration across all domains; Grade 9–12: deep specialisation and board skill elective preparation.</li>
-  </ul>
+            <h2>4. Curriculum Integration &amp; 3 Forms of Work</h2>
+            <ul>
+                <li><strong>Form 1 — Work with Life Forms:</strong> Agriculture, hydroponics, health &amp; wellness, food preservation, and herbal gardening.</li>
+                <li><strong>Form 2 — Work with Machines &amp; Materials:</strong> Electronics, robotics, carpentry, electrical tools, mechanical mechanisms, and 3D printing.</li>
+                <li><strong>Form 3 — Work in Human Services:</strong> Retail, financial literacy, tourism, graphic communication, and digital media skills.</li>
+                <li>Grade 6–8: foundational exploration across all domains; Grade 9–12: deep specialisation and board skill elective preparation.</li>
+            </ul>
 
-  <h2>5. Faculty Enablement &amp; Safety Protocols</h2>
-  <ul>
-    <li>Orientation and safety training for lab coordinators and science/vocational instructors prior to lab commissioning.</li>
-    <li>Standard Operating Procedures (SOPs), safety signage, and structured domain project guides for every student batch.</li>
-  </ul>
+            <h2>5. Faculty Enablement &amp; Safety Protocols</h2>
+            <ul>
+                <li>Orientation and safety training for lab coordinators and science/vocational instructors prior to lab commissioning.</li>
+                <li>Standard Operating Procedures (SOPs), safety signage, and structured domain project guides for every student batch.</li>
+            </ul>
 
-  <h2>6. Expected Institutional Outcomes</h2>
-  <ul>
-    <li>Full regulatory compliance for CBSE affiliation and inspections.</li>
-    <li>Measurable improvement in student practical competence and creative problem-solving ability.</li>
-    <li>A distinctive, future-focused institutional identity for skill education and holistic student development.</li>
-  </ul>';
+            <h2>6. Expected Institutional Outcomes</h2>
+            <ul>
+                <li>Full regulatory compliance for CBSE affiliation and inspections.</li>
+                <li>Measurable improvement in student practical competence and creative problem-solving ability.</li>
+                <li>A distinctive, future-focused institutional identity for skill education and holistic student development.</li>
+            </ul>';
 
             $conclusionText = 'Skillvation offers the school a structured, CBSE-aligned way to give students hands-on exposure across a broad range of skill domains. We request approval to proceed to the detailed planning and procurement stage.';
         }
