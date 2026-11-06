@@ -438,17 +438,21 @@ class BundleModel extends BaseModel
 
         $minStock = null;
         $sumPrice = 0.00;
+        $sumOriginalPrice = 0.00;
         $totalUnits = 0;
         $allSumPrice = 0.00;
+        $allSumOriginalPrice = 0.00;
         $allUnits = 0;
 
         foreach ($components as $component) {
             $compQty = (int)$component->required_quantity;
             $compLineTotal = (float)$component->total_price;
+            $compOrigLineTotal = (float)($component->original_total_price ?? ($component->price * $compQty));
 
             if ($compQty > 0) {
                 $allUnits += $compQty;
                 $allSumPrice += $compLineTotal;
+                $allSumOriginalPrice += $compOrigLineTotal;
             }
 
             if (!empty($component->is_optional)) {
@@ -457,6 +461,7 @@ class BundleModel extends BaseModel
 
             $totalUnits += $compQty;
             $sumPrice += $compLineTotal;
+            $sumOriginalPrice += $compOrigLineTotal;
 
             $maxBundlesFromComponent = $component->max_possible_bundles;
             if ($minStock === null || $maxBundlesFromComponent < $minStock) {
@@ -471,8 +476,10 @@ class BundleModel extends BaseModel
             'total_units' => $totalUnits,
             'max_stock' => $maxStock,
             'sum_price' => round($sumPrice, 2),
+            'sum_original_price' => round($sumOriginalPrice, 2),
             'all_units' => $allUnits,
             'all_sum_price' => round($allSumPrice, 2),
+            'all_sum_original_price' => round($allSumOriginalPrice, 2),
             'is_in_stock' => $maxStock > 0
         ];
     }

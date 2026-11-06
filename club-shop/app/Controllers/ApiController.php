@@ -188,6 +188,7 @@ class ApiController extends BaseController
             'sgst_rate'   => round((float)($p->vat_rate ?? 0) / 2, 2),
             'tax_amount'  => round((float)($p->price_discounted > 0 ? $p->price_discounted : $p->price) * (float)($p->vat_rate ?? 0) / 100, 2),
             'tags'        => $tagList,
+            'is_bundle'   => !empty($p->is_bundle),
             'created_at'  => $p->created_at,
         ];
     }

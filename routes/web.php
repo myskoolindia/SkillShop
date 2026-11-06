@@ -169,7 +169,7 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
     });
 
     Route::get('/api/product-details/{id}', function ($id) {
-        $rawUrl = env('STUDENT_SHOP_API_BASE_URL', 'https://test.myskill.club/api');
+        $rawUrl = env('STUDENT_SHOP_API_BASE_URL', url('/club-shop/api'));
         $baseUrl = rtrim($rawUrl, '/') . '/';
         try {
             $productPath = ctype_digit((string)$id) ? "products/" . rawurlencode($id) : "products/slug/" . rawurlencode($id);
@@ -187,7 +187,7 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
     });
 
     Route::get('/api/shop-categories', function () {
-        $rawUrl = env('STUDENT_SHOP_API_BASE_URL', 'https://test.myskill.club/api');
+        $rawUrl = env('STUDENT_SHOP_API_BASE_URL', url('/club-shop/api'));
         $baseUrl = rtrim($rawUrl, '/') . '/';
         try {
             $response = \Illuminate\Support\Facades\Http::timeout(5)->get("{$baseUrl}categories");
@@ -204,7 +204,7 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
     });
 
     Route::get('/api/shop-products', function (\Illuminate\Http\Request $request) {
-        $rawUrl = env('STUDENT_SHOP_API_BASE_URL', 'https://test.myskill.club/api');
+        $rawUrl = env('STUDENT_SHOP_API_BASE_URL', url('/club-shop/api'));
         $baseUrl = rtrim($rawUrl, '/') . '/';
         $categoryId = $request->get('category_id');
         $search = strtolower(trim((string)$request->get('search', '')));

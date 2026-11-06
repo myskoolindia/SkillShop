@@ -1293,11 +1293,56 @@ if (!function_exists('applyProductMarkup')) {
         }
 
         if (!empty($product->is_bundle)) {
-            // Bundle package pricing is calculated from its components (which already reflect individual markups/discounts)
-            // or explicit package pricing; prevent secondary compound markup.
-            $product->base_price = (float)($product->price ?? 0);
-            $product->base_price_discounted = (float)($product->price_discounted ?? 0);
-            $product->is_markup_applied = 1;
+            // Bundle package pricing is calculated dynamically from its components (reflecting individual markups/discounts)
+            $bundleModel = new \App\Models\BundleModel();
+            $bMetrics = $bundleModel->calculateBundleMetrics((int)$product->id);
+
+            if (!empty($bMetrics['total_components']) && $bMetrics['total_components'] > 0) {
+                $origSum = !empty($bMetrics['all_sum_original_price'])
+                    ? (float)$bMetrics['all_sum_original_price']
+                    : (!empty($bMetrics['all_sum_price']) ? (float)$bMetrics['all_sum_price'] : (float)($product->price ?? 0));
+                if ($origSum <= 0 && !empty($product->price) && (float)$product->price > 0) {
+                    $origSum = (float)$product->price;
+                }
+
+                $discountedSum = !empty($bMetrics['all_sum_price']) ? (float)$bMetrics['all_sum_price'] : $origSum;
+
+                $fixedDiscount = 0.0;
+                if (isset($product->discount_amount) && (float)$product->discount_amount > 0) {
+                    $fixedDiscount = (float)$product->discount_amount;
+                    $discountedSum = max(0, round($origSum - $fixedDiscount, 2));
+                    $discountRate = round(($fixedDiscount / $origSum) * 100);
+                } elseif (!empty($product->bundle_discount_rate) && (float)$product->bundle_discount_rate > 0) {
+                    $fixedDiscount = round($origSum * ((float)$product->bundle_discount_rate / 100), 2);
+                    $discountedSum = max(0, round($origSum - $fixedDiscount, 2));
+                    $discountRate = round(($fixedDiscount / $origSum) * 100);
+                } elseif (!empty($product->discount_rate) && (float)$product->discount_rate > 0) {
+                    $fixedDiscount = round($origSum * ((float)$product->discount_rate / 100), 2);
+                    $discountedSum = max(0, round($origSum - $fixedDiscount, 2));
+                    $discountRate = round(($fixedDiscount / $origSum) * 100);
+                } elseif ($origSum > $discountedSum) {
+                    $fixedDiscount = round($origSum - $discountedSum, 2);
+                    $discountRate = round(($fixedDiscount / $origSum) * 100);
+                } else {
+                    $discountedSum = $origSum;
+                    $discountRate = 0;
+                    $fixedDiscount = 0.0;
+                }
+
+                $product->price = $origSum;
+                $product->price_discounted = $discountedSum;
+                $product->discount_rate = (int)$discountRate;
+                $product->discount_amount = $fixedDiscount;
+                $product->base_price = (float)$origSum;
+                $product->base_price_discounted = (float)$discountedSum;
+                $product->stock = $bMetrics['max_stock'];
+                $product->markup_rate = getProductMarkupRate($product);
+            } else {
+                $product->base_price = (float)($product->price ?? 0);
+                $product->base_price_discounted = (float)($product->price_discounted ?? 0);
+            }
+
+            $product->is_markup_applied = true;
             return $product;
         }
 

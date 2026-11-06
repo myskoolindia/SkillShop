@@ -344,24 +344,27 @@ class HomeController extends BaseController
 
             if ($bundleCheck && !empty($bMetrics['total_components']) && $bMetrics['total_components'] > 0) {
                 // Initial package amount is the exact sum of all active/configured items in the package
-                $pkgSum = !empty($bMetrics['all_sum_price']) ? (float)$bMetrics['all_sum_price'] : (!empty($bMetrics['sum_price']) ? (float)$bMetrics['sum_price'] : (float)($product->price ?? 0));
-                if ($pkgSum <= 0 && !empty($product->price) && (float)$product->price > 0) {
-                    $pkgSum = (float)$product->price;
+                $origSum = !empty($bMetrics['all_sum_original_price']) ? (float)$bMetrics['all_sum_original_price'] : (!empty($bMetrics['all_sum_price']) ? (float)$bMetrics['all_sum_price'] : (!empty($bMetrics['sum_price']) ? (float)$bMetrics['sum_price'] : (float)($product->price ?? 0)));
+                if ($origSum <= 0 && !empty($product->price) && (float)$product->price > 0) {
+                    $origSum = (float)$product->price;
                 }
-                $origSum = $pkgSum;
-                $discountedSum = $origSum;
+                $discountedSum = !empty($bMetrics['all_sum_price']) ? (float)$bMetrics['all_sum_price'] : $origSum;
 
                 $fixedDiscount = 0.0;
                 if (isset($product->discount_amount) && (float)$product->discount_amount > 0) {
                     $fixedDiscount = (float)$product->discount_amount;
+                    $discountedSum = max(0, round($origSum - $fixedDiscount, 2));
+                    $discountRate = round(($fixedDiscount / $origSum) * 100);
                 } elseif (!empty($product->bundle_discount_rate) && (float)$product->bundle_discount_rate > 0) {
                     $fixedDiscount = round($origSum * ((float)$product->bundle_discount_rate / 100), 2);
+                    $discountedSum = max(0, round($origSum - $fixedDiscount, 2));
+                    $discountRate = round(($fixedDiscount / $origSum) * 100);
                 } elseif (!empty($product->discount_rate) && (float)$product->discount_rate > 0) {
                     $fixedDiscount = round($origSum * ((float)$product->discount_rate / 100), 2);
-                }
-
-                if ($fixedDiscount > 0 && ($origSum - $fixedDiscount) > 0) {
                     $discountedSum = max(0, round($origSum - $fixedDiscount, 2));
+                    $discountRate = round(($fixedDiscount / $origSum) * 100);
+                } elseif ($origSum > $discountedSum) {
+                    $fixedDiscount = round($origSum - $discountedSum, 2);
                     $discountRate = round(($fixedDiscount / $origSum) * 100);
                 } else {
                     $discountedSum = $origSum;
@@ -371,7 +374,7 @@ class HomeController extends BaseController
 
                 $product->price = $origSum;
                 $product->price_discounted = $discountedSum;
-                $product->discount_rate = $discountRate;
+                $product->discount_rate = (int)$discountRate;
                 $product->discount_amount = $fixedDiscount;
 
                 $data['product'] = $product;
@@ -609,24 +612,27 @@ class HomeController extends BaseController
 
             if ($bundleCheck && !empty($bMetrics['total_components']) && $bMetrics['total_components'] > 0) {
                 // Initial package amount is the exact sum of all active/configured items in the package
-                $pkgSum = !empty($bMetrics['all_sum_price']) ? (float)$bMetrics['all_sum_price'] : (!empty($bMetrics['sum_price']) ? (float)$bMetrics['sum_price'] : (float)($product->price ?? 0));
-                if ($pkgSum <= 0 && !empty($product->price) && (float)$product->price > 0) {
-                    $pkgSum = (float)$product->price;
+                $origSum = !empty($bMetrics['all_sum_original_price']) ? (float)$bMetrics['all_sum_original_price'] : (!empty($bMetrics['all_sum_price']) ? (float)$bMetrics['all_sum_price'] : (!empty($bMetrics['sum_price']) ? (float)$bMetrics['sum_price'] : (float)($product->price ?? 0)));
+                if ($origSum <= 0 && !empty($product->price) && (float)$product->price > 0) {
+                    $origSum = (float)$product->price;
                 }
-                $origSum = $pkgSum;
-                $discountedSum = $origSum;
+                $discountedSum = !empty($bMetrics['all_sum_price']) ? (float)$bMetrics['all_sum_price'] : $origSum;
 
                 $fixedDiscount = 0.0;
                 if (isset($product->discount_amount) && (float)$product->discount_amount > 0) {
                     $fixedDiscount = (float)$product->discount_amount;
+                    $discountedSum = max(0, round($origSum - $fixedDiscount, 2));
+                    $discountRate = round(($fixedDiscount / $origSum) * 100);
                 } elseif (!empty($product->bundle_discount_rate) && (float)$product->bundle_discount_rate > 0) {
                     $fixedDiscount = round($origSum * ((float)$product->bundle_discount_rate / 100), 2);
+                    $discountedSum = max(0, round($origSum - $fixedDiscount, 2));
+                    $discountRate = round(($fixedDiscount / $origSum) * 100);
                 } elseif (!empty($product->discount_rate) && (float)$product->discount_rate > 0) {
                     $fixedDiscount = round($origSum * ((float)$product->discount_rate / 100), 2);
-                }
-
-                if ($fixedDiscount > 0 && ($origSum - $fixedDiscount) > 0) {
                     $discountedSum = max(0, round($origSum - $fixedDiscount, 2));
+                    $discountRate = round(($fixedDiscount / $origSum) * 100);
+                } elseif ($origSum > $discountedSum) {
+                    $fixedDiscount = round($origSum - $discountedSum, 2);
                     $discountRate = round(($fixedDiscount / $origSum) * 100);
                 } else {
                     $discountedSum = $origSum;
@@ -636,7 +642,7 @@ class HomeController extends BaseController
 
                 $product->price = $origSum;
                 $product->price_discounted = $discountedSum;
-                $product->discount_rate = $discountRate;
+                $product->discount_rate = (int)$discountRate;
                 $product->discount_amount = $fixedDiscount;
 
                 $data['product'] = $product;
