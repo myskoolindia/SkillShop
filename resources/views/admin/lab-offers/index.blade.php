@@ -238,12 +238,17 @@
                                                 <select class="form-control form-control-sm select-catalog-prod" onchange="fillFromCatalog(this, {{ $idx }})">
                                                     <option value="">-- {{ __('Select a ClubShop Product / Bundle to Auto-Fill') }} --</option>
                                                     @foreach($clubShopProducts as $cp)
+                                                        @php
+                                                            $discPrice = (!empty($cp->price_discounted) && (float)$cp->price_discounted > 0) ? (float)$cp->price_discounted : (float)$cp->price;
+                                                            $hasDiscount = $discPrice > 0 && $discPrice < (float)$cp->price;
+                                                        @endphp
                                                         <option value="{{ $cp->id }}"
                                                                 data-title="{{ $cp->title }}"
                                                                 data-price="{{ $cp->price }}"
+                                                                data-offer-price="{{ $discPrice }}"
                                                                 data-slug="{{ $cp->slug }}"
                                                                 {{ (!empty($prod['product_id']) && $prod['product_id'] == $cp->id) ? 'selected' : '' }}>
-                                                            {{ $cp->is_bundle ? '📦 [BUNDLE] ' : '🔧 [PRODUCT] ' }}{{ $cp->title }} — ₹{{ number_format($cp->price) }}
+                                                            {{ $cp->is_bundle ? '📦 [BUNDLE] ' : '🔧 [PRODUCT] ' }}{{ $cp->title }} — ₹{{ number_format($cp->price) }}{{ $hasDiscount ? ' (Offer: ₹' . number_format($discPrice) . ')' : '' }}
                                                         </option>
                                                     @endforeach
                                                 </select>
@@ -508,7 +513,7 @@ function fillFromCatalog(sel, idx) {
     var idInp = card.querySelector('.prod-id-input');
     var titleDisplay = card.querySelector('.product-title-display');
 
-    if (titleInp && !titleInp.value) titleInp.value = title;
+    if (titleInp) titleInp.value = title;
     if (titleDisplay) titleDisplay.textContent = title;
     if (mrpInp) mrpInp.value = price;
     if (offerInp) offerInp.value = (offerPrice > 0) ? offerPrice : price;
