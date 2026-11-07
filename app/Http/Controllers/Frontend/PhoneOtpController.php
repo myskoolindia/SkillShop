@@ -53,6 +53,15 @@ class PhoneOtpController extends Controller
         $result = $this->waba->sendOtp($phone, $otp);
 
         if (!$result['success']) {
+            // In debug mode (local/UniServerZ), provide simulated OTP so local testing is never blocked
+            if (config('app.debug')) {
+                return response()->json([
+                    'status'    => 'sent',
+                    'message'   => 'OTP dispatched (Debug mode enabled for local testing).',
+                    'debug_otp' => $otp,
+                ]);
+            }
+
             return response()->json([
                 'status'  => 'error',
                 'message' => $result['message'] ?? 'Failed to send OTP. Please try again.',
@@ -65,8 +74,8 @@ class PhoneOtpController extends Controller
         ];
 
         // Expose OTP in debug mode only
-        if (config('app.debug') && isset($result['mock_otp'])) {
-            $response['debug_otp'] = $result['mock_otp'];
+        if (config('app.debug')) {
+            $response['debug_otp'] = $result['mock_otp'] ?? $otp;
         }
 
         return response()->json($response);

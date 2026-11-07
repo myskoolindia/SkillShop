@@ -62,6 +62,13 @@
                     </a>
                 </li>
 
+                <li class="{{ isRoute('admin.lab-offers*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.lab-offers') }}">
+                        <i class="fas fa-tags text-warning"></i>
+                        <span>{{ __('Lab Offers & Promos') }}</span>
+                    </a>
+                </li>
+
                 @if (Module::isEnabled('Coupon') && checkAdminHasPermission('coupon.management'))
                     @include('coupon::sidebar')
                 @endif

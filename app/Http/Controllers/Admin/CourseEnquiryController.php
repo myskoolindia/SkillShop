@@ -22,6 +22,9 @@ class CourseEnquiryController extends Controller
         'skillvation-lab'              => 'skillvation-lab',
         'skillvation-lab-advance'      => 'skillvation-lab-advance',
         'skillvation-lab-premium'      => 'skillvation-lab-premium',
+        'SPECIAL_LAB_OFFER_10PCT'      => 'skillvation-lab',
+        'SPECIAL_LAB_OFFER'            => 'skillvation-lab',
+        'PROPOSAL_SPECIAL_LAB_OFFER'   => 'skillvation-lab',
     ];
 
     public function index(Request $request)
@@ -64,13 +67,146 @@ class CourseEnquiryController extends Controller
             $enquiry->update(['status' => 'read']);
         }
 
+        $linkedOrder     = $this->findLinkedShopOrder($enquiry);
+        $labOfferDetails = $this->getLabOfferDetails($enquiry, $linkedOrder);
+
         $quotation      = $this->parseQuotation($enquiry);
         $proforma       = $this->parseProformaInvoice($enquiry);
         $invoice        = $this->parseTaxInvoice($enquiry);
-        $paymentSummary = $enquiry->invoice_payment_summary;
-        $title          = __('Enquiry Details');
 
-        return view('admin.course-enquiries.show', compact('enquiry', 'quotation', 'proforma', 'invoice', 'paymentSummary', 'title'));
+        // Compute live payment summary for the invoice
+        $invoiceGrandTotal = (float)($invoice['grand_total'] ?? 0);
+        $paymentsList      = (array)($invoice['payments'] ?? []);
+        $totalPaid         = 0.0;
+        $advancePaid       = 0.0;
+        foreach ($paymentsList as $p) {
+            $amt = (float)($p['amount'] ?? 0);
+            $totalPaid += $amt;
+            if (($p['type'] ?? '') === 'advance') {
+                $advancePaid += $amt;
+            }
+        }
+        $balanceDue = max(0.0, $invoiceGrandTotal - $totalPaid);
+        if ($totalPaid <= 0) {
+            $paymentStatus = 'unpaid';
+        } elseif ($balanceDue <= 0.01) {
+            $paymentStatus = 'paid';
+        } else {
+            $paymentStatus = 'partially_paid';
+        }
+
+        $paymentSummary = [
+            'grand_total'    => $invoiceGrandTotal,
+            'total_paid'     => $totalPaid,
+            'advance_paid'   => $advancePaid,
+            'balance_due'    => $balanceDue,
+            'payment_status' => $paymentStatus,
+            'payments'       => $paymentsList,
+        ];
+
+        $title = __('Enquiry Details');
+
+        return view('admin.course-enquiries.show', compact('enquiry', 'quotation', 'proforma', 'invoice', 'paymentSummary', 'title', 'linkedOrder', 'labOfferDetails'));
+    }
+
+    private function findLinkedShopOrder(CourseEnquiry $enquiry): ?\App\Models\ShopOrder
+    {
+        $cleanPhone = substr(preg_replace('/[^0-9]/', '', (string)$enquiry->phone), -10);
+        if (empty($cleanPhone)) {
+            return null;
+        }
+
+        return \App\Models\ShopOrder::with('items')
+            ->where(function($q) use ($cleanPhone, $enquiry) {
+                $q->where('customer_phone', 'like', "%{$cleanPhone}%");
+                if (!empty($enquiry->email) && !str_ends_with($enquiry->email, '@skillvation.com')) {
+                    $q->orWhere('customer_email', $enquiry->email);
+                }
+            })
+            ->latest('id')
+            ->first();
+    }
+
+    private function getLabOfferDetails(CourseEnquiry $enquiry, ?\App\Models\ShopOrder $linkedOrder): ?array
+    {
+        $isLabOfferSource = in_array($enquiry->source, ['SPECIAL_LAB_OFFER_10PCT', 'SPECIAL_LAB_OFFER', 'PROPOSAL_SPECIAL_LAB_OFFER'])
+            || stripos((string)$enquiry->course_title, 'Lab Offer') !== false
+            || stripos((string)$enquiry->message, 'lab 10% extra discount') !== false;
+
+        if (!$linkedOrder && !$isLabOfferSource) {
+            return null;
+        }
+
+        if ($linkedOrder) {
+            $notes = (string)$linkedOrder->admin_notes;
+            $plan = null;
+            $product = null;
+            $baseOffer = null;
+            $tokenPaid = null;
+            $balanceDue = null;
+
+            if (preg_match('/Booking Plan:\s*([^|]+)/i', $notes, $m)) {
+                $plan = trim($m[1]);
+            }
+            if (preg_match('/Product:\s*([^|]+)/i', $notes, $m)) {
+                $product = trim($m[1]);
+            }
+            if (preg_match('/Base Offer:\s*([^|]+)/i', $notes, $m)) {
+                $baseOffer = trim($m[1]);
+            }
+            if (preg_match('/Advance Token Paid:\s*([^|]+)/i', $notes, $m)) {
+                $tokenPaid = trim($m[1]);
+            }
+            if (preg_match('/Balance Due:\s*([^|]+)/i', $notes, $m)) {
+                $balanceDue = trim($m[1]);
+            }
+
+            $orderItem = $linkedOrder->items?->first();
+            if (!$product && $orderItem) {
+                $product = trim(preg_replace('/\[.*?\]/', '', $orderItem->product_title));
+            }
+
+            $paidAmt = (float)$linkedOrder->total_amount;
+            if (!$balanceDue && $baseOffer) {
+                $numericBase = (float)str_replace([',', '₹', ' '], '', $baseOffer);
+                if ($numericBase > $paidAmt) {
+                    $balanceDue = '₹' . number_format($numericBase - $paidAmt);
+                }
+            }
+
+            return [
+                'order'          => $linkedOrder,
+                'order_number'   => $linkedOrder->order_number,
+                'order_id'       => $linkedOrder->id,
+                'product'        => $product ?: ($orderItem?->product_title ?? 'Standard Skillvation Lab (Without Lab Infra)'),
+                'plan'           => $plan ?: ($paidAmt <= 25000 ? 'Pre-Booking Advance Token (₹25,000)' : 'Full Payment Offer'),
+                'base_offer'     => $baseOffer ?: ('₹' . number_format(max(150000, $paidAmt))),
+                'paid_amount'    => $paidAmt,
+                'balance_due'    => $balanceDue ?: ($paidAmt <= 25000 ? '₹' . number_format(max(0, 150000 - $paidAmt)) : '₹0 (Fully Paid)'),
+                'payment_method' => $linkedOrder->payment_method ?: 'Online',
+                'payment_id'     => $linkedOrder->payment_id,
+                'payment_status' => $linkedOrder->payment_status ?: 'paid',
+                'order_status'   => $linkedOrder->order_status ?: 'pending',
+                'created_at'     => $linkedOrder->created_at,
+            ];
+        }
+
+        // Enquiry captured without checkout completed yet
+        return [
+            'order'          => null,
+            'order_number'   => null,
+            'order_id'       => null,
+            'product'        => 'Special School Lab Festival Offer',
+            'plan'           => '10% Extra Discount & Pre-Booking Privileges Active',
+            'base_offer'     => '₹1,50,000 - ₹3,80,000',
+            'paid_amount'    => 0.0,
+            'balance_due'    => 'Awaiting Order Checkout',
+            'payment_method' => 'WhatsApp OTP Verified',
+            'payment_id'     => null,
+            'payment_status' => 'Verified Lead',
+            'order_status'   => 'Lead Active',
+            'created_at'     => $enquiry->created_at,
+        ];
     }
 
     public function updateStatus(Request $request, $id)
@@ -700,6 +836,28 @@ class CourseEnquiryController extends Controller
                 ];
             }
         }
+
+        // Auto pre-fill Lab Offer package item if empty
+        if (empty($items)) {
+            $linkedOrder = $this->findLinkedShopOrder($enquiry);
+            $labDetails  = $this->getLabOfferDetails($enquiry, $linkedOrder);
+            if (!empty($labDetails) && !empty($labDetails['product'])) {
+                $productName = $labDetails['product'];
+                $basePrice   = (float)str_replace([',', '₹', ' '], '', (string)($labDetails['base_offer'] ?? '150000'));
+                if ($basePrice <= 0) $basePrice = 150000;
+
+                $items[] = [
+                    'product_id' => $linkedOrder?->items?->first()?->product_id ?? 74,
+                    'sku'        => 'SKV-LAB-PACKAGE',
+                    'category'   => 'Turnkey Skillvation Lab',
+                    'item'       => $productName,
+                    'hsn'        => '9023',
+                    'qty'        => 1,
+                    'unit_price' => $basePrice,
+                    'total'      => $basePrice,
+                ];
+            }
+        }
         $subtotal = (float) ($stored['subtotal'] ?? 0);
         if ($subtotal <= 0 && !empty($items)) {
             $subtotal = array_sum(array_column($items, 'total'));
@@ -813,6 +971,24 @@ class CourseEnquiryController extends Controller
         $dueDate       = date('Y-m-d', strtotime('+7 days'));
         $invNumber     = 'INV-' . ($enquiry->created_at ? $enquiry->created_at->format('Ym') : date('Ym')) . '-' . str_pad($enquiry->id, 4, '0', STR_PAD_LEFT);
 
+        // Check for online advance payment from linked shop order
+        $payments = [];
+        $linkedOrder = $this->findLinkedShopOrder($enquiry);
+        if ($linkedOrder && $linkedOrder->payment_status === 'paid' && (float)$linkedOrder->total_amount > 0) {
+            $paidAmt = (float)$linkedOrder->total_amount;
+            $grand   = (float)($source['grand_total'] ?? 0);
+            $payments[] = [
+                'id'             => 'pay_' . substr(md5($linkedOrder->id . $linkedOrder->order_number), 0, 8),
+                'amount'         => $paidAmt,
+                'payment_date'   => $linkedOrder->created_at ? $linkedOrder->created_at->format('Y-m-d') : date('Y-m-d'),
+                'payment_method' => $linkedOrder->payment_method ? ucfirst($linkedOrder->payment_method) : 'Razorpay / Online',
+                'transaction_id' => $linkedOrder->payment_id ?: $linkedOrder->order_number,
+                'type'           => ($paidAmt < $grand) ? 'advance' : 'full',
+                'notes'          => 'Pre-Booking Advance Token via Shop Order #' . $linkedOrder->order_number,
+                'recorded_at'    => $linkedOrder->created_at ? $linkedOrder->created_at->toDateTimeString() : now()->toDateTimeString(),
+            ];
+        }
+
         return [
             'invoice_number' => $invNumber,
             'date'           => $dateFormatted,
@@ -843,7 +1019,7 @@ class CourseEnquiryController extends Controller
             'upi_id'         => $source['upi_id'] ?? 'skillvation@hdfcbank',
             'notes'          => 'Certified that the particulars given above are true and correct. Thank you for your business.',
             'terms'          => "1. All disputes subject to Bengaluru jurisdiction.\n2. Interest @ 18% p.a. will be charged if payment is delayed beyond due date.\n3. Goods supplied carry 1-year standard replacement/service warranty.",
-            'payments'       => [],
+            'payments'       => $payments,
         ];
     }
 

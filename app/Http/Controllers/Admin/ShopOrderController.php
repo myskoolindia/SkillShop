@@ -160,14 +160,14 @@ class ShopOrderController extends Controller
     public function apiStore(Request $request)
     {
         $validated = $request->validate([
-            'customer_name' => 'required|string|max:255',
+            'customer_name' => 'nullable|string|max:255',
             'customer_phone' => 'required|string|max:20',
-            'customer_email' => 'nullable|email|max:255',
-            'pincode' => 'required|string|max:10',
-            'city' => 'required|string|max:255',
-            'state' => 'required|string|max:255',
+            'customer_email' => 'nullable|string|max:255',
+            'pincode' => 'nullable|string|max:10',
+            'city' => 'nullable|string|max:255',
+            'state' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
-            'address' => 'required|string',
+            'address' => 'nullable|string',
             'address_type' => 'nullable|string|max:50',
             'payment_method' => 'nullable|string|max:50',
             'payment_id' => 'nullable|string|max:255',
@@ -179,6 +179,8 @@ class ShopOrderController extends Controller
             'items.*.unit_price' => 'required|numeric',
             'items.*.quantity' => 'required|integer|min:1',
             'total_amount' => 'nullable|numeric',
+            'discount' => 'nullable|numeric',
+            'admin_notes' => 'nullable|string',
         ]);
 
         $orderNumber = 'SKILLBOX-' . date('Ymd') . '-' . strtoupper(Str::random(5));
@@ -193,24 +195,25 @@ class ShopOrderController extends Controller
         $shopOrder = ShopOrder::create([
             'order_number' => $orderNumber,
             'user_id' => auth()->id() ?? null,
-            'customer_name' => $validated['customer_name'],
-            'customer_email' => $validated['customer_email'] ?? (auth()->user()?->email),
+            'customer_name' => !empty($validated['customer_name']) ? $validated['customer_name'] : 'School Representative',
+            'customer_email' => !empty($validated['customer_email']) ? $validated['customer_email'] : (auth()->user()?->email ?? 'procurement@school.local'),
             'customer_phone' => $validated['customer_phone'],
-            'pincode' => $validated['pincode'],
-            'city' => $validated['city'],
-            'state' => $validated['state'],
+            'pincode' => !empty($validated['pincode']) ? $validated['pincode'] : '560001',
+            'city' => !empty($validated['city']) ? $validated['city'] : 'Bengaluru',
+            'state' => !empty($validated['state']) ? $validated['state'] : 'Karnataka',
             'country' => $validated['country'] ?? 'India',
-            'address' => $validated['address'],
-            'address_type' => $validated['address_type'] ?? 'Home',
+            'address' => !empty($validated['address']) ? $validated['address'] : 'Address to be confirmed on coordinator call',
+            'address_type' => $validated['address_type'] ?? 'School / Institution',
             'payment_method' => $validated['payment_method'] ?? 'razorpay',
             'payment_id' => $validated['payment_id'] ?? null,
             'payment_status' => $validated['payment_status'] ?? 'paid',
             'order_status' => 'pending',
             'subtotal' => $subtotal,
             'shipping_cost' => 0,
-            'discount' => 0,
+            'discount' => (float)$request->input('discount', 0),
             'total_amount' => $totalAmount,
             'currency' => 'INR',
+            'admin_notes' => $request->input('admin_notes'),
         ]);
 
         foreach ($validated['items'] as $item) {

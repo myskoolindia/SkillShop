@@ -129,6 +129,11 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
         return view('frontend.home-four.pages.lab-composite-skill-premium');
     })->name('labs.composite-skill-premium');
 
+    // Lab Offers & Promotions Landing Page
+    Route::get('/lab-offer', [\App\Http\Controllers\Frontend\LabOfferController::class, 'index'])->name('lab.offer');
+    Route::get('/lab-offers', fn() => redirect()->route('lab.offer'));
+    Route::get('/offers/lab-offer', fn() => redirect()->route('lab.offer'));
+
     Route::get('/ttt', function () {
         return view('frontend.home-four.pages.ttt');
     })->name('ttt');

@@ -157,8 +157,30 @@
             <div class="row justify-content-center">
                 <div class="col-xl-6 col-lg-8">
                     <div class="singUp-wrap">
+                        @php
+                            $loginRedirect = request('redirect', old('redirect', session('url.intended')));
+                            $isFromLabOffer = $loginRedirect && \Illuminate\Support\Str::contains(strtolower($loginRedirect), ['lab-offer', 'lab-offers']);
+                        @endphp
+
+                        @if($isFromLabOffer)
+                        <div class="p-3 mb-3 rounded-3" style="background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; font-size:13px; text-align:center;">
+                            <i class="fas fa-ticket-alt me-1 text-warning"></i>
+                            <strong>{{ __('DIDAC 2026 Visitor & School Portal') }}:</strong> {{ __('Sign in with your School, Teacher or Admin account.') }}
+                        </div>
+                        @endif
+
                         <div class="text-center mb-3">
-                            <p style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-bottom:10px"><a href="{{ route('roboquest.signin', ['role'=>'teacher']) }}">{{ __('Teacher login') }}</a><a href="{{ route('roboquest.signin', ['role'=>'student']) }}">{{ __('Student login') }}</a><a href="{{ route('roboquest.signin', ['role'=>'school']) }}">{{ __('School Admin login') }}</a></p>
+                            <div class="d-flex flex-wrap gap-2 justify-content-center mb-2">
+                                <a href="{{ route('roboquest.signin', ['role'=>'school']) }}" class="badge rounded-pill bg-light text-dark border text-decoration-none px-3 py-2 shadow-sm" style="font-size:12px; font-weight:600;">
+                                    <i class="fas fa-school text-primary me-1"></i> {{ __('School Admin Login') }}
+                                </a>
+                                <a href="{{ route('roboquest.signin', ['role'=>'teacher']) }}" class="badge rounded-pill bg-light text-dark border text-decoration-none px-3 py-2 shadow-sm" style="font-size:12px; font-weight:600;">
+                                    <i class="fas fa-chalkboard-teacher text-success me-1"></i> {{ __('Teacher Login') }}
+                                </a>
+                                <a href="{{ route('roboquest.signin', ['role'=>'student']) }}" class="badge rounded-pill bg-light text-dark border text-decoration-none px-3 py-2 shadow-sm" style="font-size:12px; font-weight:600;">
+                                    <i class="fas fa-user-graduate text-info me-1"></i> {{ __('Student Login') }}
+                                </a>
+                            </div>
                             <h2 class="title mb-1">{{ __('Welcome back!') }}</h2>
                             <p class="text-muted mb-2">{{ __('Log in to your School, Teacher, or Student account') }}</p>
                         </div>

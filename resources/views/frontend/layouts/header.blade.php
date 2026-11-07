@@ -87,6 +87,274 @@
 @endphp
 <!-- header-area -->
 <header>
+    {{-- =========================================================================
+         SPECIAL SCHOOL LAB FESTIVAL OFFER — PROMOTION TOP BAR (SCOPED CSS)
+         ========================================================================= --}}
+    @php
+      $labOfferActive = false;
+      try {
+          $labOfferActive = (bool) \App\Models\LabOffer::where('is_active', true)->exists();
+      } catch (\Throwable $e) {}
+
+      $currentPath = request()->path();
+      $userRole = auth()->check() ? (auth()->user()->role ?? '') : '';
+
+      $isDashboardOrAdmin = !empty($hideFlashOffer)
+        || request()->is('*school*', '*student*', '*instructor*', '*admin*', '*login*', '*register*')
+        || request()->routeIs('school.*', 'student.*', 'instructor.*', 'admin.*', 'login', 'register')
+        || str_contains($currentPath, 'school')
+        || str_contains($currentPath, 'student')
+        || str_contains($currentPath, 'instructor')
+        || str_contains($currentPath, 'admin')
+        || str_contains($currentPath, 'login')
+        || str_contains($currentPath, 'register')
+        || in_array($userRole, ['school', 'student', 'instructor', 'admin']);
+
+      $showLabOffer = $labOfferActive && !$isDashboardOrAdmin;
+    @endphp
+    @if($showLabOffer)
+    <style>
+      .lab-flash-bar-wrap {
+        background: linear-gradient(90deg, #020617 0%, #0f172a 50%, #020617 100%) !important;
+        color: #ffffff !important;
+        border-bottom: 1px solid rgba(240, 95, 67, 0.4) !important;
+        font-size: 13px !important;
+        padding: 8px 16px !important;
+        position: relative !important;
+        z-index: 9999 !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+        font-family: inherit !important;
+      }
+      .lab-flash-container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .lab-flash-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+        min-width: 260px;
+      }
+      .lab-badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 10px;
+        border-radius: 9999px;
+        background: linear-gradient(135deg, #f05f43, #f59e0b);
+        color: #ffffff !important;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        white-space: nowrap;
+        box-shadow: 0 2px 6px rgba(240,95,67,0.3);
+      }
+      .lab-badge-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #ffffff;
+        display: inline-block;
+        animation: labPulse 1.5s infinite;
+      }
+      @keyframes labPulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.4; transform: scale(0.85); }
+      }
+      .lab-event-name {
+        font-weight: 800;
+        color: #fde047 !important;
+        white-space: nowrap;
+      }
+      .lab-event-desc {
+        color: #e2e8f0 !important;
+        font-size: 13px;
+        font-weight: 500;
+        margin: 0 !important;
+      }
+      .lab-flash-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+      .lab-btn-claim {
+        padding: 5px 14px;
+        border-radius: 9999px;
+        background: #f05f43 !important;
+        color: #ffffff !important;
+        font-weight: 800;
+        font-size: 12px;
+        text-decoration: none !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 2px 8px rgba(240,95,67,0.35);
+        transition: transform 0.2s, background 0.2s;
+      }
+      .lab-btn-claim:hover {
+        background: #e24e31 !important;
+        color: #ffffff !important;
+        transform: translateY(-1px);
+      }
+      .lab-btn-wa {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 12px;
+        border-radius: 9999px;
+        background: #10b981 !important;
+        color: #ffffff !important;
+        font-weight: 700;
+        font-size: 12px;
+        text-decoration: none !important;
+        transition: background 0.2s;
+      }
+      .lab-btn-wa:hover {
+        background: #059669 !important;
+        color: #ffffff !important;
+      }
+      .lab-close-btn {
+        color: #94a3b8 !important;
+        background: transparent !important;
+        border: none !important;
+        font-size: 20px !important;
+        line-height: 1 !important;
+        padding: 2px 6px !important;
+        cursor: pointer !important;
+        transition: color 0.2s;
+      }
+      .lab-close-btn:hover {
+        color: #ffffff !important;
+      }
+      @media (max-width: 768px) {
+        .lab-event-desc {
+          display: none;
+        }
+        .lab-btn-wa {
+          display: none;
+        }
+      }
+    </style>
+
+    <div id="labTopFlashBar" class="lab-flash-bar-wrap">
+      <div class="lab-flash-container">
+        
+        <div class="lab-flash-left">
+          <span class="lab-badge-pill">
+            <span class="lab-badge-dot"></span>
+            SPECIAL SCHOOL OFFER
+          </span>
+          <span class="lab-event-name">Turnkey School Labs:</span>
+          <p class="lab-event-desc">
+            Pre-book STEM, Robotics &amp; CBSE Composite Skill Labs with &#8377;25,000 advance token or save extra 10% on full payment!
+          </p>
+        </div>
+
+        <div class="lab-flash-right">
+          <a href="{{ route('lab.offer') }}" class="lab-btn-claim">
+            <span>Claim Lab Offer &amp; 10% Discount</span>
+            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+          </a>
+
+          <a href="https://wa.me/919945612226?text=Hi%20Skillvation%20Team,%20I%20am%20enquiring%20about%20the%20Special%20School%20Lab%20Offer" target="_blank" class="lab-btn-wa">
+            <i class="fa-brands fa-whatsapp"></i>
+            <span>+91 99456 12226</span>
+          </a>
+
+          <button type="button" onclick="document.getElementById('labTopFlashBar').style.display='none'" class="lab-close-btn" title="Dismiss announcement">
+            &times;
+          </button>
+        </div>
+
+      </div>
+    </div>
+    @endif
+
+    {{-- Floating Event Offer Badge on Site Pages (Scoped CSS, Hidden on Dashboards and when Offer Inactive) --}}
+    @if($showLabOffer && !request()->routeIs('lab.offer'))
+    <style>
+      .lab-floating-pill {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 9990;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: inherit;
+      }
+      .lab-floating-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 18px 8px 14px;
+        border-radius: 9999px;
+        background: rgba(15, 23, 42, 0.95);
+        color: #ffffff !important;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        border: 1px solid rgba(240, 95, 67, 0.6);
+        text-decoration: none !important;
+        backdrop-filter: blur(8px);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .lab-floating-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 28px rgba(240, 95, 67, 0.25);
+        color: #ffffff !important;
+      }
+      .lab-floating-wa {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: #10b981;
+        color: #ffffff !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+        text-decoration: none !important;
+        transition: transform 0.2s, background 0.2s;
+      }
+      .lab-floating-wa:hover {
+        background: #059669;
+        transform: scale(1.08);
+        color: #ffffff !important;
+      }
+      @media (max-width: 640px) {
+        .lab-floating-card { display: none; }
+      }
+    </style>
+    <div class="lab-floating-pill print:hidden">
+      <a href="{{ route('lab.offer') }}" class="lab-floating-card">
+        <span style="position: relative; display: flex; width: 10px; height: 10px;">
+          <span style="position: absolute; width: 100%; height: 100%; border-radius: 50%; background: #f97316; opacity: 0.75; animation: labPulse 1.5s infinite;"></span>
+          <span style="position: relative; width: 10px; height: 10px; border-radius: 50%; background: #f05f43;"></span>
+        </span>
+        <div style="text-align: left; line-height: 1.2;">
+          <div style="font-size: 10px; font-weight: 900; color: #fde047; text-transform: uppercase; letter-spacing: 0.5px;">
+            🔥 SPECIAL SCHOOL LAB OFFER
+          </div>
+          <div style="font-weight: 800; color: #ffffff; font-size: 12px;">
+            10% Extra Discount &amp; Pre-Booking <span style="color: #f05f43;">&rarr;</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="https://wa.me/919945612226?text=Hi%20Skillvation%20Team,%20I%20am%20enquiring%20about%20the%20Special%20School%20Lab%20Offer" target="_blank" class="lab-floating-wa" title="WhatsApp Enquiry: +91 99456 12226">
+        <i class="fa-brands fa-whatsapp"></i>
+      </a>
+    </div>
+    @endif
+
     @if ($setting?->header_topbar_status == 'active')
         <div class="tg-header__top">
             <div class="container custom-container xl_container">

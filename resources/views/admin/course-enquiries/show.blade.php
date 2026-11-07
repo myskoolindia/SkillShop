@@ -151,6 +151,115 @@
                         </div>
                     </div>{{-- /.card --}}
 
+                    {{-- ── Special Lab Offer & Pre-Booking Details Card ── --}}
+                    @if(!empty($labOfferDetails))
+                    <div class="card mt-4 border-left-warning shadow-sm">
+                        <div class="card-header bg-gradient-light d-flex justify-content-between align-items-center flex-wrap">
+                            <h4 class="m-0 text-dark font-weight-bold">
+                                <i class="fas fa-certificate text-warning mr-2"></i>
+                                {{ __('Special Lab Offer & Pre-Booking Details') }}
+                                <span class="badge badge-warning text-dark ml-2 font-weight-bold">
+                                    <i class="fas fa-fire mr-1 text-danger"></i> {{ __('FESTIVAL PROMOTION') }}
+                                </span>
+                            </h4>
+                            <div class="mt-2 mt-md-0">
+                                @if(!empty($labOfferDetails['order_id']))
+                                    <a href="{{ route('admin.shop-orders.show', $labOfferDetails['order_id']) }}" class="btn btn-sm btn-outline-primary font-weight-bold" target="_blank">
+                                        <i class="fas fa-shopping-bag mr-1"></i> {{ __('View Shop Order #') }}{{ $labOfferDetails['order_number'] }}
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            {{-- Highlights metric tiles --}}
+                            <div class="row text-center mb-4">
+                                <div class="col-6 col-md-3 mb-3 mb-md-0">
+                                    <div class="p-3 rounded border bg-light">
+                                        <small class="text-muted text-uppercase font-weight-bold d-block">{{ __('Base Offer Price') }}</small>
+                                        <span class="h5 font-weight-bold text-dark mb-0 d-block mt-1">{{ $labOfferDetails['base_offer'] }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3 mb-3 mb-md-0">
+                                    <div class="p-3 rounded border bg-light">
+                                        <small class="text-muted text-uppercase font-weight-bold d-block">{{ __('Advance Token Paid') }}</small>
+                                        <span class="h5 font-weight-bold text-success mb-0 d-block mt-1">
+                                            ₹{{ number_format($labOfferDetails['paid_amount'], 2) }}
+                                        </span>
+                                        @if($labOfferDetails['paid_amount'] > 0)
+                                            <span class="badge badge-success mt-1"><i class="fas fa-check-circle mr-1"></i>{{ __('Paid Online') }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="p-3 rounded border bg-light">
+                                        <small class="text-muted text-uppercase font-weight-bold d-block">{{ __('Balance Due on Delivery') }}</small>
+                                        <span class="h5 font-weight-bold text-danger mb-0 d-block mt-1">{{ $labOfferDetails['balance_due'] }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="p-3 rounded border bg-light">
+                                        <small class="text-muted text-uppercase font-weight-bold d-block">{{ __('Booking Plan') }}</small>
+                                        <span class="h6 font-weight-bold text-primary mb-0 d-block mt-1 text-truncate" title="{{ $labOfferDetails['plan'] }}">
+                                            {{ $labOfferDetails['plan'] }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Detailed table --}}
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped mb-0">
+                                    <tbody>
+                                        <tr>
+                                            <th style="width:25%;" class="bg-light">{{ __('Selected Lab Package') }}</th>
+                                            <td class="font-weight-bold text-primary" style="font-size:15px;">
+                                                <i class="fas fa-microchip mr-2 text-warning"></i>{{ $labOfferDetails['product'] }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-light">{{ __('Order Reference') }}</th>
+                                            <td>
+                                                @if(!empty($labOfferDetails['order_number']))
+                                                    <span class="badge badge-dark font-mono mr-2">{{ $labOfferDetails['order_number'] }}</span>
+                                                    @if(!empty($labOfferDetails['order_id']))
+                                                        <a href="{{ route('admin.shop-orders.show', $labOfferDetails['order_id']) }}" target="_blank" class="text-primary font-weight-bold">
+                                                            <i class="fas fa-external-link-alt mr-1"></i>{{ __('Open Order in Club Shop') }}
+                                                        </a>
+                                                    @endif
+                                                @else
+                                                    <span class="text-muted">{{ __('Awaiting Order Placement') }}</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-light">{{ __('Payment Details') }}</th>
+                                            <td>
+                                                <span class="badge badge-info mr-1 text-uppercase">{{ $labOfferDetails['payment_method'] }}</span>
+                                                @if(!empty($labOfferDetails['payment_id']))
+                                                    <span class="text-muted ml-1">Txn / Payment ID: <code class="text-dark font-weight-bold">{{ $labOfferDetails['payment_id'] }}</code></span>
+                                                @endif
+                                                <span class="badge badge-{{ $labOfferDetails['payment_status'] === 'paid' ? 'success' : 'secondary' }} ml-2 text-uppercase">
+                                                    {{ $labOfferDetails['payment_status'] }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        @if(!empty($linkedOrder))
+                                        <tr>
+                                            <th class="bg-light">{{ __('Campus Delivery Address') }}</th>
+                                            <td>
+                                                {{ $linkedOrder->address ?: ($enquiry->address ?: 'N/A') }},
+                                                {{ $linkedOrder->city ?: $enquiry->city }},
+                                                {{ $linkedOrder->state }} - {{ $linkedOrder->pincode }}
+                                            </td>
+                                        </tr>
+                                        @endif
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
                     {{-- ── Quotation Management Card ──────────── --}}
                     <div class="card mt-4 border-left-primary">
                         <div class="card-header d-flex justify-content-between align-items-center">
@@ -280,13 +389,10 @@
                                 </div>
                             @else
                                 <div class="text-center py-4">
-                                    <div class="text-muted mb-3">
+                                    <div class="text-muted">
                                         <i class="fas fa-file-invoice fa-3x text-light mb-2 d-block"></i>
                                         {{ __('No quotation created yet for this enquiry. You can generate a custom quotation with package items, pricing, and GST.') }}
                                     </div>
-                                    <a href="{{ route('admin.course-enquiry.quotation', $enquiry->id) }}" class="btn btn-primary">
-                                        <i class="fas fa-plus mr-1"></i> {{ __('Create Quotation Now') }}
-                                    </a>
                                 </div>
                             @endif
                         </div>
@@ -445,13 +551,10 @@
                                 </div>
                             @else
                                 <div class="text-center py-4">
-                                    <div class="text-muted mb-3">
+                                    <div class="text-muted">
                                         <i class="fas fa-file-invoice-dollar fa-3x text-light mb-2 d-block"></i>
                                         {{ __('No Proforma Invoice created yet. You can create one from scratch or convert existing quotation data into a commercial proforma invoice.') }}
                                     </div>
-                                    <a href="{{ route('admin.course-enquiry.proforma', $enquiry->id) }}" class="btn btn-success">
-                                        <i class="fas fa-plus mr-1"></i> {{ __('Create Proforma Invoice') }}
-                                    </a>
                                 </div>
                             @endif
                         </div>
@@ -681,13 +784,10 @@
                                 </div>
                             @else
                                 <div class="text-center py-4">
-                                    <div class="text-muted mb-3">
+                                    <div class="text-muted">
                                         <i class="fas fa-receipt fa-3x text-light mb-2 d-block"></i>
                                         {{ __('No Final Tax Invoice created yet. Once created, previous proforma revisions are permanently locked and you can record Advance or Full payment collections.') }}
                                     </div>
-                                    <a href="{{ route('admin.course-enquiry.invoice', $enquiry->id) }}" class="btn btn-primary">
-                                        <i class="fas fa-plus mr-1"></i> {{ __('Create Final Tax Invoice') }}
-                                    </a>
                                 </div>
                             @endif
                         </div>

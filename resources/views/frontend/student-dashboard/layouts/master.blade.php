@@ -1,3 +1,6 @@
+@php
+    $hideFlashOffer = true;
+@endphp
 @extends('frontend.layouts.master')
 
 <!-- meta -->

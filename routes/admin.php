@@ -71,6 +71,11 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin'], function () {
         // ClubShop Product Integration for Line Items
         Route::get('clubshop/products/search',                  [AdminCourseEnquiryController::class, 'searchClubShopProducts'])->name('clubshop.products.search');
         Route::get('clubshop/products/catalog',                 [AdminCourseEnquiryController::class, 'getClubShopCatalog'])->name('clubshop.products.catalog');
+
+        // Lab Offers & Promotions Manager
+        Route::get('lab-offers',                                [\App\Http\Controllers\Admin\LabOfferController::class, 'index'])->name('lab-offers');
+        Route::post('lab-offers',                               [\App\Http\Controllers\Admin\LabOfferController::class, 'save'])->name('lab-offers.save');
+        Route::post('lab-offers/toggle-status',                 [\App\Http\Controllers\Admin\LabOfferController::class, 'toggleStatus'])->name('lab-offers.toggle');
     });
     Route::resource('admin', AdminController::class)->except('show');
     Route::put('admin-status/{id}', [AdminController::class, 'changeStatus'])->name('admin.status');
