@@ -796,16 +796,16 @@
                     <tbody>
                         @foreach($payments as $p)
                             <tr>
-                                <td style="font-family: monospace; font-weight: 700;">{{ $p['receipt_number'] ?? '-' }}</td>
-                                <td>{{ \Carbon\Carbon::parse($p['date'])->format('d M Y') }}</td>
+                                <td style="font-family: monospace; font-weight: 700;">{{ $p['receipt_number'] ?? ($p['receipt_no'] ?? '-') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($p['date'] ?? ($p['payment_date'] ?? now()))->format('d M Y') }}</td>
                                 <td>
                                     <span class="badge-cat">
-                                        {{ $p['type'] === 'advance' ? __('Advance') : ($p['type'] === 'balance' ? __('Balance') : __('Full Payment')) }}
+                                        {{ ($p['type'] ?? '') === 'advance' ? __('Advance') : (($p['type'] ?? '') === 'balance' ? __('Balance') : __('Full Payment')) }}
                                     </span>
                                 </td>
-                                <td>{{ strtoupper($p['method'] ?? 'Bank Transfer') }}</td>
-                                <td style="font-family: monospace;">{{ $p['transaction_id'] ?? '-' }}</td>
-                                <td style="text-align: right; font-weight: 700; color: #15803d;">₹{{ number_format($p['amount'], 2) }}</td>
+                                <td>{{ strtoupper($p['method'] ?? ($p['payment_method'] ?? 'Bank Transfer')) }}</td>
+                                <td style="font-family: monospace;">{{ $p['transaction_id'] ?? ($p['transaction_ref'] ?? '-') }}</td>
+                                <td style="text-align: right; font-weight: 700; color: #15803d;">₹{{ number_format($p['amount'] ?? 0, 2) }}</td>
                             </tr>
                         @endforeach
                     </tbody>

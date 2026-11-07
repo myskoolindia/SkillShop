@@ -217,7 +217,7 @@
                                                             @endif
 
                                                             {{-- Cell 4: Payment (Pay) --}}
-                                                            @if($enq->hasInvoice() && ($paySummary['total_paid'] ?? 0) > 0)
+                                                            @if(($paySummary['total_paid'] ?? 0) > 0)
                                                                 @if(($paySummary['payment_status'] ?? '') === 'paid')
                                                                     <a href="{{ route('admin.course-enquiry.show', $enq->id) }}#payment-card"
                                                                        class="btn btn-sm btn-success p-1 text-truncate text-left d-flex align-items-center"

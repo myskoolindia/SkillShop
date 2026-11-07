@@ -579,6 +579,9 @@
                                     @endif
                                 @else
                                     <span class="badge badge-light border ml-2 text-muted">{{ __('Not Created Yet') }}</span>
+                                    @if(($paymentSummary['total_paid'] ?? 0) > 0)
+                                        <span class="badge badge-warning ml-1"><i class="fas fa-adjust mr-1"></i>{{ __('ADVANCE PAID: ₹') }}{{ number_format($paymentSummary['total_paid'], 2) }}</span>
+                                    @endif
                                 @endif
                             </h4>
                             <div>
@@ -601,7 +604,7 @@
                         </div>
 
                         <div class="card-body">
-                            @if($enquiry->hasInvoice())
+                            @if($enquiry->hasInvoice() || ($paymentSummary['total_paid'] ?? 0) > 0)
                                 {{-- Payment Metrics Strip --}}
                                 <div class="row mb-4">
                                     <div class="col-md-3 col-sm-6 mb-2">
@@ -676,26 +679,27 @@
                                                         <tr>
                                                             <td class="text-center align-middle font-weight-bold">{{ $loop->iteration }}</td>
                                                             <td class="align-middle">
-                                                                <code class="font-weight-bold text-dark">{{ $p['receipt_number'] ?? '-' }}</code>
+                                                                <code class="font-weight-bold text-dark">{{ $p['receipt_number'] ?? ($p['receipt_no'] ?? '-') }}</code>
                                                             </td>
-                                                            <td class="align-middle">{{ \Carbon\Carbon::parse($p['date'])->format('d M Y') }}</td>
+                                                            <td class="align-middle">{{ \Carbon\Carbon::parse($p['date'] ?? ($p['payment_date'] ?? now()))->format('d M Y') }}</td>
                                                             <td class="align-middle">
-                                                                @if($p['type'] === 'advance')
+                                                                @if(($p['type'] ?? '') === 'advance')
                                                                     <span class="badge badge-warning">{{ __('Advance Payment') }}</span>
-                                                                @elseif($p['type'] === 'balance')
+                                                                @elseif(($p['type'] ?? '') === 'balance')
                                                                     <span class="badge badge-info">{{ __('Balance Payment') }}</span>
                                                                 @else
                                                                     <span class="badge badge-success">{{ __('Full Payment') }}</span>
                                                                 @endif
                                                             </td>
-                                                            <td class="align-middle text-uppercase font-weight-bold small">{{ $p['method'] ?? 'Bank Transfer' }}</td>
-                                                            <td class="align-middle font-family-monospace small">{{ $p['transaction_id'] ?? '—' }}</td>
+                                                            <td class="align-middle text-uppercase font-weight-bold small">{{ $p['method'] ?? ($p['payment_method'] ?? 'Online') }}</td>
+                                                            <td class="align-middle font-family-monospace small">{{ $p['transaction_id'] ?? ($p['transaction_ref'] ?? '—') }}</td>
                                                             <td class="text-right align-middle font-weight-bold text-success" style="font-size: 15px;">
-                                                                ₹{{ number_format($p['amount'], 2) }}
+                                                                ₹{{ number_format($p['amount'] ?? 0, 2) }}
                                                             </td>
                                                             <td class="align-middle small text-muted">{{ $p['recorded_by'] ?? 'Admin' }}</td>
                                                             <td class="text-center align-middle">
-                                                                <form action="{{ route('admin.course-enquiry.payment.delete', [$enquiry->id, $p['payment_id'] ?? '']) }}"
+                                                                @if(!empty($p['payment_id']) || !empty($p['id']))
+                                                                <form action="{{ route('admin.course-enquiry.payment.delete', [$enquiry->id, $p['payment_id'] ?? $p['id']]) }}"
                                                                       method="POST" onsubmit="return confirm('{{ __('Are you sure you want to delete this payment record?') }}');">
                                                                     @csrf
                                                                     @method('DELETE')
@@ -703,6 +707,9 @@
                                                                         <i class="fas fa-trash-alt"></i>
                                                                     </button>
                                                                 </form>
+                                                                @else
+                                                                    <span class="text-muted">—</span>
+                                                                @endif
                                                             </td>
                                                         </tr>
                                                     @endforeach
@@ -722,66 +729,82 @@
                                     @endif
                                 </div>
 
-                                {{-- Tax Invoice line items preview table --}}
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th style="width: 40px;">#</th>
-                                                <th>{{ __('Item Description') }}</th>
-                                                <th>{{ __('Category') }}</th>
-                                                <th class="text-center" style="width: 80px;">{{ __('Qty') }}</th>
-                                                <th class="text-right" style="width: 120px;">{{ __('Unit Price') }}</th>
-                                                <th class="text-right" style="width: 130px;">{{ __('Total') }}</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($invoice['items'] ?? [] as $item)
+                                @if($enquiry->hasInvoice())
+                                    {{-- Tax Invoice line items preview table --}}
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-striped">
+                                            <thead>
                                                 <tr>
-                                                    <td>{{ $loop->iteration }}</td>
-                                                    <td>
-                                                        <span class="font-weight-bold">{{ $item['item'] }}</span>
-                                                        @if(!empty($item['sku']))
-                                                            <span class="badge badge-light border ml-1 text-muted small"><i class="fas fa-barcode mr-1"></i>{{ $item['sku'] }}</span>
-                                                        @endif
-                                                    </td>
-                                                    <td><span class="badge badge-light border">{{ $item['category'] ?? 'Equipment' }}</span></td>
-                                                    <td class="text-center">{{ $item['qty'] }}</td>
-                                                    <td class="text-right">₹{{ number_format($item['unit_price'], 2) }}</td>
-                                                    <td class="text-right font-weight-bold">₹{{ number_format($item['total'] ?? ($item['qty'] * $item['unit_price']), 2) }}</td>
+                                                    <th style="width: 40px;">#</th>
+                                                    <th>{{ __('Item Description') }}</th>
+                                                    <th>{{ __('Category') }}</th>
+                                                    <th class="text-center" style="width: 80px;">{{ __('Qty') }}</th>
+                                                    <th class="text-right" style="width: 120px;">{{ __('Unit Price') }}</th>
+                                                    <th class="text-right" style="width: 130px;">{{ __('Total') }}</th>
                                                 </tr>
-                                            @endforeach
-                                        </tbody>
-                                        <tfoot>
-                                            <tr>
-                                                <td colspan="5" class="text-right text-muted font-weight-bold">{{ __('Subtotal:') }}</td>
-                                                <td class="text-right font-weight-bold">₹{{ number_format($invoice['subtotal'] ?? 0, 2) }}</td>
-                                            </tr>
-                                            @if(!empty($invoice['discount']) && $invoice['discount'] > 0)
-                                            <tr>
-                                                <td colspan="5" class="text-right text-danger font-weight-bold">{{ __('Discount:') }}</td>
-                                                <td class="text-right text-danger font-weight-bold">-₹{{ number_format($invoice['discount'], 2) }}</td>
-                                            </tr>
-                                            @endif
-                                            @if(!empty($invoice['tax_amount']) && $invoice['tax_amount'] > 0)
-                                            <tr>
-                                                <td colspan="5" class="text-right text-muted font-weight-bold">{{ __('GST (:rate%):', ['rate' => $invoice['tax_percent'] ?? 18]) }}</td>
-                                                <td class="text-right font-weight-bold">₹{{ number_format($invoice['tax_amount'], 2) }}</td>
-                                            </tr>
-                                            @endif
-                                            @if(!empty($invoice['shipping']) && $invoice['shipping'] > 0)
-                                            <tr>
-                                                <td colspan="5" class="text-right text-muted font-weight-bold">{{ __('Freight & Setup:') }}</td>
-                                                <td class="text-right font-weight-bold">₹{{ number_format($invoice['shipping'], 2) }}</td>
-                                            </tr>
-                                            @endif
-                                            <tr class="table-primary">
-                                                <td colspan="5" class="text-right font-weight-bold text-dark" style="font-size:15px;">{{ __('Grand Total:') }}</td>
-                                                <td class="text-right font-weight-bold text-primary" style="font-size:16px;">₹{{ number_format($invoice['grand_total'] ?? 0, 2) }}</td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($invoice['items'] ?? [] as $item)
+                                                    <tr>
+                                                        <td>{{ $loop->iteration }}</td>
+                                                        <td>
+                                                            <span class="font-weight-bold">{{ $item['item'] }}</span>
+                                                            @if(!empty($item['sku']))
+                                                                <span class="badge badge-light border ml-1 text-muted small"><i class="fas fa-barcode mr-1"></i>{{ $item['sku'] }}</span>
+                                                            @endif
+                                                        </td>
+                                                        <td><span class="badge badge-light border">{{ $item['category'] ?? 'Equipment' }}</span></td>
+                                                        <td class="text-center">{{ $item['qty'] }}</td>
+                                                        <td class="text-right">₹{{ number_format($item['unit_price'], 2) }}</td>
+                                                        <td class="text-right font-weight-bold">₹{{ number_format($item['total'] ?? ($item['qty'] * $item['unit_price']), 2) }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td colspan="5" class="text-right text-muted font-weight-bold">{{ __('Subtotal:') }}</td>
+                                                    <td class="text-right font-weight-bold">₹{{ number_format($invoice['subtotal'] ?? 0, 2) }}</td>
+                                                </tr>
+                                                @if(!empty($invoice['discount']) && $invoice['discount'] > 0)
+                                                <tr>
+                                                    <td colspan="5" class="text-right text-danger font-weight-bold">{{ __('Discount:') }}</td>
+                                                    <td class="text-right text-danger font-weight-bold">-₹{{ number_format($invoice['discount'], 2) }}</td>
+                                                </tr>
+                                                @endif
+                                                @if(!empty($invoice['tax_amount']) && $invoice['tax_amount'] > 0)
+                                                <tr>
+                                                    <td colspan="5" class="text-right text-muted font-weight-bold">{{ __('GST (:rate%):', ['rate' => $invoice['tax_percent'] ?? 18]) }}</td>
+                                                    <td class="text-right font-weight-bold">₹{{ number_format($invoice['tax_amount'], 2) }}</td>
+                                                </tr>
+                                                @endif
+                                                @if(!empty($invoice['shipping']) && $invoice['shipping'] > 0)
+                                                <tr>
+                                                    <td colspan="5" class="text-right text-muted font-weight-bold">{{ __('Freight & Setup:') }}</td>
+                                                    <td class="text-right font-weight-bold">₹{{ number_format($invoice['shipping'], 2) }}</td>
+                                                </tr>
+                                                @endif
+                                                <tr class="table-primary">
+                                                    <td colspan="5" class="text-right font-weight-bold text-dark" style="font-size:15px;">{{ __('Grand Total:') }}</td>
+                                                    <td class="text-right font-weight-bold text-primary" style="font-size:16px;">₹{{ number_format($invoice['grand_total'] ?? 0, 2) }}</td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                @elseif(($paymentSummary['total_paid'] ?? 0) > 0)
+                                    <div class="alert alert-info d-flex align-items-center justify-content-between flex-wrap mb-0 mt-3">
+                                        <div class="mb-2 mb-md-0">
+                                            <i class="fas fa-info-circle mr-2"></i>
+                                            <strong>{{ __('Advance Payment Collected Online:') }}</strong>
+                                            {{ __('An advance payment of ₹:amount has been credited via :method. Click "Create Final Tax Invoice" to issue the formal invoice document.', [
+                                                'amount' => number_format($paymentSummary['total_paid'], 2),
+                                                'method' => $paymentSummary['payments'][0]['payment_method'] ?? 'Online'
+                                            ]) }}
+                                        </div>
+                                        <a href="{{ route('admin.course-enquiry.invoice', $enquiry->id) }}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-plus mr-1"></i> {{ __('Create Final Tax Invoice') }}
+                                        </a>
+                                    </div>
+                                @endif
                             @else
                                 <div class="text-center py-4">
                                     <div class="text-muted">
@@ -794,7 +817,7 @@
                     </div>{{-- /.card tax invoice --}}
 
                     {{-- ── Record Payment Modal ── --}}
-                    @if($enquiry->hasInvoice())
+                    @if($enquiry->hasInvoice() || ($paymentSummary['total_paid'] ?? 0) > 0)
                         <div class="modal fade" id="recordPaymentModal" tabindex="-1" role="dialog" aria-labelledby="recordPaymentModalLabel" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="document">
                                 <div class="modal-content shadow-lg border-0">

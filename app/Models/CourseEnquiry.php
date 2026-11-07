@@ -114,19 +114,55 @@ class CourseEnquiry extends Model
     public function getInvoicePaymentSummaryAttribute(): array
     {
         $inv = $this->invoice_data;
-        if (!$inv) {
-            return [
-                'grand_total'    => 0.0,
-                'total_paid'     => 0.0,
-                'advance_paid'   => 0.0,
-                'balance_due'    => 0.0,
-                'payment_status' => 'unpaid',
-                'payments'       => [],
-            ];
+        $payments = (array) ($inv['payments'] ?? []);
+
+        // Fallback: If no invoice payments recorded in DB yet, check linked shop order
+        if (empty($payments)) {
+            $cleanPhone = substr(preg_replace('/[^0-9]/', '', (string)$this->phone), -10);
+            if (!empty($cleanPhone)) {
+                try {
+                    $linkedOrder = ShopOrder::where('customer_phone', 'like', "%{$cleanPhone}%")
+                        ->latest('id')
+                        ->first();
+                    if ($linkedOrder && $linkedOrder->payment_status === 'paid' && (float)$linkedOrder->total_amount > 0) {
+                        $paidAmt   = (float)$linkedOrder->total_amount;
+                        $payDate   = $linkedOrder->created_at ? $linkedOrder->created_at->format('Y-m-d') : date('Y-m-d');
+                        $payId     = 'pay_' . substr(md5($linkedOrder->id . $linkedOrder->order_number), 0, 8);
+                        $method    = $linkedOrder->payment_method ? ucfirst($linkedOrder->payment_method) : 'Razorpay';
+                        $txnId     = $linkedOrder->payment_id ?: $linkedOrder->order_number;
+                        $receiptNo = 'RCP-' . date('Ymd', strtotime($payDate)) . '-' . strtoupper(substr(md5($linkedOrder->order_number), 0, 4));
+
+                        $payments[] = [
+                            'id'              => $payId,
+                            'payment_id'      => $payId,
+                            'receipt_no'      => $receiptNo,
+                            'receipt_number'  => $receiptNo,
+                            'amount'          => $paidAmt,
+                            'date'            => $payDate,
+                            'payment_date'    => $payDate,
+                            'method'          => $method,
+                            'payment_method'  => $method,
+                            'transaction_id'  => $txnId,
+                            'transaction_ref' => $txnId,
+                            'type'            => 'advance',
+                            'notes'           => 'Pre-Booking Advance Token via Shop Order #' . $linkedOrder->order_number,
+                            'recorded_by'     => 'Online / Razorpay',
+                            'recorded_at'     => $linkedOrder->created_at ? $linkedOrder->created_at->toDateTimeString() : now()->toDateTimeString(),
+                        ];
+                    }
+                } catch (\Throwable $e) {}
+            }
         }
 
         $grandTotal = (float) ($inv['grand_total'] ?? 0.0);
-        $payments = (array) ($inv['payments'] ?? []);
+        if ($grandTotal <= 0 && !empty($this->proforma_invoice_data['grand_total'])) {
+            $grandTotal = (float)$this->proforma_invoice_data['grand_total'];
+        } elseif ($grandTotal <= 0 && !empty($this->quotation_data['grand_total'])) {
+            $grandTotal = (float)$this->quotation_data['grand_total'];
+        } elseif ($grandTotal <= 0 && !empty($payments)) {
+            // Default lab package quote price: 150000 + 18% GST = 177000
+            $grandTotal = 177000.0;
+        }
 
         $totalPaid = 0.0;
         $advancePaid = 0.0;

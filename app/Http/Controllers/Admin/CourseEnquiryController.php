@@ -554,7 +554,27 @@ class CourseEnquiryController extends Controller
     {
         $enquiry = CourseEnquiry::findOrFail($id);
         $invoice = $this->parseTaxInvoice($enquiry);
-        $paymentSummary = $enquiry->invoice_payment_summary;
+
+        $invoiceGrandTotal = (float)($invoice['grand_total'] ?? 0);
+        $paymentsList      = (array)($invoice['payments'] ?? []);
+        $totalPaid         = 0.0;
+        $advancePaid       = 0.0;
+        foreach ($paymentsList as $p) {
+            $amt = (float)($p['amount'] ?? 0);
+            $totalPaid += $amt;
+            if (($p['type'] ?? '') === 'advance') {
+                $advancePaid += $amt;
+            }
+        }
+        $balanceDue = max(0.0, $invoiceGrandTotal - $totalPaid);
+        $paymentSummary = [
+            'grand_total'    => $invoiceGrandTotal,
+            'total_paid'     => $totalPaid,
+            'advance_paid'   => $advancePaid,
+            'balance_due'    => $balanceDue,
+            'payment_status' => ($totalPaid <= 0) ? 'unpaid' : (($balanceDue <= 0.01) ? 'paid' : 'partially_paid'),
+            'payments'       => $paymentsList,
+        ];
 
         $title = __('Final Tax Invoice');
         return view('admin.course-enquiries.invoice-form', compact('enquiry', 'invoice', 'title', 'paymentSummary'));
@@ -616,9 +636,13 @@ class CourseEnquiryController extends Controller
         $taxAmount   = round($netSubtotal * ($taxPercent / 100), 2);
         $grandTotal  = round($netSubtotal + $taxAmount + $shipping, 2);
 
-        // Preserve payments already collected
+        // Preserve payments already collected or online advance token
         $existingInvoice = $enquiry->invoice_data;
         $payments = (array) ($existingInvoice['payments'] ?? []);
+        if (empty($payments)) {
+            $parsed = $this->parseTaxInvoice($enquiry);
+            $payments = (array) ($parsed['payments'] ?? []);
+        }
 
         $data = [
             'invoice_number' => trim($request->input('invoice_number')),
@@ -702,14 +726,24 @@ class CourseEnquiryController extends Controller
         $payments = (array) ($invoice['payments'] ?? []);
 
         $receiptNo = 'RCP-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
+        $payId     = uniqid('pay_');
+        $payDate   = $request->input('payment_date');
+        $method    = trim($request->input('payment_method'));
+        $txnRef    = trim($request->input('transaction_ref', ''));
+
         $newPayment = [
-            'id'              => uniqid('pay_'),
+            'id'              => $payId,
+            'payment_id'      => $payId,
             'receipt_no'      => $receiptNo,
+            'receipt_number'  => $receiptNo,
             'type'            => $request->input('type'),
             'amount'          => round((float) $request->input('amount'), 2),
-            'payment_date'    => $request->input('payment_date'),
-            'payment_method'  => trim($request->input('payment_method')),
-            'transaction_ref' => trim($request->input('transaction_ref', '')),
+            'date'            => $payDate,
+            'payment_date'    => $payDate,
+            'method'          => $method,
+            'payment_method'  => $method,
+            'transaction_id'  => $txnRef,
+            'transaction_ref' => $txnRef,
             'notes'           => trim($request->input('notes', '')),
             'recorded_by'     => auth()->guard('admin')->user()?->name ?? 'Admin',
             'created_at'      => now()->toDateTimeString(),
@@ -975,17 +1009,30 @@ class CourseEnquiryController extends Controller
         $payments = [];
         $linkedOrder = $this->findLinkedShopOrder($enquiry);
         if ($linkedOrder && $linkedOrder->payment_status === 'paid' && (float)$linkedOrder->total_amount > 0) {
-            $paidAmt = (float)$linkedOrder->total_amount;
-            $grand   = (float)($source['grand_total'] ?? 0);
+            $paidAmt   = (float)$linkedOrder->total_amount;
+            $grand     = (float)($source['grand_total'] ?? 0);
+            $payDate   = $linkedOrder->created_at ? $linkedOrder->created_at->format('Y-m-d') : date('Y-m-d');
+            $payId     = 'pay_' . substr(md5($linkedOrder->id . $linkedOrder->order_number), 0, 8);
+            $method    = $linkedOrder->payment_method ? ucfirst($linkedOrder->payment_method) : 'Razorpay';
+            $txnId     = $linkedOrder->payment_id ?: $linkedOrder->order_number;
+            $receiptNo = 'RCP-' . date('Ymd', strtotime($payDate)) . '-' . strtoupper(substr(md5($linkedOrder->order_number), 0, 4));
+
             $payments[] = [
-                'id'             => 'pay_' . substr(md5($linkedOrder->id . $linkedOrder->order_number), 0, 8),
-                'amount'         => $paidAmt,
-                'payment_date'   => $linkedOrder->created_at ? $linkedOrder->created_at->format('Y-m-d') : date('Y-m-d'),
-                'payment_method' => $linkedOrder->payment_method ? ucfirst($linkedOrder->payment_method) : 'Razorpay / Online',
-                'transaction_id' => $linkedOrder->payment_id ?: $linkedOrder->order_number,
-                'type'           => ($paidAmt < $grand) ? 'advance' : 'full',
-                'notes'          => 'Pre-Booking Advance Token via Shop Order #' . $linkedOrder->order_number,
-                'recorded_at'    => $linkedOrder->created_at ? $linkedOrder->created_at->toDateTimeString() : now()->toDateTimeString(),
+                'id'              => $payId,
+                'payment_id'      => $payId,
+                'receipt_no'      => $receiptNo,
+                'receipt_number'  => $receiptNo,
+                'amount'          => $paidAmt,
+                'date'            => $payDate,
+                'payment_date'    => $payDate,
+                'method'          => $method,
+                'payment_method'  => $method,
+                'transaction_id'  => $txnId,
+                'transaction_ref' => $txnId,
+                'type'            => ($paidAmt < $grand) ? 'advance' : 'full',
+                'notes'           => 'Pre-Booking Advance Token via Shop Order #' . $linkedOrder->order_number,
+                'recorded_by'     => 'Online / Razorpay',
+                'recorded_at'     => $linkedOrder->created_at ? $linkedOrder->created_at->toDateTimeString() : now()->toDateTimeString(),
             ];
         }
 

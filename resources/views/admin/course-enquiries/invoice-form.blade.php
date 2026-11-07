@@ -53,8 +53,8 @@
                 </div>
             </div>
 
-            {{-- Payment Summary Strip (If invoice exists) --}}
-            @if($enquiry->hasInvoice() && !empty($paymentSummary))
+            {{-- Payment Summary Strip (If invoice exists or online advance collected) --}}
+            @if(($enquiry->hasInvoice() || ($paymentSummary['total_paid'] ?? 0) > 0) && !empty($paymentSummary))
                 <div class="card bg-light border mb-4">
                     <div class="card-body p-3">
                         <div class="row align-items-center">
