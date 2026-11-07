@@ -165,7 +165,7 @@
                         @if($isFromLabOffer)
                         <div class="p-3 mb-3 rounded-3" style="background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; font-size:13px; text-align:center;">
                             <i class="fas fa-ticket-alt me-1 text-warning"></i>
-                            <strong>{{ __('DIDAC 2026 Visitor & School Portal') }}:</strong> {{ __('Sign in with your School, Teacher or Admin account.') }}
+                            <strong>{{ __('School & Educator Portal') }}:</strong> {{ __('Sign in with your School, Teacher or Admin account.') }}
                         </div>
                         @endif
 

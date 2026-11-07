@@ -93,11 +93,12 @@
     @php
       $labOfferActive = false;
       try {
-          $labOfferActive = (bool) \App\Models\LabOffer::where('is_active', true)->exists();
+          $activeOffer = \App\Models\LabOffer::where('is_active', 1)->first();
+          $labOfferActive = !empty($activeOffer) && (bool)$activeOffer->is_active;
       } catch (\Throwable $e) {}
 
-      $currentPath = request()->path();
-      $userRole = auth()->check() ? (auth()->user()->role ?? '') : '';
+      $currentPath = strtolower(trim(request()->path(), '/'));
+      $userRole = auth()->check() ? strtolower(auth()->user()->role ?? '') : '';
 
       $isDashboardOrAdmin = !empty($hideFlashOffer)
         || request()->is('*school*', '*student*', '*instructor*', '*admin*', '*login*', '*register*')
@@ -106,9 +107,10 @@
         || str_contains($currentPath, 'student')
         || str_contains($currentPath, 'instructor')
         || str_contains($currentPath, 'admin')
+        || str_contains($currentPath, 'dashboard')
         || str_contains($currentPath, 'login')
         || str_contains($currentPath, 'register')
-        || in_array($userRole, ['school', 'student', 'instructor', 'admin']);
+        || in_array($userRole, ['school', 'student', 'instructor', 'admin', 'teacher']);
 
       $showLabOffer = $labOfferActive && !$isDashboardOrAdmin;
     @endphp
@@ -168,11 +170,6 @@
         0%, 100% { opacity: 1; transform: scale(1); }
         50% { opacity: 0.4; transform: scale(0.85); }
       }
-      .lab-event-name {
-        font-weight: 800;
-        color: #fde047 !important;
-        white-space: nowrap;
-      }
       .lab-event-desc {
         color: #e2e8f0 !important;
         font-size: 13px;
@@ -207,19 +204,21 @@
       .lab-btn-wa {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
-        padding: 5px 12px;
-        border-radius: 9999px;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
         background: #10b981 !important;
         color: #ffffff !important;
-        font-weight: 700;
-        font-size: 12px;
+        font-size: 15px;
         text-decoration: none !important;
-        transition: background 0.2s;
+        transition: transform 0.2s, background 0.2s;
+        flex-shrink: 0;
       }
       .lab-btn-wa:hover {
         background: #059669 !important;
         color: #ffffff !important;
+        transform: scale(1.08);
       }
       .lab-close-btn {
         color: #94a3b8 !important;
@@ -238,9 +237,6 @@
         .lab-event-desc {
           display: none;
         }
-        .lab-btn-wa {
-          display: none;
-        }
       }
     </style>
 
@@ -252,7 +248,6 @@
             <span class="lab-badge-dot"></span>
             SPECIAL SCHOOL OFFER
           </span>
-          <span class="lab-event-name">Turnkey School Labs:</span>
           <p class="lab-event-desc">
             Pre-book STEM, Robotics &amp; CBSE Composite Skill Labs with &#8377;25,000 advance token or save extra 10% on full payment!
           </p>
@@ -264,9 +259,8 @@
             <i class="fa-solid fa-arrow-right text-[10px]"></i>
           </a>
 
-          <a href="https://wa.me/919945612226?text=Hi%20Skillvation%20Team,%20I%20am%20enquiring%20about%20the%20Special%20School%20Lab%20Offer" target="_blank" class="lab-btn-wa">
+          <a href="https://wa.me/919945612226?text=Hi%20Skillvation%20Team,%20I%20am%20enquiring%20about%20the%20Special%20School%20Lab%20Offer" target="_blank" class="lab-btn-wa" title="WhatsApp Enquiry">
             <i class="fa-brands fa-whatsapp"></i>
-            <span>+91 99456 12226</span>
           </a>
 
           <button type="button" onclick="document.getElementById('labTopFlashBar').style.display='none'" class="lab-close-btn" title="Dismiss announcement">

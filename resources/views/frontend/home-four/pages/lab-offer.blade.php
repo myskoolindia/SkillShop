@@ -1390,6 +1390,9 @@ function verifyWhatsAppOtp() {
 // CHECKOUT MULTI-STEP NAVIGATION (STEP 1: PHONE OTP -> STEP 2: DETAILS)
 // ─────────────────────────────────────────────────────────────────
 function goToCheckoutStep(step) {
+  var chkForm = document.getElementById('directCheckoutForm');
+  if (chkForm) chkForm.scrollTop = 0;
+
   var step1Block = document.getElementById('checkoutStep1Block');
   var step2Block = document.getElementById('checkoutStep2Block');
   var ind1 = document.getElementById('stepIndicator1');
@@ -1804,6 +1807,11 @@ function openCheckoutModal(item, defaultPlan) {
   // Prevent background scrolling completely
   document.documentElement.classList.add('modal-open');
   document.body.classList.add('modal-open');
+
+  var chkModal = document.getElementById('checkoutModal');
+  var chkForm = document.getElementById('directCheckoutForm');
+  if (chkModal) chkModal.scrollTop = 0;
+  if (chkForm) chkForm.scrollTop = 0;
 
   document.getElementById('checkoutModal').classList.remove('hidden');
 }

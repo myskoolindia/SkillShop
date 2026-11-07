@@ -1,5 +1,6 @@
 @php
     $hideFlashOffer = true;
+    view()->share('hideFlashOffer', true);
 @endphp
 @extends('frontend.layouts.master')
 

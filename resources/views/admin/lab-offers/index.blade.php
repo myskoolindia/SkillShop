@@ -393,7 +393,7 @@ function addPromoProduct() {
                 <div class="col-md-9">
                     <select class="form-control form-control-sm select-catalog-prod" onchange="fillFromCatalog(this, ${i})">
                         <option value="">-- Select a ClubShop Product / Bundle to Auto-Fill --</option>
-                        ${catalogList.map(c => `<option value="${c.id}" data-title="${c.title}" data-price="${c.price}" data-slug="${c.slug}">${c.is_bundle ? '📦 [BUNDLE] ' : '🔧 [PRODUCT] '}${c.title} — ₹${Number(c.price).toLocaleString('en-IN')}</option>`).join('')}
+                        ${catalogList.map(c => `<option value="${c.id}" data-title="${c.title}" data-price="${c.price}" data-offer-price="${c.price_discounted && Number(c.price_discounted) > 0 ? c.price_discounted : c.price}" data-slug="${c.slug}">${c.is_bundle ? '📦 [BUNDLE] ' : '🔧 [PRODUCT] '}${c.title} — ₹${Number(c.price).toLocaleString('en-IN')}${c.price_discounted && Number(c.price_discounted) > 0 && Number(c.price_discounted) < Number(c.price) ? ' (Offer: ₹' + Number(c.price_discounted).toLocaleString('en-IN') + ')' : ''}</option>`).join('')}
                     </select>
                 </div>
             </div>
@@ -499,6 +499,7 @@ function fillFromCatalog(sel, idx) {
 
     var title = opt.getAttribute('data-title') || '';
     var price = parseFloat(opt.getAttribute('data-price') || 0);
+    var offerPrice = parseFloat(opt.getAttribute('data-offer-price') || 0);
     var pid = opt.value;
 
     var titleInp = card.querySelector('.prod-title-input');
@@ -509,8 +510,8 @@ function fillFromCatalog(sel, idx) {
 
     if (titleInp && !titleInp.value) titleInp.value = title;
     if (titleDisplay) titleDisplay.textContent = title;
-    if (mrpInp && (!mrpInp.value || parseFloat(mrpInp.value) === 0)) mrpInp.value = price;
-    if (offerInp && (!offerInp.value || parseFloat(offerInp.value) === 0)) offerInp.value = Math.round(price * 0.85); // default 15% promo discount
+    if (mrpInp) mrpInp.value = price;
+    if (offerInp) offerInp.value = (offerPrice > 0) ? offerPrice : price;
     if (idInp) idInp.value = pid;
 
     updateCardSavings(idx);
