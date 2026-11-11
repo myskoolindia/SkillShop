@@ -78,6 +78,8 @@ class HomeController extends BaseController
         if (empty($slug)) {
             return redirect()->to(langBaseUrl());
         }
+        $slug = explode('#', explode('%23', (string)$slug)[0])[0];
+        $slug = explode('?', $slug)[0];
         $page = $this->pageModel->getPage($slug);
         $data['userSession'] = getUserSession();
         if (!empty($page)) {

@@ -34,13 +34,24 @@ class SsoBridgeController extends Controller
 
             // For public shop destinations (e.g. product customize slugs, bundle contents, carts), allow seamless guest browsing
             if (!empty($target)) {
-                return redirect()->away($shopUrl . '/' . ltrim($target, '/'));
+                $fragment = '';
+                if (str_contains($target, '#')) {
+                    [$target, $fragment] = explode('#', $target, 2);
+                    $fragment = '#' . $fragment;
+                }
+                $cleanTarget = '/' . ltrim(trim($target), '/');
+                return redirect()->away($shopUrl . $cleanTarget . $fragment);
             }
 
             return redirect()->guest(route('login', ['redirect' => $request->fullUrl()]));
         }
 
         $target = $request->query('target', '');
+        $fragment = '';
+        if (str_contains($target, '#')) {
+            [$target, $fragment] = explode('#', $target, 2);
+            $fragment = '#' . $fragment;
+        }
 
         // If authenticated via admin guard or requesting admin mode
         if ($admin) {
@@ -65,6 +76,9 @@ class SsoBridgeController extends Controller
         }
 
         $ssoUrl = SsoTokenService::generateShopSsoUrl($user, $target);
+        if (!empty($fragment)) {
+            $ssoUrl .= $fragment;
+        }
 
         return redirect()->away($ssoUrl);
     }

@@ -852,6 +852,8 @@ class ProductModel extends BaseModel
     //get product by slug
     public function getProductBySlug($slug)
     {
+        $slug = explode('#', explode('%23', (string)$slug)[0])[0];
+        $slug = explode('?', $slug)[0];
         $this->buildQuery(true);
         $row = $this->builder->where('products.slug', strSlug($slug))->get()->getRow();
         if (!empty($row) && $row->is_draft == 0 && $row->is_deleted == 0) {
