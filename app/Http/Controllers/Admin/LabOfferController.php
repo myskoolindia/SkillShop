@@ -88,9 +88,20 @@ class LabOfferController extends Controller
                 $offerPrice = (float)($p['offer_price'] ?? 0);
                 $discount = $mrp > $offerPrice ? round($mrp - $offerPrice, 2) : 0;
 
+                $productId = !empty($p['product_id']) ? (int)$p['product_id'] : null;
+                $slug = trim($p['package_slug'] ?? '');
+                if (empty($slug) && $productId) {
+                    try {
+                        $slug = DB::connection('clubshop')->table('products')->where('id', $productId)->value('slug') ?: '';
+                    } catch (\Throwable $e) {}
+                }
+                if (empty($slug)) {
+                    $slug = 'skillvation-lab';
+                }
+
                 $processedProducts[] = [
                     'id'              => !empty($p['id']) ? $p['id'] : 'promo_' . Str::random(6),
-                    'product_id'      => !empty($p['product_id']) ? (int)$p['product_id'] : null,
+                    'product_id'      => $productId,
                     'title'           => trim($p['title']),
                     'subtitle'        => trim($p['subtitle'] ?? ''),
                     'badge'           => trim($p['badge'] ?? ''),
@@ -98,8 +109,8 @@ class LabOfferController extends Controller
                     'offer_price'     => $offerPrice,
                     'discount_amount' => $discount,
                     'features'        => $features,
-                    'package_slug'    => trim($p['package_slug'] ?? 'skillvation-lab-stem'),
-                    'cart_url'        => trim($p['cart_url'] ?? '/club-shop/skillvation-cart'),
+                    'package_slug'    => $slug,
+                    'cart_url'        => trim($p['cart_url'] ?? ''),
                     'sort_order'      => isset($p['sort_order']) ? (int)$p['sort_order'] : $sort++,
                     'is_active'       => !empty($p['is_active']),
                     'stock_status'    => trim($p['stock_status'] ?? 'in_stock'),

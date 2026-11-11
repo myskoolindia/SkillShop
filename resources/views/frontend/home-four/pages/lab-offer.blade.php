@@ -625,8 +625,19 @@
               </button>
 
               {{-- Customize in Club Shop Cart --}}
-              <a href="{{ url('/sso/shop') }}?target={{ urlencode($p['cart_url'] ?? '/skillvation-cart') }}"
-                 class="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5">
+              @php
+                $targetSlug = !empty($p['package_slug']) ? $p['package_slug'] : (!empty($p['slug']) ? $p['slug'] : '');
+                if (empty($targetSlug) && !empty($p['product_id'])) {
+                    try {
+                        $targetSlug = \Illuminate\Support\Facades\DB::connection('clubshop')->table('products')->where('id', $p['product_id'])->value('slug');
+                    } catch (\Throwable $e) {}
+                }
+                $cleanSlug = ltrim(explode('#', $targetSlug)[0], '/');
+                $customizeTarget = !empty($cleanSlug) ? ('/' . $cleanSlug . '#tab_bundle_contents') : ($p['cart_url'] ?? '/skillvation-cart');
+              @endphp
+              <a href="{{ url('/sso/shop') }}?target={{ urlencode($customizeTarget) }}"
+                 class="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5"
+                 title="Customize Lab Components">
                 <i class="fa-solid fa-sliders text-blue-500"></i>
                 <span>Customize</span>
               </a>

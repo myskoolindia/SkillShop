@@ -23,9 +23,20 @@ class SsoBridgeController extends Controller
         $webUser = Auth::guard('web')->user();
 
         if (!$admin && !$webUser) {
-            if ($request->has('admin')) {
-                return redirect()->guest(route('admin.login', ['redirect' => $request->fullUrl()]));
+            $target = $request->query('target', '');
+            $shopUrl = rtrim(config('sso.shop_url', url('/club-shop')), '/');
+
+            // If target is admin panel or vendor dashboard, require login
+            if ($request->has('admin') || in_array(ltrim($target, '/'), ['admin', 'dashboard', 'dashboard/add-product', 'dashboard/products'])) {
+                $loginRoute = $request->has('admin') ? 'admin.login' : 'login';
+                return redirect()->guest(route($loginRoute, ['redirect' => $request->fullUrl()]));
             }
+
+            // For public shop destinations (e.g. product customize slugs, bundle contents, carts), allow seamless guest browsing
+            if (!empty($target)) {
+                return redirect()->away($shopUrl . '/' . ltrim($target, '/'));
+            }
+
             return redirect()->guest(route('login', ['redirect' => $request->fullUrl()]));
         }
 

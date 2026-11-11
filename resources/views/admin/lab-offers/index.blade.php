@@ -228,6 +228,8 @@
                                     </div>
                                     <div class="card-body">
                                         <input type="hidden" name="products[{{ $idx }}][id]" value="{{ $prod['id'] ?? 'promo_' . $idx }}">
+                                        <input type="hidden" name="products[{{ $idx }}][package_slug]" class="prod-slug-input" value="{{ $prod['package_slug'] ?? $prod['slug'] ?? '' }}">
+                                        <input type="hidden" name="products[{{ $idx }}][cart_url]" class="prod-cart-url-input" value="{{ $prod['cart_url'] ?? '' }}">
 
                                         {{-- Catalog Auto-Fill Dropdown --}}
                                         <div class="row mb-3 bg-white p-2 rounded border mx-0 align-items-center">
@@ -390,6 +392,8 @@ function addPromoProduct() {
         </div>
         <div class="card-body">
             <input type="hidden" name="products[${i}][id]" value="promo_${Date.now()}">
+            <input type="hidden" name="products[${i}][package_slug]" class="prod-slug-input" value="">
+            <input type="hidden" name="products[${i}][cart_url]" class="prod-cart-url-input" value="">
 
             <div class="row mb-3 bg-white p-2 rounded border mx-0 align-items-center">
                 <div class="col-md-3">
@@ -506,11 +510,13 @@ function fillFromCatalog(sel, idx) {
     var price = parseFloat(opt.getAttribute('data-price') || 0);
     var offerPrice = parseFloat(opt.getAttribute('data-offer-price') || 0);
     var pid = opt.value;
+    var slug = opt.getAttribute('data-slug') || '';
 
     var titleInp = card.querySelector('.prod-title-input');
     var mrpInp = card.querySelector('.prod-mrp-input');
     var offerInp = card.querySelector('.prod-offer-input');
     var idInp = card.querySelector('.prod-id-input');
+    var slugInp = card.querySelector('.prod-slug-input');
     var titleDisplay = card.querySelector('.product-title-display');
 
     if (titleInp) titleInp.value = title;
@@ -518,6 +524,7 @@ function fillFromCatalog(sel, idx) {
     if (mrpInp) mrpInp.value = price;
     if (offerInp) offerInp.value = (offerPrice > 0) ? offerPrice : price;
     if (idInp) idInp.value = pid;
+    if (slugInp) slugInp.value = slug;
 
     updateCardSavings(idx);
 }
