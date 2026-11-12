@@ -62,6 +62,9 @@ $routes->post('api/posorders',                     'ApiController::posOrders');
 $routes->post('api/pos/create-order',              'ApiController::posCreateOrder');
 $routes->get('api/pos/order-fulfillment-status',   'ApiController::orderFulfillmentStatus');
 $routes->get('api/seed-sample-bundle',             'ApiController::seedSampleBundle');
+$routes->get('api/lab-orders',                     'ApiController::getLabOrders');
+$routes->get('api/lab-orders/(:num)',              'ApiController::getLabOrderDetail/$1');
+$routes->post('api/lab-orders/(:num)/fulfill',     'ApiController::fulfillLabOrder/$1');
 
 // ─────────────────────────────────────────────────────────────────────────────
 $routes->get('/' . $csrt->affiliate . '/(:any)', 'HomeController::affiliate/$1');

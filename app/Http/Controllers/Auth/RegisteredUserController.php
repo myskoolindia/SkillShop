@@ -61,7 +61,7 @@ class RegisteredUserController extends Controller
         $setting = Cache::get('setting');
 
         $request->validate([
-            'account_type'        => ['required', 'in:student,teacher,school'],
+            'account_type'        => ['required', 'in:student,teacher,school,affiliate'],
             'phone'               => ['required', 'string', 'max:20'],
             'phone_token'         => ['required', 'string'],
             'name'                => ['required', 'string', 'max:255'],
@@ -232,6 +232,7 @@ class RegisteredUserController extends Controller
             'school'     => route('school.dashboard'),
             'teacher'    => route('student.dashboard'),
             'instructor' => route('instructor.dashboard'),
+            'affiliate'  => url('/sso/shop') . '?target=affiliate-program',
             default      => route('student.dashboard'),
         };
 

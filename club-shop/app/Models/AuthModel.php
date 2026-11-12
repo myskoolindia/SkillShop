@@ -351,6 +351,10 @@ class AuthModel extends BaseModel
                 'created_at' => $now
             ];
 
+            if (!empty($ssoUser['role']) && $ssoUser['role'] === 'affiliate') {
+                $data['is_affiliate'] = 1;
+            }
+
             if ($this->builder->insert($data)) {
                 $user = $this->getUserByEmail($ssoUser['email']);
             }
@@ -363,6 +367,12 @@ class AuthModel extends BaseModel
                 $updates['role_id'] = 1;
             } elseif (!empty($ssoUser['role']) && in_array($ssoUser['role'], ['school', 'teacher', 'student'], true)) {
                 // Ensure school user is normal Member (role_id = 3), never seller/vendor (role_id = 2)
+                if ((int)$user->role_id !== 3 && (int)$user->role_id !== 1) {
+                    $updates['role_id'] = 3;
+                }
+            }
+            if (!empty($ssoUser['role']) && $ssoUser['role'] === 'affiliate') {
+                $updates['is_affiliate'] = 1;
                 if ((int)$user->role_id !== 3 && (int)$user->role_id !== 1) {
                     $updates['role_id'] = 3;
                 }

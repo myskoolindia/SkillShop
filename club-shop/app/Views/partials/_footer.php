@@ -100,6 +100,7 @@ $social_links = getPortalSocialLinks();
                                 ?>
                                     <li><a href="<?= $url; ?>"><?= esc($mTwo['label']); ?></a></li>
                                 <?php endforeach; ?>
+                                <li><a href="<?= generateUrl('affiliate_program'); ?>">Affiliate Program</a></li>
                             </ul>
                         </div>
                     </div>

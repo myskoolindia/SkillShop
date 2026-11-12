@@ -55,6 +55,7 @@
       <ul class="space-y-2 text-sm text-on-surface-variant">
         <li><a class="hover:text-primary transition-colors" href="{{ route('become-instructor') }}">Partner with us</a></li>
         <li><a class="hover:text-primary transition-colors" href="{{ route('become-instructor') }}">Teach with us</a></li>
+        <li><a class="hover:text-primary transition-colors" href="{{ url('/sso/shop') }}?target=affiliate-program">Affiliate Program</a></li>
       </ul>
     </div>
 

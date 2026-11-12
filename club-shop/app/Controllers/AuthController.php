@@ -608,7 +608,7 @@ class AuthController extends BaseController
         if ($ssoRole === 'instructor') {
             $ssoRole = 'teacher';
         }
-        if (!in_array($ssoRole, ['school','teacher','admin','vendor'], true)) {
+        if (!in_array($ssoRole, ['school','teacher','admin','vendor','student','affiliate'], true)) {
             return $this->response->setStatusCode(403)->setBody('The lab shop is for schools and teachers only.');
         }
         $payload['role'] = $ssoRole;
@@ -632,6 +632,7 @@ class AuthController extends BaseController
                 if (str_starts_with($target, 'http://') || str_starts_with($target, 'https://')) {
                     return redirect()->to($target);
                 }
+                return redirect()->to(base_url(ltrim($target, '/')));
                 $fragment = '';
                 if (strpos($target, '#') !== false) {
                     list($target, $fragment) = explode('#', $target, 2);

@@ -83,18 +83,19 @@
                     @endif
                 </div>
                 <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                    @if(count($footer_menu_two) > 0)
                     <div class="footer__widget">
                         <h4 class="footer__widget-title">{{ __('Our Company') }}</h4>
                         <div class="footer__link">
                             <ul class="list-wrap">
-                                @foreach ($footer_menu_two as $footerMenuTwo)
-                                    <li><a href="{{ url($footerMenuTwo['link']) }}">{{ $footerMenuTwo['label'] }}</a></li>
-                                @endforeach
+                                @if(count($footer_menu_two) > 0)
+                                    @foreach ($footer_menu_two as $footerMenuTwo)
+                                        <li><a href="{{ url($footerMenuTwo['link']) }}">{{ $footerMenuTwo['label'] }}</a></li>
+                                    @endforeach
+                                @endif
+                                <li><a href="{{ url('/sso/shop') }}?target=affiliate-program">{{ __('Affiliate Program') }}</a></li>
                             </ul>
                         </div>
                     </div>
-                    @endif
                 </div>
                 <div class="col-xl-3 col-lg-4 col-md-6">
                     <div class="footer__widget">

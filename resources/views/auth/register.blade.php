@@ -212,7 +212,7 @@
             || request('scope') === 'labs'
             || in_array(request('role'), ['school', 'teacher'], true)
             || \Illuminate\Support\Str::contains(strtolower($reqRedirect), ['/labs', 'composite-skill', 'skillvation-lab', 'lab-stem', 'stem', 'ecec', 'ai-robotics']);
-        $initialRole = request('role') === 'teacher' ? 'teacher' : 'school';
+        $initialRole = in_array(request('role'), ['teacher', 'student', 'affiliate'], true) ? request('role') : 'school';
     @endphp
 
     <!-- breadcrumb-area -->
@@ -249,7 +249,7 @@
                                     @endif
                                 </div>
                                 <div class="row g-2 g-sm-3">
-                                    <div class="{{ $isLabContext ? 'col-6' : 'col-4' }}">
+                                    <div class="{{ $isLabContext ? 'col-6' : 'col-6 col-md-3' }}">
                                         <div class="reg-role-card {{ $initialRole === 'school' ? 'active' : '' }}" data-role="school" onclick="selectRole('school')">
                                             <div class="role-icon" style="background:#f3e8ff; color:#9333ea;">
                                                 <i class="fas fa-school"></i>
@@ -258,7 +258,7 @@
                                             <div class="role-subtitle">{{ __('For institutions') }}</div>
                                         </div>
                                     </div>
-                                    <div class="{{ $isLabContext ? 'col-6' : 'col-4' }}">
+                                    <div class="{{ $isLabContext ? 'col-6' : 'col-6 col-md-3' }}">
                                         <div class="reg-role-card {{ $initialRole === 'teacher' ? 'active' : '' }}" data-role="teacher" onclick="selectRole('teacher')">
                                             <div class="role-icon" style="background:#fef3c7; color:#d97706;">
                                                 <i class="fas fa-chalkboard-teacher"></i>
@@ -268,13 +268,22 @@
                                         </div>
                                     </div>
                                     @if(!$isLabContext)
-                                    <div class="col-4">
-                                        <div class="reg-role-card {{ request('role') === 'student' ? 'active' : '' }}" data-role="student" onclick="selectRole('student')">
+                                    <div class="col-6 col-md-3">
+                                        <div class="reg-role-card {{ $initialRole === 'student' ? 'active' : '' }}" data-role="student" onclick="selectRole('student')">
                                             <div class="role-icon" style="background:#e0f2fe; color:#0284c7;">
                                                 <i class="fas fa-user-graduate"></i>
                                             </div>
                                             <div class="role-title">{{ __('Student') }}</div>
                                             <div class="role-subtitle">{{ __('For learners') }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="reg-role-card {{ $initialRole === 'affiliate' ? 'active' : '' }}" data-role="affiliate" onclick="selectRole('affiliate')">
+                                            <div class="role-icon" style="background:#ecfdf5; color:#059669;">
+                                                <i class="fas fa-handshake"></i>
+                                            </div>
+                                            <div class="role-title">{{ __('Affiliate') }}</div>
+                                            <div class="role-subtitle">{{ __('Partner & Earn') }}</div>
                                         </div>
                                     </div>
                                     @endif
@@ -453,6 +462,17 @@
                                     </div>
                                 </div>
 
+                                {{-- Affiliate Specific Fields --}}
+                                <div id="affiliate-details-fields" style="display:none;" class="mb-3">
+                                    <div class="alert alert-success py-2.5 px-3 border-0 small d-flex align-items-center gap-2" style="background:#ecfdf5; border-radius:10px; color:#065f46;">
+                                        <i class="fas fa-coins fa-lg text-success mr-2"></i>
+                                        <div>
+                                            <strong>{{ __('Affiliate Partner Program') }}</strong>
+                                            <div>{{ __('Promote Skillvation labs, educational equipment, and certified courses to earn commissions on every successful referral.') }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 {{-- Common Fields --}}
                                 <div class="form-grp">
                                     <label for="reg-name"><span id="name-label-text">{{ __('Full Name') }}</span> <code>*</code></label>
@@ -493,6 +513,13 @@
                         <div class="account__switch text-center mt-4">
                             <p>{{ __('Already have an account?') }} <a href="{{ route('login') }}" class="font-weight-bold text-primary">{{ __('Log in here') }}</a></p>
                         </div>
+
+                        <div class="text-center mt-3 pt-3 border-top">
+                            <span class="text-muted small">{{ __('Want to partner and earn referral commissions?') }}</span>
+                            <a href="{{ url('/sso/shop') }}?target=affiliate-program" class="font-weight-bold text-success small ml-1">
+                                <i class="fas fa-bullhorn mr-1"></i> {{ __('Join our Affiliate Program') }} &rarr;
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -526,6 +553,10 @@
         const studentFields = document.getElementById('student-details-fields');
         if (studentFields) {
             studentFields.style.display = role === 'student' ? 'block' : 'none';
+        }
+        const affiliateFields = document.getElementById('affiliate-details-fields');
+        if (affiliateFields) {
+            affiliateFields.style.display = role === 'affiliate' ? 'block' : 'none';
         }
     }
 
@@ -762,7 +793,7 @@
         const urlRole = urlParams.get('role');
         const oldRole = "{{ old('role', '') }}";
         const isLabContext = {{ $isLabContext ? 'true' : 'false' }};
-        const allowedRoles = isLabContext ? ['school', 'teacher'] : ['school', 'teacher', 'student'];
+        const allowedRoles = isLabContext ? ['school', 'teacher'] : ['school', 'teacher', 'student', 'affiliate'];
         let initialRole = allowedRoles.includes(urlRole) 
             ? urlRole 
             : (allowedRoles.includes(oldRole) ? oldRole : '{{ $initialRole }}');

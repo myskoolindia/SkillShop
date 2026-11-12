@@ -2368,4 +2368,228 @@ class ApiController extends BaseController
             'components'         => $components
         ]);
     }
+
+    /**
+     * GET /api/lab-orders
+     * Fetch orders for Composite Lab and Skillvation Lab products with components, customer details, and fulfillment status.
+     */
+    public function getLabOrders()
+    {
+        $db = \Config\Database::connect();
+        
+        $labProductIds = [68, 72, 73, 74, 114, 385, 386];
+
+        $orders = $db->table('orders')
+            ->select('orders.*')
+            ->orderBy('orders.id', 'DESC')
+            ->get()
+            ->getResultObject();
+
+        $result = [];
+
+        foreach ($orders as $order) {
+            $orderItems = $db->table('order_items')
+                ->where('order_id', $order->id)
+                ->get()
+                ->getResultObject();
+
+            // Filter for orders containing Composite Lab or Skillvation Lab
+            $isLabOrder = false;
+            $labType = 'Skillvation Lab';
+
+            foreach ($orderItems as $item) {
+                if (in_array((int)$item->product_id, $labProductIds, true) 
+                    || stripos($item->product_title, 'Skillvation') !== false 
+                    || stripos($item->product_title, 'Composite') !== false
+                    || stripos($item->product_title, 'Lab') !== false) {
+                    $isLabOrder = true;
+                    if (stripos($item->product_title, 'Composite') !== false) {
+                        $labType = 'Composite Skill Lab';
+                    }
+                }
+            }
+
+            if (!$isLabOrder) {
+                continue;
+            }
+
+            // Parse buyer / shipping details
+            $shippingObj = @unserialize($order->shipping);
+            $buyer = [
+                'name'    => !empty($shippingObj->sFirstName) ? trim($shippingObj->sFirstName . ' ' . ($shippingObj->sLastName ?? '')) : '',
+                'email'   => $shippingObj->sEmail ?? '',
+                'phone'   => $shippingObj->sPhoneNumber ?? '',
+                'address' => $shippingObj->sAddress ?? '',
+                'city'    => $shippingObj->sCity ?? '',
+                'state'   => $shippingObj->sState ?? '',
+                'zip'     => $shippingObj->sZipCode ?? '',
+                'country' => $shippingObj->sCountry ?? 'India'
+            ];
+
+            // Regex fallback if PHP serialized length mismatch
+            if (empty($buyer['name']) || $buyer['name'] === 'Valued Institution') {
+                if (preg_match('/"sFirstName";s:\d+:"([^"]+)"/', (string)$order->shipping, $m1)) {
+                    $buyer['name'] = $m1[1];
+                    if (preg_match('/"sLastName";s:\d+:"([^"]+)"/', (string)$order->shipping, $m2)) {
+                        $buyer['name'] .= ' ' . $m2[1];
+                    }
+                }
+                if (preg_match('/"sEmail";s:\d+:"([^"]+)"/', (string)$order->shipping, $m)) $buyer['email'] = $m[1];
+                if (preg_match('/"sPhoneNumber";s:\d+:"([^"]+)"/', (string)$order->shipping, $m)) $buyer['phone'] = $m[1];
+                if (preg_match('/"sAddress";s:\d+:"([^"]+)"/', (string)$order->shipping, $m)) $buyer['address'] = $m[1];
+                if (preg_match('/"sCity";s:\d+:"([^"]+)"/', (string)$order->shipping, $m)) $buyer['city'] = $m[1];
+                if (preg_match('/"sState";s:\d+:"([^"]+)"/', (string)$order->shipping, $m)) $buyer['state'] = $m[1];
+                if (preg_match('/"sZipCode";s:\d+:"([^"]+)"/', (string)$order->shipping, $m)) $buyer['zip'] = $m[1];
+            }
+            if (empty($buyer['name'])) {
+                $buyer['name'] = 'Valued Institution';
+            }
+
+            // Get bundle components breakdown
+            $bundleItems = $db->table('order_bundle_items')
+                ->where('order_id', $order->id)
+                ->get()
+                ->getResultObject();
+
+            // Clean items
+            $itemsList = [];
+            foreach ($orderItems as $item) {
+                $itemsList[] = [
+                    'id'            => (int)$item->id,
+                    'product_id'    => (int)$item->product_id,
+                    'title'         => $item->product_title,
+                    'sku'           => $item->product_sku,
+                    'quantity'      => (int)$item->product_quantity,
+                    'unit_price'    => (float)$item->product_unit_price,
+                    'total_price'   => (float)$item->product_total_price,
+                    'order_status'  => $item->order_status ?: 'processing',
+                    'tracking_num'  => $item->shipping_tracking_number ?? '',
+                    'tracking_url'  => $item->shipping_tracking_url ?? '',
+                    'is_bundle'     => (bool)$item->is_bundle
+                ];
+            }
+
+            $componentsList = [];
+            foreach ($bundleItems as $bi) {
+                $componentsList[] = [
+                    'id'                   => (int)$bi->id,
+                    'component_product_id' => (int)$bi->component_product_id,
+                    'title'                => $bi->product_title,
+                    'quantity'             => (int)$bi->quantity,
+                    'unit_price'           => (float)$bi->unit_price
+                ];
+            }
+
+            // Derive overall fulfillment status
+            $fulfillmentStatus = 'pending';
+            if (!empty($orderItems[0]->order_status)) {
+                $st = strtolower($orderItems[0]->order_status);
+                if ($st === 'completed' || $st === 'fulfilled') {
+                    $fulfillmentStatus = 'fulfilled';
+                } elseif ($st === 'shipped' || $st === 'dispatched') {
+                    $fulfillmentStatus = 'dispatched';
+                } elseif ($st === 'processing') {
+                    $fulfillmentStatus = 'processing';
+                }
+            }
+
+            $result[] = [
+                'id'                 => (int)$order->id,
+                'order_number'       => (string)$order->order_number,
+                'lab_type'           => $labType,
+                'total_price'        => (float)$order->price_total,
+                'currency'           => $order->price_currency ?: 'INR',
+                'payment_status'     => $order->payment_status ?: 'payment_received',
+                'order_status'       => $order->status ? 'confirmed' : 'pending',
+                'fulfillment_status' => $fulfillmentStatus,
+                'created_at'         => $order->created_at,
+                'buyer'              => $buyer,
+                'items'              => $itemsList,
+                'bundle_components'  => $componentsList
+            ];
+        }
+
+        return $this->json([
+            'status' => 'success',
+            'count'  => count($result),
+            'data'   => $result
+        ]);
+    }
+
+    /**
+     * GET /api/lab-orders/{id}
+     */
+    public function getLabOrderDetail(int $id)
+    {
+        $db = \Config\Database::connect();
+        $order = $db->table('orders')->where('id', $id)->orWhere('order_number', $id)->get()->getRow();
+        if (empty($order)) {
+            return $this->json(['status' => 'error', 'message' => 'Order not found'], 404);
+        }
+
+        $orderItems = $db->table('order_items')->where('order_id', $order->id)->get()->getResultObject();
+        $bundleItems = $db->table('order_bundle_items')->where('order_id', $order->id)->get()->getResultObject();
+        $shippingObj = @unserialize($order->shipping);
+
+        $buyer = [
+            'name'    => !empty($shippingObj->sFirstName) ? trim($shippingObj->sFirstName . ' ' . ($shippingObj->sLastName ?? '')) : 'Valued Institution',
+            'email'   => $shippingObj->sEmail ?? '',
+            'phone'   => $shippingObj->sPhoneNumber ?? '',
+            'address' => $shippingObj->sAddress ?? '',
+            'city'    => $shippingObj->sCity ?? '',
+            'state'   => $shippingObj->sState ?? '',
+            'zip'     => $shippingObj->sZipCode ?? '',
+            'country' => $shippingObj->sCountry ?? 'India'
+        ];
+
+        return $this->json([
+            'status' => 'success',
+            'data'   => [
+                'id'                => (int)$order->id,
+                'order_number'      => (string)$order->order_number,
+                'total_price'       => (float)$order->price_total,
+                'payment_status'    => $order->payment_status ?: 'payment_received',
+                'created_at'        => $order->created_at,
+                'buyer'             => $buyer,
+                'items'             => $orderItems,
+                'bundle_components' => $bundleItems
+            ]
+        ]);
+    }
+
+    /**
+     * POST /api/lab-orders/{id}/fulfill
+     * Body: { "status": "dispatched"|"fulfilled"|"processing", "tracking_number": "...", "notes": "..." }
+     */
+    public function fulfillLabOrder(int $id)
+    {
+        $body = $this->request->getJSON(true) ?? [];
+        $status = $body['status'] ?? 'fulfilled';
+        $trackingNum = $body['tracking_number'] ?? '';
+        $trackingUrl = $body['tracking_url'] ?? '';
+
+        $db = \Config\Database::connect();
+        $order = $db->table('orders')->where('id', $id)->orWhere('order_number', $id)->get()->getRow();
+        if (empty($order)) {
+            return $this->json(['status' => 'error', 'message' => 'Order not found'], 404);
+        }
+
+        // Update order_items status
+        $db->table('order_items')->where('order_id', $order->id)->update([
+            'order_status'             => $status,
+            'shipping_tracking_number' => $trackingNum,
+            'shipping_tracking_url'    => $trackingUrl,
+            'updated_at'               => date('Y-m-d H:i:s')
+        ]);
+
+        return $this->json([
+            'status'  => 'success',
+            'message' => "Order #{$order->order_number} fulfillment status updated to {$status}",
+            'data'    => [
+                'order_number'    => $order->order_number,
+                'order_status'    => $status,
+                'tracking_number' => $trackingNum
+            ]
+        ]);
+    }
 }

@@ -34,6 +34,7 @@ class SsoBridgeController extends Controller
 
             // For public shop destinations (e.g. product customize slugs, bundle contents, carts), allow seamless guest browsing
             if (!empty($target)) {
+                return redirect()->away($shopUrl . '/' . ltrim($target, '/'));
                 $fragment = '';
                 if (str_contains($target, '#')) {
                     [$target, $fragment] = explode('#', $target, 2);
@@ -63,7 +64,7 @@ class SsoBridgeController extends Controller
         $user = $webUser;
         $merchantDashboard = $user->role === 'vendor' && in_array($target, ['dashboard', '/dashboard']);
         $isTeacherMember = \App\Models\SchoolMember::where('user_id', $user->id)->where('role_in_school', 'teacher')->where('status', 'active')->exists();
-        abort_unless(in_array($user->role, ['school', 'teacher', 'instructor', 'admin']) || $isTeacherMember || $merchantDashboard, 403, 'The lab shop is for schools and teachers.');
+        abort_unless(in_array($user->role, ['school', 'teacher', 'instructor', 'admin', 'student', 'affiliate']) || $isTeacherMember || $merchantDashboard, 403, 'The lab shop is for schools and teachers.');
 
         // If user has admin role in Laravel and target is admin or empty, allow direct shop admin access
         if ($user->role === 'admin' && empty($target) && $request->has('admin')) {
@@ -203,6 +204,7 @@ class SsoBridgeController extends Controller
             'school'     => route('school.dashboard'),
             'teacher'    => route('student.dashboard'),
             'instructor' => route('instructor.dashboard'),
+            'affiliate'  => url('/sso/shop') . '?target=affiliate-program',
             'admin'      => (Auth::guard('admin')->check() ? route('admin.dashboard') : route('student.dashboard')),
             default      => route('student.dashboard'),
         };
