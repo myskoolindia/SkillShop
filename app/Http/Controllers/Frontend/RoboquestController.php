@@ -58,12 +58,12 @@ class RoboquestController extends Controller {
     public function launch(Request $request, RoboquestService $service) {
         $user = $request->user('web') ?? $request->user('admin') ?? auth('admin')->user() ?? auth('web')->user();
         if (!$user) {
-            return redirect()->route('login');
+            return redirect()->away('https://digilab.skillvation.com/login');
         }
         $url = $service->launch($user);
         if (!$url) {
-            if ($user->role === 'school') return redirect()->route('roboquest.settings')->withErrors(['connection'=>'Connect this school’s RoboQuest first.']);
-            return redirect()->route('roboquest.signin', ['role'=>$user->role ?? 'student'])->withErrors(['login'=>'Your school must connect RoboQuest and activate your membership before you can enter.']);
+            $role = ($user->role === 'school') ? 'School Admin' : ($user->role === 'teacher' ? 'Teacher' : 'Student');
+            return redirect()->away('https://digilab.skillvation.com/login?role=' . urlencode($role));
         }
         return redirect()->away($url)->withHeaders(['Referrer-Policy'=>'no-referrer','Cache-Control'=>'no-store']);
     }

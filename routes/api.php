@@ -131,11 +131,20 @@ Route::match(['GET', 'POST'], '/roboquest/auto-launch', function (\Illuminate\Ht
         $user = \App\Models\User::where('role', 'school')->where('status', 'active')->first();
     }
     if (!$user) {
-        return response()->json(['status' => 'error', 'message' => 'No active school account found.'], 404);
+        return response()->json([
+            'status' => 'error',
+            'message' => 'No active school account found.',
+            'login_url' => 'https://digilab.skillvation.com/login?role=School+Admin'
+        ], 404);
     }
     $launchUrl = $service->launch($user);
     if (!$launchUrl) {
-        return response()->json(['status' => 'error', 'message' => 'Unable to generate launch URL.'], 500);
+        $roleName = ($user->role === 'school') ? 'School Admin' : ($user->role === 'teacher' ? 'Teacher' : 'Student');
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Unable to generate launch URL.',
+            'login_url' => 'https://digilab.skillvation.com/login?role=' . urlencode($roleName)
+        ], 500);
     }
     return response()->json([
         'status' => 'success',
@@ -150,6 +159,9 @@ Route::match(['GET', 'POST'], '/roboquest/auto-launch', function (\Illuminate\Ht
 });
 
 Route::post('/login', [\App\Http\Controllers\Frontend\PostPurchaseApiController::class,'login'])->middleware('throttle:5,1');
+Route::post('/register', [\App\Http\Controllers\Frontend\PostPurchaseApiController::class,'register'])->middleware('throttle:10,1');
+Route::post('/forgot-password', [\App\Http\Controllers\Frontend\PostPurchaseApiController::class,'forgotPassword'])->middleware('throttle:5,1');
+Route::post('/reset-password', [\App\Http\Controllers\Frontend\PostPurchaseApiController::class,'resetPassword'])->middleware('throttle:5,1');
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-orders', [\App\Http\Controllers\Frontend\PostPurchaseApiController::class,'myOrders']);
     Route::get('/orders/{invoice}', [\App\Http\Controllers\Frontend\PostPurchaseApiController::class,'order']);
