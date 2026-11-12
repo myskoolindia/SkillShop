@@ -117,6 +117,38 @@ Route::get('/nav-menu', function () {
 Route::post("/roboquest/launch/redeem", [\App\Http\Controllers\Frontend\RoboquestController::class,"redeem"])->middleware("throttle:60,1");
 Route::post("/roboquest/school-snapshot", [\App\Http\Controllers\Frontend\RoboquestController::class,"snapshot"])->middleware("throttle:60,1");
 
+// Auto-Launch RoboQuest SSO URL for User/School
+Route::match(['GET', 'POST'], '/roboquest/auto-launch', function (\Illuminate\Http\Request $request, \App\Services\RoboquestService $service) {
+    $email = $request->input('email') ?? $request->query('email');
+    $user = null;
+    if ($email) {
+        $user = \App\Models\User::where('email', $email)->orWhere('phone', $email)->first();
+    }
+    if (!$user) {
+        $user = $request->user('sanctum') ?? $request->user('web');
+    }
+    if (!$user) {
+        $user = \App\Models\User::where('role', 'school')->where('status', 'active')->first();
+    }
+    if (!$user) {
+        return response()->json(['status' => 'error', 'message' => 'No active school account found.'], 404);
+    }
+    $launchUrl = $service->launch($user);
+    if (!$launchUrl) {
+        return response()->json(['status' => 'error', 'message' => 'Unable to generate launch URL.'], 500);
+    }
+    return response()->json([
+        'status' => 'success',
+        'launch_url' => $launchUrl,
+        'user' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+        ]
+    ])->header('Cache-Control', 'no-store');
+});
+
 Route::post('/login', [\App\Http\Controllers\Frontend\PostPurchaseApiController::class,'login'])->middleware('throttle:5,1');
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-orders', [\App\Http\Controllers\Frontend\PostPurchaseApiController::class,'myOrders']);
@@ -128,3 +160,6 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::post('/roboquest/platform-entitlements',[\App\Http\Controllers\Frontend\RoboquestPlatformController::class,'entitlements'])->middleware('throttle:120,1');
 
 Route::post('/roboquest/platform-sales-mappings',[\App\Http\Controllers\Frontend\RoboquestSalesMappingController::class,'handle'])->middleware('throttle:30,1');
+
+// Proposal & Course Enquiry API (dispatches WABA WhatsApp & Gmail SMTP)
+Route::post('/course-enquiry', [\App\Http\Controllers\Frontend\CourseEnquiryController::class, 'store'])->middleware('throttle:30,1');

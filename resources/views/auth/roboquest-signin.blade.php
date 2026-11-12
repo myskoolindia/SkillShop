@@ -18,7 +18,7 @@
                 <label class="rq-login-option"><input type="radio" name="account_role" value="{{ $value }}" @checked(old('account_role', $role)===$value) required><span>{{ __($label) }}</span></label>
             @endforeach
         </div>
-        <div class="form-grp"><label for="rq-email">{{ __('Email address') }}</label><input id="rq-email" name="login" type="email" autocomplete="username" value="{{ old('login') }}" required></div>
+        <div class="form-grp"><label for="rq-email">{{ __('Email address') }}</label><input id="rq-email" name="login" type="email" autocomplete="username" value="{{ old('login', request('email', request('login', ''))) }}" required></div>
         <div class="form-grp"><label for="rq-password">{{ __('Password') }}</label><input id="rq-password" name="password" type="password" autocomplete="current-password" required></div>
         @if($setting && $setting->recaptcha_status==='active')<div class="g-recaptcha" data-sitekey="{{ $setting->recaptcha_site_key }}"></div>@endif
         <button type="submit" class="btn btn-two w-100">{{ __('Sign in to RoboQuest') }}</button>
