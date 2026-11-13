@@ -109,8 +109,7 @@
         || str_contains($currentPath, 'admin')
         || str_contains($currentPath, 'dashboard')
         || str_contains($currentPath, 'login')
-        || str_contains($currentPath, 'register')
-        || in_array($userRole, ['school', 'student', 'instructor', 'admin', 'teacher']);
+        || str_contains($currentPath, 'register');
 
       $showLabOffer = $labOfferActive && !$isDashboardOrAdmin;
     @endphp

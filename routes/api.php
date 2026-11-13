@@ -158,6 +158,20 @@ Route::match(['GET', 'POST'], '/roboquest/auto-launch', function (\Illuminate\Ht
     ])->header('Cache-Control', 'no-store');
 });
 
+Route::get('/lab-offers/active', function () {
+    $offer = \App\Models\LabOffer::getActiveOffer();
+    return response()->json([
+        'status' => 'success',
+        'offer' => $offer
+    ]);
+});
+Route::get('/lab-offer', function () {
+    $offer = \App\Models\LabOffer::getActiveOffer();
+    return response()->json([
+        'status' => 'success',
+        'offer' => $offer
+    ]);
+});
 Route::match(['GET', 'POST'], '/user-profile', [\App\Http\Controllers\Frontend\PostPurchaseApiController::class, 'profile']);
 Route::match(['GET', 'POST'], '/user/profile', [\App\Http\Controllers\Frontend\PostPurchaseApiController::class, 'profile']);
 Route::post('/login', [\App\Http\Controllers\Frontend\PostPurchaseApiController::class,'login'])->middleware('throttle:5,1');
