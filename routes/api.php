@@ -158,6 +158,8 @@ Route::match(['GET', 'POST'], '/roboquest/auto-launch', function (\Illuminate\Ht
     ])->header('Cache-Control', 'no-store');
 });
 
+Route::match(['GET', 'POST'], '/user-profile', [\App\Http\Controllers\Frontend\PostPurchaseApiController::class, 'profile']);
+Route::match(['GET', 'POST'], '/user/profile', [\App\Http\Controllers\Frontend\PostPurchaseApiController::class, 'profile']);
 Route::post('/login', [\App\Http\Controllers\Frontend\PostPurchaseApiController::class,'login'])->middleware('throttle:5,1');
 Route::post('/register', [\App\Http\Controllers\Frontend\PostPurchaseApiController::class,'register'])->middleware('throttle:10,1');
 Route::post('/forgot-password', [\App\Http\Controllers\Frontend\PostPurchaseApiController::class,'forgotPassword'])->middleware('throttle:5,1');

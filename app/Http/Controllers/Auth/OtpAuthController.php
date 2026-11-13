@@ -311,10 +311,21 @@ class OtpAuthController extends Controller
             };
         }
 
+        $token = $user->createToken('post-purchase', ['purchases:read'], now()->addDays(30))->plainTextToken;
+
         return response()->json([
             'status'       => 'success',
             'message'      => 'Logged in successfully.',
             'redirect_url' => $redirectUrl,
+            'token'        => $token,
+            'user'         => [
+                'id'          => $user->id,
+                'name'        => $user->name,
+                'email'       => $user->email,
+                'phone'       => $user->phone,
+                'school_name' => $user->school_name ?? ($user->role === 'school' ? ($user->name . ' School') : null),
+                'role'        => $user->role,
+            ],
         ]);
     }
 }
