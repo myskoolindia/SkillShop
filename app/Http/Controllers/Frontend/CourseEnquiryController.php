@@ -1318,8 +1318,11 @@ class CourseEnquiryController extends Controller
 
         // Product page links
         $baseUrl     = url('/');
-        $productLink = $planInfo ? $baseUrl . $planInfo['page_url'] : '';
-        $cartLink    = $planInfo ? $baseUrl . $planInfo['cart_url']  : '';
+        $displayBase = (str_contains($baseUrl, 'localhost') || str_contains($baseUrl, '.local'))
+            ? 'https://skillvation.com'
+            : $baseUrl;
+        $productLink = $planInfo ? $displayBase . $planInfo['page_url'] : '';
+        $cartLink    = $planInfo ? $displayBase . $planInfo['cart_url']  : '';
 
         // Build PDF-specific quotation table
         $packages = $quotationData['packages'] ?? [];
@@ -1376,51 +1379,51 @@ class CourseEnquiryController extends Controller
         $pdfFoot6Col = '';
         if ($rawTotal > $subtotal || $discount > 0) {
             $pdfFoot6Col .= '<tr style="background:#f8fafc;">'
-                . '<td colspan="5" style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#64748b;">Component List Total (MRP)</td>'
-                . '<td style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#64748b;white-space:nowrap;">Rs. ' . number_format($rawTotal) . '</td>'
+                . '<td colspan="5" style="padding:2.5px 5px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#64748b;">Component List Total (MRP)</td>'
+                . '<td style="padding:2.5px 5px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#64748b;white-space:nowrap;">Rs. ' . number_format($rawTotal) . '</td>'
                 . '</tr>';
         }
         if ($discount > 0) {
             $pdfFoot6Col .= '<tr style="background:#f0fdf4;">'
-                . '<td colspan="5" style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;">Package Discount / Savings</td>'
-                . '<td style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;white-space:nowrap;">-Rs. ' . number_format($discount) . '</td>'
+                . '<td colspan="5" style="padding:2.5px 5px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;">Package Discount / Savings</td>'
+                . '<td style="padding:2.5px 5px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;white-space:nowrap;">-Rs. ' . number_format($discount) . '</td>'
                 . '</tr>';
         }
         if ($taxAmt > 0) {
             $taxLabel = !empty($quotationData['tax_percent']) ? 'GST (' . $quotationData['tax_percent'] . '%)' : 'GST';
             $pdfFoot6Col .= '<tr style="background:#f8fafc;">'
-                . '<td colspan="5" style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#475569;">' . $taxLabel . '</td>'
-                . '<td style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1e293b;white-space:nowrap;">Rs. ' . number_format($taxAmt) . '</td>'
+                . '<td colspan="5" style="padding:2.5px 5px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#475569;">' . $taxLabel . '</td>'
+                . '<td style="padding:2.5px 5px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1e293b;white-space:nowrap;">Rs. ' . number_format($taxAmt) . '</td>'
                 . '</tr>';
         }
         $pdfFoot6Col .= '<tr style="background:#1e1b4b;">'
-            . '<td colspan="5" style="padding:6px 8px;text-align:right;font-weight:bold;color:#fff;font-size:9pt;">Grand Total (Inclusive of all taxes)</td>'
-            . '<td style="padding:6px 8px;text-align:right;font-weight:bold;font-size:10pt;color:#fbbf24;white-space:nowrap;">Rs. ' . number_format($grand) . '</td>'
+            . '<td colspan="5" style="padding:3.5px 5px;text-align:right;font-weight:bold;color:#fff;font-size:8pt;">Grand Total (Inclusive of all taxes)</td>'
+            . '<td style="padding:3.5px 5px;text-align:right;font-weight:bold;font-size:8.5pt;color:#fbbf24;white-space:nowrap;">Rs. ' . number_format($grand) . '</td>'
             . '</tr>';
 
         $pdfFoot3Col = '';
         if ($rawTotal > $subtotal || $discount > 0) {
             $pdfFoot3Col .= '<tr style="background:#f8fafc;">'
-                . '<td colspan="2" style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#64748b;">Component List Total (MRP)</td>'
-                . '<td style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#64748b;white-space:nowrap;">Rs. ' . number_format($rawTotal) . '</td>'
+                . '<td colspan="2" style="padding:2.5px 5px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#64748b;">Component List Total (MRP)</td>'
+                . '<td style="padding:2.5px 5px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#64748b;white-space:nowrap;">Rs. ' . number_format($rawTotal) . '</td>'
                 . '</tr>';
         }
         if ($discount > 0) {
             $pdfFoot3Col .= '<tr style="background:#f0fdf4;">'
-                . '<td colspan="2" style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;">Package Discount / Savings</td>'
-                . '<td style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;white-space:nowrap;">-Rs. ' . number_format($discount) . '</td>'
+                . '<td colspan="2" style="padding:2.5px 5px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;">Package Discount / Savings</td>'
+                . '<td style="padding:2.5px 5px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;white-space:nowrap;">-Rs. ' . number_format($discount) . '</td>'
                 . '</tr>';
         }
         if ($taxAmt > 0) {
             $taxLabel = !empty($quotationData['tax_percent']) ? 'GST (' . $quotationData['tax_percent'] . '%)' : 'GST';
             $pdfFoot3Col .= '<tr style="background:#f8fafc;">'
-                . '<td colspan="2" style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#475569;">' . $taxLabel . '</td>'
-                . '<td style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1e293b;white-space:nowrap;">Rs. ' . number_format($taxAmt) . '</td>'
+                . '<td colspan="2" style="padding:2.5px 5px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#475569;">' . $taxLabel . '</td>'
+                . '<td style="padding:2.5px 5px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1e293b;white-space:nowrap;">Rs. ' . number_format($taxAmt) . '</td>'
                 . '</tr>';
         }
         $pdfFoot3Col .= '<tr style="background:#1e1b4b;">'
-            . '<td colspan="2" style="padding:6px 8px;text-align:right;font-weight:bold;color:#fff;font-size:9pt;">Grand Total (Inclusive of all taxes)</td>'
-            . '<td style="padding:6px 8px;text-align:right;font-weight:bold;font-size:10pt;color:#fbbf24;white-space:nowrap;">Rs. ' . number_format($grand) . '</td>'
+            . '<td colspan="2" style="padding:3.5px 5px;text-align:right;font-weight:bold;color:#fff;font-size:8pt;">Grand Total (Inclusive of all taxes)</td>'
+            . '<td style="padding:3.5px 5px;text-align:right;font-weight:bold;font-size:8.5pt;color:#fbbf24;white-space:nowrap;">Rs. ' . number_format($grand) . '</td>'
             . '</tr>';
 
         $packagesHtml = '';
@@ -1434,17 +1437,17 @@ class CourseEnquiryController extends Controller
 
                 $bg = ($pSno % 2 === 0) ? 'background:#f8fafc;' : 'background:#ffffff;';
                 $pRows .= '<tr style="' . $bg . '">'
-                    . '<td style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;">' . $pSno . '</td>'
-                    . '<td style="padding:5px 6px;border:1px solid #e2e8f0;font-weight:bold;color:#0f172a;">' . $pTitle . '</td>'
-                    . '<td style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:bold;">' . $pQty . '</td>'
+                    . '<td style="padding:3px 5px;border:1px solid #e2e8f0;text-align:center;">' . $pSno . '</td>'
+                    . '<td style="padding:3px 5px;border:1px solid #e2e8f0;font-weight:bold;color:#0f172a;">' . $pTitle . '</td>'
+                    . '<td style="padding:3px 5px;border:1px solid #e2e8f0;text-align:center;font-weight:bold;">' . $pQty . '</td>'
                     . '</tr>';
             }
 
-            $packagesHtml = '<table class="dt" style="width:100%;border-collapse:collapse;font-size:8.5pt;margin-bottom:10px;">'
+            $packagesHtml = '<table class="dt" style="width:100%;border-collapse:collapse;font-size:7pt;line-height:1.2;margin-bottom:6px;">'
                 . '<thead><tr style="background:#1e1b4b;color:#ffffff;">'
-                . '<th style="padding:5px 6px;text-align:center;width:30px;color:#fff;">#</th>'
-                . '<th style="padding:5px 6px;text-align:left;color:#fff;">Product / Package Description</th>'
-                . '<th style="padding:5px 6px;text-align:center;width:110px;color:#fff;">Qty</th>'
+                . '<th style="padding:3px 5px;text-align:center;width:25px;color:#fff;">#</th>'
+                . '<th style="padding:3px 5px;text-align:left;color:#fff;">Product / Package Description</th>'
+                . '<th style="padding:3px 5px;text-align:center;width:90px;color:#fff;">Qty</th>'
                 . '</tr></thead><tbody>' . $pRows . '</tbody>'
                 . '<tfoot>' . $pdfFoot3Col . '</tfoot></table>';
         }
@@ -1541,38 +1544,40 @@ class CourseEnquiryController extends Controller
                     $sno++;
                     $bg = ($sno % 2 === 0) ? 'background:#f8fafc;' : 'background:#ffffff;';
                     $qRows .= '<tr style="' . $bg . '">'
-                        . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">' . $sno . '</td>'
-                        . '<td style="padding:4px 6px;border:1px solid #e2e8f0;">' . htmlspecialchars($cat) . '</td>'
-                        . '<td style="padding:4px 6px;border:1px solid #e2e8f0;font-weight:bold;">' . htmlspecialchars($row['item']) . '</td>'
-                        . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">' . $row['qty'] . '</td>'
-                        . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;">Rs. ' . number_format(round($row['price'])) . '</td>'
-                        . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;">Rs. ' . number_format(round($row['total'])) . '</td>'
+                        . '<td style="padding:1.5px 3.5px;border:1px solid #e2e8f0;text-align:center;">' . $sno . '</td>'
+                        . '<td style="padding:1.5px 3.5px;border:1px solid #e2e8f0;">' . htmlspecialchars($cat) . '</td>'
+                        . '<td style="padding:1.5px 3.5px;border:1px solid #e2e8f0;font-weight:bold;">' . htmlspecialchars($row['item']) . '</td>'
+                        . '<td style="padding:1.5px 3.5px;border:1px solid #e2e8f0;text-align:center;">' . $row['qty'] . '</td>'
+                        . '<td style="padding:1.5px 3.5px;border:1px solid #e2e8f0;text-align:right;">Rs. ' . number_format(round($row['price'])) . '</td>'
+                        . '<td style="padding:1.5px 3.5px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;">Rs. ' . number_format(round($row['total'])) . '</td>'
                         . '</tr>';
                 }
                 $qRows .= '<tr style="background:#f1f5f9;">'
-                    . '<td colspan="5" style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#475569;">'
+                    . '<td colspan="5" style="padding:1.5px 3.5px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#475569;">'
                     . htmlspecialchars($cat) . ' Subtotal</td>'
-                    . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1d6fa4;">Rs. ' . number_format($catTotal) . '</td>'
+                    . '<td style="padding:1.5px 3.5px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1d6fa4;">Rs. ' . number_format($catTotal) . '</td>'
                     . '</tr>';
             }
 
             $quotTable = $qRows
-                ? '<table style="width:100%;border-collapse:collapse;font-size:8.5pt;">'
+                ? '<table style="width:100%;border-collapse:collapse;font-size:7pt;line-height:1.2;">'
                   . '<thead><tr style="background:#1e1b4b;">'
-                  . '<th style="padding:5px 6px;color:#fff;text-align:center;width:25px;">#</th>'
-                  . '<th style="padding:5px 6px;color:#fff;text-align:left;">Category</th>'
-                  . '<th style="padding:5px 6px;color:#fff;text-align:left;">Item / Description</th>'
-                  . '<th style="padding:5px 6px;color:#fff;text-align:center;width:35px;">Qty</th>'
-                  . '<th style="padding:5px 6px;color:#fff;text-align:right;width:80px;">Unit Price</th>'
-                  . '<th style="padding:5px 6px;color:#fff;text-align:right;width:90px;">Total</th>'
+                  . '<th style="padding:3px 4px;color:#fff;text-align:center;width:22px;">#</th>'
+                  . '<th style="padding:3px 4px;color:#fff;text-align:left;width:125px;">Category</th>'
+                  . '<th style="padding:3px 4px;color:#fff;text-align:left;">Item / Description</th>'
+                  . '<th style="padding:3px 4px;color:#fff;text-align:center;width:30px;">Qty</th>'
+                  . '<th style="padding:3px 4px;color:#fff;text-align:right;width:75px;">Unit Price</th>'
+                  . '<th style="padding:3px 4px;color:#fff;text-align:right;width:80px;">Total</th>'
                   . '</tr></thead><tbody>' . $qRows . '</tbody>'
                   . '<tfoot>' . ($packagesHtml ? '' : $pdfFoot6Col) . '</tfoot></table>'
-                : '<p style="color:#94a3b8;">No bundle items available.</p>';
+                : '<p style="color:#94a3b8;font-size:7pt;">No bundle items available.</p>';
         }
 
         $productLinkHtml = $productLink
-            ? '<p style="margin:4px 0;font-size:9pt;"><strong>View Product &amp; Curriculum:</strong> <span style="color:#1d6fa4;">' . $productLink . '</span></p>'
-              . '<p style="margin:4px 0;font-size:9pt;"><strong>Direct Procurement Link:</strong> <span style="color:#1d6fa4;">' . $cartLink . '</span></p>'
+            ? '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:3px;padding:3px 7px;margin:2px 0 3px;font-size:7pt;line-height:1.25;">'
+              . '<strong>View Product &amp; Curriculum:</strong> <a href="' . $productLink . '" style="color:#1d6fa4;text-decoration:none;">' . $productLink . '</a> &nbsp;|&nbsp; '
+              . '<strong>Direct Procurement Link:</strong> <a href="' . $cartLink . '" style="color:#1d6fa4;text-decoration:none;">' . $cartLink . '</a>'
+              . '</div>'
             : '';
 
         // Dynamic content based on lab type & package
@@ -1704,6 +1709,10 @@ class CourseEnquiryController extends Controller
             $conclusionText = 'Skillvation offers the school a structured, CBSE-aligned way to give students hands-on exposure across a broad range of skill domains. We request approval to proceed to the detailed planning and procurement stage.';
         }
 
+        $bomPkgTitle = (strlen($pkg) > 35 && (str_contains($pkg, 'Registration') || str_contains($pkg, 'Offer')))
+            ? 'Promotional Package'
+            : $pkg;
+
         if ($packagesHtml !== '') {
             $commercialAndBomSections = '
   <div class="page-break"></div>
@@ -1713,7 +1722,7 @@ class CourseEnquiryController extends Controller
   <h2>8. Detailed Bill of Materials (Component Breakdown)</h2>
   ' . $quotTable . '
 
-  <h2>9. Commercial Proposal &amp; Order Summary — ' . $pkg . '</h2>
+  <h2>9. Commercial Proposal &amp; Order Summary — ' . $bomPkgTitle . '</h2>
   ' . $packagesHtml . '
   <div class="note">
     A detailed, itemized budget and implementation schedule will be finalized upon domain priority sign-off.
@@ -1721,14 +1730,14 @@ class CourseEnquiryController extends Controller
   </div>
 
   <h2>10. Conclusion</h2>
-  <p>' . $conclusionText . '</p>';
+  <p style="margin:0 0 2px;font-size:7pt;">' . $conclusionText . '</p>';
         } else {
             $commercialAndBomSections = '
   <div class="page-break"></div>
   <h2>7. Product &amp; Curriculum Details</h2>
   ' . $productLinkHtml . '
 
-  <h2>8. Detailed Bill of Materials (Component Breakdown) — ' . $pkg . '</h2>
+  <h2>8. Detailed Bill of Materials (Component Breakdown) — ' . $bomPkgTitle . '</h2>
   ' . $quotTable . '
   <div class="note">
     A detailed, itemized budget and implementation schedule will be finalized upon domain priority sign-off.
@@ -1736,7 +1745,7 @@ class CourseEnquiryController extends Controller
   </div>
 
   <h2>9. Conclusion</h2>
-  <p>' . $conclusionText . '</p>';
+  <p style="margin:0 0 2px;font-size:7pt;">' . $conclusionText . '</p>';
         }
 
         $html = '<!DOCTYPE html>
@@ -1744,32 +1753,32 @@ class CourseEnquiryController extends Controller
 <head>
 <meta charset="UTF-8">
 <style>
-  @page { margin: 18px 26px; }
-  body { font-family: DejaVu Sans, sans-serif; font-size: 8.5pt; color: #1a1a2e; margin:0; padding:0; }
-  .hdr  { border-bottom: 2.5px solid #1e1b4b; padding-bottom: 5px; margin-bottom: 8px; }
-  .hdr-title { font-size:14pt; font-weight:bold; color:#1e1b4b; margin:0 0 2px; }
-  .hdr-sub   { font-size:8pt; color:#475569; margin:1px 0; }
-  .hdr-badge { display:inline-block; background:#1e1b4b; color:#fff; font-size:7.5pt;
-               font-weight:bold; padding:2px 8px; border-radius:3px; margin-top:3px; }
-  .meta { width:100%; border-collapse:collapse; margin-bottom:8px; font-size:8pt; }
-  .meta td { padding:2px 4px; vertical-align:top; }
-  .ml { color:#64748b; width:70px; }
+  @page { margin: 10px 18px 8px 18px; }
+  body { font-family: DejaVu Sans, sans-serif; font-size: 7.5pt; color: #1a1a2e; margin:0; padding:0; line-height: 1.3; }
+  .hdr  { border-bottom: 2px solid #1e1b4b; padding-bottom: 2px; margin-bottom: 4px; }
+  .hdr-title { font-size:12.5pt; font-weight:bold; color:#1e1b4b; margin:0 0 1px; }
+  .hdr-sub   { font-size:7pt; color:#475569; margin:0.5px 0; }
+  .hdr-badge { display:inline-block; background:#1e1b4b; color:#fff; font-size:6.5pt;
+               font-weight:bold; padding:1.5px 6px; border-radius:3px; margin-top:2px; }
+  .meta { width:100%; border-collapse:collapse; margin-bottom:4px; font-size:7pt; }
+  .meta td { padding:1px 3px; vertical-align:top; }
+  .ml { color:#64748b; width:65px; }
   .mv { font-weight:bold; color:#1e1b4b; }
-  h2  { font-size:9.5pt; font-weight:bold; color:#1e1b4b; margin:8px 0 3px;
-        border-left:3px solid #f97316; padding-left:6px; page-break-after: avoid; }
-  p   { font-size:8pt; line-height:1.45; color:#334155; margin:0 0 4px; }
-  ul  { font-size:8pt; line-height:1.45; color:#334155; padding-left:16px; margin:2px 0 5px; }
-  li  { margin-bottom:1.5px; }
-  .dt { width:100%; border-collapse:collapse; margin-bottom:8px; font-size:8pt; }
-  .dt th { background:#1e1b4b; color:#fff; padding:4px 6px; text-align:left; }
-  .dt td { padding:3.5px 5px; border:1px solid #e2e8f0; vertical-align:top; }
+  h2  { font-size:8.5pt; font-weight:bold; color:#1e1b4b; margin:4px 0 2px;
+        border-left:2.5px solid #f97316; padding-left:5px; page-break-after: avoid; }
+  p   { font-size:7pt; line-height:1.3; color:#334155; margin:0 0 2.5px; }
+  ul  { font-size:7pt; line-height:1.3; color:#334155; padding-left:14px; margin:1px 0 2.5px; }
+  li  { margin-bottom:1px; }
+  .dt { width:100%; border-collapse:collapse; margin-bottom:4px; font-size:7pt; line-height:1.15; }
+  .dt th { background:#1e1b4b; color:#fff; padding:3px 4px; text-align:left; }
+  .dt td { padding:1.5px 3.5px; border:1px solid #e2e8f0; vertical-align:top; }
   .dt tr { page-break-inside: avoid; }
-  .link-box { background:#f0f9ff; border:1px solid #bae6fd; border-radius:5px;
-              padding:6px 10px; margin:6px 0 10px; font-size:8pt; }
-  .note { background:#fffbeb; border:1px solid #fde68a; border-radius:4px;
-          padding:5px 8px; font-size:7.5pt; color:#78350f; margin-top:5px; page-break-inside: avoid; }
-  .footer { margin-top:10px; padding-top:6px; border-top:1.5px solid #e2e8f0;
-            font-size:7.5pt; color:#64748b; page-break-inside: avoid; }
+  .link-box { background:#f0f9ff; border:1px solid #bae6fd; border-radius:3px;
+              padding:3px 6px; margin:2px 0 4px; font-size:7pt; }
+  .note { background:#fffbeb; border:1px solid #fde68a; border-radius:3px;
+          padding:2.5px 6px; font-size:7pt; color:#78350f; margin-top:3px; page-break-inside: avoid; }
+  .footer { margin-top:4px; padding-top:3px; border-top:1px solid #e2e8f0;
+            font-size:7pt; color:#64748b; page-break-inside: avoid; line-height:1.25; }
   .page-break { page-break-before: always; }
 </style>
 </head>
