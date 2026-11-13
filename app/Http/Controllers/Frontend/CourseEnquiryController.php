@@ -915,10 +915,6 @@ class CourseEnquiryController extends Controller
                 . '<td style="padding:8px 10px;text-align:right;font-weight:800;color:#15803d;border:1px solid #e2e8f0;">-&#8377;' . number_format(round($discount)) . '</td>'
                 . '</tr>';
         }
-        $tfoot .= '<tr style="background:#f8fafc;">'
-            . '<td colspan="5" style="padding:8px 10px;text-align:right;font-weight:700;color:#1e293b;border:1px solid #e2e8f0;">Offered Subtotal</td>'
-            . '<td style="padding:8px 10px;text-align:right;font-weight:700;color:#1e293b;border:1px solid #e2e8f0;">&#8377;' . number_format(round($subtotal)) . '</td>'
-            . '</tr>';
         if ($taxAmt > 0) {
             $taxLabel = !empty($data['tax_percent']) ? 'GST (' . $data['tax_percent'] . '%)' : 'GST';
             $tfoot .= '<tr style="background:#f8fafc;">'
@@ -1332,34 +1328,54 @@ class CourseEnquiryController extends Controller
             }
         }
 
-        $pdfFoot = '';
+        $pdfFoot6Col = '';
         if ($rawTotal > $subtotal || $discount > 0) {
-            $pdfFoot .= '<tr style="background:#f8fafc;">'
-                . '<td colspan="2" style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#64748b;">Component List Total (MRP)</td>'
-                . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#64748b;white-space:nowrap;">Rs. ' . number_format($rawTotal) . '</td>'
+            $pdfFoot6Col .= '<tr style="background:#f8fafc;">'
+                . '<td colspan="5" style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#64748b;">Component List Total (MRP)</td>'
+                . '<td style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#64748b;white-space:nowrap;">Rs. ' . number_format($rawTotal) . '</td>'
                 . '</tr>';
         }
         if ($discount > 0) {
-            $pdfFoot .= '<tr style="background:#f0fdf4;">'
-                . '<td colspan="2" style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;">Package Discount / Savings</td>'
-                . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;white-space:nowrap;">-Rs. ' . number_format($discount) . '</td>'
+            $pdfFoot6Col .= '<tr style="background:#f0fdf4;">'
+                . '<td colspan="5" style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;">Package Discount / Savings</td>'
+                . '<td style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;white-space:nowrap;">-Rs. ' . number_format($discount) . '</td>'
                 . '</tr>';
         }
-        $pdfFoot .= '<tr style="background:#f8fafc;">'
-            . '<td colspan="2" style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1e293b;">Offered Subtotal</td>'
-            . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1e293b;white-space:nowrap;">Rs. ' . number_format($subtotal) . '</td>'
-            . '</tr>';
         if ($taxAmt > 0) {
             $taxLabel = !empty($quotationData['tax_percent']) ? 'GST (' . $quotationData['tax_percent'] . '%)' : 'GST';
-            $pdfFoot .= '<tr style="background:#f8fafc;">'
-                . '<td colspan="2" style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#475569;">' . $taxLabel . '</td>'
-                . '<td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1e293b;white-space:nowrap;">Rs. ' . number_format($taxAmt) . '</td>'
+            $pdfFoot6Col .= '<tr style="background:#f8fafc;">'
+                . '<td colspan="5" style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#475569;">' . $taxLabel . '</td>'
+                . '<td style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1e293b;white-space:nowrap;">Rs. ' . number_format($taxAmt) . '</td>'
                 . '</tr>';
         }
+        $pdfFoot6Col .= '<tr style="background:#1e1b4b;">'
+            . '<td colspan="5" style="padding:6px 8px;text-align:right;font-weight:bold;color:#fff;font-size:9pt;">Grand Total (Inclusive of all taxes)</td>'
+            . '<td style="padding:6px 8px;text-align:right;font-weight:bold;font-size:10pt;color:#fbbf24;white-space:nowrap;">Rs. ' . number_format($grand) . '</td>'
+            . '</tr>';
 
-        $pdfFoot .= '<tr style="background:#1e1b4b;">'
-            . '<td colspan="2" style="padding:6px 8px;text-align:right;font-weight:bold;color:#fff;font-size:9.5pt;">Grand Total (Inclusive of all taxes)</td>'
-            . '<td style="padding:6px 8px;text-align:right;font-weight:bold;font-size:10.5pt;color:#fbbf24;white-space:nowrap;">Rs. ' . number_format($grand) . '</td>'
+        $pdfFoot3Col = '';
+        if ($rawTotal > $subtotal || $discount > 0) {
+            $pdfFoot3Col .= '<tr style="background:#f8fafc;">'
+                . '<td colspan="2" style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#64748b;">Component List Total (MRP)</td>'
+                . '<td style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#64748b;white-space:nowrap;">Rs. ' . number_format($rawTotal) . '</td>'
+                . '</tr>';
+        }
+        if ($discount > 0) {
+            $pdfFoot3Col .= '<tr style="background:#f0fdf4;">'
+                . '<td colspan="2" style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;">Package Discount / Savings</td>'
+                . '<td style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#15803d;white-space:nowrap;">-Rs. ' . number_format($discount) . '</td>'
+                . '</tr>';
+        }
+        if ($taxAmt > 0) {
+            $taxLabel = !empty($quotationData['tax_percent']) ? 'GST (' . $quotationData['tax_percent'] . '%)' : 'GST';
+            $pdfFoot3Col .= '<tr style="background:#f8fafc;">'
+                . '<td colspan="2" style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#475569;">' . $taxLabel . '</td>'
+                . '<td style="padding:5px 8px;border:1px solid #e2e8f0;text-align:right;font-weight:bold;color:#1e293b;white-space:nowrap;">Rs. ' . number_format($taxAmt) . '</td>'
+                . '</tr>';
+        }
+        $pdfFoot3Col .= '<tr style="background:#1e1b4b;">'
+            . '<td colspan="2" style="padding:6px 8px;text-align:right;font-weight:bold;color:#fff;font-size:9pt;">Grand Total (Inclusive of all taxes)</td>'
+            . '<td style="padding:6px 8px;text-align:right;font-weight:bold;font-size:10pt;color:#fbbf24;white-space:nowrap;">Rs. ' . number_format($grand) . '</td>'
             . '</tr>';
 
         $packagesHtml = '';
@@ -1385,7 +1401,7 @@ class CourseEnquiryController extends Controller
                 . '<th style="padding:5px 6px;text-align:left;color:#fff;">Product / Package Description</th>'
                 . '<th style="padding:5px 6px;text-align:center;width:110px;color:#fff;">Qty</th>'
                 . '</tr></thead><tbody>' . $pRows . '</tbody>'
-                . '<tfoot>' . $pdfFoot . '</tfoot></table>';
+                . '<tfoot>' . $pdfFoot3Col . '</tfoot></table>';
         }
 
         $quotTable = '';
@@ -1505,7 +1521,7 @@ class CourseEnquiryController extends Controller
                   . '<th style="padding:5px 6px;color:#fff;text-align:right;width:80px;">Unit Price</th>'
                   . '<th style="padding:5px 6px;color:#fff;text-align:right;width:90px;">Total</th>'
                   . '</tr></thead><tbody>' . $qRows . '</tbody>'
-                  . '<tfoot>' . ($packagesHtml ? '' : $pdfFoot) . '</tfoot></table>'
+                  . '<tfoot>' . ($packagesHtml ? '' : $pdfFoot6Col) . '</tfoot></table>'
                 : '<p style="color:#94a3b8;">No bundle items available.</p>';
         }
 
@@ -1645,6 +1661,10 @@ class CourseEnquiryController extends Controller
 
         if ($packagesHtml !== '') {
             $commercialAndBomSections = '
+  <div class="page-break"></div>
+  <h2>7. Product &amp; Curriculum Details</h2>
+  ' . $productLinkHtml . '
+
   <h2>8. Detailed Bill of Materials (Component Breakdown)</h2>
   ' . $quotTable . '
 
@@ -1659,6 +1679,10 @@ class CourseEnquiryController extends Controller
   <p>' . $conclusionText . '</p>';
         } else {
             $commercialAndBomSections = '
+  <div class="page-break"></div>
+  <h2>7. Product &amp; Curriculum Details</h2>
+  ' . $productLinkHtml . '
+
   <h2>8. Detailed Bill of Materials (Component Breakdown) — ' . $pkg . '</h2>
   ' . $quotTable . '
   <div class="note">
@@ -1675,36 +1699,36 @@ class CourseEnquiryController extends Controller
 <head>
 <meta charset="UTF-8">
 <style>
-  body { font-family: DejaVu Sans, sans-serif; font-size: 10pt; color: #1a1a2e; margin:0; padding:0; }
-  .page { padding: 22px 32px; }
-  .hdr  { border-bottom: 3px solid #1e1b4b; padding-bottom: 10px; margin-bottom: 14px; }
-  .hdr-title { font-size:16pt; font-weight:bold; color:#1e1b4b; margin:0 0 3px; }
-  .hdr-sub   { font-size:9pt; color:#475569; margin:2px 0; }
-  .hdr-badge { display:inline-block; background:#1e1b4b; color:#fff; font-size:8pt;
-               font-weight:bold; padding:2px 10px; border-radius:3px; margin-top:6px; }
-  .meta { width:100%; border-collapse:collapse; margin-bottom:14px; font-size:9pt; }
-  .meta td { padding:3px 6px; vertical-align:top; }
-  .ml { color:#64748b; width:85px; }
+  @page { margin: 18px 26px; }
+  body { font-family: DejaVu Sans, sans-serif; font-size: 8.5pt; color: #1a1a2e; margin:0; padding:0; }
+  .hdr  { border-bottom: 2.5px solid #1e1b4b; padding-bottom: 5px; margin-bottom: 8px; }
+  .hdr-title { font-size:14pt; font-weight:bold; color:#1e1b4b; margin:0 0 2px; }
+  .hdr-sub   { font-size:8pt; color:#475569; margin:1px 0; }
+  .hdr-badge { display:inline-block; background:#1e1b4b; color:#fff; font-size:7.5pt;
+               font-weight:bold; padding:2px 8px; border-radius:3px; margin-top:3px; }
+  .meta { width:100%; border-collapse:collapse; margin-bottom:8px; font-size:8pt; }
+  .meta td { padding:2px 4px; vertical-align:top; }
+  .ml { color:#64748b; width:70px; }
   .mv { font-weight:bold; color:#1e1b4b; }
-  h2  { font-size:11pt; font-weight:bold; color:#1e1b4b; margin:14px 0 4px;
-        border-left:4px solid #f97316; padding-left:8px; page-break-after: avoid; }
-  p   { font-size:9pt; line-height:1.55; color:#334155; margin:0 0 6px; }
-  ul  { font-size:9pt; line-height:1.65; color:#334155; padding-left:18px; margin:4px 0 8px; }
-  li  { margin-bottom:2px; }
-  .dt { width:100%; border-collapse:collapse; margin-bottom:10px; font-size:8.5pt; }
-  .dt th { background:#1e1b4b; color:#fff; padding:5px 7px; text-align:left; }
-  .dt td { padding:4px 6px; border:1px solid #e2e8f0; vertical-align:top; }
+  h2  { font-size:9.5pt; font-weight:bold; color:#1e1b4b; margin:8px 0 3px;
+        border-left:3px solid #f97316; padding-left:6px; page-break-after: avoid; }
+  p   { font-size:8pt; line-height:1.45; color:#334155; margin:0 0 4px; }
+  ul  { font-size:8pt; line-height:1.45; color:#334155; padding-left:16px; margin:2px 0 5px; }
+  li  { margin-bottom:1.5px; }
+  .dt { width:100%; border-collapse:collapse; margin-bottom:8px; font-size:8pt; }
+  .dt th { background:#1e1b4b; color:#fff; padding:4px 6px; text-align:left; }
+  .dt td { padding:3.5px 5px; border:1px solid #e2e8f0; vertical-align:top; }
   .dt tr { page-break-inside: avoid; }
   .link-box { background:#f0f9ff; border:1px solid #bae6fd; border-radius:5px;
-              padding:8px 12px; margin:8px 0 12px; font-size:8.5pt; }
+              padding:6px 10px; margin:6px 0 10px; font-size:8pt; }
   .note { background:#fffbeb; border:1px solid #fde68a; border-radius:4px;
-          padding:6px 10px; font-size:8pt; color:#78350f; margin-top:6px; page-break-inside: avoid; }
-  .footer { margin-top:16px; padding-top:8px; border-top:2px solid #e2e8f0;
-            font-size:8pt; color:#64748b; page-break-inside: avoid; }
+          padding:5px 8px; font-size:7.5pt; color:#78350f; margin-top:5px; page-break-inside: avoid; }
+  .footer { margin-top:10px; padding-top:6px; border-top:1.5px solid #e2e8f0;
+            font-size:7.5pt; color:#64748b; page-break-inside: avoid; }
+  .page-break { page-break-before: always; }
 </style>
 </head>
 <body>
-<div class="page">
   <div class="hdr">
     <div class="hdr-title">' . $headerTitle . '</div>
     <div class="hdr-sub">' . $headerSub1 . '</div>
@@ -1733,9 +1757,6 @@ class CourseEnquiryController extends Controller
 
   ' . $bodySections . '
 
-  <h2>7. Product &amp; Curriculum Details</h2>
-  ' . $productLinkHtml . '
-
   ' . $commercialAndBomSections . '
 
   <div class="footer">
@@ -1743,7 +1764,6 @@ class CourseEnquiryController extends Controller
     +91 98450 26782 &nbsp;|&nbsp; infomyskoolonline@gmail.com &nbsp;|&nbsp; www.skillvation.com <br>
     Bengaluru, Karnataka
   </div>
-</div>
 </body>
 </html>';
 
