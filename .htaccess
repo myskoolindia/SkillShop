@@ -11,6 +11,12 @@ Options +FollowSymLinks
     RewriteRule ^update - [L]
     RewriteRule ^club-shop(/.*)?$ - [L]
 
+    # Handle static assets in public directory (excluding index.php and server.php)
+    RewriteCond %{REQUEST_URI} !/index\.php$ [NC]
+    RewriteCond %{REQUEST_URI} !/server\.php$ [NC]
+    RewriteCond %{REQUEST_URI} \.(css|js|jpg|jpeg|png|gif|svg|ico|woff|woff2|ttf|eot|pdf|webp|mp4|webm|map|json|txt)$ [NC]
+    RewriteRule ^(.*)$ public/$1 [L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
