@@ -233,8 +233,38 @@
         color: #ffffff !important;
       }
       @media (max-width: 768px) {
+        .lab-flash-bar-wrap {
+          padding: 6px 10px !important;
+        }
+        .lab-flash-container {
+          flex-wrap: nowrap !important;
+          gap: 6px !important;
+        }
+        .lab-flash-left {
+          min-width: 0 !important;
+          flex: 0 0 auto !important;
+          gap: 6px !important;
+        }
         .lab-event-desc {
-          display: none;
+          display: none !important;
+        }
+        .lab-badge-pill {
+          padding: 2px 7px !important;
+          font-size: 10px !important;
+        }
+        .lab-flash-right {
+          gap: 6px !important;
+          margin-left: auto !important;
+        }
+        .lab-btn-claim {
+          padding: 4px 10px !important;
+          font-size: 11px !important;
+          white-space: nowrap !important;
+        }
+        .lab-btn-wa {
+          width: 24px !important;
+          height: 24px !important;
+          font-size: 12px !important;
         }
       }
     </style>
@@ -245,7 +275,8 @@
         <div class="lab-flash-left">
           <span class="lab-badge-pill">
             <span class="lab-badge-dot"></span>
-            SPECIAL SCHOOL OFFER
+            <span class="d-none d-sm-inline">SPECIAL SCHOOL OFFER</span>
+            <span class="d-inline d-sm-none">OFFER</span>
           </span>
           <p class="lab-event-desc">
             Pre-book STEM, Robotics &amp; CBSE Composite Skill Labs with &#8377;25,000 advance token or save extra 10% on full payment!
@@ -254,7 +285,8 @@
 
         <div class="lab-flash-right">
           <a href="{{ route('lab.offer') }}" class="lab-btn-claim">
-            <span>Claim Lab Offer &amp; 10% Discount</span>
+            <span class="d-none d-sm-inline">Claim Lab Offer &amp; 10% Discount</span>
+            <span class="d-inline d-sm-none">Claim 10% Off</span>
             <i class="fa-solid fa-arrow-right text-[10px]"></i>
           </a>
 

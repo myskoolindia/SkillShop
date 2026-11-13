@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Services\WabaOtpService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
 
 class PhoneOtpController extends Controller
@@ -30,7 +31,7 @@ class PhoneOtpController extends Controller
         $clean = $this->waba->sanitizePhone($phone);
 
         // Rate-limit: block resend within 60 seconds
-        $lastSentAt = Session::get("otp_sent_at_{$clean}");
+        $lastSentAt = Session::get("otp_sent_at_{$clean}") ?? Cache::get("otp_sent_at_{$clean}");
         if ($lastSentAt && now()->diffInSeconds($lastSentAt) < 60) {
             $wait = 60 - now()->diffInSeconds($lastSentAt);
             return response()->json([
@@ -42,13 +43,16 @@ class PhoneOtpController extends Controller
 
         $otp = str_pad(random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
 
-        // Store OTP in session with 10-minute expiry
-        Session::put("otp_{$clean}", [
+        // Store OTP in session and cache with 10-minute expiry
+        $otpPayload = [
             'code'       => $otp,
             'expires_at' => now()->addMinutes(10)->timestamp,
             'attempts'   => 0,
-        ]);
+        ];
+        Session::put("otp_{$clean}", $otpPayload);
         Session::put("otp_sent_at_{$clean}", now());
+        Cache::put("otp_{$clean}", $otpPayload, now()->addMinutes(10));
+        Cache::put("otp_sent_at_{$clean}", now(), 60);
 
         $result = $this->waba->sendOtp($phone, $otp);
 
@@ -94,7 +98,7 @@ class PhoneOtpController extends Controller
 
         $clean      = $this->waba->sanitizePhone($request->input('phone'));
         $enteredOtp = $request->input('otp');
-        $stored     = Session::get("otp_{$clean}");
+        $stored     = Session::get("otp_{$clean}") ?? Cache::get("otp_{$clean}");
 
         if (!$stored) {
             return response()->json([
@@ -106,6 +110,7 @@ class PhoneOtpController extends Controller
         // Expiry check
         if (now()->timestamp > $stored['expires_at']) {
             Session::forget("otp_{$clean}");
+            Cache::forget("otp_{$clean}");
             return response()->json([
                 'status'  => 'expired',
                 'message' => 'OTP has expired. Please request a new one.',
@@ -115,6 +120,7 @@ class PhoneOtpController extends Controller
         // Max attempts: 5
         if ($stored['attempts'] >= 5) {
             Session::forget("otp_{$clean}");
+            Cache::forget("otp_{$clean}");
             return response()->json([
                 'status'  => 'blocked',
                 'message' => 'Too many incorrect attempts. Please request a new OTP.',
@@ -124,6 +130,7 @@ class PhoneOtpController extends Controller
         if ($enteredOtp !== $stored['code']) {
             $stored['attempts']++;
             Session::put("otp_{$clean}", $stored);
+            Cache::put("otp_{$clean}", $stored, now()->addMinutes(10));
             $remaining = 5 - $stored['attempts'];
             return response()->json([
                 'status'  => 'invalid',
@@ -133,7 +140,9 @@ class PhoneOtpController extends Controller
 
         // ✓ Verified — clear OTP, store verified flag
         Session::forget("otp_{$clean}");
+        Cache::forget("otp_{$clean}");
         Session::put("phone_verified_{$clean}", true);
+        Cache::put("phone_verified_{$clean}", true, now()->addHours(24));
 
         return response()->json([
             'status'  => 'verified',

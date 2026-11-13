@@ -172,6 +172,9 @@ Route::get('/lab-offer', function () {
         'offer' => $offer
     ]);
 });
+Route::post('/phone-otp/send', [\App\Http\Controllers\Frontend\PhoneOtpController::class, 'send']);
+Route::post('/phone-otp/verify', [\App\Http\Controllers\Frontend\PhoneOtpController::class, 'verify']);
+
 Route::match(['GET', 'POST'], '/user-profile', [\App\Http\Controllers\Frontend\PostPurchaseApiController::class, 'profile']);
 Route::match(['GET', 'POST'], '/user/profile', [\App\Http\Controllers\Frontend\PostPurchaseApiController::class, 'profile']);
 Route::post('/login', [\App\Http\Controllers\Frontend\PostPurchaseApiController::class,'login'])->middleware('throttle:5,1');

@@ -98,6 +98,37 @@ class CourseEnquiryController extends Controller
             'page_url' => '/club-shop/skillvation-lab-premium',
             'cart_url' => '/club-shop/premium-cart',
         ],
+        // Lab Offer promotions
+        'SPECIAL_LAB_OFFER_10PCT'      => [
+            'slug'     => 'skillvation-lab',
+            'label'    => 'Special School Lab Offer & 10% Discount Pass',
+            'page_url' => '/lab-offer',
+            'cart_url' => '/club-shop/skillvation-cart',
+        ],
+        'special-lab-offer'            => [
+            'slug'     => 'skillvation-lab',
+            'label'    => 'Special School Lab Festival Offer',
+            'page_url' => '/lab-offer',
+            'cart_url' => '/club-shop/skillvation-cart',
+        ],
+        'lab-offer'                    => [
+            'slug'     => 'skillvation-lab',
+            'label'    => 'Special School Lab Festival Offer',
+            'page_url' => '/lab-offer',
+            'cart_url' => '/club-shop/skillvation-cart',
+        ],
+        'cbse-composite-skill-lab-basic-68' => [
+            'slug'     => 'cbse-composite-skill-lab-basic-68',
+            'label'    => 'CBSE Composite Skill Lab Basic',
+            'page_url' => '/club-shop/cbse-composite-skill-lab-basic-68',
+            'cart_url' => '/club-shop/basic-cart',
+        ],
+        'cbse-composite-skill-lab-advanced-72' => [
+            'slug'     => 'cbse-composite-skill-lab-advanced-72',
+            'label'    => 'CBSE Composite Skill Lab Advanced',
+            'page_url' => '/club-shop/cbse-composite-skill-lab-advanced-72',
+            'cart_url' => '/club-shop/advance-cart',
+        ],
         // Course detail quote form
         'course-detail-quote'          => [
             'slug'     => null,
@@ -160,6 +191,20 @@ class CourseEnquiryController extends Controller
         $sourceLower = strtolower($source);
         $titleLower  = strtolower($courseTitle ?? '');
         $tierLower   = strtolower(($rawQ['recommended_tier'] ?? '') . ' ' . ($rawQ['budget_category'] ?? ''));
+
+        // 0. Special Lab Offer / Festival Promotion
+        if (str_contains($sourceLower, 'special_lab_offer') || str_contains($sourceLower, 'lab-offer') || str_contains($sourceLower, 'lab_offer')) {
+            if (str_contains($titleLower, 'composite') || str_contains($titleLower, 'cbse')) {
+                if (str_contains($titleLower, 'advance') || str_contains($titleLower, '72')) {
+                    return 'cbse-composite-skill-lab-advanced-72';
+                }
+                return 'cbse-composite-skill-lab-basic-68';
+            }
+            if (str_contains($titleLower, 'advance') || str_contains($titleLower, '385') || str_contains($titleLower, 'robotics')) {
+                return 'skillvation-lab-advance';
+            }
+            return 'skillvation-lab';
+        }
 
         // 1. Skillvation Lab / STEM pages
         if (str_contains($sourceLower, 'skillvation')
