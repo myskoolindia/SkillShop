@@ -34,7 +34,6 @@ class SsoBridgeController extends Controller
 
             // For public shop destinations (e.g. product customize slugs, bundle contents, carts), allow seamless guest browsing
             if (!empty($target)) {
-                return redirect()->away($shopUrl . '/' . ltrim($target, '/'));
                 $fragment = '';
                 if (str_contains($target, '#')) {
                     [$target, $fragment] = explode('#', $target, 2);

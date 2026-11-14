@@ -635,7 +635,8 @@
                 $cleanSlug = trim(explode('#', explode('?', (string)$targetSlug)[0])[0], '/');
                 $customizeTarget = !empty($cleanSlug) ? ('/' . $cleanSlug) : ($p['cart_url'] ?? '/skillvation-cart');
               @endphp
-              <a href="{{ url('/sso/shop') }}?target={{ urlencode($customizeTarget) }}#tab_bundle_contents"
+              <a href="{{ url('/sso/shop') }}?target={{ urlencode($customizeTarget . '#tab_bundle_contents') }}"
+                 onclick="return handleCustomizeClick(event, '{{ url('/sso/shop') }}?target={{ urlencode($customizeTarget . '#tab_bundle_contents') }}', '{{ addslashes($p['title']) }}')"
                  class="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5"
                  title="Customize Lab Components">
                 <i class="fa-solid fa-sliders text-blue-500"></i>
@@ -1060,8 +1061,54 @@
           <input type="email" id="propEmail" required value="{{ $user->email ?? '' }}" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm">
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">WhatsApp / Phone <span class="text-red-500">*</span></label>
-          <input type="tel" id="propPhone" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm" placeholder="9876543210">
+          <label class="block text-xs font-bold text-slate-700 mb-1">WhatsApp Mobile Number <span class="text-red-500">*</span></label>
+
+          {{-- Verified state badge --}}
+          <div id="propPhoneVerifiedBox" class="hidden p-2 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-between">
+            <span class="text-xs text-emerald-800 font-bold flex items-center gap-1.5">
+              <i class="fa-brands fa-whatsapp text-emerald-600 text-sm"></i>
+              <span>Verified: <strong class="font-mono text-emerald-950" id="propVerifiedPhoneText">+91 9876543210</strong></span>
+            </span>
+            <button type="button" onclick="changePropPhone()" class="text-[11px] text-slate-500 hover:text-slate-900 underline font-semibold">Change</button>
+          </div>
+
+          {{-- Phone input row --}}
+          <div id="propPhoneInputRow" class="flex gap-2">
+            <div class="relative flex-1">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold font-mono">+91</span>
+              <input type="tel" id="propPhone" maxlength="10" required
+                     class="w-full pl-10 pr-2 py-2.5 rounded-xl border border-slate-300 text-sm font-mono focus:ring-2 focus:ring-emerald-500 outline-none"
+                     placeholder="9876543210" oninput="onPropPhoneInputChanged()">
+            </div>
+            <button type="button" id="btnPropSendOtp" onclick="sendPropWhatsAppOtp()"
+                    class="px-3 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs whitespace-nowrap transition-all shadow-sm flex items-center gap-1">
+              <i class="fa-brands fa-whatsapp"></i>
+              <span id="btnPropSendOtpText">Get OTP</span>
+            </button>
+          </div>
+
+          {{-- OTP Drawer --}}
+          <div id="propOtpDrawer" class="hidden mt-2 p-2.5 rounded-xl bg-amber-50/90 border border-amber-300 space-y-2">
+            <div class="text-[11px] text-amber-900 font-bold flex items-center justify-between" id="propOtpStatusMsg">
+              <span><i class="fa-brands fa-whatsapp text-emerald-600 mr-1"></i> Enter the 6-digit WhatsApp OTP</span>
+            </div>
+            <div class="flex gap-2">
+              <input type="text" id="propOtpCode" maxlength="6" inputmode="numeric" placeholder="• • • • • •"
+                     class="flex-1 py-1 px-2 rounded-lg border border-amber-300 text-center font-mono font-bold text-sm tracking-widest bg-white outline-none focus:ring-2 focus:ring-amber-500"
+                     onkeyup="if(this.value.length === 6) verifyPropWhatsAppOtp()">
+              <button type="button" id="btnPropVerifyOtp" onclick="verifyPropWhatsAppOtp()"
+                      class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs">
+                Verify
+              </button>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-slate-500">
+              <span id="propOtpCountdown" class="font-mono"></span>
+              <button type="button" id="btnPropResend" onclick="sendPropWhatsAppOtp(true)" class="hidden text-amber-800 font-bold hover:underline">
+                Resend OTP
+              </button>
+            </div>
+          </div>
+          <div id="propValidationErr" class="hidden mt-1 text-[11px] text-red-600 font-semibold"></div>
         </div>
       </div>
 
@@ -1095,6 +1142,84 @@
         </button>
       </div>
     </form>
+  </div>
+</div>
+
+{{-- =========================================================================
+     6B. CUSTOMIZE LAB - WHATSAPP NUMBER VERIFICATION MODAL
+     ========================================================================= --}}
+<div id="customizeVerifyModal" class="fixed inset-0 z-[99999] hidden checkout-modal-backdrop overflow-y-auto p-3 sm:p-6 flex items-center justify-center">
+  <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden relative my-auto animate-in fade-in zoom-in-95 duration-200">
+    <div class="bg-slate-900 text-white p-4 sm:p-5 flex justify-between items-center border-b border-slate-800">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-sliders"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-white">Customize Lab Setup</h3>
+          <p class="text-xs text-slate-400" id="custModalPackageTitle">Select package</p>
+        </div>
+      </div>
+      <button type="button" onclick="closeCustomizeVerifyModal()" class="text-slate-400 hover:text-white text-xl p-1.5 rounded-lg hover:bg-slate-800 transition-all">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    
+    <div class="p-5 sm:p-6 space-y-4">
+      <div class="text-center pb-1">
+        <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 text-2xl mx-auto flex items-center justify-center mb-2">
+          <i class="fa-brands fa-whatsapp"></i>
+        </div>
+        <h4 class="text-base font-extrabold text-slate-900">Verify WhatsApp Number</h4>
+        <p class="text-xs text-slate-500 mt-1">Please verify your WhatsApp mobile number before customizing lab components and pricing.</p>
+      </div>
+
+      {{-- Phone input row --}}
+      <div id="custPhoneRow" class="space-y-2">
+        <label class="block text-xs font-bold text-slate-700">Mobile / WhatsApp Number <span class="text-red-500">*</span></label>
+        <div class="flex gap-2">
+          <div class="relative flex-1">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold font-mono">+91</span>
+            <input type="tel" id="custPhoneInput" maxlength="10" placeholder="9876543210"
+                   class="w-full pl-11 pr-3 py-2.5 rounded-xl border border-slate-300 text-sm font-mono focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <button type="button" id="btnCustSendOtp" onclick="sendCustWhatsAppOtp()"
+                  class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs whitespace-nowrap transition-all shadow-sm flex items-center gap-1.5">
+            <i class="fa-brands fa-whatsapp"></i>
+            <span id="btnCustSendOtpText">Get OTP</span>
+          </button>
+        </div>
+      </div>
+
+      {{-- OTP Drawer --}}
+      <div id="custOtpDrawer" class="hidden p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-300 space-y-2.5">
+        <div class="text-xs text-emerald-800 font-bold" id="custOtpStatusMsg">
+          <i class="fa-brands fa-whatsapp text-emerald-600 mr-1"></i> Enter the 6-digit OTP sent to your WhatsApp
+        </div>
+        <div class="flex gap-2">
+          <input type="text" id="custOtpCode" maxlength="6" inputmode="numeric" placeholder="• • • • • •"
+                 class="flex-1 py-2 px-3 rounded-xl border border-emerald-300 text-center font-mono font-black text-lg tracking-widest bg-white focus:ring-2 focus:ring-emerald-500 outline-none"
+                 onkeyup="if(this.value.length === 6) verifyCustWhatsAppOtp()">
+          <button type="button" id="btnCustVerifyOtp" onclick="verifyCustWhatsAppOtp()"
+                  class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all shadow-sm">
+            Verify &amp; Open
+          </button>
+        </div>
+        <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+          <span id="custOtpCountdown" class="font-mono"></span>
+          <button type="button" id="btnCustResend" onclick="sendCustWhatsAppOtp(true)" class="hidden text-emerald-700 font-bold hover:underline">
+            Resend OTP
+          </button>
+        </div>
+      </div>
+
+      <div id="custVerifySuccess" class="hidden p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-center text-xs font-bold text-emerald-800">
+        <i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i>
+        <span>Mobile verified! Launching customization studio…</span>
+      </div>
+
+      <div id="custVerifyErr" class="hidden p-2.5 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 font-semibold"></div>
+    </div>
   </div>
 </div>
 
@@ -1372,6 +1497,7 @@ function verifyWhatsAppOtp() {
     if (data.status === 'verified' || data.status === 'success') {
       isPhoneVerified = true;
       verifiedPhone = phoneVal;
+      if (typeof syncVerifiedPhone === 'function') syncVerifiedPhone(phoneVal);
 
       // Update UI to verified state
       document.getElementById('otpInputDrawer').classList.add('hidden');
@@ -1626,6 +1752,7 @@ function verifyVipWhatsAppOtp() {
     if (data.status === 'verified' || data.status === 'success') {
       isPhoneVerified = true;
       verifiedPhone = phoneVal;
+      if (typeof syncVerifiedPhone === 'function') syncVerifiedPhone(phoneVal);
 
       if (vipOtpTimerInterval) clearInterval(vipOtpTimerInterval);
 
@@ -2143,13 +2270,94 @@ function closeSuccessModal() {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// PROPOSAL REQUEST MODAL
+// UNIFIED WHATSAPP PHONE VERIFICATION STATE SYNC
 // ─────────────────────────────────────────────────────────────────
+function syncVerifiedPhone(phoneVal) {
+  if (!phoneVal) return;
+  phoneVal = phoneVal.replace(/[^0-9]/g, '');
+  if (phoneVal.length !== 10) return;
+
+  isPhoneVerified = true;
+  verifiedPhone = phoneVal;
+  try {
+    sessionStorage.setItem('verified_phone', phoneVal);
+  } catch(e) {}
+
+  // 1. Sync to Checkout modal
+  var chkPhone = document.getElementById('chkPhone');
+  if (chkPhone) chkPhone.value = phoneVal;
+  var phoneBox = document.getElementById('phoneVerifiedBox');
+  if (phoneBox) {
+    phoneBox.classList.remove('hidden');
+    var pText = document.getElementById('phoneVerifiedNumberText');
+    if (pText) pText.textContent = '+91 ' + phoneVal;
+  }
+  var phoneRow = document.getElementById('phoneInputRow');
+  if (phoneRow) phoneRow.classList.add('hidden');
+  var chkOtpDrawer = document.getElementById('otpInputDrawer');
+  if (chkOtpDrawer) chkOtpDrawer.classList.add('hidden');
+
+  // 2. Sync to VIP block
+  var vipPhone = document.getElementById('vipPhoneInput');
+  if (vipPhone) vipPhone.value = phoneVal;
+  var vipBadge = document.getElementById('vipVerifiedPhoneBadge');
+  if (vipBadge) vipBadge.textContent = '+91 ' + phoneVal;
+
+  // 3. Sync to Proposal modal
+  var propPhone = document.getElementById('propPhone');
+  if (propPhone) propPhone.value = phoneVal;
+  var propPhoneBox = document.getElementById('propPhoneVerifiedBox');
+  if (propPhoneBox) {
+    propPhoneBox.classList.remove('hidden');
+    var propText = document.getElementById('propVerifiedPhoneText');
+    if (propText) propText.textContent = '+91 ' + phoneVal;
+  }
+  var propPhoneRow = document.getElementById('propPhoneInputRow');
+  if (propPhoneRow) propPhoneRow.classList.add('hidden');
+  var propDrawer = document.getElementById('propOtpDrawer');
+  if (propDrawer) propDrawer.classList.add('hidden');
+  var propErr = document.getElementById('propValidationErr');
+  if (propErr) propErr.classList.add('hidden');
+
+  // 4. Sync to Customize modal
+  var custPhone = document.getElementById('custPhoneInput');
+  if (custPhone) custPhone.value = phoneVal;
+}
+
+// ─────────────────────────────────────────────────────────────────
+// PROPOSAL REQUEST MODAL & WHATSAPP OTP VERIFICATION
+// ─────────────────────────────────────────────────────────────────
+var propOtpTimerInterval = null;
+
 function openProposalModal(title, source, offerPrice) {
   document.getElementById('propTitle').value = title;
   document.getElementById('propSource').value = source;
   document.getElementById('propPackageLabel').textContent = title + ' (Offer: ₹' + Number(offerPrice).toLocaleString('en-IN') + ')';
   document.getElementById('proposalSuccessMsg').classList.add('hidden');
+
+  // If phone already verified, populate verified badge immediately
+  if (isPhoneVerified && verifiedPhone) {
+    syncVerifiedPhone(verifiedPhone);
+  } else {
+    var phoneBox = document.getElementById('propPhoneVerifiedBox');
+    if (phoneBox) phoneBox.classList.add('hidden');
+    var phoneRow = document.getElementById('propPhoneInputRow');
+    if (phoneRow) phoneRow.classList.remove('hidden');
+    var drawer = document.getElementById('propOtpDrawer');
+    if (drawer) drawer.classList.add('hidden');
+    var errBox = document.getElementById('propValidationErr');
+    if (errBox) errBox.classList.add('hidden');
+    var btnSendText = document.getElementById('btnPropSendOtpText');
+    if (btnSendText) btnSendText.textContent = 'Get OTP';
+    var propPhone = document.getElementById('propPhone');
+    if (propPhone && !propPhone.value) {
+      try {
+        var savedAddr = JSON.parse(localStorage.getItem('skillbox_delivery_address') || '{}');
+        if (savedAddr.phone) propPhone.value = savedAddr.phone;
+      } catch(e) {}
+    }
+  }
+
   document.documentElement.classList.add('modal-open');
   document.body.classList.add('modal-open');
   document.getElementById('proposalModal').classList.remove('hidden');
@@ -2159,20 +2367,202 @@ function closeProposalModal() {
   document.getElementById('proposalModal').classList.add('hidden');
   document.documentElement.classList.remove('modal-open');
   document.body.classList.remove('modal-open');
+  if (propOtpTimerInterval) clearInterval(propOtpTimerInterval);
+}
+
+function changePropPhone() {
+  var phoneBox = document.getElementById('propPhoneVerifiedBox');
+  if (phoneBox) phoneBox.classList.add('hidden');
+  var phoneRow = document.getElementById('propPhoneInputRow');
+  if (phoneRow) phoneRow.classList.remove('hidden');
+  var drawer = document.getElementById('propOtpDrawer');
+  if (drawer) drawer.classList.add('hidden');
+  var phoneInput = document.getElementById('propPhone');
+  if (phoneInput) {
+    phoneInput.focus();
+    phoneInput.select();
+  }
+}
+
+function onPropPhoneInputChanged() {
+  var currentVal = document.getElementById('propPhone').value.trim().replace(/[^0-9]/g, '');
+  if (isPhoneVerified && currentVal !== verifiedPhone) {
+    var phoneBox = document.getElementById('propPhoneVerifiedBox');
+    if (phoneBox) phoneBox.classList.add('hidden');
+    var btnSendText = document.getElementById('btnPropSendOtpText');
+    if (btnSendText) btnSendText.textContent = 'Get OTP';
+  }
+}
+
+function sendPropWhatsAppOtp(isResend) {
+  var phoneEl = document.getElementById('propPhone');
+  var phoneVal = phoneEl.value.trim().replace(/[^0-9]/g, '');
+  var errBox = document.getElementById('propValidationErr');
+  var btn = document.getElementById('btnPropSendOtp');
+  var btnText = document.getElementById('btnPropSendOtpText');
+  var drawer = document.getElementById('propOtpDrawer');
+  var statusMsg = document.getElementById('propOtpStatusMsg');
+  var resendBtn = document.getElementById('btnPropResend');
+  var countdownEl = document.getElementById('propOtpCountdown');
+
+  if (errBox) errBox.classList.add('hidden');
+
+  if (!phoneVal || phoneVal.length !== 10) {
+    if (errBox) {
+      errBox.textContent = 'Please enter a valid 10-digit mobile number.';
+      errBox.classList.remove('hidden');
+    }
+    phoneEl.focus();
+    return;
+  }
+
+  btn.disabled = true;
+  var origText = btnText.innerHTML;
+  btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i>';
+
+  fetch('{{ route("phone.otp.send") }}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'X-CSRF-TOKEN': '{{ csrf_token() }}'
+    },
+    body: JSON.stringify({ phone: phoneVal })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    btn.disabled = false;
+    btnText.innerHTML = 'Resend';
+
+    if (data.status === 'sent' || data.status === 'success') {
+      drawer.classList.remove('hidden');
+      var debugMsg = data.debug_otp ? ' <span class="bg-amber-200 text-amber-950 px-1.5 py-0.5 rounded font-mono font-bold text-xs ml-1">(Code: ' + data.debug_otp + ')</span>' : '';
+      statusMsg.innerHTML = '<span class="text-emerald-800 font-bold"><i class="fa-brands fa-whatsapp text-emerald-600 mr-1"></i> Sent to +91 ' + phoneVal + '</span>' + debugMsg;
+
+      var otpInput = document.getElementById('propOtpCode');
+      otpInput.value = '';
+      otpInput.focus();
+
+      if (resendBtn) resendBtn.classList.add('hidden');
+      var secondsLeft = 45;
+      if (countdownEl) countdownEl.textContent = 'Resend in ' + secondsLeft + 's';
+
+      if (propOtpTimerInterval) clearInterval(propOtpTimerInterval);
+      propOtpTimerInterval = setInterval(function() {
+        secondsLeft--;
+        if (secondsLeft <= 0) {
+          clearInterval(propOtpTimerInterval);
+          if (countdownEl) countdownEl.textContent = '';
+          if (resendBtn) resendBtn.classList.remove('hidden');
+        } else {
+          if (countdownEl) countdownEl.textContent = 'Resend in ' + secondsLeft + 's';
+        }
+      }, 1000);
+    } else {
+      if (errBox) {
+        errBox.textContent = data.message || 'Could not send WhatsApp OTP. Please check the number.';
+        errBox.classList.remove('hidden');
+      }
+      btnText.innerHTML = origText;
+    }
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btnText.innerHTML = origText;
+    if (errBox) {
+      errBox.textContent = 'Could not deliver WhatsApp OTP. Please try again.';
+      errBox.classList.remove('hidden');
+    }
+  });
+}
+
+function verifyPropWhatsAppOtp(autoSubmit) {
+  var phoneVal = document.getElementById('propPhone').value.trim().replace(/[^0-9]/g, '');
+  var otpVal = document.getElementById('propOtpCode').value.trim();
+  var errBox = document.getElementById('propValidationErr');
+  var statusMsg = document.getElementById('propOtpStatusMsg');
+  var btn = document.getElementById('btnPropVerifyOtp');
+
+  if (errBox) errBox.classList.add('hidden');
+
+  if (!otpVal || otpVal.length !== 6) {
+    statusMsg.innerHTML = '<span class="text-red-600 font-bold">Please enter all 6 digits of the OTP.</span>';
+    return;
+  }
+
+  var origHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+  fetch('{{ route("phone.otp.verify") }}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'X-CSRF-TOKEN': '{{ csrf_token() }}'
+    },
+    body: JSON.stringify({ phone: phoneVal, otp: otpVal })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    btn.disabled = false;
+    btn.innerHTML = origHtml;
+
+    if (data.status === 'verified' || data.status === 'success') {
+      syncVerifiedPhone(phoneVal);
+      if (propOtpTimerInterval) clearInterval(propOtpTimerInterval);
+
+      if (autoSubmit) {
+        var fakeEvent = { preventDefault: function(){} };
+        submitProposalEnquiry(fakeEvent);
+      }
+    } else {
+      statusMsg.innerHTML = '<span class="text-red-600 font-bold"><i class="fa-solid fa-circle-exclamation mr-1"></i> ' + (data.message || 'Incorrect OTP code. Please try again.') + '</span>';
+      document.getElementById('propOtpCode').focus();
+    }
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btn.innerHTML = origHtml;
+    statusMsg.innerHTML = '<span class="text-red-600 font-bold">Verification failed. Please try again.</span>';
+  });
 }
 
 function submitProposalEnquiry(e) {
-  e.preventDefault();
+  if (e && typeof e.preventDefault === 'function') e.preventDefault();
+
+  var phoneVal = document.getElementById('propPhone').value.trim().replace(/[^0-9]/g, '');
+  if (!isPhoneVerified || !verifiedPhone || phoneVal !== verifiedPhone) {
+    if (!phoneVal || phoneVal.length !== 10) {
+      alert('Please enter a valid 10-digit WhatsApp mobile number.');
+      document.getElementById('propPhone').focus();
+      return;
+    }
+    var drawer = document.getElementById('propOtpDrawer');
+    if (drawer && drawer.classList.contains('hidden')) {
+      sendPropWhatsAppOtp();
+    } else {
+      var otpCode = document.getElementById('propOtpCode').value.trim();
+      if (otpCode.length === 6) {
+        verifyPropWhatsAppOtp(true);
+      } else {
+        alert('Please enter the 6-digit WhatsApp OTP to verify your mobile number before generating proposal.');
+        document.getElementById('propOtpCode').focus();
+      }
+    }
+    return;
+  }
+
   var btn = document.getElementById('btnPropSubmit');
   var orig = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating Proposal…';
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Generating Proposal…';
 
   var fd = new FormData();
   fd.append('name', document.getElementById('propName').value);
   fd.append('school', document.getElementById('propSchool').value);
   fd.append('email', document.getElementById('propEmail').value);
-  fd.append('phone', document.getElementById('propPhone').value);
+  fd.append('phone', verifiedPhone);
   fd.append('designation', document.getElementById('propDesignation').value);
   fd.append('city', document.getElementById('propCity').value);
   fd.append('board', document.getElementById('propBoard').value);
@@ -2204,6 +2594,212 @@ function submitProposalEnquiry(e) {
     closeProposalModal();
   });
 }
+
+// ─────────────────────────────────────────────────────────────────
+// CUSTOMIZE LAB - NUMBER VERIFICATION STUDIO MODAL
+// ─────────────────────────────────────────────────────────────────
+var pendingCustomizeUrl = '';
+var custOtpTimerInterval = null;
+
+function handleCustomizeClick(event, targetUrl, packageTitle) {
+  if (isPhoneVerified && verifiedPhone) {
+    // Verified: allow direct navigation
+    return true;
+  }
+
+  if (event && typeof event.preventDefault === 'function') {
+    event.preventDefault();
+  }
+
+  openCustomizeVerifyModal(targetUrl, packageTitle);
+  return false;
+}
+
+function openCustomizeVerifyModal(targetUrl, packageTitle) {
+  pendingCustomizeUrl = targetUrl;
+  var titleEl = document.getElementById('custModalPackageTitle');
+  if (titleEl) titleEl.textContent = packageTitle || 'Custom Lab Configuration';
+
+  var phoneInput = document.getElementById('custPhoneInput');
+  if (phoneInput) {
+    if (verifiedPhone) {
+      phoneInput.value = verifiedPhone;
+    } else if (!phoneInput.value) {
+      var chkPhone = document.getElementById('chkPhone');
+      if (chkPhone && chkPhone.value) {
+        phoneInput.value = chkPhone.value.trim().replace(/[^0-9]/g, '');
+      }
+    }
+  }
+
+  document.getElementById('custPhoneRow').classList.remove('hidden');
+  document.getElementById('custOtpDrawer').classList.add('hidden');
+  document.getElementById('custVerifySuccess').classList.add('hidden');
+  var errEl = document.getElementById('custVerifyErr');
+  if (errEl) errEl.classList.add('hidden');
+
+  document.documentElement.classList.add('modal-open');
+  document.body.classList.add('modal-open');
+  document.getElementById('customizeVerifyModal').classList.remove('hidden');
+  if (phoneInput) phoneInput.focus();
+}
+
+function closeCustomizeVerifyModal() {
+  document.getElementById('customizeVerifyModal').classList.add('hidden');
+  document.documentElement.classList.remove('modal-open');
+  document.body.classList.remove('modal-open');
+  if (custOtpTimerInterval) clearInterval(custOtpTimerInterval);
+}
+
+function sendCustWhatsAppOtp(isResend) {
+  var phoneEl = document.getElementById('custPhoneInput');
+  var phoneVal = phoneEl.value.trim().replace(/[^0-9]/g, '');
+  var errBox = document.getElementById('custVerifyErr');
+  var btn = document.getElementById('btnCustSendOtp');
+  var btnText = document.getElementById('btnCustSendOtpText');
+  var drawer = document.getElementById('custOtpDrawer');
+  var statusMsg = document.getElementById('custOtpStatusMsg');
+  var resendBtn = document.getElementById('btnCustResend');
+  var countdownEl = document.getElementById('custOtpCountdown');
+
+  if (errBox) errBox.classList.add('hidden');
+
+  if (!phoneVal || phoneVal.length !== 10) {
+    if (errBox) {
+      errBox.textContent = 'Please enter a valid 10-digit mobile number.';
+      errBox.classList.remove('hidden');
+    }
+    phoneEl.focus();
+    return;
+  }
+
+  btn.disabled = true;
+  var origText = btnText.innerHTML;
+  btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Sending…';
+
+  fetch('{{ route("phone.otp.send") }}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'X-CSRF-TOKEN': '{{ csrf_token() }}'
+    },
+    body: JSON.stringify({ phone: phoneVal })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    btn.disabled = false;
+    btnText.innerHTML = 'Resend OTP';
+
+    if (data.status === 'sent' || data.status === 'success') {
+      drawer.classList.remove('hidden');
+      var debugMsg = data.debug_otp ? ' <span class="bg-amber-200 text-amber-950 px-1.5 py-0.5 rounded font-mono font-bold text-xs ml-1">(Code: ' + data.debug_otp + ')</span>' : '';
+      statusMsg.innerHTML = '<span class="text-emerald-800 font-bold"><i class="fa-brands fa-whatsapp text-emerald-600 mr-1"></i> Code sent to WhatsApp +91 ' + phoneVal + '</span>' + debugMsg;
+
+      var otpInput = document.getElementById('custOtpCode');
+      otpInput.value = '';
+      otpInput.focus();
+
+      if (resendBtn) resendBtn.classList.add('hidden');
+      var secondsLeft = 45;
+      if (countdownEl) countdownEl.textContent = 'Resend in ' + secondsLeft + 's';
+
+      if (custOtpTimerInterval) clearInterval(custOtpTimerInterval);
+      custOtpTimerInterval = setInterval(function() {
+        secondsLeft--;
+        if (secondsLeft <= 0) {
+          clearInterval(custOtpTimerInterval);
+          if (countdownEl) countdownEl.textContent = '';
+          if (resendBtn) resendBtn.classList.remove('hidden');
+        } else {
+          if (countdownEl) countdownEl.textContent = 'Resend in ' + secondsLeft + 's';
+        }
+      }, 1000);
+    } else {
+      if (errBox) {
+        errBox.textContent = data.message || 'Could not send WhatsApp OTP. Please check the number.';
+        errBox.classList.remove('hidden');
+      }
+      btnText.innerHTML = origText;
+    }
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btnText.innerHTML = origText;
+    if (errBox) {
+      errBox.textContent = 'Could not deliver WhatsApp OTP. Please try again.';
+      errBox.classList.remove('hidden');
+    }
+  });
+}
+
+function verifyCustWhatsAppOtp() {
+  var phoneVal = document.getElementById('custPhoneInput').value.trim().replace(/[^0-9]/g, '');
+  var otpVal = document.getElementById('custOtpCode').value.trim();
+  var errBox = document.getElementById('custVerifyErr');
+  var statusMsg = document.getElementById('custOtpStatusMsg');
+  var btn = document.getElementById('btnCustVerifyOtp');
+
+  if (errBox) errBox.classList.add('hidden');
+
+  if (!otpVal || otpVal.length !== 6) {
+    statusMsg.innerHTML = '<span class="text-red-600 font-bold">Please enter all 6 digits of the OTP.</span>';
+    return;
+  }
+
+  var origHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+  fetch('{{ route("phone.otp.verify") }}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'X-CSRF-TOKEN': '{{ csrf_token() }}'
+    },
+    body: JSON.stringify({ phone: phoneVal, otp: otpVal })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    btn.disabled = false;
+    btn.innerHTML = origHtml;
+
+    if (data.status === 'verified' || data.status === 'success') {
+      syncVerifiedPhone(phoneVal);
+
+      if (custOtpTimerInterval) clearInterval(custOtpTimerInterval);
+      document.getElementById('custOtpDrawer').classList.add('hidden');
+      document.getElementById('custPhoneRow').classList.add('hidden');
+      document.getElementById('custVerifySuccess').classList.remove('hidden');
+
+      setTimeout(function() {
+        closeCustomizeVerifyModal();
+        if (pendingCustomizeUrl) {
+          window.location.href = pendingCustomizeUrl;
+        }
+      }, 700);
+    } else {
+      statusMsg.innerHTML = '<span class="text-red-600 font-bold"><i class="fa-solid fa-circle-exclamation mr-1"></i> ' + (data.message || 'Incorrect OTP code. Please try again.') + '</span>';
+      document.getElementById('custOtpCode').focus();
+    }
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btn.innerHTML = origHtml;
+    statusMsg.innerHTML = '<span class="text-red-600 font-bold">Verification failed. Please try again.</span>';
+  });
+}
+
+// Auto-restore verified phone from sessionStorage on load
+document.addEventListener('DOMContentLoaded', function() {
+  try {
+    var storedPhone = sessionStorage.getItem('verified_phone');
+    if (storedPhone && storedPhone.length === 10) {
+      syncVerifiedPhone(storedPhone);
+    }
+  } catch(e) {}
+});
 </script>
 @endpush
 

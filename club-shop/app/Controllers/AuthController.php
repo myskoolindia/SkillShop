@@ -632,7 +632,6 @@ class AuthController extends BaseController
                 if (str_starts_with($target, 'http://') || str_starts_with($target, 'https://')) {
                     return redirect()->to($target);
                 }
-                return redirect()->to(base_url(ltrim($target, '/')));
                 $fragment = '';
                 if (strpos($target, '#') !== false) {
                     list($target, $fragment) = explode('#', $target, 2);
