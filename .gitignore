@@ -48,7 +48,7 @@ Homestead.json
 /storage/pail
 .phpactor.json
 auth.json
-/composer.lock
+# composer.lock is committed so deploys install the exact tested versions
 /prodesign/
 
 # Sensitive config files with hardcoded credentials
