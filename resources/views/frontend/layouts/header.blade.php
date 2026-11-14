@@ -22,12 +22,8 @@
         unset($m);
     }
 
-    // Navigation follows the same verified audience rules as the backend.
-    $shopRole = auth()->user()?->role;
-    $allowedShopLink = function ($link) use ($shopRole) {
-        if (!$shopRole) return true;
-        $path = strtolower('/' . ltrim(parse_url($link, PHP_URL_PATH) ?: '', '/'));
-        if (in_array($path, ['/shop','/skillbox'])) return $shopRole === 'student';
+    // Shop link is public for viewing by all audiences
+    $allowedShopLink = function ($link) {
         return true;
     };
     $nav_menu = array_values(array_filter(array_map(function ($menu) use ($allowedShopLink) {

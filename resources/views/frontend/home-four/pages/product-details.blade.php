@@ -1269,6 +1269,10 @@
 
     function openDeliveryModalForDirectBuy() {
       if (!productData) return;
+      @if(!auth()->check())
+        window.location.href = "{{ route('login') }}?redirect=" + encodeURIComponent(window.location.href);
+        return;
+      @endif
       checkoutMode = 'direct';
       
       const title = productData.title || productData.course_name || 'Activity Kit';
@@ -1289,6 +1293,10 @@
 
     function openDeliveryModalForCart() {
       if (skillboxCart.length === 0) return;
+      @if(!auth()->check())
+        window.location.href = "{{ route('login') }}?redirect=" + encodeURIComponent(window.location.href);
+        return;
+      @endif
       checkoutMode = 'cart';
       closeSkillboxCart();
 

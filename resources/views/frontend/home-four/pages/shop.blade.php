@@ -1410,6 +1410,10 @@
 
     function openDeliveryModalForCart() {
       if (skillboxCart.length === 0) return;
+      @if(!auth()->check())
+        window.location.href = "{{ route('login') }}?redirect=" + encodeURIComponent(window.location.href);
+        return;
+      @endif
       closeSkillboxCart();
 
       const totalItems = skillboxCart.reduce((sum, item) => sum + (item.quantity || 1), 0);
