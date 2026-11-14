@@ -14,17 +14,9 @@ class RoboquestService {
         if ($user->role === 'school' || $user->role === 'admin') {
             $connection = RoboquestConnection::where('school_user_id', $user->id)->first();
             if (!$connection) {
-                // Check if any existing connection exists or create one
-                $connection = RoboquestConnection::first();
-                if (!$connection) {
-                    $schoolId = 'school-' . $user->id;
-                    $connection = RoboquestConnection::create([
-                        'school_user_id' => $user->id,
-                        'school_id'      => $schoolId,
-                        'base_url'       => rtrim($defaultUrl, '/'),
-                        'shared_key'     => $defaultKey,
-                    ]);
-                }
+                // Every school gets its own connection on the shared DigiLab server (DEFAULT_ROBOQUEST_URL),
+                // which hosts each school separately. Never borrow another school's connection.
+                $connection = self::defaultConnection($user);
             } else {
                 // Ensure base_url and shared_key are properly set
                 if (empty($connection->base_url) || ($connection->base_url === 'https://digilab.skillvation.com' && str_contains($defaultUrl, 'localhost'))) {
@@ -65,6 +57,19 @@ class RoboquestService {
 
         return null;
     }
+    // Creates the school's own connection to the shared DigiLab server, when one is configured.
+    public static function defaultConnection(User $school): ?RoboquestConnection {
+        $defaultUrl = env('DEFAULT_ROBOQUEST_URL');
+        $defaultKey = env('DEFAULT_ROBOQUEST_KEY');
+        if (!$defaultUrl || !$defaultKey || strlen($defaultKey) < 32) return null;
+        $schoolId = 'school-' . $school->id;
+        // A school ID taken by a manual connection elsewhere is never shared.
+        if (RoboquestConnection::where('school_id', $schoolId)->where('school_user_id', '<>', $school->id)->exists()) return null;
+        return RoboquestConnection::firstOrCreate(
+            ['school_user_id' => $school->id],
+            ['school_id' => $schoolId, 'base_url' => rtrim($defaultUrl, '/'), 'shared_key' => $defaultKey]
+        );
+    }
     public function launch(User $user): ?string {
         $connection = $this->connection($user);
         if (!$connection || $user->status !== 'active' || in_array($user->is_banned, [1, '1', 'yes'], true)) return null;
@@ -74,7 +79,9 @@ class RoboquestService {
             'connection_id'=>$connection->id, 'user_id'=>$user->id, 'code_hash'=>hash('sha256', $code),
             'expires_at'=>now()->addSeconds(90), 'created_at'=>now(), 'updated_at'=>now(),
         ]);
-        return rtrim($connection->base_url, '/') . '/launch?code=' . rawurlencode($code);
+        // The school travels with the link so one DigiLab server can host every school. RoboQuest trusts it only
+        // after this code is redeemed, and a code redeems only for the school it was issued to.
+        return rtrim($connection->base_url, '/') . '/launch?code=' . rawurlencode($code) . '&school=' . rawurlencode($connection->school_id);
     }
     public function claims(User $user, RoboquestConnection $connection): array {
         abort_unless($user->status === 'active' && !in_array($user->is_banned, [1, '1', 'yes'], true), 403, 'Account is inactive.');
