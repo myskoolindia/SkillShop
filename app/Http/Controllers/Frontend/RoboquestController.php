@@ -42,8 +42,9 @@ class RoboquestController extends Controller {
             return back()->withInput()->withErrors(['school_id' => __('School ID is already connected by another school.')]);
         }
         $connection = RoboquestConnection::firstOrNew(['school_user_id' => $request->user()->id]);
-        $defaultKey = env('DEFAULT_ROBOQUEST_KEY', '6fc6bcf57baf76cbc26e4e36743a91e6b08b9268e8aff9aceeca2680d2df891a');
+        $defaultKey = env('DEFAULT_ROBOQUEST_KEY');
         if (!$connection->exists && !$request->filled('shared_key')) {
+            if (!$defaultKey) return back()->withInput()->withErrors(['shared_key' => __('Enter the connection key from the RoboQuest server.')]);
             $connection->shared_key = $defaultKey;
         } elseif ($request->filled('shared_key')) {
             $connection->shared_key = $data['shared_key'];
@@ -70,13 +71,8 @@ class RoboquestController extends Controller {
     private function authenticate(Request $request): RoboquestConnection {
         $input = $request->validate(['schoolId'=>'required|string|max:80','timestamp'=>'required|integer','nonce'=>'required|string|min:16|max:80']);
         abort_unless(abs(time() - $input['timestamp']) <= 120, 401, 'Expired request.');
+        // The request is signed for one school and checked with that school's own connection key.
         $connection = RoboquestConnection::where('school_id',$input['schoolId'])->first();
-        if (!$connection) {
-            $defaultKey = env('DEFAULT_ROBOQUEST_KEY', '6fc6bcf57baf76cbc26e4e36743a91e6b08b9268e8aff9aceeca2680d2df891a');
-            if (hash_equals(hash_hmac('sha256', $request->getContent(), $defaultKey), (string)$request->header('X-RoboQuest-Signature'))) {
-                $connection = RoboquestConnection::first();
-            }
-        }
         abort_unless($connection && hash_equals(hash_hmac('sha256',$request->getContent(),$connection->shared_key), (string)$request->header('X-RoboQuest-Signature')), 401, 'Invalid school credentials.');
         DB::table('roboquest_request_nonces')->where('expires_at','<',now())->delete();
         $inserted = DB::table('roboquest_request_nonces')->insertOrIgnore(['connection_id'=>$connection->id,'nonce'=>$input['nonce'],'expires_at'=>now()->addMinutes(3)]);
@@ -89,12 +85,13 @@ class RoboquestController extends Controller {
         return DB::transaction(function() use ($connection,$code,$service) {
             $row = DB::table('roboquest_launch_codes')->where('code_hash',hash('sha256',$code))->lockForUpdate()->first();
             abort_unless($row && !$row->used_at && now()->lt($row->expires_at),401,'Launch link expired or already used.');
+            // A code opens only the school it was issued for, even when schools share one DigiLab server and key.
+            abort_unless((int)$row->connection_id === (int)$connection->id,401,'Launch link belongs to another school.');
             $user = User::findOrFail($row->user_id);
-            $actualConnection = RoboquestConnection::find($row->connection_id) ?? $connection;
-            $claims = $service->claims($user,$actualConnection);
+            $claims = $service->claims($user,$connection);
             DB::table('roboquest_launch_codes')->where('id',$row->id)->update(['used_at'=>now()]);
 
-            $snapshot = $service->snapshot($actualConnection, $user);
+            $snapshot = $service->snapshot($connection, $user);
             $snapshot['schoolId'] = $connection->school_id;
 
             return response()->json(['user'=>$claims,'snapshot'=>$snapshot])->header('Cache-Control','no-store');

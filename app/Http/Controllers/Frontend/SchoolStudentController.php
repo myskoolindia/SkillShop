@@ -4,16 +4,21 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
 use App\Models\SchoolMember;
-use App\Models\User;
+use App\Http\Controllers\Frontend\Concerns\ManagesSchoolMembers;
+use App\Services\SchoolMemberProvisioner;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
-use Str;
 
 class SchoolStudentController extends Controller
 {
+    use ManagesSchoolMembers;
+
+    protected function memberRole(): string
+    {
+        return 'student';
+    }
+
     public function index(): View
     {
         $students = SchoolMember::with('user')
@@ -45,30 +50,13 @@ class SchoolStudentController extends Controller
 
     public function downloadTemplate()
     {
-        $headers = [
-            'Content-Type'        => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="students_import_template.csv"',
-            'Pragma'              => 'no-cache',
-            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires'             => '0',
-        ];
-
-        $columns = ['Name', 'Email', 'Roll_Number', 'Grade', 'Section', 'Academic_Year', 'Board', 'Password'];
-        $sample  = ['John Smith', 'student@example.com', 'STD-101', 'Grade 6', 'A', '2026-2027', 'CBSE', '123456'];
-
-        $callback = function () use ($columns, $sample) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $columns);
-            fputcsv($file, $sample);
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return $this->csvTemplate(['Name', 'Email', 'Roll_Number', 'Grade', 'Section', 'Academic_Year', 'Board', 'Password'],
+            ['John Smith', 'student@example.com', 'STD-101', 'Grade 6', 'A', '2026-2027', 'CBSE', ''], 'students_import_template.csv');
     }
 
     public function show(SchoolMember $member): View
     {
-        if ($member->school_id !== userAuth()->id || $member->role_in_school !== 'student') {
+        if ((int) $member->school_id !== (int) userAuth()->id || $member->role_in_school !== 'student') {
             abort(403);
         }
 
@@ -113,7 +101,7 @@ class SchoolStudentController extends Controller
         $request->validate([
             'name'          => 'required|string|max:255',
             'email'         => 'required|email|max:255',
-            'password'      => 'nullable|string|min:4',
+            'password'      => 'nullable|string|min:' . SchoolMemberProvisioner::MIN_PASSWORD . '|max:128',
             'id_number'     => 'nullable|string|max:100',
             'grade'         => 'nullable|string|max:50',
             'section'       => 'nullable|string|max:20',
@@ -121,171 +109,34 @@ class SchoolStudentController extends Controller
             'board'         => 'nullable|string|max:50',
         ]);
 
-        return DB::transaction(function () use ($request) {
-            $user = User::where('email', $request->email)->first();
-            $password = $request->password ?: '123456';
-
-            if (!$user) {
-                $user = User::create([
-                    'name'               => $request->name,
-                    'email'              => $request->email,
-                    'role'               => 'student',
-                    'password'           => Hash::make($password),
-                    'status'             => 'active',
-                    'is_banned'          => 'no',
-                    'email_verified_at'  => now(),
-                    'verification_token' => null,
-                ]);
-            }
-
-            $exists = SchoolMember::where('school_id', userAuth()->id)
-                ->where('user_id', $user->id)
-                ->exists();
-
-            if ($exists) {
-                $notification = ['messege' => __('This user is already a member of your school.'), 'alert-type' => 'error'];
-                return redirect()->back()->with($notification);
-            }
-
-            SchoolMember::create([
-                'school_id'      => userAuth()->id,
-                'user_id'        => $user->id,
-                'role_in_school' => 'student',
-                'id_number'      => $request->id_number,
-                'grade'          => $request->grade,
-                'section'        => $request->section,
-                'academic_year'  => $request->academic_year,
-                'board'          => $request->board,
-                'status'         => 'active',
-            ]);
-
-            $notification = ['messege' => __('Student added successfully. Password: ') . $password, 'alert-type' => 'success'];
-            return redirect()->route('school.students.index')->with($notification);
-        });
+        return $this->addMember($request, $request->only(['id_number', 'grade', 'section', 'academic_year', 'board']));
     }
 
     public function import(Request $request): RedirectResponse
     {
-        $request->validate([
-            'csv_file' => 'required|file|max:5120',
-        ], [
-            'csv_file.required' => __('Please select a CSV file to upload.'),
-        ]);
-
-        $file = $request->file('csv_file');
-        $ext = strtolower($file->getClientOriginalExtension());
-        if (!in_array($ext, ['csv', 'txt'])) {
-            $notification = ['messege' => __('Please upload a valid .csv file.'), 'alert-type' => 'error'];
-            return redirect()->back()->with($notification);
-        }
-
-        $filePath = $file->getPathname();
-        $content = file_get_contents($filePath);
-
-        // Detect delimiter (comma or semicolon)
-        $firstLine = strtok($content, "\r\n");
-        $delimiter = (substr_count($firstLine, ';') > substr_count($firstLine, ',')) ? ';' : ',';
-
-        $handle = fopen($filePath, 'r');
-        if (!$handle) {
-            $notification = ['messege' => __('Unable to read the uploaded CSV file.'), 'alert-type' => 'error'];
-            return redirect()->back()->with($notification);
-        }
-
-        // Read header row
-        $header = fgetcsv($handle, 0, $delimiter);
-
-        $added = 0;
-        $skipped = 0;
-
-        DB::transaction(function () use ($handle, $delimiter, &$added, &$skipped) {
-            while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
-                if (empty(array_filter($row))) {
-                    continue; // Skip empty rows
-                }
-
-                $name     = preg_replace('/^\xEF\xBB\xBF/', '', trim($row[0] ?? ''));
-                $email    = trim($row[1] ?? '');
-                $idNum    = trim($row[2] ?? '');
-
-                if (count($row) >= 8) {
-                    $grade        = trim($row[3] ?? '') ?: null;
-                    $section      = trim($row[4] ?? '') ?: null;
-                    $academicYear = trim($row[5] ?? '') ?: null;
-                    $board        = trim($row[6] ?? '') ?: null;
-                    $password     = trim($row[7] ?? '') ?: '123456';
-                } else {
-                    $grade        = null;
-                    $section      = null;
-                    $academicYear = null;
-                    $board        = null;
-                    $password     = trim($row[3] ?? '') ?: '123456';
-                }
-
-                if (!$name || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                    $skipped++;
-                    continue;
-                }
-
-                $user = User::where('email', $email)->first();
-                if (!$user) {
-                    $user = User::create([
-                        'name'               => $name,
-                        'email'              => $email,
-                        'role'               => 'student',
-                        'password'           => Hash::make($password),
-                        'status'             => 'active',
-                        'is_banned'          => 'no',
-                        'email_verified_at'  => now(),
-                        'verification_token' => null,
-                    ]);
-                }
-
-                $exists = SchoolMember::where('school_id', userAuth()->id)
-                    ->where('user_id', $user->id)
-                    ->exists();
-
-                if ($exists) {
-                    $skipped++;
-                    continue;
-                }
-
-                SchoolMember::create([
-                    'school_id'      => userAuth()->id,
-                    'user_id'        => $user->id,
-                    'role_in_school' => 'student',
-                    'id_number'      => $idNum ?: null,
-                    'grade'          => $grade,
-                    'section'        => $section,
-                    'academic_year'  => $academicYear,
-                    'board'          => $board,
-                    'status'         => 'active',
-                ]);
-                $added++;
-            }
+        // Full format: Name, Email, Roll_Number, Grade, Section, Academic_Year, Board, Password (optional)
+        // Short format: Name, Email, Roll_Number, Password (optional)
+        return $this->importMembers($request, function (array $row) {
+            $full = count($row) >= 8;
+            return [
+                'name' => $row[0] ?? '', 'email' => $row[1] ?? '', 'password' => $full ? ($row[7] ?? null) : ($row[3] ?? null),
+                'fields' => [
+                    'id_number' => $row[2] ?? null, 'grade' => $full ? mb_substr($row[3] ?? '', 0, 50) : null,
+                    'section' => $full ? mb_substr($row[4] ?? '', 0, 20) : null, 'academic_year' => $full ? mb_substr($row[5] ?? '', 0, 20) : null,
+                    'board' => $full ? mb_substr($row[6] ?? '', 0, 50) : null,
+                ],
+            ];
         });
-
-        fclose($handle);
-
-        $notification = ['messege' => __("Import complete: :added added, :skipped skipped.", ['added' => $added, 'skipped' => $skipped]), 'alert-type' => 'success'];
-        return redirect()->route('school.students.index')->with($notification);
     }
 
     public function toggleStatus(SchoolMember $member): RedirectResponse
     {
-        if ($member->school_id !== userAuth()->id || $member->role_in_school !== 'student') {
-            abort(403);
-        }
-
-        $member->update(['status' => $member->status === 'active' ? 'inactive' : 'active']);
-
-        $notification = ['messege' => __('Student status updated.'), 'alert-type' => 'success'];
-        return redirect()->back()->with($notification);
+        return $this->toggleMemberStatus($member);
     }
 
     public function destroy(SchoolMember $member): RedirectResponse
     {
-        if ($member->school_id !== userAuth()->id || $member->role_in_school !== 'student') {
+        if ((int) $member->school_id !== (int) userAuth()->id || $member->role_in_school !== 'student') {
             abort(403);
         }
 

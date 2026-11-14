@@ -6,6 +6,7 @@ use Illuminate\Support\Str;
 use Modules\Order\app\Models\Enrollment;
 
 class RoboquestService {
+    public function __construct(private ProductCourseMapService $productCourses) {}
     public function connection(User $user): ?RoboquestConnection {
         $defaultUrl = env('DEFAULT_ROBOQUEST_URL');
         $defaultKey = env('DEFAULT_ROBOQUEST_KEY');
@@ -13,17 +14,9 @@ class RoboquestService {
         if ($user->role === 'school' || $user->role === 'admin') {
             $connection = RoboquestConnection::where('school_user_id', $user->id)->first();
             if (!$connection) {
-                // Check if any existing connection exists or create one
-                $connection = RoboquestConnection::first();
-                if (!$connection) {
-                    $schoolId = 'school-' . $user->id;
-                    $connection = RoboquestConnection::create([
-                        'school_user_id' => $user->id,
-                        'school_id'      => $schoolId,
-                        'base_url'       => rtrim($defaultUrl, '/'),
-                        'shared_key'     => $defaultKey,
-                    ]);
-                }
+                // Every school gets its own connection on the shared DigiLab server (DEFAULT_ROBOQUEST_URL),
+                // which hosts each school separately. Never borrow another school's connection.
+                $connection = self::defaultConnection($user);
             } else {
                 // Ensure base_url and shared_key are properly set
                 if (empty($connection->base_url) || ($connection->base_url === 'https://digilab.skillvation.com' && str_contains($defaultUrl, 'localhost'))) {
@@ -64,6 +57,19 @@ class RoboquestService {
 
         return null;
     }
+    // Creates the school's own connection to the shared DigiLab server, when one is configured.
+    public static function defaultConnection(User $school): ?RoboquestConnection {
+        $defaultUrl = env('DEFAULT_ROBOQUEST_URL');
+        $defaultKey = env('DEFAULT_ROBOQUEST_KEY');
+        if (!$defaultUrl || !$defaultKey || strlen($defaultKey) < 32) return null;
+        $schoolId = 'school-' . $school->id;
+        // A school ID taken by a manual connection elsewhere is never shared.
+        if (RoboquestConnection::where('school_id', $schoolId)->where('school_user_id', '<>', $school->id)->exists()) return null;
+        return RoboquestConnection::firstOrCreate(
+            ['school_user_id' => $school->id],
+            ['school_id' => $schoolId, 'base_url' => rtrim($defaultUrl, '/'), 'shared_key' => $defaultKey]
+        );
+    }
     public function launch(User $user): ?string {
         $connection = $this->connection($user);
         if (!$connection || $user->status !== 'active' || in_array($user->is_banned, [1, '1', 'yes'], true)) return null;
@@ -73,7 +79,9 @@ class RoboquestService {
             'connection_id'=>$connection->id, 'user_id'=>$user->id, 'code_hash'=>hash('sha256', $code),
             'expires_at'=>now()->addSeconds(90), 'created_at'=>now(), 'updated_at'=>now(),
         ]);
-        return rtrim($connection->base_url, '/') . '/launch?code=' . rawurlencode($code);
+        // The school travels with the link so one DigiLab server can host every school. RoboQuest trusts it only
+        // after this code is redeemed, and a code redeems only for the school it was issued to.
+        return rtrim($connection->base_url, '/') . '/launch?code=' . rawurlencode($code) . '&school=' . rawurlencode($connection->school_id);
     }
     public function claims(User $user, RoboquestConnection $connection): array {
         abort_unless($user->status === 'active' && !in_array($user->is_banned, [1, '1', 'yes'], true), 403, 'Account is inactive.');
@@ -108,7 +116,7 @@ class RoboquestService {
             $url=parse_url((string)$value);
             return filter_var($value,FILTER_VALIDATE_URL) && ($url['scheme']??'')==='https' && !isset($url['user']) && !isset($url['pass']) ? $value : null;
         };
-        return ['schoolId'=>$connection->school_id, 'buyerId'=>(string)$buyerId, 'members'=>$members, 'courses'=>$courses->map(function($course) use ($plain,$video,$buyerId) {
+        $list = $courses->map(function($course) use ($plain,$video,$buyerId) {
             return ['id'=>(string)$course->id, 'externalCourseId'=>$course->api_course_id, 'buyerUserId'=>(string)$buyerId, 'title'=>$course->title,
                 'summary'=>$plain($course->description), 'capacity'=>$course->capacity > 0 ? (int)$course->capacity : null,
                 'chapters'=>$course->chapters->where('status', 'active')->sortBy('order')->values()->map(fn($chapter)=>[
@@ -119,6 +127,34 @@ class RoboquestService {
                         'videoUrl'=>$video($item->lesson),
                     ])->values(),
                 ])];
-        })->values(), 'updatedAt'=>now()->toIso8601String()];
+        })->values()->all();
+        // Courses included with this buyer's paid Club Shop lab products (Mapper API). A direct course purchase takes precedence.
+        // Lesson content for these courses comes from the RoboQuest platform Content Studio.
+        $owned = $courses->pluck('api_course_id')->filter()->map(fn($id) => (string)$id)->all();
+        // RoboQuest stores a teacher's snapshot courses by ID next to the school's, so a teacher's copy gets its own ID
+        // and never replaces the school's record of the same lab course.
+        $suffix = (int)$buyerId === (int)$connection->school_user_id ? '' : '-u'.$buyerId;
+        foreach ($this->labCourses([(int)$buyerId]) as $courseId => $mapped) {
+            if (in_array((string)$courseId, $owned, true)) continue;
+            $list[] = ['id'=>'lab-course-'.$courseId.$suffix, 'externalCourseId'=>$courseId, 'buyerUserId'=>(string)$buyerId, 'title'=>$mapped['title'],
+                'summary'=>'Included with '.implode(', ', array_column($mapped['labProducts'], 'title')),
+                'capacity'=>null, 'chapters'=>[], 'source'=>'lab-product', 'labProducts'=>$mapped['labProducts']];
+        }
+        return ['schoolId'=>$connection->school_id, 'buyerId'=>(string)$buyerId, 'members'=>$members, 'courses'=>$list, 'updatedAt'=>now()->toIso8601String()];
+    }
+    /**
+     * Provider course ID => mapped course, for the paid Club Shop lab products of these portal users.
+     * Fails closed (503) so a mapper or Club Shop outage never removes or grants access.
+     */
+    public function labCourses(array $portalUserIds): array {
+        try { return $this->productCourses->coursesForBuyers($portalUserIds); }
+        catch (\Throwable $error) {
+            report($error);
+            abort(503, 'Lab course access is temporarily unavailable. Existing access is unchanged; try again shortly.');
+        }
+    }
+    /** Lab-mapped course IDs for the school and its active teachers, for the master's content check. */
+    public function schoolLabCourseIds(RoboquestConnection $connection): array {
+        return array_keys($this->labCourses($this->productCourses->schoolBuyerIds($connection)));
     }
 }

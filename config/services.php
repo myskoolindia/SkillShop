@@ -50,4 +50,9 @@ return [
     ],
 
     'roboquest'=>['platform_key'=>env('ROBOQUEST_PLATFORM_KEY','')],
+    // Mapper API: Club Shop lab product -> provider courses. Paid lab orders unlock the mapped courses in RoboQuest.
+    'collab'=>[
+        'product_course_map_url'=>env('COLLAB_PRODUCT_COURSE_MAP_URL','https://collab.myskool.club/api/product-course-map'),
+        'lab_course_access'=>env('LAB_COURSE_ACCESS_ENABLED',true),
+    ],
 ];

@@ -14,6 +14,8 @@
             </div>
         </div>
 
+        @include('frontend.school-dashboard.partials.member-notices', ['role' => 'teacher'])
+
         <div class="row">
             <div class="col-12">
                 <div class="dashboard__review-table table-responsive">
@@ -95,7 +97,7 @@
                         <div class="alert alert-light border mb-3" style="font-size: 13px;">
                             <div class="fw-bold mb-1"><i class="fa fa-info-circle text-info"></i> {{ __('CSV Column Format:') }}</div>
                             <code>Name, Email, ID_Number, Password</code>
-                            <div class="text-muted mt-1">{{ __('Password is optional (defaults to 123456). Accounts will be activated immediately.') }}</div>
+                            <div class="text-muted mt-1">{{ __('Password is optional (at least 8 characters). Leave it blank to generate one; you can download the new login details once after the import. Accounts are active immediately.') }}</div>
                         </div>
 
                         <div class="mb-3">

@@ -22,6 +22,8 @@ class RoboquestBridgeTest extends TestCase {
         Schema::create('course_chapter_items',function(Blueprint $t){$t->id();$t->foreignId('chapter_id');$t->integer('order')->default(0);});
         Schema::create('course_chapter_lessons',function(Blueprint $t){$t->id();$t->foreignId('chapter_item_id');$t->string('title');$t->text('description')->nullable();$t->text('material_required')->nullable();$t->text('video_url')->nullable();});
         $migration=require database_path('migrations/2026_10_27_000001_create_roboquest_connections.php');$migration->up();
+        // Lab-mapped courses are covered by ProductCourseMapTest; these tests have no Club Shop database.
+        config(['services.collab.lab_course_access'=>false]);
     }
     private function user(string $email,string $role='school'): User {
         return User::withoutEvents(fn()=>User::create(['name'=>$role,'email'=>$email,'role'=>$role,'password'=>Hash::make('Test-Only-Password-2026!'),'status'=>'active','is_banned'=>'no','email_verified_at'=>now()]));
@@ -79,6 +81,31 @@ class RoboquestBridgeTest extends TestCase {
         try {app(\App\Http\Controllers\Auth\AuthenticatedSessionController::class)->store($request);$this->fail('Credentials are required to switch accounts');}
         catch (\Illuminate\Validation\ValidationException $e) {$this->assertArrayHasKey('login',$e->errors());}
         $this->assertAuthenticatedAs($student);
+    }
+    private function withDefaultDigilab(callable $fn): void {
+        $key=str_repeat('d',64);foreach(['DEFAULT_ROBOQUEST_URL'=>'https://digilab.test','DEFAULT_ROBOQUEST_KEY'=>$key] as $k=>$v){putenv("$k=$v");$_ENV[$k]=$_SERVER[$k]=$v;}
+        try{$fn($key);}finally{foreach(['DEFAULT_ROBOQUEST_URL','DEFAULT_ROBOQUEST_KEY'] as $k){putenv($k);unset($_ENV[$k],$_SERVER[$k]);}}
+    }
+    public function test_each_new_school_gets_its_own_digilab_connection_and_codes_open_only_their_school(): void {
+        $this->withDefaultDigilab(function(string $key){
+            $first=$this->user('first@multi.test');$second=$this->user('second@multi.test');$this->paidCourse($second);
+            $service=app(RoboquestService::class);
+            $a=$service->launch($first);$b=$service->launch($second);
+            // No borrowing: two schools, two connections, each with its own school ID on the shared server.
+            $this->assertSame(2,RoboquestConnection::count());
+            $this->assertStringStartsWith('https://digilab.test/launch?code=',$a);
+            $this->assertStringEndsWith('&school=school-'.$first->id,$a);
+            $this->assertStringEndsWith('&school=school-'.$second->id,$b);
+            parse_str(parse_url($a,PHP_URL_QUERY),$qa);parse_str(parse_url($b,PHP_URL_QUERY),$qb);
+            // The second school's code presented for the first school is refused, and is still usable by its own school.
+            $this->signed('/api/roboquest/launch/redeem',['code'=>$qb['code'],'schoolId'=>'school-'.$first->id],$key)->assertStatus(401);
+            $this->signed('/api/roboquest/launch/redeem',['code'=>$qb['code'],'schoolId'=>'school-'.$second->id],$key)->assertOk()
+                ->assertJsonPath('snapshot.schoolId','school-'.$second->id)->assertJsonCount(1,'snapshot.courses');
+            $this->signed('/api/roboquest/launch/redeem',['code'=>$qa['code'],'schoolId'=>'school-'.$first->id],$key)->assertOk()
+                ->assertJsonPath('snapshot.schoolId','school-'.$first->id)->assertJsonCount(0,'snapshot.courses');
+            // An unknown school signed with the shared key gets nothing (no fallback to another school's data).
+            $this->signed('/api/roboquest/school-snapshot',['schoolId'=>'school-999999'],$key)->assertStatus(401);
+        });
     }
     public function test_signatures_nonce_replay_and_school_isolation(): void {
         $school=$this->user('school@two.test');$this->connection($school);$other=$this->user('other@two.test');$this->connection($other,'school-two');$this->paidCourse($other);

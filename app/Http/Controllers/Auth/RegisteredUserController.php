@@ -145,18 +145,8 @@ class RegisteredUserController extends Controller
         // Auto-provision DigiLab RoboQuest connection or membership
         try {
             if ($role === 'school') {
-                $schoolId = 'school-' . $user->id;
-                $defaultUrl = env('DEFAULT_ROBOQUEST_URL');
-                $defaultKey = env('DEFAULT_ROBOQUEST_KEY');
-
-                RoboquestConnection::firstOrCreate(
-                    ['school_user_id' => $user->id],
-                    [
-                        'school_id'  => $schoolId,
-                        'base_url'   => rtrim($defaultUrl, '/'),
-                        'shared_key' => $defaultKey,
-                    ]
-                );
+                // Its own connection on the shared DigiLab server; RoboQuest adds the school on first launch.
+                \App\Services\RoboquestService::defaultConnection($user);
             } elseif ($role === 'teacher') {
                 $targetSchoolId = $request->input('school_id');
                 if (!$targetSchoolId) {
