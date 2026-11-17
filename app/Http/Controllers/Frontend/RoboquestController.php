@@ -68,7 +68,7 @@ class RoboquestController extends Controller {
         }
         return redirect()->away($url)->withHeaders(['Referrer-Policy'=>'no-referrer','Cache-Control'=>'no-store']);
     }
-    private function authenticate(Request $request): RoboquestConnection {
+    protected function authenticate(Request $request): RoboquestConnection {
         $input = $request->validate(['schoolId'=>'required|string|max:80','timestamp'=>'required|integer','nonce'=>'required|string|min:16|max:80']);
         abort_unless(abs(time() - $input['timestamp']) <= 120, 401, 'Expired request.');
         // The request is signed for one school and checked with that school's own connection key.

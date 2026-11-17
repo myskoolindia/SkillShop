@@ -119,6 +119,60 @@ class WabaOtpService
     }
 
     /**
+     * Send RoboQuest / Skillvation sign-in details to a new teacher or student (or a new password).
+     * Uses the approved template WABA_LOGIN_TEMPLATE when set ({{1}} name, {{2}} login, {{3}} password, {{4}} link),
+     * otherwise a text message. The password is never written to the log.
+     *
+     * @param array $data ['name', 'login', 'password', 'url', 'school', 'reset' => bool]
+     */
+    public function sendLoginDetails(string $phone, array $data): array
+    {
+        $cleanPhone = $this->sanitizePhone($phone);
+        if (empty($cleanPhone)) return ['success' => false, 'message' => 'Empty phone number'];
+        $driver = config('services.waba.driver', env('WABA_DRIVER', 'wabaconnect'));
+        $name = $data['name'] ?? 'there'; $login = $data['login'] ?? ''; $password = $data['password'] ?? ''; $url = $data['url'] ?? '';
+        $school = $data['school'] ?? 'your school';
+        $intro = !empty($data['reset']) ? "Your password for *{$school}* on Skillvation and RoboQuest was changed." : "*{$school}* has created your Skillvation and RoboQuest account.";
+        $message = "Hello {$name},\n\n{$intro}\n\n👤 *Login:* {$login}\n🔑 *Password:* {$password}\n" . ($url ? "🔗 {$url}\n" : '')
+            . "\nYou can also sign in with this mobile number. Please keep these details private.\n\n_Skillvation — MySkool Learning Private Limited_";
+        $template = config('services.waba.login_template', env('WABA_LOGIN_TEMPLATE', ''));
+        $params = [$name, $login, $password, $url ?: 'skillvation.com'];
+        $masked = substr($cleanPhone, 0, 4) . '****' . substr($cleanPhone, -2);
+        try {
+            if ($driver === 'wabaconnect') {
+                $baseUrl = rtrim(config('services.waba.base_url', 'https://login.wabaconnect.com/api'), '/');
+                $auth = ['LicenseNumber' => config('services.waba.license_number'), 'APIKey' => config('services.waba.api_key'), 'Contact' => $cleanPhone];
+                if (empty($auth['LicenseNumber']) || empty($auth['APIKey'])) return ['success' => false, 'message' => 'WhatsApp is not configured'];
+                if ($template) {
+                    $res = Http::withoutVerifying()->connectTimeout(5)->timeout(10)->get("{$baseUrl}/sendtemplate.php", $auth + ['Template' => $template, 'Param' => implode(',', array_map(static fn ($v) => str_replace(',', ' ', (string) $v), $params))]);
+                    if ($res->successful() && strtolower($res->json()['ApiResponse'] ?? '') === 'success') { Log::info('[WABA Login Template Sent]', ['phone' => $masked]); return ['success' => true, 'message' => 'Sent via WhatsApp template']; }
+                    Log::warning('[WABA Login Template Failed]', ['phone' => $masked, 'status' => $res->status()]);
+                }
+                $res = Http::withoutVerifying()->connectTimeout(5)->timeout(10)->get("{$baseUrl}/sendtextmessage.php", $auth + ['Message' => $message]);
+                $ok = $res->successful() && in_array(strtolower($res->json()['ApiResponse'] ?? ($res->json()['Status'] ?? '')), ['success'], true);
+                Log::info('[WABA Login Text]', ['phone' => $masked, 'ok' => $ok]);
+                return ['success' => $ok, 'message' => $ok ? 'Sent via WhatsApp' : 'WhatsApp did not confirm delivery'];
+            }
+            if ($driver === 'meta') {
+                $phoneNumberId = config('services.waba.phone_number_id', env('WABA_PHONE_NUMBER_ID')); $token = config('services.waba.api_token', env('WABA_API_TOKEN'));
+                if (!$phoneNumberId || !$token) return ['success' => false, 'message' => 'WhatsApp is not configured'];
+                $endpoint = "https://graph.facebook.com/v19.0/{$phoneNumberId}/messages";
+                $payload = $template
+                    ? ['messaging_product' => 'whatsapp', 'to' => $cleanPhone, 'type' => 'template', 'template' => ['name' => $template, 'language' => ['code' => config('services.waba.login_template_lang', 'en')], 'components' => [['type' => 'body', 'parameters' => array_map(fn ($v) => ['type' => 'text', 'text' => (string) $v], $params)]]]]
+                    : ['messaging_product' => 'whatsapp', 'to' => $cleanPhone, 'type' => 'text', 'text' => ['body' => $message]];
+                $res = Http::withToken($token)->timeout(10)->post($endpoint, $payload);
+                Log::info('[WABA Login Meta]', ['phone' => $masked, 'status' => $res->status()]);
+                return ['success' => $res->successful(), 'message' => $res->successful() ? 'Sent via WhatsApp' : 'WhatsApp rejected the message'];
+            }
+            Log::info('[WABA Mock Login] Sign-in details sent', ['phone' => $masked, 'login' => $login]);
+            return ['success' => true, 'message' => 'Sent via WhatsApp (mock)'];
+        } catch (\Throwable $e) {
+            Log::warning('[WABA Login Exception] ' . $e->getMessage(), ['phone' => $masked]);
+            return ['success' => false, 'message' => 'WhatsApp delivery failed'];
+        }
+    }
+
+    /**
      * Generate a pre-filled direct WhatsApp share / chat URL for a proposal.
      */
     public function generateWhatsAppShareUrl(string $phone, array $data): string
