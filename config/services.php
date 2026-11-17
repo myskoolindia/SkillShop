@@ -31,6 +31,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // Club Shop catalogue API used by the shops inside RoboQuest (defaults to this site's /club-shop/api).
+    'club_shop' => ['api_url' => env('CLUB_SHOP_API_BASE_URL')],
+
     'waba' => [
         'driver'                 => env('WABA_DRIVER', 'wabaconnect'),
         'base_url'               => env('WABA_BASE_URL', 'https://login.wabaconnect.com/api'),
