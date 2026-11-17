@@ -218,4 +218,38 @@ class RoboquestBridgeTest extends TestCase {
         $this->signed('/api/roboquest/launch/redeem',['code'=>$code($student)])->assertOk()->assertJsonPath('user.role','Student')
             ->assertJsonPath('user.profile.grade','6')->assertJsonPath('user.profile.section','B')->assertJsonPath('user.profile.idNumber','R-17')->assertJsonPath('user.profile.phone','+919800000001')->assertJsonMissingPath('user.profile.schoolName');
     }
+    private function useSharedServer(): void {
+        foreach (['DEFAULT_ROBOQUEST_URL'=>'http://localhost:8080','DEFAULT_ROBOQUEST_KEY'=>str_repeat('d',40)] as $k=>$v){putenv("$k=$v");$_ENV[$k]=$v;$_SERVER[$k]=$v;}
+    }
+    private function personalPurchase(User $buyer): Course {
+        $course=Course::withoutEvents(fn()=>Course::create(['title'=>'Own robotics','slug'=>'own-'.random_int(1,99999),'type'=>'course','description'=>'Mine','capacity'=>1]));
+        $order=Order::create(['buyer_id'=>$buyer->id,'invoice_id'=>bin2hex(random_bytes(8)),'status'=>'completed','payment_status'=>'paid']);
+        Enrollment::create(['order_id'=>$order->id,'user_id'=>$buyer->id,'course_id'=>$course->id,'has_access'=>1]);return $course;
+    }
+    public function test_people_without_a_school_get_their_personal_space_with_only_their_own_purchases_and_are_never_added_to_a_school(): void {
+        $this->useSharedServer();
+        $school=$this->user('school@first.test');$this->connection($school);$this->paidCourse($school);
+        $teacher=$this->user('left@school.test','teacher');$own=$this->personalPurchase($teacher);
+        $launch=app(RoboquestService::class)->launch($teacher);
+        $this->assertStringContainsString('school=personal',$launch,'no school → personal space');
+        $this->assertSame(0,SchoolMember::where('user_id',$teacher->id)->count(),'never added to a school automatically');
+        parse_str(parse_url($launch,PHP_URL_QUERY),$q);
+        $connection=RoboquestConnection::where('school_id','personal')->firstOrFail();
+        $body=['schoolId'=>'personal','timestamp'=>time(),'nonce'=>bin2hex(random_bytes(20)),'code'=>$q['code']];$raw=json_encode($body);
+        $result=$this->call('POST','/api/roboquest/launch/redeem',[],[],[],['CONTENT_TYPE'=>'application/json','HTTP_ACCEPT'=>'application/json','HTTP_X_ROBOQUEST_SIGNATURE'=>hash_hmac('sha256',$raw,str_repeat('d',40))],$raw);
+        $result->assertOk()->assertJsonPath('user.role','Teacher')->assertJsonCount(1,'snapshot.courses')->assertJsonPath('snapshot.courses.0.id',$own->id.'-u'.$teacher->id)->assertJsonPath('snapshot.members.0.externalId',(string)$teacher->id);
+        $this->assertSame('inactive',User::find($connection->school_user_id)->status,'the personal space owner can never sign in');
+        // Joining a school ends the personal space for them.
+        SchoolMember::create(['school_id'=>$school->id,'user_id'=>$teacher->id,'role_in_school'=>'teacher','status'=>'active']);
+        $this->assertSame('school-one',app(RoboquestService::class)->connection($teacher)->school_id);
+        $snapshot=app(RoboquestService::class)->snapshot($connection);$this->assertCount(0,$snapshot['members']);
+    }
+    public function test_a_teachers_own_purchase_never_shares_an_id_with_the_schools(): void {
+        $school=$this->user('school@ids.test');$connection=$this->connection($school);$shared=$this->paidCourse($school);
+        $teacher=$this->user('own@ids.test','teacher');SchoolMember::create(['school_id'=>$school->id,'user_id'=>$teacher->id,'role_in_school'=>'teacher','status'=>'active']);
+        $order=Order::create(['buyer_id'=>$teacher->id,'invoice_id'=>bin2hex(random_bytes(8)),'status'=>'completed','payment_status'=>'paid']);
+        Enrollment::create(['order_id'=>$order->id,'user_id'=>$teacher->id,'course_id'=>$shared->id,'has_access'=>1]);
+        $this->assertSame((string)$shared->id,app(RoboquestService::class)->snapshot($connection)['courses'][0]['id']);
+        $this->assertSame($shared->id.'-u'.$teacher->id,app(RoboquestService::class)->snapshot($connection,$teacher)['courses'][0]['id']);
+    }
 }
