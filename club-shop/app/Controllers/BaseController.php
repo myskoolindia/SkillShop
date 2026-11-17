@@ -90,10 +90,8 @@ abstract class BaseController extends Controller
         // Load App Context Service
         service('appContext');
 
-        // No framing, except by the RoboQuest servers listed in SHOP_FRAME_ANCESTORS (space-separated origins), where
-        // teachers and students buy inside RoboQuest. Admin pages (BaseAdminController) are never framed.
-        $frameAncestors = trim((string) (getenv('SHOP_FRAME_ANCESTORS') ?: ''));
-        $this->response->setHeader('Content-Security-Policy', $frameAncestors !== '' && preg_match('#^(https?://[A-Za-z0-9.\-:*]+\s*)+$#', $frameAncestors) ? "frame-ancestors 'self' {$frameAncestors};" : "frame-ancestors 'none';");
+        // prevent iframe
+        $this->response->setHeader('Content-Security-Policy', "frame-ancestors 'none';");
 
         // Preload any models, libraries, etc, here.
         $this->session = \Config\Services::session();
