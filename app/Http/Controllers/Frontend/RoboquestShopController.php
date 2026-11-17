@@ -3,7 +3,7 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Models\{SchoolMember, User};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{Auth, DB, Http};
+use Illuminate\Support\Facades\{Auth, DB, Http, Log};
 use Illuminate\Support\Str;
 
 /**
@@ -32,8 +32,10 @@ class RoboquestShopController extends RoboquestController
             $path = !empty($input['categoryId']) ? "categories/{$input['categoryId']}/products" : 'products';
             $response = Http::timeout(8)->get($base . $path, ['page' => $input['page'] ?? 1, 'per_page' => $input['perPage'] ?? 24, 'search' => $input['search'] ?? null]);
         } catch (\Throwable $e) {
+            Log::warning('[RoboQuest shop] catalogue unreachable', ['base' => $base, 'error' => $e->getMessage()]);
             abort(502, 'The shop catalogue is unavailable.');
         }
+        if (!$response->successful()) Log::warning('[RoboQuest shop] catalogue refused', ['base' => $base, 'status' => $response->status()]);
         abort_unless($response->successful(), 502, 'The shop catalogue is unavailable.');
         $search = mb_strtolower(trim($input['search'] ?? ''));
         $products = collect($response->json('data') ?? [])
