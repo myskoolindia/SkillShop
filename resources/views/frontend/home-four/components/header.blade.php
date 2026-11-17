@@ -160,27 +160,54 @@
     </nav>
 
     <!-- Auth Buttons & Action Area -->
-    <div class="flex items-center gap-3 sm:gap-4">
-        @if (auth()->user()->role === 'vendor')
-          <a href="{{ url('/club-shop/dashboard') }}" class="bg-primary hover:bg-primary-dark text-white px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm hover:shadow inline-flex items-center justify-center gap-1.5">
+    <div class="flex items-center gap-2 sm:gap-3">
+      @auth
+        @php
+          $authUser = auth()->user();
+          $hasPurchased = $authUser->hasPurchasedCourses();
+          $profileUrl = $authUser->role === 'school' ? route('school.profile.index') : ($authUser->role === 'instructor' ? route('instructor.setting.index') : route('student.setting.index'));
+        @endphp
+
+        {{-- Cart Button --}}
+        <a href="{{ route('cart') }}" class="relative p-2 text-slate-600 hover:text-primary rounded-lg hover:bg-slate-50 transition-colors inline-flex items-center justify-center" title="Cart">
+          <i class="fa-solid fa-cart-shopping text-sm sm:text-base"></i>
+          @if(\Cart::count() > 0)
+            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">{{ \Cart::count() }}</span>
+          @endif
+        </a>
+
+        {{-- Profile Button --}}
+        <a href="{{ $profileUrl }}" class="flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-semibold text-slate-700 hover:text-primary bg-slate-100 hover:bg-slate-200 rounded-full transition-colors" title="Profile">
+          <i class="fa-regular fa-user text-xs"></i>
+          <span class="hidden md:inline">{{ __('Profile') }}</span>
+        </a>
+
+        {{-- Dashboard / RoboQuest Button (shown ONLY if courses purchased, or admin/vendor/instructor) --}}
+        @if ($authUser->role === 'vendor')
+          <a href="{{ url('/club-shop/dashboard') }}" class="bg-primary hover:bg-primary-dark text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm hover:shadow inline-flex items-center justify-center gap-1.5">
             <i class="fa-solid fa-store text-xs"></i>
             <span>Vendor Dashboard</span>
           </a>
-        @elseif (auth()->user()->role === 'school')
-          <a href="{{ route('school.dashboard') }}" class="bg-primary hover:bg-primary-dark text-white px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm hover:shadow inline-flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-graduation-cap text-xs"></i>
-            <span>School Portal</span>
-          </a>
-        @elseif (auth()->user()->role === 'instructor')
-          <a href="{{ route('instructor.dashboard') }}" class="bg-primary hover:bg-primary-dark text-white px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm hover:shadow inline-flex items-center justify-center gap-1.5">
+        @elseif ($authUser->role === 'instructor')
+          <a href="{{ route('instructor.dashboard') }}" class="bg-primary hover:bg-primary-dark text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm hover:shadow inline-flex items-center justify-center gap-1.5">
             <i class="fa-solid fa-chalkboard-user text-xs"></i>
             <span>Instructor Portal</span>
           </a>
+        @elseif ($authUser->role === 'school')
+          @if ($hasPurchased)
+            <a href="{{ route('school.dashboard') }}" class="bg-primary hover:bg-primary-dark text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm hover:shadow inline-flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-graduation-cap text-xs"></i>
+              <span>School Portal</span>
+            </a>
+          @endif
         @else
-          <a href="{{ route('student.dashboard') }}" class="bg-primary hover:bg-primary-dark text-white px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm hover:shadow inline-flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-user-graduate text-xs"></i>
-            <span>My Learning</span>
-          </a>
+          {{-- Student / Teacher --}}
+          @if ($hasPurchased)
+            <a href="{{ route('roboquest.launch') }}" class="bg-primary hover:bg-primary-dark text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm hover:shadow inline-flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-rocket text-xs"></i>
+              <span>RoboQuest Lab</span>
+            </a>
+          @endif
         @endif
         
         <form method="POST" action="{{ route('logout') }}" class="inline">
@@ -281,21 +308,43 @@
     {{-- Auth actions --}}
     <div class="mt-3 pt-3 border-t border-slate-100 space-y-2">
       @auth
-        <a href="{{ auth()->user()->role === 'vendor'
-              ? url('/club-shop/dashboard')
-              : (auth()->user()->role === 'school'
-                  ? route('school.dashboard')
-                  : (auth()->user()->role === 'instructor'
-                      ? route('instructor.dashboard')
-                      : route('student.dashboard'))) }}"
-           class="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-bold hover:bg-primary/20 transition-colors">
-          <i class="fa-solid fa-gauge text-xs"></i> Go to Dashboard
+        @php
+          $mUser = auth()->user();
+          $mHasPurchased = $mUser->hasPurchasedCourses();
+          $mProfileUrl = $mUser->role === 'school' ? route('school.profile.index') : ($mUser->role === 'instructor' ? route('instructor.setting.index') : route('student.setting.index'));
+        @endphp
+
+        @if (!in_array($mUser->role, ['school', 'teacher', 'student'], true) || $mHasPurchased)
+          <a href="{{ $mUser->role === 'vendor'
+                ? url('/club-shop/dashboard')
+                : ($mUser->role === 'school'
+                    ? route('school.dashboard')
+                    : ($mUser->role === 'instructor'
+                        ? route('instructor.dashboard')
+                        : route('roboquest.launch'))) }}"
+             class="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-bold hover:bg-primary/20 transition-colors">
+            <i class="fa-solid fa-gauge text-xs"></i> {{ $mUser->role === 'school' ? 'School Portal' : ($mUser->role === 'vendor' ? 'Vendor Dashboard' : ($mUser->role === 'instructor' ? 'Instructor Portal' : 'RoboQuest Lab')) }}
+          </a>
+        @endif
+
+        <a href="{{ route('cart') }}"
+           class="flex items-center justify-between px-3 py-2.5 rounded-xl text-slate-700 text-sm font-semibold hover:bg-slate-50 transition-colors">
+          <span class="flex items-center gap-2"><i class="fa-solid fa-cart-shopping text-xs"></i> {{ __('Cart') }}</span>
+          @if(\Cart::count() > 0)
+            <span class="bg-primary text-white text-xs px-2 py-0.5 rounded-full font-bold">{{ \Cart::count() }}</span>
+          @endif
         </a>
+
+        <a href="{{ $mProfileUrl }}"
+           class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-slate-700 text-sm font-semibold hover:bg-slate-50 transition-colors">
+          <i class="fa-regular fa-user text-xs"></i> {{ __('Profile') }}
+        </a>
+
         <form method="POST" action="{{ route('logout') }}">
           @csrf
           <button type="submit"
                   class="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-red-500 text-sm font-bold hover:bg-red-50 transition-colors text-left">
-            <i class="fa-solid fa-right-from-bracket text-xs"></i> Logout
+            <i class="fa-solid fa-right-from-bracket text-xs"></i> {{ __('Logout') }}
           </button>
         </form>
       @else

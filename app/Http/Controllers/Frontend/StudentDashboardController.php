@@ -27,6 +27,13 @@ class StudentDashboardController extends Controller {
             return redirect()->route('instructor.dashboard');
         }
 
+        if (!userAuth()->hasPurchasedCourses()) {
+            return redirect()->route('student.setting.index')->with([
+                'messege' => __('You do not have any purchased courses yet. Please explore our shop or courses to get started.'),
+                'alert-type' => 'info',
+            ]);
+        }
+
         $teacherOrderIds = Order::where('buyer_id', userAuth()->id)->where('payment_status', 'paid')->where('status', 'completed')->pluck('id');
         $totalEnrolledCourses = Enrollment::where('user_id', userAuth()->id)->whereIn('order_id', $teacherOrderIds)->count();
         $totalQuizAttempts = QuizResult::where('user_id', userAuth()->id)->count();

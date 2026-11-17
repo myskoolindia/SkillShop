@@ -224,6 +224,69 @@ class User extends Authenticatable {
     }
 
     /**
+     * Determine if this user has purchased or has active access to any courses.
+     */
+    public function hasPurchasedCourses(): bool {
+        // Admin always has full access
+        if ($this->role === 'admin') {
+            return true;
+        }
+
+        // 1. Direct LMS paid enrollments with active access
+        $hasPaidEnrollment = \Modules\Order\app\Models\Enrollment::where('user_id', $this->id)
+            ->where('has_access', 1)
+            ->whereIn('order_id', \Illuminate\Support\Facades\DB::table('orders')
+                ->where('buyer_id', $this->id)
+                ->where('status', 'completed')
+                ->where('payment_status', 'paid')
+                ->select('id'))
+            ->exists();
+
+        if ($hasPaidEnrollment) {
+            return true;
+        }
+
+        // 2. For teachers/students: check active course assignments from school
+        if (in_array($this->role, ['teacher', 'student'], true)) {
+            $hasAssignment = \App\Models\SchoolCourseAssignment::where('user_id', $this->id)
+                ->where('status', 'active')
+                ->exists();
+            if ($hasAssignment) {
+                return true;
+            }
+        }
+
+        // 3. Check paid Club Shop lab products mapping to courses
+        try {
+            $mapService = app(\App\Services\ProductCourseMapService::class);
+            if ($mapService->enabled()) {
+                $labCourses = $mapService->coursesForBuyers([$this->id]);
+                if (!empty($labCourses)) {
+                    return true;
+                }
+            }
+        } catch (\Throwable $e) {
+            // Fail safe
+        }
+
+        // 4. For school: check if school has paid orders containing course items
+        if ($this->role === 'school') {
+            $hasCourseOrder = \Modules\Order\app\Models\OrderItem::whereIn('order_id', \Illuminate\Support\Facades\DB::table('orders')
+                ->where('buyer_id', $this->id)
+                ->where('status', 'completed')
+                ->where('payment_status', 'paid')
+                ->select('id'))
+                ->whereNotNull('course_id')
+                ->exists();
+            if ($hasCourseOrder) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Boot the model.
      */
     protected static function boot() {

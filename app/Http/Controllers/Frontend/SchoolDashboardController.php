@@ -6,13 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Models\SchoolMember;
 use App\Models\SchoolCourseAssignment;
 use Modules\Order\app\Models\Order;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class SchoolDashboardController extends Controller
 {
-    public function index(): View
+    public function index(): View|RedirectResponse
     {
         $school = userAuth();
+
+        if (!$school->hasPurchasedCourses()) {
+            return redirect()->route('school.profile.index')->with([
+                'messege' => __('You do not have any purchased courses yet. Please explore our shop or courses to get started.'),
+                'alert-type' => 'info',
+            ]);
+        }
 
         $totalTeachers = SchoolMember::where('school_id', $school->id)->teachers()->active()->count();
         $totalStudents = SchoolMember::where('school_id', $school->id)->students()->active()->count();
