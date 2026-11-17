@@ -205,4 +205,17 @@ class RoboquestBridgeTest extends TestCase {
         $this->assertSame(route('order-fail'),$response->getTargetUrl());$this->assertSame($before,Order::count());
     }
 
+    public function test_launch_sends_the_school_signup_and_member_details_as_the_roboquest_profile(): void {
+        Schema::table('users',function(Blueprint $t){$t->string('school_name')->nullable();$t->string('registration_number')->nullable();$t->string('contact_person')->nullable();$t->string('job_title')->nullable();});
+        Schema::table('school_members',function(Blueprint $t){$t->string('id_number')->nullable();$t->string('grade')->nullable();$t->string('section')->nullable();$t->string('academic_year')->nullable();$t->string('board')->nullable();});
+        $school=$this->user('school@profile.test');$school->forceFill(['phone'=>'+919876543210','school_name'=>'Sunrise Public School','registration_number'=>'REG-42','contact_person'=>'Meera Iyer','job_title'=>'Principal'])->saveQuietly();$this->connection($school);
+        $code=fn(User $u)=>(function()use($u){parse_str(parse_url(app(RoboquestService::class)->launch($u),PHP_URL_QUERY),$q);return $q['code'];})();
+        $this->signed('/api/roboquest/launch/redeem',['code'=>$code($school)])->assertOk()
+            ->assertJsonPath('user.profile.schoolName','Sunrise Public School')->assertJsonPath('user.profile.registrationNumber','REG-42')
+            ->assertJsonPath('user.profile.contactPerson','Meera Iyer')->assertJsonPath('user.profile.jobTitle','Principal')->assertJsonPath('user.profile.phone','+919876543210');
+        $student=$this->user('kid@profile.test','student');$student->forceFill(['phone'=>'+919800000001'])->saveQuietly();
+        SchoolMember::create(['school_id'=>$school->id,'user_id'=>$student->id,'role_in_school'=>'student','status'=>'active','id_number'=>'R-17','grade'=>'6','section'=>'B','academic_year'=>'2026-27','board'=>'CBSE']);
+        $this->signed('/api/roboquest/launch/redeem',['code'=>$code($student)])->assertOk()->assertJsonPath('user.role','Student')
+            ->assertJsonPath('user.profile.grade','6')->assertJsonPath('user.profile.section','B')->assertJsonPath('user.profile.idNumber','R-17')->assertJsonPath('user.profile.phone','+919800000001')->assertJsonMissingPath('user.profile.schoolName');
+    }
 }

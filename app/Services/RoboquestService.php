@@ -85,14 +85,21 @@ class RoboquestService {
     }
     public function claims(User $user, RoboquestConnection $connection): array {
         abort_unless($user->status === 'active' && !in_array($user->is_banned, [1, '1', 'yes'], true), 403, 'Account is inactive.');
+        $clip = fn($value, $max) => $value === null || $value === '' ? null : mb_substr(trim((string) $value), 0, $max);
         if ($user->id == $connection->school_user_id || in_array($user->role, ['school', 'admin'])) {
             $role = 'School Admin';
+            // The school's signup details become the School Admin's profile in RoboQuest.
+            $profile = ['phone' => $clip($user->phone, 20), 'schoolName' => $clip($user->school_name, 255), 'registrationNumber' => $clip($user->registration_number, 100),
+                'contactPerson' => $clip($user->contact_person, 255), 'jobTitle' => $clip($user->job_title, 255)];
         } else {
             $member = SchoolMember::where('school_id', $connection->school_user_id)->where('user_id', $user->id)->where('status', 'active')->first();
             abort_unless($member && in_array($user->role, ['teacher', 'student', 'instructor']), 403, 'Active school membership required.');
             $role = in_array($user->role, ['teacher', 'instructor']) ? 'Teacher' : 'Student';
+            // Membership details the school entered on Skillvation.
+            $profile = ['phone' => $clip($user->phone, 20), 'idNumber' => $clip($member->id_number, 100), 'grade' => $clip($member->grade, 50),
+                'section' => $clip($member->section, 20), 'academicYear' => $clip($member->academic_year, 20), 'board' => $clip($member->board, 50)];
         }
-        return ['externalId'=>(string)$user->id, 'email'=>$user->email, 'displayName'=>$user->name, 'role'=>$role];
+        return ['externalId'=>(string)$user->id, 'email'=>$user->email, 'displayName'=>$user->name, 'role'=>$role, 'profile'=>array_filter($profile, fn($v) => $v !== null)];
     }
     public function snapshot(RoboquestConnection $connection, ?User $user = null): array {
         // School purchased order should not be visible for teacher; if teacher purchases, that will be visible for teacher.
