@@ -116,6 +116,11 @@ Route::get('/nav-menu', function () {
 // School-scoped, HMAC-authenticated, replay-protected RoboQuest integration.
 Route::post("/roboquest/launch/redeem", [\App\Http\Controllers\Frontend\RoboquestController::class,"redeem"])->middleware("throttle:60,1");
 Route::post("/roboquest/school-snapshot", [\App\Http\Controllers\Frontend\RoboquestController::class,"snapshot"])->middleware("throttle:60,1");
+// Teachers and students created in RoboQuest get the same Skillvation account (one login); sign-in details by WhatsApp.
+// Teacher and student shops inside RoboQuest: product list and one-time signed-in shop links.
+Route::post("/roboquest/shop/products", [\App\Http\Controllers\Frontend\RoboquestShopController::class,"products"])->middleware("throttle:300,1");
+Route::post("/roboquest/shop/link", [\App\Http\Controllers\Frontend\RoboquestShopController::class,"link"])->middleware("throttle:120,1");
+Route::post("/roboquest/members", [\App\Http\Controllers\Frontend\RoboquestMembersController::class,"handle"])->middleware("throttle:600,1");
 
 // Auto-Launch RoboQuest SSO URL for User/School
 Route::match(['GET', 'POST'], '/roboquest/auto-launch', function (\Illuminate\Http\Request $request, \App\Services\RoboquestService $service) {

@@ -72,6 +72,7 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
     Route::get('/roboquest/sign-in', [\App\Http\Controllers\Frontend\RoboquestController::class,'signIn'])->name('roboquest.signin');
     Route::post('/roboquest/sign-in', [\App\Http\Controllers\Auth\AuthenticatedSessionController::class,'store'])->middleware('throttle:10,1')->name('roboquest.signin.store');
     Route::get('/roboquest/open', [\App\Http\Controllers\Frontend\RoboquestController::class,'launch'])->name('roboquest.launch');
+    Route::get('/roboquest/shop-open', [\App\Http\Controllers\Frontend\RoboquestShopController::class,'open'])->middleware('throttle:60,1')->name('roboquest.shop.open');
     Route::middleware(['auth','verified'])->group(function () {
         Route::get('/school/roboquest', [\App\Http\Controllers\Frontend\RoboquestController::class,'settings'])->name('roboquest.settings');
         Route::post('/school/roboquest', [\App\Http\Controllers\Frontend\RoboquestController::class,'save'])->name('roboquest.settings.save');

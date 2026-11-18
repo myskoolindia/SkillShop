@@ -32,15 +32,9 @@ class RoboquestService {
         if (in_array($user->role, ['teacher', 'student', 'instructor'])) {
             $schools = SchoolMember::where('user_id', $user->id)->where('status', 'active')->pluck('school_id');
             if ($schools->isEmpty()) {
-                // Auto-associate unlinked teacher/student/instructor with primary active school
-                $primarySchool = User::where('role', 'school')->where('status', 'active')->orderBy('id', 'asc')->first();
-                if ($primarySchool) {
-                    SchoolMember::firstOrCreate(
-                        ['school_id' => $primarySchool->id, 'user_id' => $user->id],
-                        ['role_in_school' => in_array($user->role, ['teacher', 'instructor']) ? 'teacher' : 'student', 'status' => 'active']
-                    );
-                    $schools = collect([$primarySchool->id]);
-                }
+                // Not (or no longer) in a school: open their personal space, which shows only what they bought themselves.
+                // Nobody is ever added to a school automatically.
+                return self::personalConnection();
             }
 
             // Ensure connected school has RoboquestConnection
@@ -70,6 +64,22 @@ class RoboquestService {
             ['school_id' => $schoolId, 'base_url' => rtrim($defaultUrl, '/'), 'shared_key' => $defaultKey]
         );
     }
+    /** School ID of the personal space on the shared RoboQuest server (people who are not in a school). */
+    public static function personalSchoolId(): string { return (string) env('PERSONAL_ROBOQUEST_SCHOOL_ID', 'personal'); }
+    public static function isPersonal(RoboquestConnection $connection): bool { return $connection->school_id === self::personalSchoolId(); }
+    /**
+     * The personal space's connection. It belongs to a hidden owner account (inactive, cannot sign in); its school
+     * purchases are always empty. Uses the shared server (DEFAULT_ROBOQUEST_URL/KEY), like new schools.
+     */
+    public static function personalConnection(): ?RoboquestConnection {
+        $url = env('DEFAULT_ROBOQUEST_URL'); $key = env('DEFAULT_ROBOQUEST_KEY');
+        if (!$url || !$key || strlen($key) < 32) return null;
+        $existing = RoboquestConnection::where('school_id', self::personalSchoolId())->first();
+        if ($existing) return $existing;
+        $owner = User::withoutEvents(fn () => User::firstOrCreate(['email' => 'personal-space@roboquest.invalid'],
+            ['name' => 'RoboQuest personal space', 'role' => 'school', 'status' => 'inactive', 'is_banned' => 'yes', 'password' => \Illuminate\Support\Facades\Hash::make(Str::random(64))]));
+        return RoboquestConnection::firstOrCreate(['school_user_id' => $owner->id], ['school_id' => self::personalSchoolId(), 'base_url' => rtrim($url, '/'), 'shared_key' => $key]);
+    }
     public function launch(User $user): ?string {
         $connection = $this->connection($user);
         if (!$connection || $user->status !== 'active' || in_array($user->is_banned, [1, '1', 'yes'], true)) return null;
@@ -85,14 +95,26 @@ class RoboquestService {
     }
     public function claims(User $user, RoboquestConnection $connection): array {
         abort_unless($user->status === 'active' && !in_array($user->is_banned, [1, '1', 'yes'], true), 403, 'Account is inactive.');
-        if ($user->id == $connection->school_user_id || in_array($user->role, ['school', 'admin'])) {
+        $clip = fn($value, $max) => $value === null || $value === '' ? null : mb_substr(trim((string) $value), 0, $max);
+        if (self::isPersonal($connection)) {
+            abort_unless(in_array($user->role, ['teacher', 'student', 'instructor'], true), 403, 'The personal space is for teachers and students.');
+            abort_if(SchoolMember::where('user_id', $user->id)->where('status', 'active')->exists(), 403, 'You belong to a school now. Open RoboQuest from your school.');
+            $role = in_array($user->role, ['teacher', 'instructor']) ? 'Teacher' : 'Student';
+            $profile = ['phone' => $clip($user->phone, 20)];
+        } elseif ($user->id == $connection->school_user_id || in_array($user->role, ['school', 'admin'])) {
             $role = 'School Admin';
+            // The school's signup details become the School Admin's profile in RoboQuest.
+            $profile = ['phone' => $clip($user->phone, 20), 'schoolName' => $clip($user->school_name, 255), 'registrationNumber' => $clip($user->registration_number, 100),
+                'contactPerson' => $clip($user->contact_person, 255), 'jobTitle' => $clip($user->job_title, 255)];
         } else {
             $member = SchoolMember::where('school_id', $connection->school_user_id)->where('user_id', $user->id)->where('status', 'active')->first();
             abort_unless($member && in_array($user->role, ['teacher', 'student', 'instructor']), 403, 'Active school membership required.');
             $role = in_array($user->role, ['teacher', 'instructor']) ? 'Teacher' : 'Student';
+            // Membership details the school entered on Skillvation.
+            $profile = ['phone' => $clip($user->phone, 20), 'idNumber' => $clip($member->id_number, 100), 'grade' => $clip($member->grade, 50),
+                'section' => $clip($member->section, 20), 'academicYear' => $clip($member->academic_year, 20), 'board' => $clip($member->board, 50)];
         }
-        return ['externalId'=>(string)$user->id, 'email'=>$user->email, 'displayName'=>$user->name, 'role'=>$role];
+        return ['externalId'=>(string)$user->id, 'email'=>$user->email, 'displayName'=>$user->name, 'role'=>$role, 'profile'=>array_filter($profile, fn($v) => $v !== null)];
     }
     public function snapshot(RoboquestConnection $connection, ?User $user = null): array {
         // School purchased order should not be visible for teacher; if teacher purchases, that will be visible for teacher.
@@ -106,9 +128,16 @@ class RoboquestService {
             ->whereIn('order_id', DB::table('orders')->where('buyer_id', $buyerId)->where('status', 'completed')->where('payment_status', 'paid')->select('id'))
             ->pluck('course_id')->unique();
         $courses = Course::whereIn('id', $ids)->with('chapters.chapterItems.lesson')->get();
-        $members = SchoolMember::where('school_id', $connection->school_user_id)->where('status', 'active')->with('user')->get()
-            ->filter(fn($m) => $m->user && $m->user->status === 'active' && in_array($m->user->role, ['teacher','student']) && !in_array($m->user->is_banned, [1,'1','yes'], true))
-            ->map(fn($m) => ['externalId'=>(string)$m->user_id,'email'=>$m->user->email,'displayName'=>$m->user->name,'role'=>$m->user->role === 'teacher' ? 'Teacher' : 'Student'])->values();
+        $memberUsers = self::isPersonal($connection)
+            // Personal space: everyone who has opened it and still has no school (joining a school ends their access here).
+            ? User::whereIn('id', DB::table('roboquest_launch_codes')->where('connection_id', $connection->id)->whereNotNull('used_at')->select('user_id'))
+                ->whereNotIn('id', SchoolMember::where('status', 'active')->select('user_id'))->get()
+            : SchoolMember::where('school_id', $connection->school_user_id)->where('status', 'active')->with('user')->get()->map(fn($m) => $m->user)->filter();
+        $members = $memberUsers
+            ->filter(fn($u) => $u->status === 'active' && in_array($u->role, ['teacher','student']) && !in_array($u->is_banned, [1,'1','yes'], true))
+            ->map(fn($u) => ['externalId'=>(string)$u->id,'email'=>$u->email,'displayName'=>$u->name,'role'=>$u->role === 'teacher' ? 'Teacher' : 'Student'])->values();
+        // A person's own purchases get their own IDs, so they never replace the school's record of the same course.
+        $suffix = (int)$buyerId === (int)$connection->school_user_id ? '' : '-u'.$buyerId;
         $plain = fn($text) => mb_substr(trim(strip_tags(preg_replace('/<\/(p|div|li|h[1-6])>|<br\s*\/?\s*>/i', "\n", (string)$text))), 0, 12000);
         $video = function($lesson) {
             $value=$lesson->video_url;
@@ -116,8 +145,8 @@ class RoboquestService {
             $url=parse_url((string)$value);
             return filter_var($value,FILTER_VALIDATE_URL) && ($url['scheme']??'')==='https' && !isset($url['user']) && !isset($url['pass']) ? $value : null;
         };
-        $list = $courses->map(function($course) use ($plain,$video,$buyerId) {
-            return ['id'=>(string)$course->id, 'externalCourseId'=>$course->api_course_id, 'buyerUserId'=>(string)$buyerId, 'title'=>$course->title,
+        $list = $courses->map(function($course) use ($plain,$video,$buyerId,$suffix) {
+            return ['id'=>(string)$course->id.$suffix, 'externalCourseId'=>$course->api_course_id, 'buyerUserId'=>(string)$buyerId, 'title'=>$course->title,
                 'summary'=>$plain($course->description), 'capacity'=>$course->capacity > 0 ? (int)$course->capacity : null,
                 'chapters'=>$course->chapters->where('status', 'active')->sortBy('order')->values()->map(fn($chapter)=>[
                     'id'=>(string)$chapter->id,'title'=>$chapter->title,
@@ -133,7 +162,6 @@ class RoboquestService {
         $owned = $courses->pluck('api_course_id')->filter()->map(fn($id) => (string)$id)->all();
         // RoboQuest stores a teacher's snapshot courses by ID next to the school's, so a teacher's copy gets its own ID
         // and never replaces the school's record of the same lab course.
-        $suffix = (int)$buyerId === (int)$connection->school_user_id ? '' : '-u'.$buyerId;
         foreach ($this->labCourses([(int)$buyerId]) as $courseId => $mapped) {
             if (in_array((string)$courseId, $owned, true)) continue;
             $list[] = ['id'=>'lab-course-'.$courseId.$suffix, 'externalCourseId'=>$courseId, 'buyerUserId'=>(string)$buyerId, 'title'=>$mapped['title'],

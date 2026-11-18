@@ -31,6 +31,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // Club Shop catalogue API used by the shops inside RoboQuest (defaults to this site's /club-shop/api).
+    'club_shop' => ['api_url' => env('CLUB_SHOP_API_BASE_URL')],
+
     'waba' => [
         'driver'                 => env('WABA_DRIVER', 'wabaconnect'),
         'base_url'               => env('WABA_BASE_URL', 'https://login.wabaconnect.com/api'),
@@ -40,6 +43,9 @@ return [
         'proposal_template_lang' => env('WABA_PROPOSAL_TEMPLATE_LANG', 'en'),
         'pdf_base_url'           => env('PROPOSAL_PDF_BASE_URL', 'https://devpro.skillvation.com'),
         'template_name'          => env('WABA_TEMPLATE_NAME', ''),
+        // RoboQuest/Skillvation sign-in details for new teachers and students: {{1}} name, {{2}} login, {{3}} password, {{4}} link.
+        'login_template'         => env('WABA_LOGIN_TEMPLATE', ''),
+        'login_template_lang'    => env('WABA_LOGIN_TEMPLATE_LANG', 'en'),
         'timeout'                => (int) env('WABA_TIMEOUT', 30),
     ],
 
