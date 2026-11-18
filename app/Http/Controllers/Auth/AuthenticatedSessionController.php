@@ -148,6 +148,25 @@ class AuthenticatedSessionController extends Controller
             return redirect()->away($ssoUrl)->with($notification);
         }
 
+        // For school, teacher, student:
+        // Once any course is purchased, redirect to RoboQuest on every login.
+        // If no courses are purchased, never redirect to dashboard; send to home or shop/cart.
+        if (in_array($user->role, ['school', 'teacher', 'student'], true)) {
+            if ($user->hasPurchasedCourses()) {
+                if ($intendedUrl && \Str::contains($intendedUrl, ['/checkout', '/cart', '/payment'])) {
+                    return redirect()->to($intendedUrl)->with($notification);
+                }
+                $request->session()->forget('url.intended');
+                return redirect()->route('roboquest.launch');
+            } else {
+                if ($intendedUrl && !\Str::contains($intendedUrl, ['/dashboard', 'student/dashboard', 'school/dashboard'])) {
+                    return redirect()->to($intendedUrl)->with($notification);
+                }
+                $request->session()->forget('url.intended');
+                return redirect()->route('no-courses-purchased');
+            }
+        }
+
         $defaultRoute = match ($user->role) {
             'school'     => route('school.dashboard'),
             'teacher'    => route('student.dashboard'),

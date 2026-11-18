@@ -303,12 +303,16 @@ class OtpAuthController extends Controller
         } elseif ($user->role === 'vendor') {
             $redirectUrl = \App\Services\SsoTokenService::generateShopSsoUrl($user, 'dashboard');
         } else {
-            $redirectUrl = match ($user->role) {
-                'school'     => route('school.dashboard'),
-                'teacher'    => route('student.dashboard'),
-                'instructor' => route('instructor.dashboard'),
-                default      => route('student.dashboard'),
-            };
+            if (in_array($user->role, ['school', 'teacher', 'student'], true)) {
+                $redirectUrl = $user->hasPurchasedCourses() ? route('roboquest.launch') : route('no-courses-purchased');
+            } else {
+                $redirectUrl = match ($user->role) {
+                    'school'     => route('school.dashboard'),
+                    'teacher'    => route('student.dashboard'),
+                    'instructor' => route('instructor.dashboard'),
+                    default      => route('student.dashboard'),
+                };
+            }
         }
 
         $token = $user->createToken('post-purchase', ['purchases:read'], now()->addDays(30))->plainTextToken;

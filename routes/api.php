@@ -199,3 +199,8 @@ Route::post('/roboquest/platform-sales-mappings',[\App\Http\Controllers\Frontend
 
 // Proposal & Course Enquiry API (dispatches WABA WhatsApp & Gmail SMTP)
 Route::post('/course-enquiry', [\App\Http\Controllers\Frontend\CourseEnquiryController::class, 'store'])->middleware('throttle:30,1');
+
+// School Provisioning & Signup API (Automated account creation from CRRM on payment realization)
+Route::post('/school/provision', [\App\Http\Controllers\Api\SchoolProvisionController::class, 'provision'])->middleware('throttle:60,1');
+Route::post('/school/signup', [\App\Http\Controllers\Api\SchoolProvisionController::class, 'provision'])->middleware('throttle:60,1');
+Route::match(['GET', 'POST'], '/school/check', [\App\Http\Controllers\Api\SchoolProvisionController::class, 'check'])->middleware('throttle:60,1');

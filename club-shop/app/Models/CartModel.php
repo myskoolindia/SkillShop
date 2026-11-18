@@ -1942,29 +1942,76 @@ class CartModel extends BaseModel
     public function clearCart($checkout, $onlyService = false)
     {
         if (!$onlyService) {
-            // Check if $checkout is valid
-            if (empty($checkout) || (!isset($checkout->user_id) && !isset($checkout->session_id))) {
-                return;
+            $cartIds = [];
+
+            // 1. Direct cart_id from checkout object
+            if (!empty($checkout) && !empty($checkout->cart_id)) {
+                $cartIds[] = (int)$checkout->cart_id;
             }
 
-            $row = null;
-            if (!empty($checkout->user_id)) {
-                // Get the single cart record for the user
-                $row = $this->builderCarts->where('user_id', $checkout->user_id)->get()->getRow();
-            } else {
-                // Get the single cart record for the session
-                $row = $this->builderCarts->where('session_id', $checkout->session_id)->get()->getRow();
+            // 2. User carts (from checkout or current logged in user)
+            $userIds = [];
+            if (!empty($checkout) && !empty($checkout->user_id)) {
+                $userIds[] = (int)$checkout->user_id;
+            }
+            if (authCheck() && !empty(user()->id)) {
+                $userIds[] = (int)user()->id;
+            }
+            $userIds = array_values(array_unique(array_filter($userIds)));
+            if (!empty($userIds)) {
+                $userCarts = $this->builderCarts->whereIn('user_id', $userIds)->get()->getResult();
+                if (!empty($userCarts)) {
+                    foreach ($userCarts as $uc) {
+                        $cartIds[] = (int)$uc->id;
+                    }
+                }
             }
 
-            if (!empty($row)) {
-                $this->builderCartItems->where('cart_id', $row->id)->delete();
-                $this->builderCarts->where('id', $row->id)->delete();
+            // 3. Session carts (from checkout session_id, cartSessionId helper, or current session)
+            $sessionIds = [];
+            if (!empty($checkout) && !empty($checkout->session_id)) {
+                $sessionIds[] = (string)$checkout->session_id;
+            }
+            $cartSessionId = helperGetSession('cartSessionId');
+            if (!empty($cartSessionId)) {
+                $sessionIds[] = (string)$cartSessionId;
+            }
+            $sessId = $this->getSessionId();
+            if (!empty($sessId)) {
+                $sessionIds[] = (string)$sessId;
+            }
+            $sessionIds = array_values(array_unique(array_filter($sessionIds)));
+            if (!empty($sessionIds)) {
+                $sessCarts = $this->builderCarts->whereIn('session_id', $sessionIds)->get()->getResult();
+                if (!empty($sessCarts)) {
+                    foreach ($sessCarts as $sc) {
+                        $cartIds[] = (int)$sc->id;
+                    }
+                }
+            }
+
+            $cartIds = array_values(array_unique(array_filter($cartIds)));
+            if (!empty($cartIds)) {
+                $this->builderCartItems->whereIn('cart_id', $cartIds)->delete();
+                $this->builderCarts->whereIn('id', $cartIds)->delete();
+            }
+
+            // Clean up any orphaned cart items
+            try {
+                $this->db->query("DELETE FROM cart_items WHERE cart_id NOT IN (SELECT id FROM carts)");
+            } catch (\Throwable $e) {
+                // Ignore in case DB permissions or foreign keys differ
             }
         }
 
-        // Handle the session part regardless of cart deletion
+        // Clean up cart sessions
+        helperDeleteSession('cartSessionId');
+        helperDeleteSession('mds_cart_has_changed');
+        helperDeleteSession('mds_cart_shipping_address');
+        helperDeleteSession('mds_cart_payment_method');
+        helperDeleteSession('mds_cart_coupon_code');
         if (helperGetSession('mds_service_payment')) {
-            helperdeleteSession('mds_service_payment');
+            helperDeleteSession('mds_service_payment');
         }
     }
 

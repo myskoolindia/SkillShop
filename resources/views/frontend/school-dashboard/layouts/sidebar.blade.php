@@ -5,35 +5,43 @@
     </div>
     <nav class="dashboard__sidebar-menu">
         <ul class="list-wrap">
-            <li class="{{ Route::is('school.dashboard') ? 'active' : '' }}">
-                <a href="{{ route('school.dashboard') }}">
-                    <i class="flaticon-mortarboard"></i>{{ __('Dashboard') }}</a>
-            </li>
+            @php
+                $scHasPurchased = userAuth()?->hasPurchasedCourses() ?? false;
+            @endphp
 
-            <li class="{{ Route::is('school.teachers.*') ? 'active' : '' }}">
-                <a href="{{ route('school.teachers.index') }}">
-                    <i class="flaticon-mortarboard"></i>{{ __('Teachers') }}</a>
-            </li>
+            @if ($scHasPurchased)
+                <li class="{{ Route::is('school.dashboard') ? 'active' : '' }}">
+                    <a href="{{ route('school.dashboard') }}">
+                        <i class="flaticon-mortarboard"></i>{{ __('Dashboard') }}</a>
+                </li>
 
-            <li class="{{ Route::is('school.students.*') ? 'active' : '' }}">
-                <a href="{{ route('school.students.index') }}">
-                    <i class="flaticon-mortarboard"></i>{{ __('Students') }}</a>
-            </li>
+                <li class="{{ Route::is('school.teachers.*') ? 'active' : '' }}">
+                    <a href="{{ route('school.teachers.index') }}">
+                        <i class="flaticon-mortarboard"></i>{{ __('Teachers') }}</a>
+                </li>
 
-            <li class="{{ Route::is('school.courses.*') ? 'active' : '' }}">
-                <a href="{{ route('school.courses.index') }}">
-                    <i class="flaticon-mortarboard"></i>{{ __('Courses & Assignments') }}</a>
-            </li>
+                <li class="{{ Route::is('school.students.*') ? 'active' : '' }}">
+                    <a href="{{ route('school.students.index') }}">
+                        <i class="flaticon-mortarboard"></i>{{ __('Students') }}</a>
+                </li>
+
+                <li class="{{ Route::is('school.courses.*') ? 'active' : '' }}">
+                    <a href="{{ route('school.courses.index') }}">
+                        <i class="flaticon-mortarboard"></i>{{ __('Courses & Assignments') }}</a>
+                </li>
+            @endif
 
             <li class="{{ Route::is('school.orders.*') ? 'active' : '' }}">
                 <a href="{{ route('school.orders.index') }}">
                     <i class="flaticon-mortarboard"></i>{{ __('Order History') }}</a>
             </li>
 
-            <li>
-                <a href="{{ route('roboquest.launch') }}" target="_blank">
-                    <i class="flaticon-mortarboard"></i>{{ __('RoboQuest Lab') }}</a>
-            </li>
+            @if ($scHasPurchased)
+                <li>
+                    <a href="{{ route('roboquest.launch') }}" target="_blank">
+                        <i class="flaticon-mortarboard"></i>{{ __('RoboQuest Lab') }}</a>
+                </li>
+            @endif
         </ul>
     </nav>
     <div class="dashboard__sidebar-title mt-30 mb-20">

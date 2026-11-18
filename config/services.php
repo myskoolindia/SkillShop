@@ -61,4 +61,9 @@ return [
         'product_course_map_url'=>env('COLLAB_PRODUCT_COURSE_MAP_URL','https://collab.myskool.club/api/product-course-map'),
         'lab_course_access'=>env('LAB_COURSE_ACCESS_ENABLED',true),
     ],
+
+    // CRRM Integration: Automated School Account Provisioning on Payment Realization
+    'crrm' => [
+        'api_secret' => env('CRRM_API_SECRET', 'sk_live_myskool_skillvation_2026_sec'),
+    ],
 ];

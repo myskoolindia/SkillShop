@@ -20,6 +20,7 @@ class VerifyCsrfToken extends Middleware
         '*auth/send-otp*',
         '*auth/verify-otp*',
         '*auth/login-otp*',
+        '*auth/check-email*',
         'phone-otp/*',
         'cart-proposal',
         'contact/send-mail',

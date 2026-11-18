@@ -9,15 +9,29 @@
  *   $cart, $userSession, $generalSettings, $productSettings
  */
 
+$isSkillvationFamily = in_array($planKey, ['skillvation', 'skillvation-advance', 'skillvation-premium', 'skilllab', 'skilllab-advance', 'skilllab-premium'], true);
+
 $planColors = [
-    'basic'   => ['bg' => '#f0fdf4', 'border' => '#86efac', 'text' => '#166534', 'badge_bg' => '#dcfce7', 'badge_text' => '#15803d'],
-    'advance' => ['bg' => '#eff6ff', 'border' => '#93c5fd', 'text' => '#1e40af', 'badge_bg' => '#dbeafe', 'badge_text' => '#1d4ed8'],
-    'premium' => ['bg' => '#fdf4ff', 'border' => '#d8b4fe', 'text' => '#6b21a8', 'badge_bg' => '#f3e8ff', 'badge_text' => '#7e22ce'],
+    'basic'               => ['bg' => '#f0fdf4', 'border' => '#86efac', 'text' => '#166534', 'badge_bg' => '#dcfce7', 'badge_text' => '#15803d'],
+    'advance'             => ['bg' => '#eff6ff', 'border' => '#93c5fd', 'text' => '#1e40af', 'badge_bg' => '#dbeafe', 'badge_text' => '#1d4ed8'],
+    'premium'             => ['bg' => '#fdf4ff', 'border' => '#d8b4fe', 'text' => '#6b21a8', 'badge_bg' => '#f3e8ff', 'badge_text' => '#7e22ce'],
+    'skillvation'         => ['bg' => '#f0fdf4', 'border' => '#86efac', 'text' => '#166534', 'badge_bg' => '#dcfce7', 'badge_text' => '#15803d'],
+    'skilllab'            => ['bg' => '#f0fdf4', 'border' => '#86efac', 'text' => '#166534', 'badge_bg' => '#dcfce7', 'badge_text' => '#15803d'],
+    'skillvation-advance' => ['bg' => '#eff6ff', 'border' => '#93c5fd', 'text' => '#1e40af', 'badge_bg' => '#dbeafe', 'badge_text' => '#1d4ed8'],
+    'skilllab-advance'    => ['bg' => '#eff6ff', 'border' => '#93c5fd', 'text' => '#1e40af', 'badge_bg' => '#dbeafe', 'badge_text' => '#1d4ed8'],
+    'skillvation-premium' => ['bg' => '#fdf4ff', 'border' => '#d8b4fe', 'text' => '#6b21a8', 'badge_bg' => '#f3e8ff', 'badge_text' => '#7e22ce'],
+    'skilllab-premium'    => ['bg' => '#fdf4ff', 'border' => '#d8b4fe', 'text' => '#6b21a8', 'badge_bg' => '#f3e8ff', 'badge_text' => '#7e22ce'],
 ];
 $planIcons = [
-    'basic'   => 'fa-cube',
-    'advance' => 'fa-cubes',
-    'premium' => 'fa-star',
+    'basic'               => 'fa-cube',
+    'advance'             => 'fa-cubes',
+    'premium'             => 'fa-star',
+    'skillvation'         => 'fa-graduation-cap',
+    'skilllab'            => 'fa-graduation-cap',
+    'skillvation-advance' => 'fa-cubes',
+    'skilllab-advance'    => 'fa-cubes',
+    'skillvation-premium' => 'fa-star',
+    'skilllab-premium'    => 'fa-star',
 ];
 $c  = $planColors[$planKey]  ?? $planColors['basic'];
 $ic = $planIcons[$planKey]   ?? 'fa-cube';
@@ -29,12 +43,12 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
             <div class="col-12">
 
                 <!-- Plan banner -->
-                <div style="background:<?= $c['bg'] ?>; border:1px solid <?= $c['border'] ?>; border-radius:10px; padding:14px 20px; margin:24px 0 8px; display:flex; align-items:center; gap:12px;">
+                <div style="background:<?= $c['bg'] ?>; border:1px solid <?= $c['border'] ?>; border-radius:10px; padding:14px 20px; margin:24px 0 16px; display:flex; align-items:center; gap:12px;">
                     <span style="background:<?= $c['badge_bg'] ?>; color:<?= $c['badge_text'] ?>; font-size:13px; font-weight:700; padding:4px 12px; border-radius:20px; border:1px solid <?= $c['border'] ?>; white-space:nowrap;">
-                        <i class="fa <?= $ic ?>"></i>&nbsp; <?= esc($planLabel) ?> Plan
+                        <i class="fa <?= $ic ?>"></i>&nbsp; <?= esc($planLabel) ?>
                     </span>
                     <span style="font-size:14px; color:<?= $c['text'] ?>; font-weight:600;">
-                        You are checking out the <strong><?= esc($planLabel) ?></strong> plan. Review your items below.
+                        You are viewing the <strong><?= esc($planLabel) ?></strong> package. You can customize quantities or proceed directly.
                     </span>
                 </div>
                 <?php $labDesignNotice = session()->getFlashdata('lab_design_notice'); if (!empty($labDesignNotice)): ?>
@@ -547,148 +561,91 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                     <?php endif; ?>
 
                                     <?php
-                                    // Skillvation plan carts are proposal-only: no checkout/buy, just "Send Proposal".
-                                    $proposalOnlyPlans = ['skillvation', 'skillvation-advance', 'skillvation-premium', 'basic', 'advance', 'premium'];
-                                    $isProposalOnly = in_array($planKey, $proposalOnlyPlans, true);
-                                    ?>
+                                    // Current user info (if authenticated)
+                                    $shopUser = authCheck() ? user() : null;
+                                    $shopUserEmail = !empty($shopUser) ? (string)$shopUser->email : '';
+                                    $shopUserName = !empty($shopUser) ? (string)(trim(($shopUser->first_name ?? '') . ' ' . ($shopUser->last_name ?? '')) ?: $shopUser->username) : '';
 
-                                    <?php if ($isProposalOnly):
-                                        // Build the quotation from the current cart (incl. bundle items) to send to Skillvation.
-                                        $proposalItems = [];
-                                        $proposalPackages = [];
-                                        if (!empty($cart->items)) {
-                                            foreach ($cart->items as $ci) {
-                                                if ((int)($ci->quantity ?? 0) <= 0) continue;
-                                                $pkgTitle = (string)(!empty($ci->product_title) ? $ci->product_title : (!empty($ci->title) ? $ci->title : 'Package'));
-                                                $origPrice = (float)($ci->original_unit_price ?? ($ci->original_price ?? $ci->unit_price ?? 0));
-                                                $unitPrice = (float)($ci->unit_price ?? 0);
-                                                $pkgQty    = (int)$ci->quantity;
-                                                $discAmt   = (float)($ci->discount_amount ?? max(0, ($origPrice - $unitPrice) * $pkgQty));
-                                                $proposalPackages[] = [
-                                                    'product_id'     => (int)($ci->product_id ?? 0),
-                                                    'title'          => $pkgTitle,
-                                                    'quantity'       => $pkgQty,
-                                                    'unit_price'     => round($unitPrice),
-                                                    'total_price'    => round((float)($ci->total_price ?? ($unitPrice * $pkgQty))),
-                                                    'original_price' => round($origPrice),
-                                                    'discount_amount'=> round($discAmt)
-                                                ];
+                                    // Build quotation data for proposal request
+                                    $proposalItems = [];
+                                    $proposalPackages = [];
+                                    if (!empty($cart->items)) {
+                                        foreach ($cart->items as $ci) {
+                                            if ((int)($ci->quantity ?? 0) <= 0) continue;
+                                            $pkgTitle = (string)(!empty($ci->product_title) ? $ci->product_title : (!empty($ci->title) ? $ci->title : 'Package'));
+                                            $origPrice = (float)($ci->original_unit_price ?? ($ci->original_price ?? $ci->unit_price ?? 0));
+                                            $unitPrice = (float)($ci->unit_price ?? 0);
+                                            $pkgQty    = (int)$ci->quantity;
+                                            $discAmt   = (float)($ci->discount_amount ?? max(0, ($origPrice - $unitPrice) * $pkgQty));
+                                            $proposalPackages[] = [
+                                                'product_id'     => (int)($ci->product_id ?? 0),
+                                                'title'          => $pkgTitle,
+                                                'quantity'       => $pkgQty,
+                                                'unit_price'     => round($unitPrice),
+                                                'total_price'    => round((float)($ci->total_price ?? ($unitPrice * $pkgQty))),
+                                                'original_price' => round($origPrice),
+                                                'discount_amount'=> round($discAmt)
+                                            ];
 
-                                                $hasBundle = !empty($ci->is_bundle) && (!empty($ci->bundle_categories) || !empty($ci->bundle_products));
-                                                if ($hasBundle && !empty($ci->bundle_categories)) {
-                                                    foreach ($ci->bundle_categories as $bCat) {
-                                                        $catName = $bCat['name'] ?? 'General';
-                                                        foreach (($bCat['items'] ?? []) as $bp) {
-                                                            $q = (int)($bp->quantity ?? 0);
-                                                            if ($q <= 0) continue;
-                                                            $up = (float)($bp->unit_price ?? 0);
-                                                            $proposalItems[] = [
-                                                                'package'    => $pkgTitle,
-                                                                'category'   => $catName,
-                                                                'item'       => (string)($bp->title ?? ''),
-                                                                'qty'        => $q,
-                                                                'unit_price' => $up,
-                                                                'total'      => $q * $up
-                                                            ];
-                                                        }
+                                            $hasBundle = !empty($ci->is_bundle) && (!empty($ci->bundle_categories) || !empty($ci->bundle_products));
+                                            if ($hasBundle && !empty($ci->bundle_categories)) {
+                                                foreach ($ci->bundle_categories as $bCat) {
+                                                    $catName = $bCat['name'] ?? 'General';
+                                                    foreach (($bCat['items'] ?? []) as $bp) {
+                                                        $q = (int)($bp->quantity ?? 0);
+                                                        if ($q <= 0) continue;
+                                                        $up = (float)($bp->unit_price ?? 0);
+                                                        $proposalItems[] = [
+                                                            'package'    => $pkgTitle,
+                                                            'category'   => $catName,
+                                                            'item'       => (string)($bp->title ?? ''),
+                                                            'qty'        => $q,
+                                                            'unit_price' => $up,
+                                                            'total'      => $q * $up
+                                                        ];
                                                     }
-                                                } else {
-                                                    $q = (int)$ci->quantity;
-                                                    $up = (float)($ci->unit_price ?? 0);
-                                                    $proposalItems[] = [
-                                                        'package'    => $pkgTitle,
-                                                        'category'   => 'Lab',
-                                                        'item'       => $pkgTitle,
-                                                        'qty'        => $q,
-                                                        'unit_price' => $up,
-                                                        'total'      => $q * $up
-                                                    ];
                                                 }
+                                            } else {
+                                                $q = (int)$ci->quantity;
+                                                $up = (float)($ci->unit_price ?? 0);
+                                                $proposalItems[] = [
+                                                    'package'    => $pkgTitle,
+                                                    'category'   => 'Lab',
+                                                    'item'       => $pkgTitle,
+                                                    'qty'        => $q,
+                                                    'unit_price' => $up,
+                                                    'total'      => $q * $up
+                                                ];
                                             }
                                         }
+                                    }
 
-                                        $rawItemTotal = array_sum(array_column($proposalItems, 'total'));
-                                        $cartSubtotal = (float)($cart->totals->subtotal ?? $rawItemTotal);
-                                        $cartSavings  = (float)($cart->totals->total_savings ?? 0);
-                                        $cartVat      = (float)($cart->totals->vat ?? 0);
-                                        $cartGrand    = (float)($cart->totals->total_before_shipping ?? ($cartSubtotal + $cartVat));
-                                        $gstRateVal   = !empty($cartGst['is_interstate'])
-                                            ? (float)($cartGst['igst_rate'] ?? 10.0)
-                                            : (!empty($cartGst['cgst_rate']) ? (float)($cartGst['cgst_rate'] + $cartGst['sgst_rate']) : 10.0);
+                                    $rawItemTotal = array_sum(array_column($proposalItems, 'total'));
+                                    $cartSubtotal = (float)($cart->totals->subtotal ?? $rawItemTotal);
+                                    $cartSavings  = (float)($cart->totals->total_savings ?? 0);
+                                    $cartVat      = (float)($cart->totals->vat ?? 0);
+                                    $cartGrand    = (float)($cart->totals->total_before_shipping ?? ($cartSubtotal + $cartVat));
+                                    $gstRateVal   = !empty($cartGst['is_interstate'])
+                                        ? (float)($cartGst['igst_rate'] ?? 10.0)
+                                        : (!empty($cartGst['cgst_rate']) ? (float)($cartGst['cgst_rate'] + $cartGst['sgst_rate']) : 10.0);
 
-                                        $proposalPayload = json_encode([
-                                            'items'        => $proposalItems,
-                                            'packages'     => $proposalPackages,
-                                            'raw_total'    => round($rawItemTotal),
-                                            'subtotal'     => round($cartSubtotal),
-                                            'discount'     => round($cartSavings),
-                                            'tax_amount'   => round($cartVat),
-                                            'tax_percent'  => $gstRateVal,
-                                            'grand_total'  => round($cartGrand)
-                                        ]);
-                                        $skillvationBase = rtrim(env('LARAVEL_APP_URL', str_replace('/club-shop', '', rtrim(base_url(), '/'))), '/');
+                                    $proposalPayload = json_encode([
+                                        'items'        => $proposalItems,
+                                        'packages'     => $proposalPackages,
+                                        'raw_total'    => round($rawItemTotal),
+                                        'subtotal'     => round($cartSubtotal),
+                                        'discount'     => round($cartSavings),
+                                        'tax_amount'   => round($cartVat),
+                                        'tax_percent'  => $gstRateVal,
+                                        'grand_total'  => round($cartGrand)
+                                    ]);
+                                    $skillvationBase = rtrim(env('LARAVEL_APP_URL', str_replace('/club-shop', '', rtrim(base_url(), '/'))), '/');
                                     ?>
-                                        <div class="row-custom m-t-24 m-b-15">
-                                            <button type="button" id="sendProposalBtn" class="btn btn-block"
-                                                onclick="sendCartProposal(this)">
-                                                <i class="fa-solid fa-file-lines"></i>&nbsp; Send Proposal
-                                            </button>
-                                            <div id="sendProposalMsg" style="margin-top:10px; font-size:13px; display:none;"></div>
-                                        </div>
-                                        <script>
-                                        (function(){
-                                            window.__cartProposal = {
-                                                url: '<?= $skillvationBase ?>/cart-proposal',
-                                                planKey: '<?= esc($planKey) ?>',
-                                                items: <?= $proposalPayload ?: '[]' ?>
-                                            };
-                                        })();
-                                        function sendCartProposal(btn){
-                                            var cfg = window.__cartProposal || {};
-                                            var msg = document.getElementById('sendProposalMsg');
-                                            var orig = btn.innerHTML;
-                                            btn.disabled = true; btn.innerHTML = 'Sending…';
-                                            var fd = new FormData();
-                                            fd.append('plan_key', cfg.planKey || '');
-                                            var pData = cfg.items || {};
-                                            fd.append('items', JSON.stringify(pData.items || []));
-                                            fd.append('packages', JSON.stringify(pData.packages || []));
-                                            if (pData.subtotal !== undefined) fd.append('subtotal', pData.subtotal);
-                                            if (pData.discount !== undefined) {
-                                                fd.append('discount', pData.discount);
-                                                fd.append('discount_amount', pData.discount);
-                                            }
-                                            if (pData.tax_amount !== undefined) fd.append('tax_amount', pData.tax_amount);
-                                            if (pData.tax_percent !== undefined) fd.append('tax_percent', pData.tax_percent);
-                                            if (pData.grand_total !== undefined) fd.append('grand_total', pData.grand_total);
-                                            if (pData.raw_total !== undefined) fd.append('raw_total', pData.raw_total);
-                                            fetch(cfg.url, {
-                                                method: 'POST',
-                                                headers: { 'Accept': 'application/json' },
-                                                credentials: 'include',           // send shared SSO session cookie
-                                                body: fd
-                                            })
-                                            .then(function(r){ return r.json().then(function(j){ return {ok: r.ok, body: j}; }); })
-                                            .then(function(res){
-                                                if (msg) { msg.style.display = 'block'; }
-                                                if (res.ok && res.body && res.body.status === 'success') {
-                                                    if (msg) { msg.style.color = '#15803d'; msg.innerHTML = '<i class="fa-solid fa-circle-check"></i> ' + (res.body.message || 'Proposal sent to your email.'); }
-                                                    btn.innerHTML = 'Proposal Sent';
-                                                } else {
-                                                    if (msg) { msg.style.color = '#b91c1c'; msg.innerHTML = (res.body && res.body.message) ? res.body.message : 'Could not send the proposal. Please sign in and try again.'; }
-                                                    btn.disabled = false; btn.innerHTML = orig;
-                                                }
-                                            })
-                                            .catch(function(){
-                                                if (msg) { msg.style.display = 'block'; msg.style.color = '#b91c1c'; msg.innerHTML = 'Network error. Please try again.'; }
-                                                btn.disabled = false; btn.innerHTML = orig;
-                                            });
-                                        }
-                                        </script>
-                                    <?php else: ?>
-                                    <div class="row-custom m-t-24 m-b-15">
+
+                                    <!-- 1. Primary Action: Continue to Checkout -->
+                                    <div class="row-custom m-t-24 m-b-10">
                                         <?php if (empty($cart->is_valid)): ?>
-                                            <a href="javascript:void(0)" class="btn btn-block"><?= trans("continue_to_checkout"); ?></a>
+                                            <a href="javascript:void(0)" class="btn btn-block btn-custom"><?= trans("continue_to_checkout"); ?></a>
                                         <?php else:
                                             $showCheckoutBtn = false;
                                             if (authCheck()) {
@@ -698,21 +655,111 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                             }
                                             if ($showCheckoutBtn):
                                                 if ($cart->has_physical_product == true && $productSettings->marketplace_shipping == 1): ?>
-                                                    <a href="<?= generateUrl('cart', 'shipping'); ?>" class="btn btn-block"><?= trans("continue_to_checkout"); ?></a>
+                                                    <a href="<?= generateUrl('cart', 'shipping'); ?>" class="btn btn-block btn-custom" style="padding:12px; font-size:15px; font-weight:700;"><?= trans("continue_to_checkout"); ?> <i class="fa fa-arrow-right m-l-5"></i></a>
                                                 <?php else: ?>
-                                                    <a href="<?= generateUrl('cart', 'payment_method'); ?>" class="btn btn-block"><?= trans("continue_to_checkout"); ?></a>
+                                                    <a href="<?= generateUrl('cart', 'payment_method'); ?>" class="btn btn-block btn-custom" style="padding:12px; font-size:15px; font-weight:700;"><?= trans("continue_to_checkout"); ?> <i class="fa fa-arrow-right m-l-5"></i></a>
                                                 <?php endif;
                                             else: ?>
-                                                <a href="#" class="btn btn-block" data-toggle="modal" data-target="#loginModal"><?= trans("continue_to_checkout"); ?></a>
+                                                <a href="#" class="btn btn-block btn-custom" data-toggle="modal" data-target="#loginModal" style="padding:12px; font-size:15px; font-weight:700;"><?= trans("continue_to_checkout"); ?> <i class="fa fa-arrow-right m-l-5"></i></a>
                                             <?php endif;
                                         endif; ?>
                                     </div>
-                                    <?php endif; ?>
+
+                                    <!-- 2. Secondary Action: Request Detailed Proposal to Email -->
+                                    <div class="row-custom m-t-5 m-b-15">
+                                        <?php if (!authCheck()): ?>
+                                            <div style="margin-bottom:8px;">
+                                                <input type="email" id="proposalGuestEmail" class="form-control form-input" placeholder="Enter email for proposal quotation" style="font-size:13px; height:38px; border-radius:6px;">
+                                            </div>
+                                        <?php endif; ?>
+                                        <button type="button" id="sendProposalBtn" class="btn btn-block"
+                                            style="background:#f0f9ff; color:#0369a1; border:1px solid #7dd3fc; font-weight:700; padding:10px 14px; border-radius:6px; font-size:14px;"
+                                            onclick="sendCartProposal(this)">
+                                            <i class="fa-solid fa-file-lines m-r-5"></i> Request Detailed Proposal
+                                        </button>
+                                        <div id="sendProposalMsg" style="margin-top:10px; font-size:13px; display:none; text-align:center;"></div>
+                                    </div>
+
+                                    <script>
+                                    (function(){
+                                        window.__cartProposal = {
+                                            url: '<?= $skillvationBase ?>/cart-proposal',
+                                            planKey: '<?= esc($planKey) ?>',
+                                            userEmail: '<?= esc($shopUserEmail) ?>',
+                                            userName: '<?= esc($shopUserName) ?>',
+                                            items: <?= $proposalPayload ?: '[]' ?>
+                                        };
+                                    })();
+                                    function sendCartProposal(btn){
+                                        var cfg = window.__cartProposal || {};
+                                        var msg = document.getElementById('sendProposalMsg');
+                                        var guestInput = document.getElementById('proposalGuestEmail');
+                                        var targetEmail = (cfg.userEmail || (guestInput ? guestInput.value.trim() : '')).trim();
+
+                                        if (!targetEmail) {
+                                            if (msg) {
+                                                msg.style.display = 'block';
+                                                msg.style.color = '#b91c1c';
+                                                msg.innerHTML = '<i class="fa fa-exclamation-circle"></i> Please enter an email address to receive the proposal.';
+                                            }
+                                            if (guestInput) { guestInput.focus(); }
+                                            return;
+                                        }
+
+                                        var orig = btn.innerHTML;
+                                        btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Sending Proposal…';
+                                        var fd = new FormData();
+                                        fd.append('plan_key', cfg.planKey || '');
+                                        fd.append('user_email', targetEmail);
+                                        if (cfg.userName) {
+                                            fd.append('user_name', cfg.userName);
+                                        }
+                                        var pData = cfg.items || {};
+                                        fd.append('items', JSON.stringify(pData.items || []));
+                                        fd.append('packages', JSON.stringify(pData.packages || []));
+                                        if (pData.subtotal !== undefined) fd.append('subtotal', pData.subtotal);
+                                        if (pData.discount !== undefined) {
+                                            fd.append('discount', pData.discount);
+                                            fd.append('discount_amount', pData.discount);
+                                        }
+                                        if (pData.tax_amount !== undefined) fd.append('tax_amount', pData.tax_amount);
+                                        if (pData.tax_percent !== undefined) fd.append('tax_percent', pData.tax_percent);
+                                        if (pData.grand_total !== undefined) fd.append('grand_total', pData.grand_total);
+                                        if (pData.raw_total !== undefined) fd.append('raw_total', pData.raw_total);
+
+                                        fetch(cfg.url, {
+                                            method: 'POST',
+                                            headers: { 'Accept': 'application/json' },
+                                            credentials: 'include',
+                                            body: fd
+                                        })
+                                        .then(function(r){ return r.json().then(function(j){ return {ok: r.ok, body: j}; }); })
+                                        .then(function(res){
+                                            if (msg) { msg.style.display = 'block'; }
+                                            if (res.ok && res.body && res.body.status === 'success') {
+                                                if (msg) {
+                                                    msg.style.color = '#15803d';
+                                                    msg.innerHTML = '<i class="fa-solid fa-circle-check"></i> ' + (res.body.message || 'Proposal sent to your email.');
+                                                }
+                                                btn.innerHTML = '<i class="fa fa-check"></i> Proposal Sent';
+                                            } else {
+                                                if (msg) {
+                                                    msg.style.color = '#b91c1c';
+                                                    msg.innerHTML = (res.body && res.body.message) ? res.body.message : 'Could not send the proposal. Please check your email and try again.';
+                                                }
+                                                btn.disabled = false; btn.innerHTML = orig;
+                                            }
+                                        })
+                                        .catch(function(){
+                                            if (msg) { msg.style.display = 'block'; msg.style.color = '#b91c1c'; msg.innerHTML = 'Network error. Please try again.'; }
+                                            btn.disabled = false; btn.innerHTML = orig;
+                                        });
+                                    }
+                                    </script>
 
                                     <div class="clearfix"></div>
 
-                                    <?php if (!$isProposalOnly): // Hide the discount coupon on proposal-only (skillvation) carts ?>
-                                    <hr class="m-t-30 m-b-30">
+                                    <hr class="m-t-20 m-b-20">
 
                                     <form action="<?= base_url('cart/coupon-code-post'); ?>" method="post" id="form_validate" class="m-0">
                                         <?= csrf_field(); ?>
@@ -727,7 +774,6 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                             <div class="text-danger"><?= helperGetSession('error_coupon_code'); ?></div>
                                         <?php endif; ?>
                                     </div>
-                                    <?php endif; ?>
 
                                 </div>
                             </div>

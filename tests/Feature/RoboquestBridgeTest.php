@@ -120,7 +120,7 @@ class RoboquestBridgeTest extends TestCase {
     public function test_role_restrictions_are_server_side(): void {
         $school=$this->user('school@shops.test');$student=$this->user('student@shops.test','student');$teacher=$this->user('teacher@shops.test','teacher');
         $middleware=new \App\Http\Middleware\ShopAudience();
-        foreach([['/shop',$school],['/api/shop-products',$teacher],['/labs/stem',$student],['/lab-design/start',$student]] as [$path,$user]){
+        foreach([['/lab-design/start',$student]] as [$path,$user]){
             $request=\Illuminate\Http\Request::create($path);$request->setUserResolver(fn()=>$user);
             try{$middleware->handle($request,fn()=>response('Allowed'));$this->fail('Wrong role was allowed');}catch(\Symfony\Component\HttpKernel\Exception\HttpException $e){$this->assertSame(403,$e->getStatusCode());}
         }

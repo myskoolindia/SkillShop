@@ -4,11 +4,16 @@
     </div>
     <nav class="dashboard__sidebar-menu">
         <ul class="list-wrap">
+            @php
+                $sHasPurchased = userAuth()?->hasPurchasedCourses() ?? false;
+            @endphp
             
-            <li class="{{ Route::is('student.dashboard') ? 'active' : '' }}">
-                <a href="{{ route('student.dashboard') }}">
-                    <i class="flaticon-mortarboard"></i>{{ __('Dashboard') }}</a>
-            </li>
+            @if ($sHasPurchased)
+                <li class="{{ Route::is('student.dashboard') ? 'active' : '' }}">
+                    <a href="{{ route('student.dashboard') }}">
+                        <i class="flaticon-mortarboard"></i>{{ __('Dashboard') }}</a>
+                </li>
+            @endif
 
             <li class="{{ Route::is('student.orders.index') ? 'active' : '' }}">
                 <a href="{{ route('student.orders.index') }}">
@@ -17,22 +22,24 @@
                 </a>
             </li>
 
-            <li class="{{ Route::is('student.enrolled-courses') ? 'active' : '' }}">
-                <a href="{{ route('student.enrolled-courses') }}">
-                    <i class="flaticon-mortarboard"></i>{{ __('Enrolled Courses') }}</a>
-            </li>
-            <li class="{{ Route::is('student.reviews.index') ? 'active' : '' }}">
-                <a href="{{ route('student.reviews.index') }}">
-                    <i class="flaticon-mortarboard"></i>{{ __('Reviews') }}</a>
-            </li>
-            <li class="{{ Route::is('student.quiz-attempts') ? 'active' : '' }}">
-                <a href="{{ route('student.quiz-attempts') }}">
-                    <i class="flaticon-mortarboard"></i>{{ __('My Quiz Attempts') }}</a>
-            </li>
-            <li>
-                <a href="{{ route('roboquest.launch') }}" target="_blank">
-                    <i class="flaticon-mortarboard"></i>{{ __('RoboQuest Lab') }}</a>
-            </li>
+            @if ($sHasPurchased)
+                <li class="{{ Route::is('student.enrolled-courses') ? 'active' : '' }}">
+                    <a href="{{ route('student.enrolled-courses') }}">
+                        <i class="flaticon-mortarboard"></i>{{ __('Enrolled Courses') }}</a>
+                </li>
+                <li class="{{ Route::is('student.reviews.index') ? 'active' : '' }}">
+                    <a href="{{ route('student.reviews.index') }}">
+                        <i class="flaticon-mortarboard"></i>{{ __('Reviews') }}</a>
+                </li>
+                <li class="{{ Route::is('student.quiz-attempts') ? 'active' : '' }}">
+                    <a href="{{ route('student.quiz-attempts') }}">
+                        <i class="flaticon-mortarboard"></i>{{ __('My Quiz Attempts') }}</a>
+                </li>
+                <li>
+                    <a href="{{ route('roboquest.launch') }}" target="_blank">
+                        <i class="flaticon-mortarboard"></i>{{ __('RoboQuest Lab') }}</a>
+                </li>
+            @endif
         </ul>
     </nav>
     <div class="dashboard__sidebar-title mt-30 mb-20">
