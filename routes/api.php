@@ -120,6 +120,7 @@ Route::post("/roboquest/school-snapshot", [\App\Http\Controllers\Frontend\Roboqu
 // Teacher and student shops inside RoboQuest: product list and one-time signed-in shop links.
 Route::post("/roboquest/shop/products", [\App\Http\Controllers\Frontend\RoboquestShopController::class,"products"])->middleware("throttle:300,1");
 Route::post("/roboquest/shop/link", [\App\Http\Controllers\Frontend\RoboquestShopController::class,"link"])->middleware("throttle:120,1");
+Route::post("/roboquest/shop/orders", [\App\Http\Controllers\Frontend\RoboquestShopController::class,"orders"])->middleware("throttle:300,1");
 Route::post("/roboquest/members", [\App\Http\Controllers\Frontend\RoboquestMembersController::class,"handle"])->middleware("throttle:600,1");
 
 // Auto-Launch RoboQuest SSO URL for User/School
