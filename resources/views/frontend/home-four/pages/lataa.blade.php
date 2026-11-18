@@ -1,7 +1,7 @@
 @extends('frontend.home-four.layouts.master')
 
-@section('meta_title', 'LATaA OS — Learning & Teaching AI Assistant Operating System | Skillvation')
-@section('meta_description', 'An Intelligent AI Ecosystem Built Exclusively for Education. LATaA OS transforms how educational institutions teach, how teachers prepare, and how students learn.')
+@section('meta_title', 'LATAA OS — Learning & Teaching AI Assistant Operating System | Skillvation')
+@section('meta_description', 'An Intelligent AI Ecosystem Built Exclusively for Education. LATAA OS transforms how educational institutions teach, how teachers prepare, and how students learn.')
 
 @push('styles')
 <style>
@@ -416,19 +416,19 @@
           <span class="lataa-badge-dot"></span>
           Next-Generation EdTech Architecture
         </div>
-        <h1 class="lataa-hero-title">LATaA OS</h1>
+        <h1 class="lataa-hero-title">LATAA OS</h1>
         <div class="lataa-hero-sub">Learning and Teaching AI Assistant Operating System</div>
         <p class="lead text-light mb-3 font-weight-bold" style="color:#38bdf8 !important;">
           An Intelligent AI Ecosystem Built Exclusively for Education.
         </p>
         <p class="lataa-hero-desc">
-          A purpose-built AI operating system designed to transform how educational institutions teach, how teachers prepare, and how students learn. LATaA OS brings intelligent assistance, personalised learning, and academic support into one connected educational environment.
+          A purpose-built AI operating system designed to transform how educational institutions teach, how teachers prepare, and how students learn. LATAA OS brings intelligent assistance, personalised learning, and academic support into one connected educational environment.
         </p>
         <p class="text-white-50 mb-4" style="font-size:0.95rem;">
           <strong class="text-white">One platform. Three key users. Endless learning possibilities.</strong>
         </p>
         <div class="lataa-cta-group">
-          <a href="{{ asset('uploads/docs/LATaA_OS_Platform_Overview.pdf') }}" target="_blank" class="btn-lataa-primary">
+          <a href="{{ asset('uploads/docs/LATAA_OS_Platform_Overview.pdf') }}" target="_blank" class="btn-lataa-primary">
             <i class="fas fa-file-pdf"></i> Download Official Overview (PDF)
           </a>
           <a href="#three-experiences" class="btn-lataa-outline">
@@ -437,10 +437,10 @@
         </div>
       </div>
       <div class="col-lg-5 mt-5 mt-lg-0 text-center">
-        <div style="position:relative; display:inline-block; border-radius:18px; padding:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
-          <img src="{{ asset('frontend/img/skillbox/ai_empowered.jpg') }}" alt="LATaA OS - AI Empowered Education" class="img-fluid rounded" style="max-height:420px; object-fit:cover;">
-          <div style="position:absolute; bottom:-15px; right:-15px; background:#06b6d4; color:#042f2e; padding:10px 18px; border-radius:10px; font-weight:800; font-size:0.85rem; box-shadow:0 10px 20px rgba(6,182,212,0.4);">
-            <i class="fas fa-microchip"></i> 100% Education-First AI
+        <div style="position:relative; display:inline-block; border-radius:18px; padding:8px; background:rgba(255,255,255,0.06); border:1px solid rgba(6,182,212,0.35); box-shadow: 0 25px 60px rgba(0,0,0,0.6);">
+          <img src="{{ asset('frontend/img/skillbox/lataa_hero_ai.jpg') }}" alt="LATAA OS - AI Empowered Education" class="img-fluid rounded" style="max-height:430px; width:100%; object-fit:cover; box-shadow:0 10px 30px rgba(0,0,0,0.4);">
+          <div style="position:absolute; bottom:-12px; right:-10px; background:linear-gradient(135deg, #06b6d4, #3b82f6); color:#ffffff; padding:10px 18px; border-radius:10px; font-weight:800; font-size:0.85rem; box-shadow:0 10px 25px rgba(6,182,212,0.5);">
+            <i class="fas fa-microchip me-1"></i> 100% Education-First AI
           </div>
         </div>
       </div>
@@ -459,17 +459,17 @@
           <span class="text-primary font-weight-bold text-uppercase" style="letter-spacing:1px; font-size:0.85rem;">Section 1 &bull; Overview</span>
           <h2 class="h1 font-weight-bold mt-2 mb-3" style="color:#0f172a;">AI Designed Around Education.<br><span style="color:#0284c7;">Not Just Adapted for It.</span></h2>
           <p class="text-secondary" style="font-size:1.05rem; line-height:1.7;">
-            <strong>LATaA OS</strong> is an AI-powered learning and teaching assistant operating system developed specifically for educational institutions.
+            <strong>LATAA OS</strong> is an AI-powered learning and teaching assistant operating system developed specifically for educational institutions.
           </p>
           <p class="text-secondary" style="line-height:1.7;">
             It bridges the gap between traditional teaching methods and intelligent, personalised learning by providing AI-powered assistance to students, teachers, and academic institutions.
           </p>
           <p class="text-secondary" style="line-height:1.7;">
-            Whether it is helping a student understand a difficult concept, assisting a teacher in preparing a lesson, or supporting an institution in strengthening its academic delivery, LATaA OS brings these requirements together through one intelligent platform.
+            Whether it is helping a student understand a difficult concept, assisting a teacher in preparing a lesson, or supporting an institution in strengthening its academic delivery, LATAA OS brings these requirements together through one intelligent platform.
           </p>
           <div class="p-3 mt-4 rounded" style="background:#f0f9ff; border-left:4px solid #0284c7;">
             <p class="mb-0 text-dark font-weight-bold" style="font-size:0.95rem;">
-              Unlike general AI applications, LATaA OS is designed with educational content, academic objectives, teaching methodologies, and learner requirements at its core.
+              Unlike general AI applications, LATAA OS is designed with educational content, academic objectives, teaching methodologies, and learner requirements at its core.
             </p>
           </div>
         </div>
@@ -519,7 +519,7 @@
       <span class="text-primary font-weight-bold text-uppercase" style="letter-spacing:1px; font-size:0.85rem;">Section 2 &bull; User Personas</span>
       <h2 class="h1 font-weight-bold mt-2 mb-3" style="color:#0f172a;">One AI. Three Educational Experiences.</h2>
       <p class="text-secondary" style="font-size:1.05rem;">
-        LATaA OS empowers every stakeholder in the school ecosystem with specialized AI intelligence.
+        LATAA OS empowers every stakeholder in the school ecosystem with specialized AI intelligence.
       </p>
     </div>
 
@@ -530,7 +530,7 @@
           <div class="persona-icon-circle">
             <i class="fas fa-user-graduate"></i>
           </div>
-          <h3 class="h4 font-weight-bold text-dark mb-1">1. LATaA for Students</h3>
+          <h3 class="h4 font-weight-bold text-dark mb-1">1. LATAA for Students</h3>
           <p class="text-primary font-weight-bold mb-3" style="font-size:0.95rem;">An intelligent learning companion.</p>
           <ul class="lataa-checklist">
             <li>Understand concepts through interactive explanations.</li>
@@ -549,7 +549,7 @@
           <div class="persona-icon-circle">
             <i class="fas fa-chalkboard-teacher"></i>
           </div>
-          <h3 class="h4 font-weight-bold text-dark mb-1">2. LATaA for Teachers</h3>
+          <h3 class="h4 font-weight-bold text-dark mb-1">2. LATAA for Teachers</h3>
           <p class="text-purple font-weight-bold mb-3" style="color:#7c3aed; font-size:0.95rem;">An intelligent teaching assistant.</p>
           <ul class="lataa-checklist">
             <li>Generate structured, board-aligned lesson plans.</li>
@@ -569,7 +569,7 @@
           <div class="persona-icon-circle">
             <i class="fas fa-school"></i>
           </div>
-          <h3 class="h4 font-weight-bold text-dark mb-1">3. LATaA for Institutions</h3>
+          <h3 class="h4 font-weight-bold text-dark mb-1">3. LATAA for Institutions</h3>
           <p class="text-warning font-weight-bold mb-3" style="color:#d97706; font-size:0.95rem;">An intelligent academic support ecosystem.</p>
           <ul class="lataa-checklist">
             <li>Support consistent, standardized academic delivery.</li>
@@ -592,7 +592,7 @@
   <div class="container py-4">
     <div class="text-center max-w-700 mx-auto mb-5">
       <span class="text-primary font-weight-bold text-uppercase" style="letter-spacing:1px; font-size:0.85rem;">Section 3 &bull; Core Capabilities</span>
-      <h2 class="h1 font-weight-bold mt-2 mb-3" style="color:#0f172a;">Intelligent Features of LATaA OS</h2>
+      <h2 class="h1 font-weight-bold mt-2 mb-3" style="color:#0f172a;">Intelligent Features of LATAA OS</h2>
       <p class="text-secondary" style="font-size:1.05rem;">
         Built from the ground up to solve real classroom and institutional challenges.
       </p>
@@ -660,16 +660,16 @@
     <div class="row align-items-center">
       <div class="col-lg-5 mb-4 mb-lg-0">
         <span class="text-primary font-weight-bold text-uppercase" style="letter-spacing:1px; font-size:0.85rem;">Section 4 &bull; Methodology</span>
-        <h2 class="h1 font-weight-bold mt-2 mb-3" style="color:#0f172a;">How LATaA OS Works</h2>
+        <h2 class="h1 font-weight-bold mt-2 mb-3" style="color:#0f172a;">How LATAA OS Works</h2>
         <h4 class="h5 text-primary mb-3">Intelligence That Understands the Learning Process</h4>
         <p class="text-secondary" style="line-height:1.7;">
-          LATaA OS brings together academic content, AI intelligence, and educational expertise to deliver relevant teaching and learning assistance.
+          LATAA OS brings together academic content, AI intelligence, and educational expertise to deliver relevant teaching and learning assistance.
         </p>
         <p class="text-secondary" style="line-height:1.7;">
           The platform follows a structured, scientifically proven methodology that ensures accuracy, safety, and instructional integrity at every step.
         </p>
         <div class="mt-4">
-          <a href="{{ asset('uploads/docs/LATaA_OS_Platform_Overview.pdf') }}" target="_blank" class="btn btn-outline-primary font-weight-bold px-4 py-2">
+          <a href="{{ asset('uploads/docs/LATAA_OS_Platform_Overview.pdf') }}" target="_blank" class="btn btn-outline-primary font-weight-bold px-4 py-2">
             <i class="fas fa-download me-1"></i> Get Whitepaper PDF
           </a>
         </div>
@@ -696,7 +696,7 @@
           <div class="wf-step-num" style="background:linear-gradient(135deg, #7c3aed, #a855f7);">3</div>
           <div>
             <h5 class="font-weight-bold text-dark mb-1">AI-Powered Processing</h5>
-            <p class="text-muted mb-0 small">LATaA OS uses the integrated knowledge and user requirements to generate relevant learning and teaching assistance.</p>
+            <p class="text-muted mb-0 small">LATAA OS uses the integrated knowledge and user requirements to generate relevant learning and teaching assistance.</p>
           </div>
         </div>
 
@@ -727,7 +727,7 @@
   <div class="container py-4">
     <div class="text-center max-w-700 mx-auto mb-5">
       <span class="text-primary font-weight-bold text-uppercase" style="letter-spacing:1px; font-size:0.85rem;">Section 6 &bull; Differentiators</span>
-      <h2 class="h1 font-weight-bold mt-2 mb-3" style="color:#0f172a;">Why LATaA OS is Different</h2>
+      <h2 class="h1 font-weight-bold mt-2 mb-3" style="color:#0f172a;">Why LATAA OS is Different</h2>
       <h4 class="h5 text-primary mb-3">Purpose-Built for the Education Sector</h4>
       <p class="text-secondary" style="font-size:1.05rem;">
         General-purpose AI tools are designed to answer a wide range of questions. Educational institutions, however, require much more than general answers: academic relevance, structured learning, teaching methodologies, age-appropriate explanations, and curriculum-oriented resources.
@@ -739,7 +739,7 @@
         <thead>
           <tr>
             <th class="th-gen"><i class="fas fa-times-circle text-muted me-2"></i> General-Purpose AI</th>
-            <th class="th-lataa"><i class="fas fa-check-circle text-info me-2"></i> LATaA OS (Education-First)</th>
+            <th class="th-lataa"><i class="fas fa-check-circle text-info me-2"></i> LATAA OS (Education-First)</th>
           </tr>
         </thead>
         <tbody>
@@ -770,7 +770,7 @@
     <div class="mt-4 p-4 rounded-3 text-center" style="background:#f0fdf4; border:1px solid #86efac; max-width:850px; margin:0 auto;">
       <h5 class="font-weight-bold text-success mb-1">Our Core Differentiator</h5>
       <p class="mb-0 text-dark" style="font-size:1rem;">
-        LATaA OS combines AI technology with educational expertise to make AI meaningful in everyday teaching and learning.
+        LATAA OS combines AI technology with educational expertise to make AI meaningful in everyday teaching and learning.
       </p>
     </div>
   </div>
@@ -783,17 +783,27 @@
   <div class="container py-4">
     <div class="text-center max-w-700 mx-auto mb-5">
       <span class="text-info font-weight-bold text-uppercase" style="letter-spacing:1px; font-size:0.85rem;">Section 7 &bull; Unified Matrix</span>
-      <h2 class="h1 font-weight-bold mt-2 mb-3 text-white">LATaA OS &amp; Skillvation: One Connected Ecosystem</h2>
+      <h2 class="h1 font-weight-bold mt-2 mb-3 text-white">LATAA OS &amp; Skillvation: One Connected Ecosystem</h2>
       <h4 class="h5" style="color:#38bdf8;">AI That Doesn't Stop at the Screen. It Enters the Classroom.</h4>
       <p class="text-white-50" style="font-size:1.05rem;">
-        LATaA OS is not just a digital learning platform within Skillvation. It is the intelligence that strengthens the delivery of our complete education ecosystem.
+        LATAA OS is not just a digital learning platform within Skillvation. It is the intelligence that strengthens the delivery of our complete education ecosystem.
       </p>
     </div>
 
     <div class="lataa-eco-hub">
-      <div class="text-center mb-4">
-        <div class="display-6 font-weight-bold text-info mb-1">LATaA OS</div>
-        <div class="text-white-50">The Intelligence Behind Skillvation</div>
+      <div class="row align-items-center mb-5">
+        <div class="col-lg-5 text-center text-lg-start mb-4 mb-lg-0">
+          <div class="display-6 font-weight-bold text-info mb-1">LATAA OS</div>
+          <div class="h5 text-white mb-3">The Intelligence Behind Skillvation</div>
+          <p class="text-white-50 mb-0" style="line-height:1.7;">
+            A centralized AI intelligence engine seamlessly interconnected with student learning camps, teacher enablement, professional upskilling, and hands-on robotics maker labs.
+          </p>
+        </div>
+        <div class="col-lg-7 text-center">
+          <div style="border-radius:14px; overflow:hidden; border:1px solid rgba(6,182,212,0.4); box-shadow:0 15px 40px rgba(0,0,0,0.6);">
+            <img src="{{ asset('frontend/img/skillbox/lataa_ecosystem_ai.jpg') }}" alt="LATAA OS Connected AI Ecosystem" class="img-fluid" style="width:100%; max-height:300px; object-fit:cover; display:block;">
+          </div>
+        </div>
       </div>
 
       <div class="row g-4">
@@ -833,7 +843,7 @@
 
     <div class="text-center mt-4">
       <p class="text-white-50 mx-auto" style="max-width:800px; font-size:1.05rem;">
-        Through this integration, Skillvation brings together the physical, academic, and digital dimensions of education, with LATaA OS supporting the teaching and learning journey.
+        Through this integration, Skillvation brings together the physical, academic, and digital dimensions of education, with LATAA OS supporting the teaching and learning journey.
       </p>
     </div>
   </div>
@@ -855,14 +865,14 @@
         The future of education is not about replacing teachers with technology. It is about empowering teachers, supporting students, and helping institutions deliver better learning experiences.
       </p>
       <p class="text-light mx-auto mb-5" style="max-width:760px; font-size:1.1rem; line-height:1.7;">
-        With LATaA OS, we bring AI closer to the classroom and make intelligent education accessible to the entire school ecosystem.
+        With LATAA OS, we bring AI closer to the classroom and make intelligent education accessible to the entire school ecosystem.
       </p>
       <div class="h4 font-weight-bold text-info mb-4">
-        LATaA OS &mdash; Your Intelligent Partner in Teaching and Learning.
+        LATAA OS &mdash; Your Intelligent Partner in Teaching and Learning.
       </div>
       <div>
-        <a href="{{ asset('uploads/docs/LATaA_OS_Platform_Overview.pdf') }}" target="_blank" class="btn-lataa-primary">
-          <i class="fas fa-file-pdf"></i> Download Complete LATaA OS PDF Document
+        <a href="{{ asset('uploads/docs/LATAA_OS_Platform_Overview.pdf') }}" target="_blank" class="btn-lataa-primary">
+          <i class="fas fa-file-pdf"></i> Download Complete LATAA OS PDF Document
         </a>
       </div>
     </div>

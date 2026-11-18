@@ -50,27 +50,68 @@
 
   /* ── Hero Banner ─────────────────────────────────── */
   .skillvation-hero-banner {
-    background: linear-gradient(rgba(11, 37, 69, 0.8), rgba(0, 86, 179, 0.75)), url("{{asset('frontend/img/banner/homeban01.jpeg')}}");
+    background: linear-gradient(rgba(11, 37, 69, 0.85), rgba(0, 86, 179, 0.8)), url("{{asset('frontend/img/banner/homeban01.jpeg')}}");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     color: #ffffff;
-    padding: 70px 0;
+    padding: 75px 0 70px;
   }
   .skillvation-hero-banner h1 {
     color: #ffffff;
-    font-size: clamp(34px, 4.5vw, 52px);
-    margin-bottom: 12px;
-    font-weight: 700;
+    font-size: clamp(32px, 4.2vw, 48px);
+    line-height: 1.25;
+    margin-bottom: 14px;
+    font-weight: 800;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
   }
-  .skillvation-hero-banner p {
-    font-size: 20px;
-    color: #f0f4f8;
-    margin: 0;
-    max-width: 800px;
-    font-weight: 500;
+  .sv-hero-tagline {
+    font-size: clamp(17px, 2vw, 22px);
+    font-weight: 700;
+    color: #60a5fa;
+    letter-spacing: 0.3px;
+    margin-bottom: 16px;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  }
+  .sv-hero-desc {
+    font-size: 17.5px;
+    line-height: 1.65;
+    color: #f1f5f9;
+    margin: 0 0 22px 0;
+    max-width: 920px;
+    font-weight: 400;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+  }
+  .sv-hero-powered {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 8px 18px;
+    border-radius: 9999px;
+    font-size: 14.5px;
+    color: #ffffff !important;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+  .sv-hero-powered:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: #60a5fa;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+  }
+  .sv-hero-powered .badge-chip {
+    background: linear-gradient(135deg, #2563eb, #38bdf8);
+    color: #ffffff;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
   }
 
   /* ── Pill Buttons ─────────────────────────────────── */
@@ -537,6 +578,92 @@
     background: #ffffff;
     border-left: 5px solid #0077d4;
   }
+  .sv-section-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #0284c7;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    margin-bottom: 18px;
+  }
+  .sv-pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-top: 36px;
+  }
+  @media (max-width: 991px) {
+    .sv-pillars-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 576px) {
+    .sv-pillars-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .sv-pillar-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 22px 20px;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  .sv-pillar-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--pillar-accent, #2563eb);
+  }
+  .sv-pillar-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+    background: #ffffff;
+    border-color: #cbd5e1;
+  }
+  .sv-pillar-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 14px;
+    background: var(--pillar-bg, #eff6ff);
+    color: var(--pillar-accent, #2563eb);
+  }
+  .sv-pillar-card h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .sv-pillar-card p {
+    font-size: 13.5px;
+    color: #64748b;
+    line-height: 1.55;
+    margin: 0;
+  }
+  .sv-pillar-card.curriculum { --pillar-accent: #2563eb; --pillar-bg: #eff6ff; }
+  .sv-pillar-card.teacher { --pillar-accent: #059669; --pillar-bg: #ecfdf5; }
+  .sv-pillar-card.infrastructure { --pillar-accent: #7c3aed; --pillar-bg: #f5f3ff; }
+  .sv-pillar-card.intelligence { --pillar-accent: #0284c7; --pillar-bg: #f0f9ff; }
 
   /* Section 3 — Skills for the Future: cool light slate */
   .sv-section-skills {
@@ -679,53 +806,42 @@
   <section class="skillvation-hero-banner">
     <div class="skillvation-container">
       <div class="sv-hero-text">
-        <h1>India's Favourite Skill Platform</h1>
-        <p>Empowering students and teachers for the future of education</p>
+        <h1>Building Future-Ready Schools Through Skill Education and AI</h1>
+        <div class="sv-hero-tagline">One Integrated Ecosystem. Four Powerful Solutions. One Intelligent AI Backbone.</div>
+        <p class="sv-hero-desc">Skillvation brings together structured skill education, teacher development, experiential learning infrastructure and intelligent AI technology to transform how schools teach, learn and prepare students for the future.</p>
+        <a href="{{ route('lataa') }}" class="sv-hero-powered">
+          <span class="badge-chip">LATAA OS</span>
+          <span>Powered by <strong>LATAA OS</strong> &ndash; Learning and Teaching AI Assistant Operating System</span>
+          <i class="fa-solid fa-arrow-right" style="font-size: 11px;"></i>
+        </a>
       </div>
     </div>
   </section>
 
-  <!-- 2. Intro Section with Video Feature -->
+  <!-- 2. Section 2 – Our integrated education ecosystem -->
   <section class="skillvation-section sv-section-intro" data-reveal="fade-up">
     <div class="skillvation-container">
       <div class="skillvation-grid-2col">
         <div>
-          <h2 class="mb-4">
-            Empowering Schools for the Future of Education
+          <div class="sv-section-eyebrow">
+            <i class="fa-solid fa-shapes"></i> Our Integrated Education Ecosystem
+          </div>
+          <h2 class="mb-4" style="font-size: clamp(26px, 3.2vw, 38px); font-weight: 800; color: #0f172a; line-height: 1.25;">
+            Everything a School Needs to Transform Teaching and Learning
           </h2>
 
-          <p>
-            Education is evolving from knowledge acquisition to the development of
-            skills, competencies and real-world capabilities. As schools increasingly
-            embrace experiential and competency-based learning, there is a growing need
-            for structured skill education that complements the academic curriculum.
+          <p style="font-size: 16px; color: #334155; line-height: 1.75; margin-bottom: 16px;">
+            Skill education cannot happen through curriculum alone. It requires capable teachers, meaningful learning experiences, the right infrastructure and intelligent technology.
           </p>
 
-          <p>
-            Skillvation partners with schools to make this transition meaningful,
-            structured and sustainable.
+          <p style="font-size: 16px; color: #334155; line-height: 1.75; margin-bottom: 0;">
+            Skillvation brings all these elements together through an integrated ecosystem designed to support schools, teachers and students at every stage of the learning journey.
           </p>
-
-          <p>
-            We work alongside schools to create a comprehensive skill education
-            ecosystem that enables students to explore their interests, develop
-            practical competencies and connect classroom learning with real-world
-            applications.
-          </p>
-
-          <p>
-            Our approach goes beyond introducing individual activities or programmes.
-            We work as an integral skill education partner, supporting schools with the
-            expertise, programmes, resources and implementation framework required to
-            embed skill development into the school’s learning environment.
-          </p>
-
-          
         </div>
         
         <div>
-          <div class="skillvation-media-card" style="height: auto !important; aspect-ratio: 16/9; overflow: hidden; border-radius: 8px;">
-          <iframe
+          <div class="skillvation-media-card" style="height: auto !important; aspect-ratio: 16/9; overflow: hidden; border-radius: 12px;">
+            <iframe
               src="https://www.youtube.com/embed/nBfEYkylnXU"
               title="Skillvation Education Video"
               style="width: 100%; height: 100%; min-height: 280px; border: none; display: block;"
@@ -737,7 +853,28 @@
         </div>
       </div>
 
-      <div class="mt-8">
+      <!-- 4 Pillars Grid -->
+      <div class="sv-pillars-grid">
+        <div class="sv-pillar-card curriculum">
+          <div class="sv-pillar-icon"><i class="fa-solid fa-book-bookmark"></i></div>
+          <h3>Curriculum</h3>
+          <p>Structured skill education programmes and learning pathways.</p>
+        </div>
+        <div class="sv-pillar-card teacher">
+          <div class="sv-pillar-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+          <h3>Teacher Capability</h3>
+          <p>Training, upskilling and AI-assisted teaching support.</p>
+        </div>
+        <div class="sv-pillar-card infrastructure">
+          <div class="sv-pillar-icon"><i class="fa-solid fa-microchip"></i></div>
+          <h3>Infrastructure</h3>
+          <p>Purpose-built skill labs and practical learning environments.</p>
+        </div>
+        <div class="sv-pillar-card intelligence">
+          <div class="sv-pillar-icon"><i class="fa-solid fa-brain"></i></div>
+          <h3>Intelligence</h3>
+          <p><a href="{{ route('lataa') }}" style="color: inherit; text-decoration: none;"><strong>LATAA OS</strong> powering personalised learning and intelligent teaching.</a></p>
+        </div>
       </div>
     </div>
   </section>
@@ -1093,9 +1230,25 @@
 
     <style>
       .sv-eco-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#6d28d9;background:#f3e8ff;border:1px solid #e9d5ff;padding:5px 14px;border-radius:999px;margin-bottom:18px;}
-      .sv-eco-intro{text-align:center;max-width:840px;margin:0 auto 72px;}
+      .sv-eco-intro{text-align:center;max-width:940px;margin:0 auto 72px;}
       .sv-eco-intro h2{font-size:clamp(28px,3.8vw,44px);font-weight:800;color:#1e1b4b;line-height:1.2;margin-bottom:22px;}
       .sv-eco-intro p{font-size:17px;color:#475569;line-height:1.8;margin-bottom:14px;}
+      .sv-lataa-core-hub{display:inline-flex;flex-direction:column;align-items:center;background:linear-gradient(135deg,#1e1b4b 0%,#1e3a8a 100%);color:#ffffff;padding:18px 36px;border-radius:18px;box-shadow:0 12px 28px rgba(30,27,75,0.18);margin:16px auto 28px;border:1px solid rgba(96,165,250,0.35);text-decoration:none;transition:transform .3s ease;}
+      .sv-lataa-core-hub:hover{transform:translateY(-2px);color:#ffffff;}
+      .sv-lataa-core-badge{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#2563eb,#38bdf8);color:#ffffff;font-size:13px;font-weight:800;letter-spacing:0.08em;padding:4px 14px;border-radius:999px;margin-bottom:8px;text-transform:uppercase;}
+      .sv-lataa-core-title{font-size:17px;font-weight:700;color:#f1f5f9;letter-spacing:0.02em;}
+      .sv-lataa-transform-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:0 auto 28px;text-align:left;}
+      @media(max-width:860px){.sv-lataa-transform-grid{grid-template-columns:repeat(2,1fr);}}
+      @media(max-width:520px){.sv-lataa-transform-grid{grid-template-columns:1fr;}}
+      .sv-transform-card{background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:20px 18px;box-shadow:0 4px 16px rgba(30,27,75,0.05);transition:all .3s ease;display:flex;flex-direction:column;align-items:flex-start;}
+      .sv-transform-card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(37,99,235,0.12);border-color:#93c5fd;}
+      .sv-transform-pill{display:inline-block;font-size:13.5px;font-weight:800;color:#1d4ed8;background:#eff6ff;border:1px solid #bfdbfe;padding:4px 12px;border-radius:8px;margin-bottom:10px;letter-spacing:0.03em;}
+      .sv-transform-card p{font-size:14px;color:#475569;line-height:1.55;margin:0;font-weight:500;}
+      .sv-eco-connected-banner{background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:12px;padding:12px 24px;display:inline-flex;align-items:center;gap:18px;margin:0 auto 24px;flex-wrap:wrap;justify-content:center;}
+      .sv-eco-connected-title{font-size:13px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:0.06em;display:inline-flex;align-items:center;gap:8px;}
+      .sv-eco-connected-nodes{display:inline-flex;align-items:center;gap:10px;font-size:14px;font-weight:600;color:#1e40af;}
+      .sv-eco-connected-nodes .sep{color:#94a3b8;}
+      .sv-lataa-conclusion{font-size:16.5px;color:#475569;line-height:1.8;max-width:840px;margin:0 auto;}
       .sv-eco-stripe{display:flex;align-items:center;gap:20px;margin:0 auto 52px;}
       .sv-eco-stripe-line{flex:1;height:2px;background:linear-gradient(90deg,transparent,#c7d2fe);}
       .sv-eco-stripe-line.rev{background:linear-gradient(90deg,#c7d2fe,transparent);}
@@ -1170,17 +1323,218 @@
         .sv-tagline{min-width:0;}
         .sv-eco-pipeline{padding:40px 24px;}
       }
+
+      /* ── The Skillvation Advantage ── */
+      .sv-advantage-section {
+        margin-top: 72px;
+        text-align: center;
+      }
+      .sv-advantage-section h2 {
+        font-size: clamp(24px, 3.2vw, 38px);
+        font-weight: 800;
+        color: #1e1b4b;
+        margin-bottom: 36px;
+      }
+      .sv-advantage-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        text-align: left;
+      }
+      @media(max-width: 920px) {
+        .sv-advantage-grid { grid-template-columns: repeat(2, 1fr); }
+      }
+      @media(max-width: 580px) {
+        .sv-advantage-grid { grid-template-columns: 1fr; }
+      }
+      .sv-advantage-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 22px 20px;
+        box-shadow: 0 4px 16px rgba(30, 27, 75, 0.05);
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+      }
+      .sv-advantage-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px rgba(37, 99, 235, 0.12);
+        border-color: #93c5fd;
+      }
+      .sv-adv-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 16px;
+        background: #eff6ff;
+        color: #2563eb;
+      }
+      .sv-advantage-card p {
+        font-size: 14.5px;
+        color: #334155;
+        line-height: 1.55;
+        margin: 0;
+        font-weight: 600;
+      }
+      .sv-advantage-card.full-span {
+        grid-column: 1 / -1;
+        background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%);
+        border: 1px solid #c7d2fe;
+        justify-content: center;
+        text-align: center;
+      }
+      .sv-advantage-card.full-span .sv-adv-icon {
+        background: #3b82f6;
+        color: #fff;
+      }
+
+      /* ── Closing Banner ── */
+      .sv-closing-banner {
+        margin-top: 56px;
+        border-radius: 22px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #1e3a8a 100%);
+        padding: 56px 48px;
+        color: #ffffff;
+        text-align: center;
+        position: relative;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.22);
+      }
+      .sv-closing-banner::before {
+        content: '';
+        position: absolute;
+        top: -60px;
+        right: -60px;
+        width: 280px;
+        height: 280px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 70%);
+        pointer-events: none;
+      }
+      .sv-closing-banner::after {
+        content: '';
+        position: absolute;
+        bottom: -50px;
+        left: -50px;
+        width: 240px;
+        height: 240px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.2) 0%, transparent 70%);
+        pointer-events: none;
+      }
+      .sv-closing-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: #38bdf8;
+        background: rgba(56, 189, 248, 0.12);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        padding: 5px 16px;
+        border-radius: 999px;
+        margin-bottom: 20px;
+      }
+      .sv-closing-banner h2 {
+        font-size: clamp(24px, 3.5vw, 40px);
+        font-weight: 800;
+        color: #ffffff;
+        line-height: 1.25;
+        margin-bottom: 20px;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+      }
+      .sv-closing-banner p {
+        font-size: 17px;
+        color: #e2e8f0;
+        line-height: 1.75;
+        max-width: 820px;
+        margin: 0 auto 14px;
+      }
+      .sv-closing-powered {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 24px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(8px);
+        padding: 10px 24px;
+        border-radius: 999px;
+        font-size: 15.5px;
+        font-weight: 700;
+        color: #ffffff !important;
+        text-decoration: none;
+        transition: all .3s ease;
+      }
+      .sv-closing-powered:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: #38bdf8;
+        transform: translateY(-2px);
+      }
+      .sv-closing-powered .badge {
+        background: linear-gradient(135deg, #2563eb, #38bdf8);
+        color: #fff;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .05em;
+      }
     </style>
 
     <div class="skillvation-container">
 
-      {{-- Intro --}}
+      {{-- How LATAA OS transforms the Skillvation ecosystem --}}
       <div class="sv-eco-intro" data-reveal="fade-up">
-        <div class="sv-eco-eyebrow"><i class="fa-solid fa-star" style="font-size:10px;"></i> Our Approach</div>
-        <h2>Building Future-Ready Schools<br>Through Skill Education</h2>
-        <p>Education is evolving beyond the traditional boundaries of knowledge acquisition. Schools today are increasingly focused on developing <strong>competencies, practical skills, creativity, critical thinking and real-world readiness</strong> alongside academic learning.</p>
-        <p><strong>Skillvation partners with schools to make skill education a structured and sustainable part of the learning ecosystem.</strong></p>
-        <p>We bring together <strong>curriculum-aligned content, digital learning, AI, teacher development, practical infrastructure and project-based learning</strong> — supporting the entire journey from <strong>learning and understanding to practising, creating and applying</strong>.</p>
+        <div class="sv-eco-eyebrow"><i class="fa-solid fa-robot" style="font-size:11px;"></i> How LATAA OS Transforms the Skillvation Ecosystem</div>
+        <h2>From Planning to Practice.<br><span style="color:#2563eb;">From Learning to Mastery.</span></h2>
+        
+        <a href="{{ route('lataa') }}" class="sv-lataa-core-hub">
+          <span class="sv-lataa-core-badge"><i class="fa-solid fa-microchip"></i> LATAA OS</span>
+          <span class="sv-lataa-core-title">The AI Intelligence Layer Across Skillvation</span>
+        </a>
+
+        <div class="sv-lataa-transform-grid">
+          <div class="sv-transform-card">
+            <span class="sv-transform-pill">CAMPS</span>
+            <p>AI-assisted student learning</p>
+          </div>
+          <div class="sv-transform-card">
+            <span class="sv-transform-pill">TTT</span>
+            <p>AI-assisted teaching preparation</p>
+          </div>
+          <div class="sv-transform-card">
+            <span class="sv-transform-pill">U4T</span>
+            <p>AI-enabled teacher development</p>
+          </div>
+          <div class="sv-transform-card">
+            <span class="sv-transform-pill">Skill Labs</span>
+            <p>AI-supported practical learning</p>
+          </div>
+        </div>
+
+        <div class="sv-eco-connected-banner">
+          <span class="sv-eco-connected-title"><i class="fa-solid fa-network-wired"></i> Connected Education Ecosystem</span>
+          <div class="sv-eco-connected-nodes">
+            <span><i class="fa-solid fa-school"></i> Schools</span>
+            <span class="sep">&bull;</span>
+            <span><i class="fa-solid fa-chalkboard-user"></i> Teachers</span>
+            <span class="sep">&bull;</span>
+            <span><i class="fa-solid fa-user-graduate"></i> Students</span>
+          </div>
+        </div>
+
+        <p class="sv-lataa-conclusion">
+          LATAA OS ensures that technology is not an isolated addition to education. It becomes a working part of the teaching and learning process, connecting academic content, teacher capabilities and student development.
+        </p>
       </div>
 
       {{-- Sub-heading stripe --}}
@@ -1199,69 +1553,69 @@
           'img'   => asset('frontend/img/skillbox/Workonmaterialsandmachines.jpeg'),
           'alt'   => 'Skill Education Infrastructure — Labs',
           'grad'  => 'linear-gradient(135deg,rgba(180,83,9,.6),rgba(245,158,11,.35))',
-          'bBg'   => '#b45309','bIcon'=>'fa-building-columns','bLabel'=>'Skill Labs',
+          'bBg'   => '#b45309','bIcon'=>'fa-building-columns','bLabel'=>'CAMPS',
           'tagBg' => '#fffbeb','tagClr'=>'#b45309','tagIcon'=>'fa-building-columns','tagLabel'=>'Learning Environments',
-          'clr'   => '#b45309','title'=>'Skill Education Infrastructure',
-          'sub'   => 'Creating Environments for Experiential Learning',
-          'body'  => 'Supports schools in designing <strong>purpose-driven skill education environments and lab setups</strong> aligned with chosen skill areas — bridging theory and application.',
-          'pts'   => ['CBSE aligned composite skill lab','Purpose-built skill infrastructure','Theory–application bridge','Dedicated experiential spaces','Hands-on exploration support','Strengthens skill ecosystem'],
-          'qt'    => 'Creating the environment where learning becomes experience.',
+          'clr'   => '#b45309','title'=>'Making Skill Education an Integral Part of School Learning',
+          'sub'   => 'What CAMPS offers:',
+          'body'  => 'CAMPS enables schools to implement structured, curriculum-aligned skill education that goes beyond textbooks and examinations.<br> Through practical activities, project-based learning, competency development and AI-supported learning experiences, students develop the confidence and capabilities needed to apply knowledge in real-life situations.',
+          'pts'   => ['Structured skill education curriculum and learning pathways','Practical and experiential learning activities','Curriculum-aligned projects, DIY kits and learning resources','Dedicated experiential spaces','Competency-based student development and assessment','AI-assisted explanations, practice and personalised learning through LATAA OS', 'student progress insights and learning support'],
+          'qt'    => 'Empowered by LATAA OS: Students receive intelligent learning assistance, while teachers can use AI to prepare lessons, activities, assessments and learning resources',
         ],
         [
           'rev'   => true,
           'num'   => '02',
-          'img'   => asset('frontend/img/skillbox/ai_empowered.jpg'),
-          'alt'   => 'AI Lataa — AI-Powered Education',
-          'grad'  => 'linear-gradient(135deg,rgba(3,105,161,.6),rgba(14,165,233,.35))',
-          'bBg'   => '#0369a1','bIcon'=>'fa-robot','bLabel'=>'AI Lataa',
-          'tagBg' => '#e0f2fe','tagClr'=>'#0369a1','tagIcon'=>'fa-robot','tagLabel'=>'Artificial Intelligence',
-          'clr'   => '#0369a1','title'=>'AI Lataa (Learning & teaching assist)',
-          'sub'   => 'AI-Powered Support for Learning & Teaching',
-          'body'  => 'Brings artificial intelligence into the educational ecosystem — an intelligent support layer for <strong>teachers and students</strong> to explore, interact with and learn through AI-enabled experiences.',
-          'pts'   => ['AI assistance for teachers','Enhanced student engagement','Practical AI exposure','Digital readiness building','Adapts to emerging tech'],
-          'qt'    => 'Enabling schools to embrace AI as part of modern education.',
+          'img'   => asset('frontend/img/skillbox/teacher_upskilling.jpg'),
+          'alt'   => 'Train the Teacher Programme',
+          'grad'  => 'linear-gradient(135deg,rgba(4,120,87,.6),rgba(16,185,129,.35))',
+          'bBg'   => '#047857','bIcon'=>'fa-chalkboard-user','bLabel'=>'TTT – Train the Teacher',
+          'tagBg' => '#ecfdf5','tagClr'=>'#047857','tagIcon'=>'fa-chalkboard-user','tagLabel'=>'Teacher Development',
+          'clr'   => '#047857','title'=>'Transforming Teachers into Confident Learning Facilitators',
+          'sub'   => 'What TTT offers:',
+          'body'  => 'Great education begins with empowered teachers. Our Train the Teacher programme equips educators with the knowledge, teaching methodologies and practical skills required to deliver engaging, effective and competency-based learning.',
+          'pts'   => ['Structured teacher training programmes','Pedagogy and experiential learning methodologies','Subject-specific teaching strategies','Classroom management and student engagement','Activity-based and project-based teaching','Practical training for skill education implementation','AI-enabled lesson preparation and teaching assistance'],
+          'qt'    => 'Empowered by LATAA OS: Teachers gain an intelligent teaching assistant to support lesson planning, teaching scripts, worksheets, question banks, assessments and classroom resources.',
         ],
         [
           'rev'   => false,
           'num'   => '03',
           'img'   => asset('frontend/img/skillbox/teacher_upskilling.jpg'),
-          'alt'   => 'Train the Teacher Programme',
-          'grad'  => 'linear-gradient(135deg,rgba(4,120,87,.6),rgba(16,185,129,.35))',
-          'bBg'   => '#047857','bIcon'=>'fa-chalkboard-user','bLabel'=>'TTT Programme',
-          'tagBg' => '#ecfdf5','tagClr'=>'#047857','tagIcon'=>'fa-chalkboard-user','tagLabel'=>'Teacher Development',
-          'clr'   => '#047857','title'=>'TTT | Train the Teacher',
-          'sub'   => 'Empowering Educators to Deliver Skill-Based Learning',
-          'body'  => 'Helps educators develop the knowledge, methodologies and confidence to facilitate <strong>experiential, competency-based and skill-oriented learning</strong> — shifting from content delivery to facilitation.',
-          'pts'   => ['Teacher skill education capability','Experiential methodology support','Continuous professional development','Internal capacity building','Practical facilitation skills'],
-          'qt'    => 'Building the teacher capability required for future-ready education.',
+          'alt'   => 'Upskill For Teacher Programme',
+          'grad'  => 'linear-gradient(135deg,rgba(223, 63, 63, 0.6),rgba(226, 127, 88, 0.35))',
+          'bBg'   => '#882b00','bIcon'=>'fa-chalkboard-user','bLabel'=>'U4T – Upskill for Teachers',
+          'tagBg' => '#ecfdf5','tagClr'=>'#882b00','tagIcon'=>'fa-chalkboard-user','tagLabel'=>'Teacher Development',
+          'clr'   => '#882b00','title'=>'Continuous Learning for the Educators of Tomorrow',
+          'sub'   => 'What U4T offers:',
+          'body'  => 'Teaching is an evolving profession. U4T provides educators with opportunities to continuously upgrade their knowledge, professional capabilities and classroom practices through structured learning programmes and digital learning experiences.',
+          'pts'   => ['Self-paced professional development courses','Subject and domain-specific upskilling','Modern teaching methodologies','Educational technology and AI awareness','Child psychology and classroom management','Communication, leadership and professional development','Continuous learning and development pathways'],
+          'qt'    => 'Empowered by LATAA OS: Educators can access AI-assisted learning, explore new concepts, strengthen subject knowledge and receive support in applying their learning to classroom practice.',
         ],
         [
           'rev'   => true,
           'num'   => '04',
-          'img'   => asset('frontend/img/skillbox/teacher_upskilling.jpg'),
-          'alt'   => 'Upskill For Teacher Programme',
-          'grad'  => 'linear-gradient(135deg,rgba(223, 63, 63, 0.6),rgba(226, 127, 88, 0.35))',
-          'bBg'   => '#882b00','bIcon'=>'fa-chalkboard-user','bLabel'=>'U4T Programme',
-          'tagBg' => '#ecfdf5','tagClr'=>'#882b00','tagIcon'=>'fa-chalkboard-user','tagLabel'=>'Teacher Development',
-          'clr'   => '#882b00','title'=>'U4T | Upskill For Teacher',
-          'sub'   => 'Empowering Educators to Deliver Skill-Based Learning',
-          'body'  => 'Helps educators develop the knowledge, methodologies and confidence to facilitate <strong>experiential, competency-based and skill-oriented learning</strong> — shifting from content delivery to facilitation.',
-          'pts'   => ['Teacher skill education capability','Experiential methodology support','Continuous professional development','Internal capacity building','Practical facilitation skills'],
-          'qt'    => 'Building the teacher capability required for future-ready education.',
+          'img'   => asset('frontend/img/skillbox/Workonlifeforms.jpeg'),
+          'alt'   => 'Composite Skill Lab & Skillvation Lab',
+          'grad'  => 'linear-gradient(135deg,rgba(190,24,93,.6),rgba(236,72,153,.35))',
+          'bBg'   => '#be185d','bIcon'=>'fa-screwdriver-wrench','bLabel'=>'Composite Skill Lab & Skillvation Lab',
+          'tagBg' => '#fdf2f8','tagClr'=>'#be185d','tagIcon'=>'fa-screwdriver-wrench','tagLabel'=>'Project-Based Learning',
+          'clr'   => '#be185d','title'=>'Where Knowledge Transforms into Practical Skills',
+          'sub'   => 'What our labs offer:',
+          'body'  => 'Skillvation designs and develops practical learning environments that enable students to explore, experiment, create and apply their knowledge.<br> From CBSE-aligned Composite Skill Labs to customised Skillvation Labs for State Board and ICSE schools, we provide integrated infrastructure, curriculum, learning resources and implementation support.',
+          'pts'   => ['CBSE-aligned Composite Skill Lab solutions','Customised Skillvation Labs for State and ICSE schools','Purpose-built infrastructure and equipment','Curriculum and session-wise lesson plans','Teacher demonstration resources and student DIY project kits','Teacher training and implementation support','AI-assisted curriculum preparation and teaching resources'],
+          'qt'    => 'Empowered by LATAA OS: Teachers can plan practical sessions, access instructional resources and create supporting learning materials. Students can receive AI-guided conceptual support to complement their hands-on lab experiences.',
         ],
         [
           'rev'   => false,
           'num'   => '05',
-          'img'   => asset('frontend/img/skillbox/Workonlifeforms.jpeg'),
-          'alt'   => 'Project-Based Learning Kits',
-          'grad'  => 'linear-gradient(135deg,rgba(190,24,93,.6),rgba(236,72,153,.35))',
-          'bBg'   => '#be185d','bIcon'=>'fa-screwdriver-wrench','bLabel'=>'PBL Kits',
-          'tagBg' => '#fdf2f8','tagClr'=>'#be185d','tagIcon'=>'fa-screwdriver-wrench','tagLabel'=>'Project-Based Learning',
-          'clr'   => '#be185d','title'=>'Project-Based Learning Kits',
-          'sub'   => 'Turning Concepts into Creation',
-          'body'  => 'Structured kits enabling students to <strong>design, build, experiment, test, collaborate and solve problems</strong> — developing competencies well beyond academic knowledge.',
-          'pts'   => ['Practical & engaging learning','Creativity & critical thinking','Collaboration & innovation','Tangible student outcomes','Ready-to-use resources'],
-          'qt'    => 'Turning knowledge into skills through purposeful creation.',
+          'img'   => asset('frontend/img/skillbox/ai_empowered.jpg'),
+          'alt'   => 'LATAA OS',
+          'grad'  => 'linear-gradient(135deg,rgba(3,105,161,.6),rgba(14,165,233,.35))',
+          'bBg'   => '#0369a1','bIcon'=>'fa-robot','bLabel'=>'LATAA OS',
+          'tagBg' => '#e0f2fe','tagClr'=>'#0369a1','tagIcon'=>'fa-robot','tagLabel'=>'Artificial Intelligence',
+          'clr'   => '#0369a1','title'=>'AI Lataa (Learning & teaching assist)',
+          'sub'   => 'AI-Powered Support for Learning & Teaching',
+          'body'  => 'At the heart of Skillvation is LATaA OS, our purpose-built AI operating system designed exclusively for educational institutions.<br> LATAA OS brings intelligent assistance to students, teachers and academic institutions. It supports personalised learning, lesson preparation, teaching resources, assessments and academic development – making everyday teaching and learning more effective, accessible and engaging.<br> Unlike general-purpose AI tools, LATaA OS is designed around the needs of schools, educators and learners.',
+          'pts'   => ['AI assistance for teachers','Enhanced student engagement','Practical AI exposure','Digital readiness building','Adapts to emerging tech'],
+          'qt'    => 'Enabling schools to embrace AI as part of modern education.',
         ],
       ];
       @endphp
@@ -1305,6 +1659,58 @@
 
         </div>
         @endforeach
+      </div>
+
+      {{-- Section – The Skillvation advantage --}}
+      <div class="sv-advantage-section" data-reveal="fade-up">
+        <div class="sv-eco-eyebrow"><i class="fa-solid fa-award" style="font-size:11px;"></i> The Skillvation Advantage</div>
+        <h2>Why Schools Choose Skillvation</h2>
+
+        <div class="sv-advantage-grid">
+          <div class="sv-advantage-card">
+            <div class="sv-adv-icon"><i class="fa-solid fa-layer-group"></i></div>
+            <p>One integrated partner for skill education, teacher development and learning infrastructure.</p>
+          </div>
+          <div class="sv-advantage-card">
+            <div class="sv-adv-icon"><i class="fa-solid fa-book-bookmark"></i></div>
+            <p>Curriculum-driven programmes supported by practical implementation.</p>
+          </div>
+          <div class="sv-advantage-card">
+            <div class="sv-adv-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+            <p>Continuous teacher training and professional development.</p>
+          </div>
+          <div class="sv-advantage-card">
+            <div class="sv-adv-icon"><i class="fa-solid fa-brain"></i></div>
+            <p>AI-powered assistance for both teaching and learning.</p>
+          </div>
+          <div class="sv-advantage-card">
+            <div class="sv-adv-icon"><i class="fa-solid fa-flask-vial"></i></div>
+            <p>Experiential learning through structured activities and skill labs.</p>
+          </div>
+          <div class="sv-advantage-card">
+            <div class="sv-adv-icon"><i class="fa-solid fa-sliders"></i></div>
+            <p>Personalised and scalable solutions based on institutional requirements.</p>
+          </div>
+          <div class="sv-advantage-card full-span">
+            <div class="sv-adv-icon"><i class="fa-solid fa-network-wired"></i></div>
+            <p>A connected ecosystem that supports the school, teacher and student.</p>
+          </div>
+        </div>
+      </div>
+
+      {{-- Section - Closing banner --}}
+      <div class="sv-closing-banner" data-reveal="fade-up">
+        <div class="sv-closing-eyebrow"><i class="fa-solid fa-sparkles"></i> The Future of Education</div>
+        <h2>The Future of Education Is Integrated.<br>The Future Is Intelligent.</h2>
+        <p>Give your school more than a curriculum, more than a lab and more than a digital tool.</p>
+        <p>Give your teachers the right support, your students the right learning experiences and your institution the intelligence to move forward.</p>
+        <div>
+          <a href="{{ route('lataa') }}" class="sv-closing-powered">
+            <span class="badge">LATAA OS</span>
+            <span>Build a future-ready school with <strong>Skillvation</strong>, powered by <strong>LATAA OS</strong></span>
+            <i class="fa-solid fa-arrow-right" style="font-size:12px;"></i>
+          </a>
+        </div>
       </div>
 
       {{-- One Partner. One Integrated Ecosystem. --}}
