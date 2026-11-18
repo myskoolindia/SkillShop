@@ -22,12 +22,8 @@
         unset($m);
     }
 
-    // Navigation follows the same verified audience rules as the backend.
-    $shopRole = auth()->user()?->role;
-    $allowedShopLink = function ($link) use ($shopRole) {
-        if (!$shopRole) return true;
-        $path = strtolower('/' . ltrim(parse_url($link, PHP_URL_PATH) ?: '', '/'));
-        if (in_array($path, ['/shop','/skillbox'])) return $shopRole === 'student';
+    // Shop link is public for viewing by all audiences
+    $allowedShopLink = function ($link) {
         return true;
     };
     $nav_menu = array_values(array_filter(array_map(function ($menu) use ($allowedShopLink) {
@@ -569,27 +565,43 @@
                                                 <li><a href="{{ route('register') }}">{{ __('Sign Up') }}</a></li>
                                             @else
                                                 @if (Auth::guard('web')->user())
-                                                    @if (userAuth()->role == 'instructor')
+                                                    @php
+                                                        $lhUser = Auth::guard('web')->user();
+                                                        $lhHasPurchased = $lhUser->hasPurchasedCourses();
+                                                    @endphp
+                                                    @if ($lhUser->role == 'instructor')
                                                         <li><a
                                                                 href="{{ route('instructor.dashboard') }}">{{ __('Instructor Dashboard') }}</a>
                                                         </li>
-                                                    @elseif (userAuth()->role == 'school')
-                                                        <li><a
-                                                                href="{{ route('school.dashboard') }}">{{ __('School Dashboard') }}</a>
-                                                        </li>
+                                                    @elseif ($lhUser->role == 'school')
+                                                        @if ($lhHasPurchased)
+                                                            <li><a
+                                                                    href="{{ route('school.dashboard') }}">{{ __('School Dashboard') }}</a>
+                                                            </li>
+                                                        @endif
+                                                    @elseif ($lhUser->role == 'vendor')
+                                                        <li><a href="{{ route('sso.shop') }}?target=dashboard">{{ __('Vendor Dashboard') }}</a></li>
                                                     @else
-                                                        <li><a
-                                                                href="{{ route('student.dashboard') }}">{{ __('Student Dashboard') }}</a>
-                                                        </li>
+                                                        @if ($lhHasPurchased)
+                                                            <li><a
+                                                                    href="{{ route('roboquest.launch') }}">{{ __('RoboQuest Lab') }}</a>
+                                                            </li>
+                                                            <li><a
+                                                                    href="{{ route('student.dashboard') }}">{{ __('Student Dashboard') }}</a>
+                                                            </li>
+                                                        @endif
                                                     @endif
+                                                    <li><a href="{{ route('cart') }}"><i class="fas fa-shopping-cart mr-1"></i> {{ __('Cart') }}@if(\Cart::count() > 0) ({{ \Cart::count() }})@endif</a></li>
                                                     <li><a href="{{ route('sso.shop', ['target' => '/orders']) }}" target="_blank" style="color:#d97706; font-weight:600;"><i class="fas fa-shopping-bag mr-1"></i> {{ __('Club Shop & Orders') }}</a>
                                                     </li>
                                                     <li><a
-                                                            href="{{ userAuth()->role == 'instructor' ? route('instructor.setting.index') : (userAuth()->role == 'school' ? route('school.profile.index') : route('student.setting.index')) }}">{{ __('Profile') }}</a>
+                                                            href="{{ $lhUser->role == 'instructor' ? route('instructor.setting.index') : ($lhUser->role == 'school' ? route('school.profile.index') : route('student.setting.index')) }}">{{ __('Profile') }}</a>
                                                     </li>
-                                                    <li><a
-                                                            href="{{ userAuth()->role == 'instructor' ? route('instructor.courses.index') : (userAuth()->role == 'school' ? route('school.courses.index') : route('student.enrolled-courses')) }}">{{ __('Courses') }}</a>
-                                                    </li>
+                                                    @if ($lhHasPurchased)
+                                                        <li><a
+                                                                href="{{ $lhUser->role == 'instructor' ? route('instructor.courses.index') : ($lhUser->role == 'school' ? route('school.courses.index') : route('student.enrolled-courses')) }}">{{ __('Courses') }}</a>
+                                                        </li>
+                                                    @endif
                                                     <li><a href="javascript:void(0)"
                                                             class="text-danger logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">{{ __('Logout') }}</a>
                                                     </li>
@@ -660,27 +672,40 @@
                                 </ul>
                             @endguest
                             @auth
-                                @if (Auth::guard('web')->user()->role == 'vendor')
+                                @php
+                                    $lmUser = Auth::guard('web')->user();
+                                    $lmHasPurchased = $lmUser?->hasPurchasedCourses() ?? false;
+                                @endphp
+                                @if ($lmUser->role == 'vendor')
                                     <ul class="mobile_menu_login d-flex flex-wrap">
                                         <li><a href="{{ route('sso.shop') }}?target=dashboard">{{ __('Vendor Dashboard') }}</a></li>
                                         <li><a href="javascript:void(0)" class="text-danger logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">{{ __('Logout') }}</a></li>
                                     </ul>
-                                @elseif (Auth::guard('web')->user()->role == 'instructor')
+                                @elseif ($lmUser->role == 'instructor')
                                     <ul class="mobile_menu_login d-flex flex-wrap">
                                         <li><a href="{{ route('instructor.dashboard') }}">{{ __('Dashboard') }}</a></li>
                                         <li><a href="{{ route('instructor.courses.index') }}">{{ __('Courses') }}</a></li>
                                         <li><a href="javascript:void(0)" class="text-danger logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">{{ __('Logout') }}</a></li>
                                     </ul>
-                                @elseif (Auth::guard('web')->user()->role == 'school')
+                                @elseif ($lmUser->role == 'school')
                                     <ul class="mobile_menu_login d-flex flex-wrap">
-                                        <li><a href="{{ route('school.dashboard') }}">{{ __('Dashboard') }}</a></li>
-                                        <li><a href="{{ route('school.courses.index') }}">{{ __('Courses') }}</a></li>
+                                        @if ($lmHasPurchased)
+                                            <li><a href="{{ route('school.dashboard') }}">{{ __('Dashboard') }}</a></li>
+                                            <li><a href="{{ route('school.courses.index') }}">{{ __('Courses') }}</a></li>
+                                        @endif
+                                        <li><a href="{{ route('cart') }}">{{ __('Cart') }}</a></li>
+                                        <li><a href="{{ route('school.profile.index') }}">{{ __('Profile') }}</a></li>
                                         <li><a href="javascript:void(0)" class="text-danger logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">{{ __('Logout') }}</a></li>
                                     </ul>
                                 @else
                                     <ul class="mobile_menu_login d-flex flex-wrap">
-                                        <li><a href="{{ route('student.dashboard') }}">{{ __('Dashboard') }}</a></li>
-                                        <li><a href="{{ route('student.enrolled-courses') }}">{{ __('Courses') }}</a></li>
+                                        @if ($lmHasPurchased)
+                                            <li><a href="{{ route('roboquest.launch') }}">{{ __('RoboQuest Lab') }}</a></li>
+                                            <li><a href="{{ route('student.dashboard') }}">{{ __('Dashboard') }}</a></li>
+                                            <li><a href="{{ route('student.enrolled-courses') }}">{{ __('Courses') }}</a></li>
+                                        @endif
+                                        <li><a href="{{ route('cart') }}">{{ __('Cart') }}</a></li>
+                                        <li><a href="{{ route('student.setting.index') }}">{{ __('Profile') }}</a></li>
                                         <li><a href="javascript:void(0)" class="text-danger logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">{{ __('Logout') }}</a></li>
                                     </ul>
                                 @endif

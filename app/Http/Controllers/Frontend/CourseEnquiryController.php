@@ -363,7 +363,26 @@ class CourseEnquiryController extends Controller
     {
         $user = auth()->user();
         if (!$user) {
-            return response()->json(['status' => 'error', 'message' => 'Please sign in to request a proposal.'], 401);
+            $email = trim((string) $request->input('user_email', $request->input('email', '')));
+            if (!empty($email)) {
+                $user = \App\Models\User::where('email', $email)->first();
+                if ($user) {
+                    auth()->login($user);
+                } else {
+                    $name = trim((string) $request->input('user_name', $request->input('name', '')));
+                    if (empty($name)) {
+                        $name = explode('@', $email)[0];
+                    }
+                    $request->merge([
+                        'email' => $email,
+                        'name'  => $name,
+                    ]);
+                }
+            }
+        }
+
+        if (!$user && !$request->filled('email')) {
+            return response()->json(['status' => 'error', 'message' => 'Please sign in or enter your email to request a proposal.'], 401);
         }
 
         // Map the cart's planKey → enquiry source + human package label.
@@ -373,6 +392,9 @@ class CourseEnquiryController extends Controller
             'skillvation'         => ['source' => 'skillvation-lab-stem',         'label' => 'Skillvation Lab'],
             'skillvation-advance' => ['source' => 'skillvation-lab-stem-advance', 'label' => 'Skillvation Lab Advance'],
             'skillvation-premium' => ['source' => 'skillvation-lab-stem-premium', 'label' => 'Skillvation Lab Premium'],
+            'skilllab'            => ['source' => 'skillvation-lab-stem',         'label' => 'Skillvation Lab'],
+            'skilllab-advance'    => ['source' => 'skillvation-lab-stem-advance', 'label' => 'Skillvation Lab Advance'],
+            'skilllab-premium'    => ['source' => 'skillvation-lab-stem-premium', 'label' => 'Skillvation Lab Premium'],
             // Composite Skill Lab carts
             'basic'               => ['source' => 'composite-skill-lab-basic',    'label' => 'Basic Composite Skill Lab'],
             'advance'             => ['source' => 'composite-skill-lab-advance',  'label' => 'Advance Composite Skill Lab'],

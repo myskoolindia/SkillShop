@@ -46,11 +46,20 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
 
     Route::get('set-language', [DashboardController::class, 'setLanguage'])->name('set-language');
 
+    Route::get('/no-courses-purchased', function () {
+        return view('frontend.pages.no-courses-purchased', [
+            'user' => Auth::user(),
+        ]);
+    })->name('no-courses-purchased');
+
     Route::get('dashboard', function () {
         if (!Auth::check()) {
             return redirect()->route('login');
         }
         $user = Auth::user();
+        if (in_array($user->role, ['school', 'teacher', 'student'], true) && !$user->hasPurchasedCourses()) {
+            return view('frontend.pages.no-courses-purchased', ['user' => $user]);
+        }
         return match ($user->role) {
             'vendor'     => redirect(url('/club-shop/dashboard')),
             'school'     => redirect()->route('school.dashboard'),
@@ -154,6 +163,11 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
         return view('frontend.home-four.pages.upskill-teacher');
     })->name('upskill4teacher');
 
+    Route::get('/lataa', function () {
+        return view('frontend.home-four.pages.lataa');
+    })->name('lataa');
+    Route::get('/lataa-os', fn() => redirect()->route('lataa'));
+
     Route::get('/shop', function () {
         return view('frontend.home-four.pages.shop');
     })->name('shop');
@@ -175,11 +189,11 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
     });
 
     Route::get('/api/product-details/{id}', function ($id) {
-        $rawUrl = env('STUDENT_SHOP_API_BASE_URL', url('/club-shop/api'));
+        $rawUrl = env('SHOP_API_BASE_URL', env('STUDENT_SHOP_API_BASE_URL', 'https://test.myskill.club/api/'));
         $baseUrl = rtrim($rawUrl, '/') . '/';
         try {
             $productPath = ctype_digit((string)$id) ? "products/" . rawurlencode($id) : "products/slug/" . rawurlencode($id);
-            $response = \Illuminate\Support\Facades\Http::timeout(5)->get($baseUrl . $productPath);
+            $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])->timeout(15)->get($baseUrl . $productPath);
             if ($response->successful()) {
                 return response()->json($response->json());
             }
@@ -193,10 +207,10 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
     });
 
     Route::get('/api/shop-categories', function () {
-        $rawUrl = env('STUDENT_SHOP_API_BASE_URL', url('/club-shop/api'));
+        $rawUrl = env('SHOP_API_BASE_URL', env('STUDENT_SHOP_API_BASE_URL', 'https://test.myskill.club/api/'));
         $baseUrl = rtrim($rawUrl, '/') . '/';
         try {
-            $response = \Illuminate\Support\Facades\Http::timeout(5)->get("{$baseUrl}categories");
+            $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])->timeout(15)->get("{$baseUrl}categories");
             if ($response->successful()) {
                 return response()->json($response->json());
             }
@@ -210,7 +224,7 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
     });
 
     Route::get('/api/shop-products', function (\Illuminate\Http\Request $request) {
-        $rawUrl = env('STUDENT_SHOP_API_BASE_URL', url('/club-shop/api'));
+        $rawUrl = env('SHOP_API_BASE_URL', env('STUDENT_SHOP_API_BASE_URL', 'https://test.myskill.club/api/'));
         $baseUrl = rtrim($rawUrl, '/') . '/';
         $categoryId = $request->get('category_id');
         $search = strtolower(trim((string)$request->get('search', '')));
@@ -219,7 +233,7 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
 
         try {
             $url = $categoryId ? "{$baseUrl}categories/{$categoryId}/products" : "{$baseUrl}products";
-            $response = \Illuminate\Support\Facades\Http::timeout(5)->get($url, [
+            $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])->timeout(15)->get($url, [
                 'page' => $page,
                 'per_page' => $perPage,
             ]);

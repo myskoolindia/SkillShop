@@ -188,6 +188,176 @@ if (!function_exists('ssoMainUrl')) {
     }
 }
 
+//get mapped courses for product from https://collab.myskool.club/api/product-course-map
+if (!function_exists('getProductMappedCourses')) {
+    function getProductMappedCourses(int $productId): array
+    {
+        if ($productId <= 0) {
+            return [];
+        }
+
+        $cacheKey = 'mapped_courses_prod_' . $productId;
+        if (function_exists('cache')) {
+            try {
+                $cached = cache($cacheKey);
+                if ($cached !== null && is_array($cached)) {
+                    return $cached;
+                }
+            } catch (\Throwable $e) {}
+        }
+
+        // 1. Gather target product IDs (direct product ID, plus component IDs if bundle)
+        $targetIds = [$productId];
+        try {
+            $db = class_exists('\Config\Database') ? \Config\Database::connect() : null;
+            if ($db) {
+                $compRows = $db->table('product_bundles')
+                    ->select('component_product_id')
+                    ->where('bundle_product_id', $productId)
+                    ->get()->getResultArray();
+                if (!empty($compRows)) {
+                    foreach ($compRows as $cr) {
+                        if (!empty($cr['component_product_id'])) {
+                            $targetIds[] = (int)$cr['component_product_id'];
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $e) {}
+        $targetIds = array_values(array_unique(array_filter($targetIds)));
+
+        // 2. Fetch mapping from API (cached globally for 10 minutes)
+        $allMappings = [];
+        $mappingsCacheKey = 'collab_all_product_course_maps';
+        if (function_exists('cache')) {
+            try {
+                $cachedAll = cache($mappingsCacheKey);
+                if (!empty($cachedAll) && is_array($cachedAll)) {
+                    $allMappings = $cachedAll;
+                }
+            } catch (\Throwable $e) {}
+        }
+
+        if (empty($allMappings)) {
+            try {
+                if (class_exists('\Config\Services')) {
+                    $client = \Config\Services::curlrequest([
+                        'timeout' => 4,
+                        'http_errors' => false,
+                        'headers' => [
+                            'Accept' => 'application/json',
+                            'User-Agent' => 'SkillvationShop/1.0',
+                        ],
+                    ]);
+                    $response = $client->get('https://collab.myskool.club/api/product-course-map?per_page=1000');
+                    if ($response && $response->getStatusCode() === 200) {
+                        $body = json_decode($response->getBody(), true);
+                        if (!empty($body['data']) && is_array($body['data'])) {
+                            $allMappings = $body['data'];
+                            if (function_exists('cache')) {
+                                try {
+                                    cache()->save($mappingsCacheKey, $allMappings, 600);
+                                } catch (\Throwable $e) {}
+                            }
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                if (function_exists('log_message')) {
+                    log_message('warning', '[ProductCourseMap] ' . $e->getMessage());
+                }
+            }
+        }
+
+        // Fallback to simple cURL or file_get_contents if Services::curlrequest was not used
+        if (empty($allMappings)) {
+            try {
+                $ctx = stream_context_create(['http' => ['timeout' => 3, 'ignore_errors' => true]]);
+                $json = @file_get_contents('https://collab.myskool.club/api/product-course-map?per_page=1000', false, $ctx);
+                if ($json) {
+                    $body = json_decode($json, true);
+                    if (!empty($body['data']) && is_array($body['data'])) {
+                        $allMappings = $body['data'];
+                    }
+                }
+            } catch (\Throwable $e) {}
+        }
+
+        // 3. Find matched courses for targetIds
+        $matched = [];
+        $matchedCourseIds = [];
+        if (!empty($allMappings)) {
+            foreach ($allMappings as $course) {
+                $cid = (int)($course['course_id'] ?? 0);
+                if (in_array($cid, $matchedCourseIds, true)) {
+                    continue;
+                }
+                if (!empty($course['products']) && is_array($course['products'])) {
+                    foreach ($course['products'] as $p) {
+                        $pid = (int)($p['product_id'] ?? 0);
+                        if (in_array($pid, $targetIds, true)) {
+                            $c = $course;
+                            $c['mapped_product'] = $p;
+                            $c['is_component_match'] = ($pid !== $productId);
+                            $matched[] = $c;
+                            $matchedCourseIds[] = $cid;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 4. Enrich matched courses with local LMS metadata if available (thumbnail, slug, duration, description)
+        if (!empty($matched) && !empty($matchedCourseIds)) {
+            try {
+                $lmsDb = class_exists('\Config\Database') ? \Config\Database::connect('laravel', false) : null;
+                if ($lmsDb) {
+                    $cRows = $lmsDb->table('courses')
+                        ->select('id, title, slug, api_course_id, thumbnail, duration, price, description')
+                        ->groupStart()
+                            ->whereIn('api_course_id', $matchedCourseIds)
+                            ->orWhereIn('id', $matchedCourseIds)
+                        ->groupEnd()
+                        ->get()->getResultArray();
+
+                    $localMap = [];
+                    foreach ($cRows as $lr) {
+                        if (!empty($lr['api_course_id'])) {
+                            $localMap[(int)$lr['api_course_id']] = $lr;
+                        }
+                        $localMap[(int)$lr['id']] = $lr;
+                    }
+
+                    foreach ($matched as &$m) {
+                        $cid = (int)($m['course_id'] ?? 0);
+                        if (isset($localMap[$cid])) {
+                            $lr = $localMap[$cid];
+                            $m['local_id'] = $lr['id'];
+                            $m['slug'] = $lr['slug'] ?? '';
+                            $m['thumbnail'] = $lr['thumbnail'] ?? '';
+                            $m['duration'] = $lr['duration'] ?? '';
+                            $m['price'] = $lr['price'] ?? '';
+                            if (!empty($lr['description'])) {
+                                $m['description'] = $lr['description'];
+                            }
+                        }
+                    }
+                    unset($m);
+                }
+            } catch (\Throwable $e) {}
+        }
+
+        if (function_exists('cache')) {
+            try {
+                cache()->save($cacheKey, $matched, 300);
+            } catch (\Throwable $e) {}
+        }
+
+        return $matched;
+    }
+}
+
 //escape variable for safe JavaScript output
 if (!function_exists('escJs')) {
     function escJs($data): string

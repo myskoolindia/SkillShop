@@ -482,7 +482,13 @@
 
                                 <div class="form-grp">
                                     <label for="reg-email">{{ __('Email Address') }} <code>*</code></label>
-                                    <input type="email" id="reg-email" placeholder="{{ __('Enter email address') }}" name="email" value="{{ old('email') }}" required>
+                                    <div class="position-relative">
+                                        <input type="email" id="reg-email" placeholder="{{ __('Enter email address') }}" name="email" value="{{ old('email') }}" required autocomplete="email" style="transition: border-color 0.2s, box-shadow 0.2s;">
+                                        <span id="reg-email-spinner" class="position-absolute" style="right: 14px; top: 50%; transform: translateY(-50%); display: none;">
+                                            <i class="fas fa-spinner fa-spin text-muted"></i>
+                                        </span>
+                                    </div>
+                                    <div id="email-inline-alert" class="mt-1" style="display:none;"></div>
                                     <x-frontend.validation-error name="email" />
                                 </div>
 
@@ -834,6 +840,173 @@
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     handleSendOtp();
+                }
+            });
+        }
+
+        @if(old('phone_token') && old('phone'))
+            verifiedPhone = "{{ old('phone') }}";
+            verifiedPhoneToken = "{{ old('phone_token') }}";
+            document.getElementById('form-phone').value = verifiedPhone;
+            document.getElementById('form-phone-token').value = verifiedPhoneToken;
+            document.getElementById('badge-verified-phone').textContent = '+91 ' + verifiedPhone.replace(/^\+?91/, '');
+            document.getElementById('badge-role-display').textContent = "{{ old('account_type', 'school') }}".toUpperCase();
+            document.getElementById('otp-verification-section').style.display = 'none';
+            document.getElementById('details-form-section').style.display = 'block';
+            selectRole("{{ old('account_type', 'school') }}");
+        @endif
+
+        // ── Real-time Inline Email Validation ─────────────────────────────
+        const emailInput = document.getElementById('reg-email');
+        const emailAlert = document.getElementById('email-inline-alert');
+        const emailSpinner = document.getElementById('reg-email-spinner');
+        let emailDebounceTimer = null;
+        let isEmailValid = null;
+        let lastCheckedEmail = '';
+
+        function validateEmailInline(showChecking = true) {
+            if (!emailInput || !emailAlert) return;
+            const email = emailInput.value.trim();
+
+            if (emailSpinner) emailSpinner.style.display = 'none';
+
+            if (!email) {
+                isEmailValid = null;
+                emailAlert.style.display = 'none';
+                emailAlert.innerHTML = '';
+                emailInput.style.borderColor = '';
+                return;
+            }
+
+            // Regex check for basic format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+            if (!emailRegex.test(email)) {
+                isEmailValid = false;
+                emailInput.style.borderColor = '#dc2626';
+                emailAlert.style.display = 'block';
+                emailAlert.innerHTML = `
+                    <div class="alert alert-danger py-1.5 px-3 small d-flex align-items-center gap-2 mb-0" style="border-radius:8px; font-size:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b;">
+                        <i class="fas fa-exclamation-circle text-danger"></i>
+                        <span>{{ __('Please enter a valid email address (e.g. name@school.com).') }}</span>
+                    </div>
+                `;
+                return;
+            }
+
+            if (email === lastCheckedEmail && isEmailValid === true) {
+                return;
+            }
+
+            if (showChecking) {
+                if (emailSpinner) emailSpinner.style.display = 'block';
+                emailAlert.style.display = 'block';
+                emailAlert.innerHTML = `
+                    <div class="text-muted small py-1 px-1" style="font-size:12px;">
+                        <i class="fas fa-spinner fa-spin mr-1"></i> {{ __('Checking email availability...') }}
+                    </div>
+                `;
+            }
+
+            fetch('{{ route("auth.check-email") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ email: email })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (emailSpinner) emailSpinner.style.display = 'none';
+                lastCheckedEmail = email;
+
+                if (data.status === 'taken') {
+                    isEmailValid = false;
+                    emailInput.style.borderColor = '#dc2626';
+                    emailAlert.style.display = 'block';
+                    emailAlert.innerHTML = `
+                        <div class="alert alert-warning py-2 px-3 small d-flex align-items-center justify-content-between mb-0" style="border-radius:8px; font-size:12px; background:#fffbeb; border:1px solid #fde68a; color:#92400e;">
+                            <div class="d-flex align-items-center gap-1.5">
+                                <i class="fas fa-exclamation-triangle text-warning mr-1"></i>
+                                <span><strong>${data.message || '{{ __("This email is already registered.") }}'}</strong></span>
+                            </div>
+                            <a href="${data.login_url || '{{ route("login") }}'}" class="btn btn-sm btn-outline-primary px-2.5 py-0.5 ml-2 font-weight-bold" style="font-size:11px; white-space:nowrap;">{{ __('Log In') }}</a>
+                        </div>
+                    `;
+                } else if (data.status === 'available') {
+                    isEmailValid = true;
+                    emailInput.style.borderColor = '#10b981';
+                    emailAlert.style.display = 'block';
+                    emailAlert.innerHTML = `
+                        <div class="alert alert-success py-1.5 px-3 small d-flex align-items-center gap-1.5 mb-0" style="border-radius:8px; font-size:12px; background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46;">
+                            <i class="fas fa-check-circle text-success mr-1"></i>
+                            <span>${data.message || '{{ __("Email address is valid and available.") }}'}</span>
+                        </div>
+                    `;
+                } else {
+                    isEmailValid = false;
+                    emailInput.style.borderColor = '#dc2626';
+                    emailAlert.style.display = 'block';
+                    emailAlert.innerHTML = `
+                        <div class="alert alert-danger py-1.5 px-3 small d-flex align-items-center gap-2 mb-0" style="border-radius:8px; font-size:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b;">
+                            <i class="fas fa-exclamation-circle text-danger"></i>
+                            <span>${data.message || '{{ __("Invalid email address.") }}'}</span>
+                        </div>
+                    `;
+                }
+            })
+            .catch(() => {
+                if (emailSpinner) emailSpinner.style.display = 'none';
+            });
+        }
+
+        if (emailInput) {
+            emailInput.addEventListener('input', () => {
+                clearTimeout(emailDebounceTimer);
+                emailDebounceTimer = setTimeout(() => {
+                    validateEmailInline(true);
+                }, 350);
+            });
+
+            emailInput.addEventListener('blur', () => {
+                clearTimeout(emailDebounceTimer);
+                validateEmailInline(true);
+            });
+
+            if (emailInput.value.trim()) {
+                validateEmailInline(false);
+            }
+        }
+
+        const registerForm = document.getElementById('final-register-form');
+        if (registerForm) {
+            registerForm.addEventListener('submit', (e) => {
+                const emailVal = emailInput ? emailInput.value.trim() : '';
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+                if (!emailVal) {
+                    e.preventDefault();
+                    if (emailAlert) {
+                        emailAlert.style.display = 'block';
+                        emailAlert.innerHTML = `
+                            <div class="alert alert-danger py-1.5 px-3 small d-flex align-items-center gap-2 mb-0" style="border-radius:8px; font-size:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b;">
+                                <i class="fas fa-exclamation-circle text-danger"></i>
+                                <span>{{ __('Email address is required.') }}</span>
+                            </div>
+                        `;
+                    }
+                    if (emailInput) {
+                        emailInput.style.borderColor = '#dc2626';
+                        emailInput.focus();
+                    }
+                    return;
+                }
+
+                if (!emailRegex.test(emailVal) || isEmailValid === false) {
+                    e.preventDefault();
+                    validateEmailInline(false);
+                    if (emailInput) emailInput.focus();
+                    return;
                 }
             });
         }

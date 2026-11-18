@@ -506,6 +506,8 @@ class HomeController extends BaseController
                 $data['productDiscountRate'] = ($itemOrigUnitPrice > $itemUnitPrice) ? round((($itemOrigUnitPrice - $itemUnitPrice) / $itemOrigUnitPrice) * 100) : 0;
             }
 
+            $data['mappedCourses'] = getProductMappedCourses((int)$product->id);
+
             echo view('partials/_header', $data);
             echo view('product/details/product', $data);
             echo view('partials/_footer');
@@ -773,6 +775,8 @@ class HomeController extends BaseController
                 $data['productPriceDiscounted'] = priceFormatted($itemUnitPrice, $product->currency, $convertCurrency);
                 $data['productDiscountRate'] = ($itemOrigUnitPrice > $itemUnitPrice) ? round((($itemOrigUnitPrice - $itemUnitPrice) / $itemOrigUnitPrice) * 100) : 0;
             }
+
+            $data['mappedCourses'] = getProductMappedCourses((int)$product->id);
 
             echo view('partials/_header', $data);
             echo view('product/details/productCustomize', $data);

@@ -1278,24 +1278,35 @@ class CheckoutController extends BaseController
         $data['title'] = trans("msg_order_completed");
         $data['description'] = trans("msg_order_completed") . ' - ' . $this->baseVars->appName;
         $data['keywords'] = trans("msg_order_completed") . ',' . $this->baseVars->appName;
-        $data['order'] = $this->orderModel->getOrderByOrderNumber($orderNumber);
 
-        if (empty($data['order'])) {
-            return redirect()->to(langBaseUrl());
+        $order = $this->orderModel->getOrderByOrderNumber($orderNumber);
+        if (empty($order)) {
+            $order = $this->orderModel->getOrderByCheckoutToken($orderNumber);
+        }
+        if (empty($order)) {
+            $checkout = $this->checkoutModel->getCheckoutByToken($orderNumber);
+            if (!empty($checkout)) {
+                $order = $this->orderModel->getOrderByCheckoutToken($checkout->checkout_token);
+            }
         }
 
-        if (empty(helperGetSession('mds_show_order_completed_page'))) {
-            return redirect()->to(langBaseUrl());
-        }
+        $session = session();
+        if (!empty($order)) {
+            $data['order'] = $order;
+            $return = \App\Libraries\RoboquestPaymentReturn::destination($order, [
+                'auth_user_id'                => $session->get('auth_user_id') ?: $order->buyer_id,
+                'roboquest_shop_user_id'      => $session->get('roboquest_shop_user_id'),
+                'roboquest_shop_role'         => $session->get('roboquest_shop_role'),
+                'roboquest_shop_role_expires' => $session->get('roboquest_shop_role_expires'),
+            ], mainAppUrl('roboquest/open'));
 
-        $session=session();
-        $return=\App\Libraries\RoboquestPaymentReturn::destination($data['order'],[
-            'auth_user_id'=>$session->get('auth_user_id') ?: $data['order']->buyer_id,
-            'roboquest_shop_user_id'=>$session->get('roboquest_shop_user_id'),
-            'roboquest_shop_role'=>$session->get('roboquest_shop_role'),
-            'roboquest_shop_role_expires'=>$session->get('roboquest_shop_role_expires'),
-        ],mainAppUrl('roboquest/open'));
-        if($return)return redirect()->to($return)->setHeader('Cache-Control','no-store')->setHeader('Referrer-Policy','no-referrer');
+            if ($return) {
+                return redirect()->to($return)->setHeader('Cache-Control', 'no-store')->setHeader('Referrer-Policy', 'no-referrer');
+            }
+            $data['roboquestUrl'] = ssoMainUrl('roboquest/open');
+        } else {
+            return redirect()->to(ssoMainUrl('roboquest/open'))->setHeader('Cache-Control', 'no-store')->setHeader('Referrer-Policy', 'no-referrer');
+        }
 
         echo view('partials/_header', $data);
         echo view('cart/order_completed', $data);

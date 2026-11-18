@@ -27,6 +27,12 @@ class StudentDashboardController extends Controller {
             return redirect()->route('instructor.dashboard');
         }
 
+        if (!userAuth()->hasPurchasedCourses()) {
+            return view('frontend.pages.no-courses-purchased', [
+                'user' => userAuth(),
+            ]);
+        }
+
         $teacherOrderIds = Order::where('buyer_id', userAuth()->id)->where('payment_status', 'paid')->where('status', 'completed')->pluck('id');
         $totalEnrolledCourses = Enrollment::where('user_id', userAuth()->id)->whereIn('order_id', $teacherOrderIds)->count();
         $totalQuizAttempts = QuizResult::where('user_id', userAuth()->id)->count();
