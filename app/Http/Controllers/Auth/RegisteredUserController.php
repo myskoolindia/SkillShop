@@ -148,12 +148,9 @@ class RegisteredUserController extends Controller
                 // Its own connection on the shared DigiLab server; RoboQuest adds the school on first launch.
                 \App\Services\RoboquestService::defaultConnection($user);
             } elseif ($role === 'teacher') {
+                // Only the school the teacher chose. Nobody is added to a school automatically: without one, the
+                // teacher opens their personal RoboQuest space, which keeps what they buy themselves.
                 $targetSchoolId = $request->input('school_id');
-                if (!$targetSchoolId) {
-                    // Fall back to first active school if not explicitly selected
-                    $firstSchool = User::where('role', 'school')->where('status', 'active')->first();
-                    $targetSchoolId = $firstSchool?->id;
-                }
 
                 if ($targetSchoolId) {
                     SchoolMember::firstOrCreate(
@@ -181,6 +178,12 @@ class RegisteredUserController extends Controller
 
         // Log the user in directly
         Auth::guard('web')->login($user, true);
+
+        // Login details on WhatsApp (the number was just verified). Their own password is not repeated back.
+        $phone = $user->phone; $name = $user->name; $login = $user->email;
+        dispatch(function () use ($phone, $name, $login) {
+            app(WabaOtpService::class)->sendLoginDetails($phone, ['name' => $name, 'login' => $login, 'password' => 'the password you chose', 'url' => route('roboquest.signin'), 'welcome' => true]);
+        })->afterResponse();
 
         $notification = __('Account created successfully! Welcome to Skillvation.');
         $notification = ['messege' => $notification, 'alert-type' => 'success'];
@@ -215,6 +218,17 @@ class RegisteredUserController extends Controller
 
             if ($isSameHost && $isSafePath) {
                 return redirect()->to($intendedUrl)->with($notification);
+            }
+        }
+
+        // Schools, teachers and students land in their RoboQuest dashboard (their school's, or their personal space).
+        // Affiliates and anyone who signed up on the way to another page (such as checkout) go where they were heading.
+        if (in_array($user->role, ['school', 'teacher', 'student'], true)) {
+            try {
+                $launch = app(\App\Services\RoboquestService::class)->launch($user);
+                if ($launch) return redirect()->away($launch)->with($notification)->withHeaders(['Referrer-Policy' => 'no-referrer', 'Cache-Control' => 'no-store']);
+            } catch (\Throwable $e) {
+                \Log::warning('RoboQuest launch after signup failed: ' . $e->getMessage());
             }
         }
 

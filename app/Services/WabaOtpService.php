@@ -123,7 +123,7 @@ class WabaOtpService
      * Uses the approved template WABA_LOGIN_TEMPLATE when set ({{1}} name, {{2}} login, {{3}} password, {{4}} link),
      * otherwise a text message. The password is never written to the log.
      *
-     * @param array $data ['name', 'login', 'password', 'url', 'school', 'reset' => bool]
+     * @param array $data ['name', 'login', 'password', 'url', 'school', 'reset' => bool, 'welcome' => bool]
      */
     public function sendLoginDetails(string $phone, array $data): array
     {
@@ -132,7 +132,9 @@ class WabaOtpService
         $driver = config('services.waba.driver', env('WABA_DRIVER', 'wabaconnect'));
         $name = $data['name'] ?? 'there'; $login = $data['login'] ?? ''; $password = $data['password'] ?? ''; $url = $data['url'] ?? '';
         $school = $data['school'] ?? 'your school';
-        $intro = !empty($data['reset']) ? "Your password for *{$school}* on Skillvation and RoboQuest was changed." : "*{$school}* has created your Skillvation and RoboQuest account.";
+        // welcome: the person signed up themselves; their own password is never echoed back (pass a reminder instead).
+        $intro = !empty($data['welcome']) ? "Welcome! Your Skillvation and RoboQuest account is ready."
+            : (!empty($data['reset']) ? "Your password for *{$school}* on Skillvation and RoboQuest was changed." : "*{$school}* has created your Skillvation and RoboQuest account.");
         $message = "Hello {$name},\n\n{$intro}\n\n👤 *Login:* {$login}\n🔑 *Password:* {$password}\n" . ($url ? "🔗 {$url}\n" : '')
             . "\nYou can also sign in with this mobile number. Please keep these details private.\n\n_Skillvation — MySkool Learning Private Limited_";
         $template = config('services.waba.login_template', env('WABA_LOGIN_TEMPLATE', ''));

@@ -41,6 +41,16 @@
                             </div>
                         </div>
 
+                        {{-- Parent's WhatsApp number --}}
+                        <div class="col-md-6">
+                            <div class="form-grp mb-3">
+                                <label for="phone" class="form-label fw-bold">{{ __("Parent's WhatsApp number") }} <small class="text-muted fw-normal">({{ __('recommended') }})</small></label>
+                                <input type="tel" id="phone" name="phone" value="{{ old('phone') }}" maxlength="20" class="form-control" placeholder="{{ __('e.g. 98765 43210') }}">
+                                <small class="text-muted">{{ __('The login details are sent here on WhatsApp. One number per student: brothers and sisters need different numbers.') }}</small>
+                                <x-frontend.validation-error name="phone" />
+                            </div>
+                        </div>
+
                         {{-- Roll Number / ID --}}
                         <div class="col-md-6">
                             <div class="form-grp mb-3">

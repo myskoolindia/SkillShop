@@ -50,8 +50,8 @@ class SchoolStudentController extends Controller
 
     public function downloadTemplate()
     {
-        return $this->csvTemplate(['Name', 'Email', 'Roll_Number', 'Grade', 'Section', 'Academic_Year', 'Board', 'Password'],
-            ['John Smith', 'student@example.com', 'STD-101', 'Grade 6', 'A', '2026-2027', 'CBSE', ''], 'students_import_template.csv');
+        return $this->csvTemplate(['Name', 'Email', 'Roll_Number', 'Grade', 'Section', 'Academic_Year', 'Board', 'Password', 'Parent_Phone'],
+            ['John Smith', 'student@example.com', 'STD-101', 'Grade 6', 'A', '2026-2027', 'CBSE', '', '9876543210'], 'students_import_template.csv');
     }
 
     public function show(SchoolMember $member): View
@@ -107,6 +107,7 @@ class SchoolStudentController extends Controller
             'section'       => 'nullable|string|max:20',
             'academic_year' => 'nullable|string|max:20',
             'board'         => 'nullable|string|max:50',
+            'phone'         => 'nullable|string|max:20',
         ]);
 
         return $this->addMember($request, $request->only(['id_number', 'grade', 'section', 'academic_year', 'board']));
@@ -114,12 +115,14 @@ class SchoolStudentController extends Controller
 
     public function import(Request $request): RedirectResponse
     {
-        // Full format: Name, Email, Roll_Number, Grade, Section, Academic_Year, Board, Password (optional)
-        // Short format: Name, Email, Roll_Number, Password (optional)
+        // Full format: Name, Email, Roll_Number, Grade, Section, Academic_Year, Board, Password (optional), Parent_Phone (optional)
+        // Short format: Name, Email, Roll_Number, Password (optional), Parent_Phone (optional)
+        // Parent_Phone: one number per student (siblings cannot share); the login details are sent there on WhatsApp.
         return $this->importMembers($request, function (array $row) {
             $full = count($row) >= 8;
             return [
                 'name' => $row[0] ?? '', 'email' => $row[1] ?? '', 'password' => $full ? ($row[7] ?? null) : ($row[3] ?? null),
+                'phone' => $full ? ($row[8] ?? null) : ($row[4] ?? null),
                 'fields' => [
                     'id_number' => $row[2] ?? null, 'grade' => $full ? mb_substr($row[3] ?? '', 0, 50) : null,
                     'section' => $full ? mb_substr($row[4] ?? '', 0, 20) : null, 'academic_year' => $full ? mb_substr($row[5] ?? '', 0, 20) : null,

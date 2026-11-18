@@ -96,7 +96,8 @@
                     <div class="modal-body">
                         <div class="alert alert-light border mb-3" style="font-size: 13px;">
                             <div class="fw-bold mb-1"><i class="fa fa-info-circle text-info"></i> {{ __('CSV Column Format:') }}</div>
-                            <code>Name, Email, ID_Number, Password</code>
+                            <code>Name, Email, ID_Number, Password, Phone</code>
+                            <div class="text-muted mt-1">{{ __("Phone: the teacher's WhatsApp number; their login details are sent there.") }}</div>
                             <div class="text-muted mt-1">{{ __('Password is optional (at least 8 characters). Leave it blank to generate one; you can download the new login details once after the import. Accounts are active immediately.') }}</div>
                         </div>
 

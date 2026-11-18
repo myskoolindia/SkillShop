@@ -126,4 +126,20 @@ class SchoolTeacherMembershipTest extends TestCase {
         $this->assertSame('student',$both->fresh()->role,'an account that is also a student somewhere is left for a person to check');
         $this->assertSame(2,SchoolMember::where('user_id',$multi->id)->where('status','active')->count(),'multi-school records are only reported');
     }
+    public function test_a_mobile_number_sends_login_details_on_whatsapp_and_belongs_to_one_person(): void {
+        config(['services.waba.driver'=>'mock']);
+        \Illuminate\Support\Facades\Log::spy();
+        $school=$this->user('school@a.test','school');
+        $this->add($school,'student','kid1@s.test',['phone'=>'+91 98765 43210','password'=>'Kid-Pass-2026'])->assertSessionHas('messege','Student added. Login details are being sent on WhatsApp.');
+        $this->assertSame('919876543210',User::where('email','kid1@s.test')->value('phone'));
+        \Illuminate\Support\Facades\Log::shouldHaveReceived('info')->withArgs(fn($m,$c=[])=>$m==='[WABA Mock Login] Sign-in details sent'&&($c['login']??'')==='kid1@s.test')->once();
+        // A sibling cannot use the same number, written with or without the country code.
+        $this->add($school,'student','kid2@s.test',['phone'=>'9876543210'])->assertSessionHas('messege','This mobile number is already used by another account. Each person needs their own number.');
+        $this->assertNull(User::where('email','kid2@s.test')->first());
+        $this->add($school,'teacher','t@t.test',['phone'=>'12'])->assertSessionHas('messege','Enter a valid mobile number.');
+        // CSV: Parent_Phone is the last column; rows with a number get WhatsApp, others do not.
+        $this->actingAs($school)->post('/school/students/import',['csv_file'=>$this->csv("Name,Email,Roll,Password,Parent_Phone\nA,a@s.test,1,,9000000001\nB,b@s.test,2,,\n")])
+            ->assertSessionHas('messege','Import complete: 2 added, 0 skipped. 1 will get their login details on WhatsApp.');
+        $this->assertSame('919000000001',User::where('email','a@s.test')->value('phone'));
+    }
 }
