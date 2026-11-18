@@ -42,55 +42,8 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
         <div class="row">
             <div class="col-12">
 
-                <!-- Plan Navigation Bar: Switch tiers, change family, or go to general cart -->
-                <div class="cart-plan-switcher-wrap" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 20px; margin:24px 0 14px; box-shadow:0 1px 3px rgba(0,0,0,0.03);">
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                            <span style="font-weight:700; font-size:12px; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">
-                                <i class="fa fa-layer-group"></i>&nbsp; <?= $isSkillvationFamily ? 'Skillvation Lab Tiers:' : 'Composite Lab Tiers:' ?>
-                            </span>
-                            <?php if ($isSkillvationFamily): ?>
-                                <a href="<?= base_url('lab-cart?plan=skillvation'); ?>" class="btn btn-sm <?= in_array($planKey, ['skillvation', 'skilllab'], true) ? 'btn-success text-white' : 'btn-outline-secondary' ?>" style="font-weight:600; border-radius:20px; padding:4px 14px; font-size:12px;">
-                                    Standard Plan
-                                </a>
-                                <a href="<?= base_url('lab-cart?plan=skillvation-advance'); ?>" class="btn btn-sm <?= in_array($planKey, ['skillvation-advance', 'skilllab-advance'], true) ? 'btn-primary text-white' : 'btn-outline-secondary' ?>" style="font-weight:600; border-radius:20px; padding:4px 14px; font-size:12px;">
-                                    Advance Plan
-                                </a>
-                                <a href="<?= base_url('lab-cart?plan=skillvation-premium'); ?>" class="btn btn-sm <?= in_array($planKey, ['skillvation-premium', 'skilllab-premium'], true) ? 'text-white' : 'btn-outline-secondary' ?>" style="<?= in_array($planKey, ['skillvation-premium', 'skilllab-premium'], true) ? 'background:#7e22ce; border-color:#7e22ce;' : '' ?> font-weight:600; border-radius:20px; padding:4px 14px; font-size:12px;">
-                                    Premium Plan
-                                </a>
-                            <?php else: ?>
-                                <a href="<?= base_url('lab-cart?plan=basic'); ?>" class="btn btn-sm <?= $planKey === 'basic' ? 'btn-success text-white' : 'btn-outline-secondary' ?>" style="font-weight:600; border-radius:20px; padding:4px 14px; font-size:12px;">
-                                    Basic Plan
-                                </a>
-                                <a href="<?= base_url('lab-cart?plan=advance'); ?>" class="btn btn-sm <?= $planKey === 'advance' ? 'btn-primary text-white' : 'btn-outline-secondary' ?>" style="font-weight:600; border-radius:20px; padding:4px 14px; font-size:12px;">
-                                    Advance Plan
-                                </a>
-                                <a href="<?= base_url('lab-cart?plan=premium'); ?>" class="btn btn-sm <?= $planKey === 'premium' ? 'text-white' : 'btn-outline-secondary' ?>" style="<?= $planKey === 'premium' ? 'background:#7e22ce; border-color:#7e22ce;' : '' ?> font-weight:600; border-radius:20px; padding:4px 14px; font-size:12px;">
-                                    Premium Plan
-                                </a>
-                            <?php endif; ?>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
-                            <?php if ($isSkillvationFamily): ?>
-                                <a href="<?= base_url('lab-cart?plan=basic'); ?>" style="font-size:13px; font-weight:600; color:#2563eb; text-decoration:none;">
-                                    <i class="fa fa-refresh"></i> Switch to Composite Lab
-                                </a>
-                            <?php else: ?>
-                                <a href="<?= base_url('lab-cart?plan=skillvation'); ?>" style="font-size:13px; font-weight:600; color:#2563eb; text-decoration:none;">
-                                    <i class="fa fa-refresh"></i> Switch to Skillvation Lab
-                                </a>
-                            <?php endif; ?>
-                            <span style="color:#cbd5e1;">|</span>
-                            <a href="<?= generateUrl('cart'); ?>" style="font-size:13px; font-weight:600; color:#475569; text-decoration:none;">
-                                <i class="fa fa-shopping-cart"></i> General Shop Cart
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Plan banner -->
-                <div style="background:<?= $c['bg'] ?>; border:1px solid <?= $c['border'] ?>; border-radius:10px; padding:14px 20px; margin:0 0 16px; display:flex; align-items:center; gap:12px;">
+                <div style="background:<?= $c['bg'] ?>; border:1px solid <?= $c['border'] ?>; border-radius:10px; padding:14px 20px; margin:24px 0 16px; display:flex; align-items:center; gap:12px;">
                     <span style="background:<?= $c['badge_bg'] ?>; color:<?= $c['badge_text'] ?>; font-size:13px; font-weight:700; padding:4px 12px; border-radius:20px; border:1px solid <?= $c['border'] ?>; white-space:nowrap;">
                         <i class="fa <?= $ic ?>"></i>&nbsp; <?= esc($planLabel) ?>
                     </span>
