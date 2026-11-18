@@ -64,6 +64,13 @@
                                 <li class="nav-item">
                                     <a class="nav-link <?= $isDescriptionTabActive ? 'active' : ''; ?>" id="tab_description" data-toggle="tab" href="#tab_description_content"><?= trans("description"); ?></a>
                                 </li>
+                                <?php 
+                                $mappedCourses = !empty($mappedCourses) ? $mappedCourses : (function_exists('getProductMappedCourses') ? getProductMappedCourses((int)$product->id) : []);
+                                if (!empty($mappedCourses)): ?>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="tab_courses" data-toggle="tab" href="#tab_courses_content"><i class="fa fa-graduation-cap text-primary"></i> <?= count($mappedCourses) > 1 ? 'Courses' : 'Course'; ?>&nbsp;(<?= count($mappedCourses); ?>)</a>
+                                    </li>
+                                <?php endif; ?>
                                 <?php if (!empty($productCustomFieldsValues) && !empty($productCustomFieldsValues['bottom']) && countItems($productCustomFieldsValues['bottom']) > 0): ?>
                                     <li class="nav-item">
                                         <a class="nav-link" id="tab_additional_information" data-toggle="tab" href="#tab_additional_information_content"><?= trans("additional_information"); ?></a>
@@ -152,6 +159,22 @@
                                         </div>
                                     </div>
                                 </div>
+                                <?php if (!empty($mappedCourses)): ?>
+                                    <div class="tab-pane fade" id="tab_courses_content">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <a class="card-link collapsed" data-toggle="collapse" href="#collapse_courses_content">
+                                                    <i class="fa fa-graduation-cap text-primary"></i> <?= count($mappedCourses) > 1 ? 'Courses' : 'Course'; ?> (<?= count($mappedCourses); ?>)<i class="icon-arrow-down"></i><i class="icon-arrow-up"></i>
+                                                </a>
+                                            </div>
+                                            <div id="collapse_courses_content" class="collapse-description-content collapse">
+                                                <div class="tab-content-inner">
+                                                    <?= view('product/details/_mapped_courses', ['mappedCourses' => $mappedCourses, 'product' => $product]); ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
                                 <?php if (!empty($productCustomFieldsValues) && !empty($productCustomFieldsValues['bottom']) && countItems($productCustomFieldsValues['bottom']) > 0): ?>
                                     <div class="tab-pane fade" id="tab_additional_information_content">
                                         <div class="card">

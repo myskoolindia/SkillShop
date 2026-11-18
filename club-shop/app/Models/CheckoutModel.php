@@ -551,10 +551,12 @@ class CheckoutModel extends BaseModel
         }
         session()->set('just_completed_order', $order->order_number);
 
+        $roboquestUrl = \App\Libraries\RoboquestPaymentReturn::destination($order, session()->get() ?? [], mainAppUrl('roboquest/open'));
+
         return [
             'status' => 1,
             'message' => $isGuest ? null : trans("msg_order_completed"),
-            'redirectUrl' => generateUrl($isGuest ? 'order_completed' : 'order_details') . '/' . $order->order_number,
+            'redirectUrl' => $roboquestUrl ?: (generateUrl($isGuest ? 'order_completed' : 'order_details') . '/' . $order->order_number),
             'orderId' => $order->id,
             'orderNumber' => $order->order_number
         ];
@@ -743,6 +745,11 @@ class CheckoutModel extends BaseModel
                     helperSetSession('mds_show_order_completed_page', 1);
                 }
                 session()->set('just_completed_order', $order->order_number);
+
+                $roboquestUrl = \App\Libraries\RoboquestPaymentReturn::destination($order, session()->get() ?? [], mainAppUrl('roboquest/open'));
+                if ($roboquestUrl) {
+                    return $roboquestUrl;
+                }
 
                 setSuccessMessage(trans("msg_order_completed"));
                 $redirectRoute = $isGuest ? 'order_completed' : 'order_details';

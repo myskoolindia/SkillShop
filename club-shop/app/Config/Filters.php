@@ -91,6 +91,7 @@ class Filters extends BaseFilters
                     'payment/webhook/razorpay',
                     'payment/webhook/yoomoney',
                     'payment/webhook/mercado-pago',
+                    'checkout/complete-razorpay-payment',
                     'api/*',
                 ]
             ],

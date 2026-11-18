@@ -2,6 +2,24 @@
     <div class="container">
         <div class="row">
             <div class="col-12">
+                <!-- Lab Plans Quick Navigation -->
+                <div class="cart-plan-switcher-wrap" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:12px 20px; margin:20px 0 16px; box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <span style="font-size:13px; color:#475569; font-weight:600;">
+                            <i class="fa fa-shopping-cart text-primary"></i> <strong>General Shop Cart</strong>
+                        </span>
+                        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:13px;">
+                            <span style="color:#64748b; font-weight:600;">Looking for Lab Plans?</span>
+                            <a href="<?= base_url('lab-cart?plan=basic'); ?>" class="btn btn-sm btn-outline-success" style="font-weight:600; border-radius:20px; padding:3px 12px; font-size:12px;">
+                                <i class="fa fa-cube"></i> Composite Skill Lab
+                            </a>
+                            <a href="<?= base_url('lab-cart?plan=skillvation'); ?>" class="btn btn-sm btn-outline-primary" style="font-weight:600; border-radius:20px; padding:3px 12px; font-size:12px;">
+                                <i class="fa fa-graduation-cap"></i> Skillvation Lab
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
                 <?php if (!empty($cart) && !empty($cart->items)): ?>
                     <div class="shopping-cart">
                         <div class="row">

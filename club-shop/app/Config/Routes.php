@@ -734,6 +734,8 @@ if (!empty($languages)) {
         $routes->get($key . 'rss/' . $csrt->seller . '/(:any)', 'HomeController::rssBySeller/$1');
         //cart
         $routes->get($key . $csrt->cart, 'CartController::cart');
+        $routes->get($key . 'lab-cart', 'CartController::labCart');
+        $routes->get($key . 'lab-cart/(:any)', 'CartController::labCart/$1');
         $routes->get($key . 'basic-cart', 'CartController::basicCart');
         $routes->get($key . 'lab-design-cart', 'CartController::labDesignCart');
         $routes->get($key . 'advance-cart', 'CartController::advanceCart');
@@ -747,7 +749,7 @@ if (!empty($languages)) {
         //orders
         $routes->get($key . $csrt->orders, 'OrderController::orders');
         $routes->get($key . $csrt->order_details . '/(:num)', 'OrderController::order/$1');
-        $routes->get($key . $csrt->order_completed . '/(:num)', 'CheckoutController::orderCompleted/$1');
+        $routes->get($key . $csrt->order_completed . '/(:any)', 'CheckoutController::orderCompleted/$1');
         $routes->get($key . $csrt->checkout . '/' . $csrt->service_payment_completed, 'CheckoutController::servicePaymentCompleted');
         $routes->get($key . 'invoice/(:num)', 'HomeController::invoice/$1');
         $routes->get($key . 'invoicepos/(:num)', 'HomeController::invoicepos/$1');

@@ -58,10 +58,12 @@ class CartController extends BaseController
         $labSlugs = [
             'cbse-composite-skill-lab-basic-68', 'cbse-composite-skill-lab-advanced-72', 'cbse-composite-skill-lab-premium-73',
             'basic-skill-1', 'advance-skill-1', 'premium-skill-1',
-            'test-skill-1', 'basic-plan', 'advance-plan', 'premium-plan'
+            'test-skill-1', 'basic-plan', 'advance-plan', 'premium-plan',
+            'skillvation-lab', 'skillvation-lab-advance', 'skillvation-lab-premium',
+            'cbse-composite-skill-lab-basic-68-1793453049'
         ];
 
-        $ids = [68, 72, 73, 1, 26, 27];
+        $ids = [68, 72, 73, 74, 385, 386, 1, 26, 27, 114];
 
         try {
             $this->productModel->setBaseQuery(true);
@@ -69,7 +71,7 @@ class CartController extends BaseController
                 ->select('products.id')
                 ->groupStart()
                     ->whereIn('products.slug', $labSlugs)
-                    ->orWhereIn('products.id', [68, 72, 73, 1, 26, 27])
+                    ->orWhereIn('products.id', [68, 72, 73, 74, 385, 386, 1, 26, 27, 114])
                 ->groupEnd()
                 ->where('products.is_deleted', 0)
                 ->get()->getResult();
@@ -127,36 +129,199 @@ class CartController extends BaseController
     }
 
     /**
-     * Basic Cart
+     * Unified Lab Plan Cart
+     * Handles both CBSE Composite Skill Lab and Skillvation Lab tiers.
+     * Supports:
+     *   - basic / composite-basic
+     *   - advance / composite-advance
+     *   - premium / composite-premium
+     *   - skillvation / skilllab / skillvation-basic
+     *   - skillvation-advance / skilllab-advance
+     *   - skillvation-premium / skilllab-premium
      */
-    public function basicCart()
+    public function labCart(?string $planKey = null)
     {
-        $product = $this->productModel->getProductBySlug('cbse-composite-skill-lab-basic-68');
-        if (empty($product)) {
-            $product = $this->productModel->getActiveProduct(68);
+        if (empty($planKey)) {
+            $planKey = (string)inputGet('plan');
+        }
+
+        // If still empty, check if cart already has an active lab plan product
+        if (empty($planKey)) {
+            $existingCart = $this->cartModel->getCart();
+            if (!empty($existingCart) && !empty($existingCart->items)) {
+                $pidMap = [
+                    68  => 'basic',
+                    72  => 'advance',
+                    73  => 'premium',
+                    74  => 'skillvation',
+                    385 => 'skillvation-advance',
+                    386 => 'skillvation-premium',
+                ];
+                foreach ($existingCart->items as $item) {
+                    $itemPid = (int)$item->product_id;
+                    if (isset($pidMap[$itemPid])) {
+                        $planKey = $pidMap[$itemPid];
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (empty($planKey)) {
+            $planKey = 'basic';
+        }
+
+        $planKey = strtolower(trim($planKey));
+
+        $planConfigs = [
+            'basic' => [
+                'slugs'     => ['cbse-composite-skill-lab-basic-68', 'basic-skill-1'],
+                'ids'       => [68, 1],
+                'key'       => 'basic',
+                'label'     => 'Basic',
+                'title'     => 'Composite Skill Lab (Basic) — Cart',
+                'family'    => 'composite',
+            ],
+            'composite-basic' => [
+                'slugs'     => ['cbse-composite-skill-lab-basic-68', 'basic-skill-1'],
+                'ids'       => [68, 1],
+                'key'       => 'basic',
+                'label'     => 'Basic',
+                'title'     => 'Composite Skill Lab (Basic) — Cart',
+                'family'    => 'composite',
+            ],
+            'advance' => [
+                'slugs'     => ['cbse-composite-skill-lab-advanced-72', 'advance-skill-1'],
+                'ids'       => [72, 26],
+                'key'       => 'advance',
+                'label'     => 'Advance',
+                'title'     => 'Composite Skill Lab (Advance) — Cart',
+                'family'    => 'composite',
+            ],
+            'composite-advance' => [
+                'slugs'     => ['cbse-composite-skill-lab-advanced-72', 'advance-skill-1'],
+                'ids'       => [72, 26],
+                'key'       => 'advance',
+                'label'     => 'Advance',
+                'title'     => 'Composite Skill Lab (Advance) — Cart',
+                'family'    => 'composite',
+            ],
+            'premium' => [
+                'slugs'     => ['cbse-composite-skill-lab-premium-73', 'premium-skill-1'],
+                'ids'       => [73, 27],
+                'key'       => 'premium',
+                'label'     => 'Premium',
+                'title'     => 'Composite Skill Lab (Premium) — Cart',
+                'family'    => 'composite',
+            ],
+            'composite-premium' => [
+                'slugs'     => ['cbse-composite-skill-lab-premium-73', 'premium-skill-1'],
+                'ids'       => [73, 27],
+                'key'       => 'premium',
+                'label'     => 'Premium',
+                'title'     => 'Composite Skill Lab (Premium) — Cart',
+                'family'    => 'composite',
+            ],
+            'skillvation' => [
+                'slugs'     => ['skillvation-lab', 'cbse-composite-skill-lab-basic-68-1793453049'],
+                'ids'       => [74, 114],
+                'key'       => 'skillvation',
+                'label'     => 'Skillvation Standard',
+                'title'     => 'Skillvation Standard Lab — Cart',
+                'family'    => 'skillvation',
+            ],
+            'skilllab' => [
+                'slugs'     => ['skillvation-lab', 'cbse-composite-skill-lab-basic-68-1793453049'],
+                'ids'       => [74, 114],
+                'key'       => 'skillvation',
+                'label'     => 'Skillvation Standard',
+                'title'     => 'Skillvation Standard Lab — Cart',
+                'family'    => 'skillvation',
+            ],
+            'skillvation-basic' => [
+                'slugs'     => ['skillvation-lab', 'cbse-composite-skill-lab-basic-68-1793453049'],
+                'ids'       => [74, 114],
+                'key'       => 'skillvation',
+                'label'     => 'Skillvation Standard',
+                'title'     => 'Skillvation Standard Lab — Cart',
+                'family'    => 'skillvation',
+            ],
+            'skillvation-advance' => [
+                'slugs'     => ['skillvation-lab-advance', 'skillvation-lab'],
+                'ids'       => [385, 74],
+                'key'       => 'skillvation-advance',
+                'label'     => 'Skillvation Advance',
+                'title'     => 'Skillvation Advance Lab — Cart',
+                'family'    => 'skillvation',
+            ],
+            'skilllab-advance' => [
+                'slugs'     => ['skillvation-lab-advance', 'skillvation-lab'],
+                'ids'       => [385, 74],
+                'key'       => 'skillvation-advance',
+                'label'     => 'Skillvation Advance',
+                'title'     => 'Skillvation Advance Lab — Cart',
+                'family'    => 'skillvation',
+            ],
+            'skillvation-premium' => [
+                'slugs'     => ['skillvation-lab-premium', 'cbse-composite-skill-lab-premium-73'],
+                'ids'       => [386, 73],
+                'key'       => 'skillvation-premium',
+                'label'     => 'Skillvation Premium',
+                'title'     => 'Skillvation Premium Lab — Cart',
+                'family'    => 'skillvation',
+            ],
+            'skilllab-premium' => [
+                'slugs'     => ['skillvation-lab-premium', 'cbse-composite-skill-lab-premium-73'],
+                'ids'       => [386, 73],
+                'key'       => 'skillvation-premium',
+                'label'     => 'Skillvation Premium',
+                'title'     => 'Skillvation Premium Lab — Cart',
+                'family'    => 'skillvation',
+            ],
+        ];
+
+        $cfg = $planConfigs[$planKey] ?? $planConfigs['basic'];
+
+        $product = null;
+        foreach ($cfg['slugs'] as $slug) {
+            $product = $this->productModel->getProductBySlug($slug);
+            if (!empty($product)) {
+                break;
+            }
         }
         if (empty($product)) {
-            $product = $this->productModel->getProductBySlug('basic-skill-1');
-        }
-        if (empty($product)) {
-            $product = $this->productModel->getActiveProduct(1);
+            foreach ($cfg['ids'] as $id) {
+                $product = $this->productModel->getActiveProduct($id);
+                if (!empty($product)) {
+                    break;
+                }
+            }
         }
 
         $this->syncSelectedLabCart($product);
 
-        $data = setPageMeta('Basic Plan — Cart');
+        $data = setPageMeta($cfg['title']);
         $data['isTranslatable'] = true;
         $data['cart'] = $this->cartModel->getCart();
         $data['userSession'] = getUserSession();
-        $data['planKey'] = 'basic';
-        $data['planLabel'] = 'Basic';
-        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 68;
+        $data['planKey'] = $cfg['key'];
+        $data['planLabel'] = $cfg['label'];
+        $data['planFamily'] = $cfg['family'];
+        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : ($cfg['ids'][0] ?? 68);
 
         helperDeleteSession('mds_service_payment');
 
         echo view('partials/_header', $data);
-        echo view('cart/basic-cart', $data);
+        echo view('cart/_plan_cart', $data);
         echo view('partials/_footer');
+    }
+
+    /**
+     * Legacy plan cart routes (backward-compatible aliases)
+     */
+    public function basicCart()
+    {
+        return $this->labCart('basic');
     }
 
     /**
@@ -269,154 +434,43 @@ class CartController extends BaseController
     }
 
     /**
-     * Advance Cart
+     * Advance Cart (Alias to unified labCart)
      */
     public function advanceCart()
     {
-        $product = $this->productModel->getProductBySlug('cbse-composite-skill-lab-advanced-72');
-        if (empty($product)) {
-            $product = $this->productModel->getActiveProduct(72);
-        }
-        if (empty($product)) {
-            $product = $this->productModel->getProductBySlug('advance-skill-1');
-        }
-        if (empty($product)) {
-            $product = $this->productModel->getActiveProduct(26);
-        }
-
-        $this->syncSelectedLabCart($product);
-
-        $data = setPageMeta('Advance Plan — Cart');
-        $data['isTranslatable'] = true;
-        $data['cart'] = $this->cartModel->getCart();
-        $data['userSession'] = getUserSession();
-        $data['planKey'] = 'advance';
-        $data['planLabel'] = 'Advance';
-        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 72;
-        helperDeleteSession('mds_service_payment');
-
-        echo view('partials/_header', $data);
-        echo view('cart/advance-cart', $data);
-        echo view('partials/_footer');
+        return $this->labCart('advance');
     }
 
     /**
-     * Premium Cart
+     * Premium Cart (Alias to unified labCart)
      */
     public function premiumCart()
     {
-        $product = $this->productModel->getProductBySlug('cbse-composite-skill-lab-premium-73');
-        if (empty($product)) {
-            $product = $this->productModel->getActiveProduct(73);
-        }
-        if (empty($product)) {
-            $product = $this->productModel->getProductBySlug('premium-skill-1');
-        }
-        if (empty($product)) {
-            $product = $this->productModel->getActiveProduct(27);
-        }
-
-        $this->syncSelectedLabCart($product);
-
-        $data = setPageMeta('Premium Plan — Cart');
-        $data['isTranslatable'] = true;
-        $data['cart'] = $this->cartModel->getCart();
-        $data['userSession'] = getUserSession();
-        $data['planKey'] = 'premium';
-        $data['planLabel'] = 'Premium';
-        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 73;
-        helperDeleteSession('mds_service_payment');
-
-        echo view('partials/_header', $data);
-        echo view('cart/premium-cart', $data);
-        echo view('partials/_footer');
+        return $this->labCart('premium');
     }
 
     /**
-     * Skillvations Cart
+     * Skillvation Cart (Alias to unified labCart)
      */
     public function skilllabCart()
     {
-        $product = $this->productModel->getProductBySlug('cbse-composite-skill-lab-basic-68-1793453049');
-        if (empty($product)) {
-            $product = $this->productModel->getActiveProduct(114);
-        }
-        if (empty($product)) {
-            $product = $this->productModel->getProductBySlug('skillvation-lab');
-        }
-        if (empty($product)) {
-            $product = $this->productModel->getActiveProduct(1);
-        }
-
-        $this->syncSelectedLabCart($product);
-
-        $data = setPageMeta('Sillvation Plan — Cart');
-        $data['isTranslatable'] = true;
-        $data['cart'] = $this->cartModel->getCart();
-        $data['userSession'] = getUserSession();
-        $data['planKey'] = 'skilllab';
-        $data['planLabel'] = 'Skillvation';
-        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 74;
-
-        helperDeleteSession('mds_service_payment');
-
-        echo view('partials/_header', $data);
-        echo view('cart/skillvation-cart', $data);
-        echo view('partials/_footer');
+        return $this->labCart('skillvation');
     }
 
     /**
-     * Skillvation Advance Cart
+     * Skillvation Advance Cart (Alias to unified labCart)
      */
     public function skilllabAdvanceCart()
     {
-        $product = $this->productModel->getProductBySlug('skillvation-lab');
-        if (empty($product)) {
-            $product = $this->productModel->getActiveProduct(74);
-        }
-
-        $this->syncSelectedLabCart($product);
-
-        $data = setPageMeta('Skillvation Advance Plan — Cart');
-        $data['isTranslatable'] = true;
-        $data['cart'] = $this->cartModel->getCart();
-        $data['userSession'] = getUserSession();
-        $data['planKey'] = 'skilllab-advance';
-        $data['planLabel'] = 'Skillvation Advance';
-        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 385;
-
-        helperDeleteSession('mds_service_payment');
-
-        echo view('partials/_header', $data);
-        echo view('cart/skillvation-advance-cart', $data);
-        echo view('partials/_footer');
+        return $this->labCart('skillvation-advance');
     }
 
     /**
-     * Skillvation Premium Cart
+     * Skillvation Premium Cart (Alias to unified labCart)
      */
     public function skilllabPremiumCart()
     {
-        $product = $this->productModel->getProductBySlug('cbse-composite-skill-lab-premium-73');
-        if (empty($product)) {
-            $product = $this->productModel->getActiveProduct(73);
-        }
-
-        $this->syncSelectedLabCart($product);
-
-        $data = setPageMeta('Skillvation Premium Plan — Cart');
-        $data['isTranslatable'] = true;
-        $data['cart'] = $this->cartModel->getCart();
-        $data['userSession'] = getUserSession();
-        $data['planKey'] = 'skilllab-premium';
-        $data['planLabel'] = 'Skillvation Premium';
-        $data['planDefaultProductId'] = !empty($product) ? (int)$product->id : 386;
-
-        helperDeleteSession('mds_service_payment');
-
-        echo view('partials/_header', $data);
-        echo view('cart/skillvation-premium-cart', $data);
-        echo view('partials/_footer');
+        return $this->labCart('skillvation-premium');
     }
 
     /**
