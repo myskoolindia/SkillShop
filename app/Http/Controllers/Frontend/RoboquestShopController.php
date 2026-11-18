@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
  * The teacher and student shops inside RoboQuest.
  *   POST /api/roboquest/shop/products  (school-signed)  products of the teacher (lab) shop or the student shop
  *   POST /api/roboquest/shop/link      (school-signed)  a one-time link that opens the shop signed in as that member
+ *   POST /api/roboquest/shop/orders    (school-signed)  that member's own Club Shop orders (My orders in RoboQuest)
  *   GET  /roboquest/shop-open?code=…                    signs the member in and continues to the Club Shop page
  * RoboQuest shows the products itself and opens the link in a frame for cart and payment.
  */
@@ -49,15 +50,55 @@ class RoboquestShopController extends RoboquestController
             'page' => (int) ($pagination['page'] ?? $input['page'] ?? 1), 'pages' => (int) ($pagination['pages'] ?? 1), 'total' => (int) ($pagination['total'] ?? $products->count())])->header('Cache-Control', 'no-store');
     }
 
+    /**
+     * The signed-in RoboQuest person, if they may use this connection's shop: the school itself, an active member of it,
+     * or (personal space) a teacher or student who is in no school.
+     */
+    private function member(\App\Models\RoboquestConnection $connection, string $externalId): User
+    {
+        $user = User::find((int) $externalId);
+        $ok = $user && $user->status === 'active' && !in_array($user->is_banned, [1, '1', 'yes'], true) && (
+            \App\Services\RoboquestService::isPersonal($connection)
+                ? in_array($user->role, ['teacher', 'student', 'instructor'], true) && !SchoolMember::where('user_id', $user->id)->where('status', 'active')->exists()
+                : ((int) $user->id === (int) $connection->school_user_id
+                    || SchoolMember::where('school_id', $connection->school_user_id)->where('user_id', $user->id)->where('status', 'active')->exists()));
+        abort_unless($ok, 404, 'This person is not an active member of the school on Skillvation.');
+        return $user;
+    }
+
+    /** This person's own Club Shop orders, newest first (matched by their Skillvation email, as single sign-on does). */
+    public function orders(Request $request)
+    {
+        $connection = $this->authenticate($request);
+        $input = $request->validate(['externalId' => 'required|string|max:20', 'limit' => 'nullable|integer|min:1|max:50']);
+        $user = $this->member($connection, $input['externalId']);
+        try {
+            $shop = DB::connection('clubshop');
+            $buyer = $shop->table('users')->whereRaw('LOWER(email) = ?', [mb_strtolower($user->email)])->value('id');
+            $orders = $buyer ? $shop->table('orders')->where('buyer_id', $buyer)->orderByDesc('id')->limit($input['limit'] ?? 20)->get() : collect();
+            $items = $orders->isEmpty() ? collect() : $shop->table('order_items')->whereIn('order_id', $orders->pluck('id'))->get()->groupBy('order_id');
+        } catch (\Throwable $e) {
+            Log::warning('[RoboQuest shop] orders unavailable', ['error' => $e->getMessage()]);
+            abort(502, 'Your orders are unavailable right now.');
+        }
+        // Same wording as the Club Shop's own order list.
+        $status = fn ($o) => (int) $o->status === 2 ? 'cancelled'
+            : ($o->payment_status === 'pending_payment' ? ($o->payment_method === 'cash_on_delivery' ? 'processing' : 'pending_payment')
+            : ((int) $o->status === 1 ? 'completed' : 'processing'));
+        return response()->json(['orders' => $orders->map(fn ($o) => [
+            'number' => (string) $o->order_number, 'date' => (string) $o->created_at, 'status' => $status($o),
+            'total' => (float) $o->price_total, 'currency' => $o->price_currency ?: 'INR',
+            'items' => $items->get($o->id, collect())->map(fn ($i) => ['title' => (string) $i->product_title, 'quantity' => (int) ($i->product_quantity ?? 1),
+                'price' => (float) ($i->product_total_price ?? $i->product_unit_price ?? 0)])->values(),
+        ])->values()])->header('Cache-Control', 'no-store');
+    }
+
     public function link(Request $request)
     {
         $connection = $this->authenticate($request);
         $input = $request->validate(['externalId' => 'required|string|max:20', 'target' => ['required', 'string', 'max:300', 'regex:#^/[A-Za-z0-9/_\-.?=&%]*$#']]);
         abort_if(str_contains($input['target'], '..') || str_starts_with($input['target'], '//'), 422, 'Invalid shop page.');
-        $user = User::find((int) $input['externalId']);
-        $member = $user && ((int) $user->id === (int) $connection->school_user_id
-            || SchoolMember::where('school_id', $connection->school_user_id)->where('user_id', $user->id)->where('status', 'active')->exists());
-        abort_unless($member && $user->status === 'active', 404, 'This person is not an active member of the school on Skillvation.');
+        $user = $this->member($connection, $input['externalId']);
         $code = bin2hex(random_bytes(32));
         DB::table('roboquest_shop_codes')->where('expires_at', '<', now()->subDay())->delete();
         DB::table('roboquest_shop_codes')->insert(['connection_id' => $connection->id, 'user_id' => $user->id, 'code_hash' => hash('sha256', $code), 'target' => $input['target'], 'expires_at' => now()->addMinutes(2), 'created_at' => now(), 'updated_at' => now()]);
