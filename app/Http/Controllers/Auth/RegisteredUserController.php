@@ -13,6 +13,7 @@ use App\Services\WabaOtpService;
 use App\Traits\GetGlobalInformationTrait;
 use Cache;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -54,6 +55,43 @@ class RegisteredUserController extends Controller
             ->get();
 
         return view('auth.register', compact('isLabContext', 'intended', 'schools'));
+    }
+
+    /**
+     * Real-time inline validation check for email uniqueness and format.
+     */
+    public function checkEmail(Request $request): JsonResponse
+    {
+        $email = trim((string) $request->input('email', ''));
+
+        if ($email === '') {
+            return response()->json([
+                'status'  => 'empty',
+                'message' => __('Email address is required.'),
+            ]);
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return response()->json([
+                'status'  => 'invalid',
+                'message' => __('Please enter a valid email address (e.g. name@example.com).'),
+            ]);
+        }
+
+        $exists = User::where('email', $email)->exists();
+
+        if ($exists) {
+            return response()->json([
+                'status'    => 'taken',
+                'message'   => __('This email is already registered.'),
+                'login_url' => route('login'),
+            ]);
+        }
+
+        return response()->json([
+            'status'  => 'available',
+            'message' => __('Email address is available.'),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse

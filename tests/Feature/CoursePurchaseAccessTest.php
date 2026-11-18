@@ -157,7 +157,7 @@ class CoursePurchaseAccessTest extends TestCase
         $this->assertTrue($student->hasPurchasedCourses());
     }
 
-    public function test_login_without_purchased_courses_redirects_to_home_not_dashboard(): void
+    public function test_login_without_purchased_courses_redirects_to_no_courses_purchased(): void
     {
         $student = $this->createUser('student_login_none@test.com', 'student');
 
@@ -171,7 +171,7 @@ class CoursePurchaseAccessTest extends TestCase
         $controller = app(\App\Http\Controllers\Auth\AuthenticatedSessionController::class);
         $response = $controller->store($loginRequest);
 
-        $this->assertSame(route('home'), $response->getTargetUrl());
+        $this->assertSame(route('no-courses-purchased'), $response->getTargetUrl());
     }
 
     public function test_login_with_purchased_courses_redirects_to_roboquest(): void
@@ -194,7 +194,7 @@ class CoursePurchaseAccessTest extends TestCase
         $this->assertSame(route('roboquest.launch'), $response->getTargetUrl());
     }
 
-    public function test_school_without_purchased_courses_visiting_dashboard_redirects_to_profile(): void
+    public function test_school_without_purchased_courses_visiting_dashboard_shows_no_courses_view(): void
     {
         $school = $this->createUser('school_dash_none@test.com', 'school');
         $this->actingAs($school);
@@ -202,10 +202,11 @@ class CoursePurchaseAccessTest extends TestCase
         $controller = app(SchoolDashboardController::class);
         $response = $controller->index();
 
-        $this->assertSame(route('school.profile.index'), $response->getTargetUrl());
+        $this->assertInstanceOf(\Illuminate\View\View::class, $response);
+        $this->assertSame('frontend.pages.no-courses-purchased', $response->name());
     }
 
-    public function test_student_without_purchased_courses_visiting_dashboard_redirects_to_profile(): void
+    public function test_student_without_purchased_courses_visiting_dashboard_shows_no_courses_view(): void
     {
         $student = $this->createUser('student_dash_none@test.com', 'student');
         $this->actingAs($student);
@@ -213,6 +214,7 @@ class CoursePurchaseAccessTest extends TestCase
         $controller = app(StudentDashboardController::class);
         $response = $controller->index();
 
-        $this->assertSame(route('student.setting.index'), $response->getTargetUrl());
+        $this->assertInstanceOf(\Illuminate\View\View::class, $response);
+        $this->assertSame('frontend.pages.no-courses-purchased', $response->name());
     }
 }

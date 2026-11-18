@@ -49,6 +49,7 @@ class User extends Authenticatable {
         'country_id',
         'state',
         'city',
+        'address',
     ];
 
     /**

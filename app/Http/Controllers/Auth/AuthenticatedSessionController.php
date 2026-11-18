@@ -163,7 +163,7 @@ class AuthenticatedSessionController extends Controller
                     return redirect()->to($intendedUrl)->with($notification);
                 }
                 $request->session()->forget('url.intended');
-                return redirect()->route('home')->with($notification);
+                return redirect()->route('no-courses-purchased');
             }
         }
 

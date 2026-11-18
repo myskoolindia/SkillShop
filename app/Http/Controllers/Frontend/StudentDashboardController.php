@@ -28,9 +28,8 @@ class StudentDashboardController extends Controller {
         }
 
         if (!userAuth()->hasPurchasedCourses()) {
-            return redirect()->route('student.setting.index')->with([
-                'messege' => __('You do not have any purchased courses yet. Please explore our shop or courses to get started.'),
-                'alert-type' => 'info',
+            return view('frontend.pages.no-courses-purchased', [
+                'user' => userAuth(),
             ]);
         }
 

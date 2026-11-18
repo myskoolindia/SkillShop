@@ -1163,7 +1163,7 @@
     // Load Categories from API
     async function loadCategories() {
       try {
-        const res = await fetch('/api/shop-categories');
+        const res = await fetch('{{ url('/api/shop-categories') }}');
         const json = await res.json();
         if (json && json.data && json.data.length > 0) {
           const currentVal = categoryFilter.value;
@@ -1183,12 +1183,12 @@
       emptyState.classList.add('hidden');
 
       try {
-        const res = await fetch('/api/shop-products?per_page=100');
+        const res = await fetch('{{ url('/api/shop-products') }}?per_page=100');
         if (!res.ok) throw new Error('Unable to load the student shop');
         const json = await res.json();
         const pages = Math.min(Number(json.pagination?.pages || json.last_page || 1), 20);
         const remaining = await Promise.all(Array.from({length: Math.max(0, pages - 1)}, async (_, i) => {
-          const response = await fetch('/api/shop-products?per_page=100&page=' + (i + 2));
+          const response = await fetch('{{ url('/api/shop-products') }}?per_page=100&page=' + (i + 2));
           if (!response.ok) throw new Error('Unable to load another product page');
           return response.json();
         }));
@@ -1264,7 +1264,7 @@
 
         return `
           <div class="skillbox-card">
-            <div class="skillbox-card__img-box" onclick="window.location.href='/ProductDetails/${detailKey}'">
+            <div class="skillbox-card__img-box" onclick="window.location.href='{{ url('/product-details') }}/${detailKey}'">
               <img src="${image}" alt="${title}" class="skillbox-card__img" loading="lazy" onerror="this.onerror=null;this.src='https://pedaskills.com/static/media/skillBoxImg.54ef565f4b0836600035.png';" />
               <button 
                 class="skillbox-card__wish-btn ${isWishlisted ? 'active' : ''}" 
@@ -1275,7 +1275,7 @@
               </button>
             </div>
 
-            <div class="skillbox-card__body" onclick="window.location.href='/ProductDetails/${detailKey}'" style="cursor: pointer;">
+            <div class="skillbox-card__body" onclick="window.location.href='{{ url('/product-details') }}/${detailKey}'" style="cursor: pointer;">
               <h3 class="skillbox-card__title" title="${title}">${title}</h3>
               
               <div class="skillbox-card__stars">
@@ -1534,7 +1534,7 @@
       }));
 
       function recordShopOrder(paymentId, payStatus) {
-        fetch('/api/shop-orders/create', {
+        fetch('{{ url('/api/shop-orders/create') }}', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

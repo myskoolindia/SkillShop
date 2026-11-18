@@ -1052,7 +1052,7 @@
     // Load Product Data
     async function loadProductDetails() {
       try {
-        const res = await fetch(`/api/product-details/${encodeURIComponent(productLookup)}`);
+        const res = await fetch(`{{ url('/api/product-details') }}/${encodeURIComponent(productLookup)}`);
         const json = await res.json();
         
         if (json && json.data) {
@@ -1062,11 +1062,11 @@
           loadSimilarProducts(productData.category_id || (productData.category ? productData.category.id : null));
         } else {
           document.getElementById('breadcrumbTitle').textContent = 'Product not found';
-          productLoading.innerHTML = '<div class="text-center py-12 text-slate-500 font-bold">Product not found. <a href="/shop" class="text-red-600 underline ml-2">Back to Shop</a></div>';
+          productLoading.innerHTML = '<div class="text-center py-12 text-slate-500 font-bold">Product not found. <a href="{{ url('/shop') }}" class="text-red-600 underline ml-2">Back to Shop</a></div>';
         }
       } catch (err) {
         console.error('Error fetching product details:', err);
-        productLoading.innerHTML = '<div class="text-center py-12 text-slate-500 font-bold">Error loading product details. <a href="/shop" class="text-red-600 underline ml-2">Back to Shop</a></div>';
+        productLoading.innerHTML = '<div class="text-center py-12 text-slate-500 font-bold">Error loading product details. <a href="{{ url('/shop') }}" class="text-red-600 underline ml-2">Back to Shop</a></div>';
       }
     }
 
@@ -1146,7 +1146,7 @@
     // Load Similar Products
     async function loadSimilarProducts(catId) {
       try {
-        const url = catId ? `/api/shop-products?category_id=${catId}` : '/api/shop-products';
+        const url = catId ? `{{ url('/api/shop-products') }}?category_id=${catId}` : '{{ url('/api/shop-products') }}';
         const res = await fetch(url);
         const json = await res.json();
         const items = (json.data || []).filter(item => String(item.id) !== String(productId)).slice(0, 4);
@@ -1162,10 +1162,10 @@
 
             return `
               <div class="rel-card">
-                <div class="rel-card__img-box" onclick="window.location.href='/ProductDetails/${detailKey}'">
+                <div class="rel-card__img-box" onclick="window.location.href='{{ url('/product-details') }}/${detailKey}'">
                   <img src="${img}" alt="${title}" class="rel-card__img" loading="lazy" onerror="this.src='https://pedaskills.com/static/media/skillBoxImg.54ef565f4b0836600035.png';" />
                 </div>
-                <div class="p-4 flex flex-col flex-grow bg-white cursor-pointer" onclick="window.location.href='/ProductDetails/${detailKey}'">
+                <div class="p-4 flex flex-col flex-grow bg-white cursor-pointer" onclick="window.location.href='{{ url('/product-details') }}/${detailKey}'">
                   <h4 class="text-sm font-semibold text-slate-800 line-clamp-2 mb-2">${title}</h4>
                   <div class="flex items-center justify-between mt-auto pt-2 border-t border-slate-100">
                     <span class="text-base font-bold text-slate-900">₹ ${discounted.toLocaleString('en-IN')}</span>
@@ -1455,7 +1455,7 @@
       }
 
       function recordShopOrder(paymentId, payStatus) {
-        fetch('/api/shop-orders/create', {
+        fetch('{{ url('/api/shop-orders/create') }}', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
