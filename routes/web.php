@@ -162,6 +162,11 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
         return view('frontend.home-four.pages.upskill-teacher');
     })->name('upskill4teacher');
 
+    Route::get('/lataa', function () {
+        return view('frontend.home-four.pages.lataa');
+    })->name('lataa');
+    Route::get('/lataa-os', fn() => redirect()->route('lataa'));
+
     Route::get('/shop', function () {
         return view('frontend.home-four.pages.shop');
     })->name('shop');
