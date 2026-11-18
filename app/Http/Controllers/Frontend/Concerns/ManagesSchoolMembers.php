@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Frontend\Concerns;
 
 use App\Models\SchoolMember;
 use App\Services\SchoolMemberProvisioner;
+use App\Services\WabaOtpService;
 use Illuminate\Http\{RedirectResponse, Request};
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -24,15 +25,38 @@ trait ManagesSchoolMembers
         return 'school_member_credentials.' . $role;
     }
 
+    /**
+     * New accounts with a mobile number get their login details on WhatsApp, after the page has been sent (so a slow
+     * WhatsApp API never delays the school). Existing accounts keep their password, so nothing is sent for them.
+     *
+     * @param array<int, array{user: \App\Models\User, password: string}> $people
+     */
+    protected function sendLoginDetails(array $people): int
+    {
+        $people = array_values(array_filter($people, fn ($p) => !empty($p['user']->phone) && $p['password'] !== ''));
+        if (!$people) return 0;
+        $school = userAuth();
+        $schoolName = $school->school_name ?: $school->name;
+        $url = route('roboquest.signin');
+        dispatch(function () use ($people, $schoolName, $url) {
+            $waba = app(WabaOtpService::class);
+            foreach ($people as $p) {
+                $waba->sendLoginDetails($p['user']->phone, ['name' => $p['user']->name, 'login' => $p['user']->email, 'password' => $p['password'], 'url' => $url, 'school' => $schoolName]);
+            }
+        })->afterResponse();
+        return count($people);
+    }
+
     protected function addMember(Request $request, array $fields = []): RedirectResponse
     {
         $role = $this->memberRole();
-        $result = app(SchoolMemberProvisioner::class)->add(userAuth()->id, $role, (string) $request->name, (string) $request->email, $request->password, $fields);
+        $result = app(SchoolMemberProvisioner::class)->add(userAuth()->id, $role, (string) $request->name, (string) $request->email, $request->password, $fields, $request->input('phone'));
         if (!$result['added']) return redirect()->back()->withInput($request->except('password'))->with(['messege' => $result['error'], 'alert-type' => 'error']);
         $label = $role === 'teacher' ? __('Teacher') : __('Student');
+        $sent = $result['created'] ? $this->sendLoginDetails([['user' => $result['user'], 'password' => (string) ($result['password'] ?? $request->password)]]) : 0;
         $message = !$result['created']
             ? __(':label added. They already had an account, so their current password is unchanged.', ['label' => $label])
-            : __(':label added.', ['label' => $label]);
+            : ($sent ? __(':label added. Login details are being sent on WhatsApp.', ['label' => $label]) : __(':label added.', ['label' => $label]));
         // Shown once on the next page in a panel that stays until dismissed, not in a disappearing toast.
         $new = $result['password'] === null ? null : ['name' => $result['user']->name, 'email' => $result['user']->email, 'password' => $result['password']];
         return redirect()->route("school.{$role}s.index")->with(['messege' => $message, 'alert-type' => 'success', 'new_member_login' => $new]);
@@ -56,7 +80,7 @@ trait ManagesSchoolMembers
         fgetcsv($handle, 0, $delimiter); // header row
 
         $provisioner = app(SchoolMemberProvisioner::class);
-        $added = 0; $problems = []; $credentials = []; $line = 1;
+        $added = 0; $problems = []; $credentials = []; $notify = []; $line = 1;
         try {
             while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
                 $line++;
@@ -64,10 +88,11 @@ trait ManagesSchoolMembers
                 if ($line - 1 > self::$maxImportRows) { $problems[] = ['line' => $line, 'email' => '', 'reason' => __('Only the first :max rows are imported. Upload the rest in another file.', ['max' => self::$maxImportRows])]; break; }
                 $values = $parse(array_map(fn($cell) => trim((string) $cell), $row));
                 $values['name'] = preg_replace('/^\xEF\xBB\xBF/', '', $values['name']);
-                $result = $provisioner->add(userAuth()->id, $role, $values['name'], $values['email'], $values['password'], $values['fields']);
+                $result = $provisioner->add(userAuth()->id, $role, $values['name'], $values['email'], $values['password'], $values['fields'], $values['phone'] ?? null);
                 if (!$result['added']) { $problems[] = ['line' => $line, 'email' => $values['email'], 'reason' => $result['error']]; continue; }
                 $added++;
                 if ($result['password'] !== null) $credentials[] = ['name' => $result['user']->name, 'email' => $result['user']->email, 'password' => $result['password']];
+                if ($result['created']) $notify[] = ['user' => $result['user'], 'password' => (string) ($result['password'] ?? $values['password'])];
             }
         } finally {
             fclose($handle);
@@ -75,7 +100,9 @@ trait ManagesSchoolMembers
 
         // Replace any undownloaded details from an earlier import: the newest list is the one the school expects.
         if ($credentials) session()->put(self::credentialsKey($role), ['role' => $role, 'rows' => $credentials, 'createdAt' => now()->toIso8601String()]);
-        $message = __('Import complete: :added added, :skipped skipped.', ['added' => $added, 'skipped' => count($problems)]);
+        $sent = $this->sendLoginDetails($notify);
+        $message = __('Import complete: :added added, :skipped skipped.', ['added' => $added, 'skipped' => count($problems)])
+            . ($sent ? ' ' . __(':n will get their login details on WhatsApp.', ['n' => $sent]) : '');
         return redirect()->route("school.{$role}s.index")->with(['messege' => $message, 'alert-type' => $problems ? 'warning' : 'success', 'import_problems' => array_slice($problems, 0, 200)]);
     }
 

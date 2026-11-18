@@ -37,7 +37,7 @@ class SchoolTeacherController extends Controller
 
     public function downloadTemplate()
     {
-        return $this->csvTemplate(['Name', 'Email', 'ID_Number', 'Password'], ['Jane Doe', 'teacher@example.com', 'TCH-001', ''], 'teachers_import_template.csv');
+        return $this->csvTemplate(['Name', 'Email', 'ID_Number', 'Password', 'Phone'], ['Jane Doe', 'teacher@example.com', 'TCH-001', '', '9876543211'], 'teachers_import_template.csv');
     }
 
     public function show(SchoolMember $member): View
@@ -82,6 +82,7 @@ class SchoolTeacherController extends Controller
             'email'     => 'required|email|max:255',
             'password'  => 'nullable|string|min:' . SchoolMemberProvisioner::MIN_PASSWORD . '|max:128',
             'id_number' => 'nullable|string|max:100',
+            'phone'     => 'nullable|string|max:20',
         ]);
 
         return $this->addMember($request, ['id_number' => $request->id_number]);
@@ -89,9 +90,9 @@ class SchoolTeacherController extends Controller
 
     public function import(Request $request): RedirectResponse
     {
-        // Columns: Name, Email, ID_Number, Password (optional)
+        // Columns: Name, Email, ID_Number, Password (optional), Phone (optional, for WhatsApp login details)
         return $this->importMembers($request, fn(array $row) => [
-            'name' => $row[0] ?? '', 'email' => $row[1] ?? '', 'password' => $row[3] ?? null,
+            'name' => $row[0] ?? '', 'email' => $row[1] ?? '', 'password' => $row[3] ?? null, 'phone' => $row[4] ?? null,
             'fields' => ['id_number' => $row[2] ?? null],
         ]);
     }

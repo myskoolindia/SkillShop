@@ -13,6 +13,8 @@ use Illuminate\Support\Str;
  * - An existing account can only be linked with its own role, and its password is never changed.
  * - A person can be active in only one school at a time. RoboQuest needs this to know which school to open.
  * - A password is at least 8 characters. When none is given, a random one is generated and shown once.
+ * - A mobile number (optional) belongs to one person only: siblings cannot share one. New accounts with a number get
+ *   their login details on WhatsApp (see ManagesSchoolMembers).
  */
 class SchoolMemberProvisioner
 {
@@ -21,11 +23,12 @@ class SchoolMemberProvisioner
 
     /**
      * @param array $fields Extra school_members columns (id_number, grade, section, academic_year, board).
+     * @param ?string $phone Mobile number for WhatsApp (teacher's own; for a student, a parent's number used by no one else).
      * @return array{added: bool, created: bool, error: ?string, user: ?User, password: ?string}
      *         created: a new account was made (otherwise an existing one was linked).
      *         password: set only when it was generated here; this is the only time it can be shown.
      */
-    public function add(int $schoolId, string $role, string $name, string $email, ?string $password, array $fields = []): array
+    public function add(int $schoolId, string $role, string $name, string $email, ?string $password, array $fields = [], ?string $phone = null): array
     {
         abort_unless(in_array($role, self::ROLES, true), 500, 'Unsupported school role.');
         $name = trim($name);
@@ -36,12 +39,18 @@ class SchoolMemberProvisioner
         if ($password !== null && (mb_strlen($password) < self::MIN_PASSWORD || mb_strlen($password) > 128)) {
             return $this->fail(__('Passwords must be :min to 128 characters.', ['min' => self::MIN_PASSWORD]));
         }
+        $phone = $phone === null || trim($phone) === '' ? null : app(WabaOtpService::class)->sanitizePhone($phone);
+        if ($phone !== null && !preg_match('/^\d{10,15}$/', $phone)) return $this->fail(__('Enter a valid mobile number.'));
 
-        return DB::transaction(function () use ($schoolId, $role, $name, $email, $password, $fields) {
+        return DB::transaction(function () use ($schoolId, $role, $name, $email, $password, $fields, $phone) {
             // Lock the account so two schools cannot add the same person at the same moment.
             $user = User::whereRaw('LOWER(email) = ?', [$email])->lockForUpdate()->first();
             $generated = null;
             $created = !$user;
+            // One number per person: the same 10 digits on any other account (with or without country code) blocks it.
+            if ($phone !== null && User::where(fn ($q) => $q->where('phone', $phone)->orWhere('phone', 'like', '%' . substr($phone, -10)))->when($user, fn ($q) => $q->where('id', '<>', $user->id))->exists()) {
+                return $this->fail(__('This mobile number is already used by another account. Each person needs their own number.'));
+            }
             if ($user) {
                 if ($user->role !== $role) return $this->fail(__('This email belongs to an existing :role account and cannot be added as a :wanted.', ['role' => $user->role, 'wanted' => $role]));
                 if ($user->status !== 'active' || in_array($user->is_banned, [1, '1', 'yes'], true)) return $this->fail(__('This account is inactive. Contact support to restore it.'));
@@ -51,9 +60,11 @@ class SchoolMemberProvisioner
                 $generated = $password === null ? $this->generatePassword() : null;
                 $user = User::create([
                     'name' => $name, 'email' => $email, 'role' => $role, 'password' => Hash::make($password ?? $generated),
-                    'status' => 'active', 'is_banned' => 'no', 'email_verified_at' => now(), 'verification_token' => null,
+                    'status' => 'active', 'is_banned' => 'no', 'email_verified_at' => now(), 'verification_token' => null, 'phone' => $phone,
                 ]);
             }
+            // An existing account without a number gets the one the school entered.
+            if (!$created && $phone !== null && empty($user->phone)) $user->update(['phone' => $phone]);
             SchoolMember::create(array_merge(array_map(fn($value) => is_string($value) && trim($value) === '' ? null : $value, $fields), [
                 'school_id' => $schoolId, 'user_id' => $user->id, 'role_in_school' => $role, 'status' => 'active',
             ]));

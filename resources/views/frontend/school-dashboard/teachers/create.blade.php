@@ -34,6 +34,14 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-grp">
+                                <label for="phone">{{ __('WhatsApp number') }} <small class="text-muted">({{ __('recommended') }})</small></label>
+                                <input type="tel" id="phone" name="phone" value="{{ old('phone') }}" maxlength="20" placeholder="{{ __('e.g. 98765 43210') }}">
+                                <small class="text-muted">{{ __("The teacher's login details are sent here on WhatsApp.") }}</small>
+                                <x-frontend.validation-error name="phone" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-grp">
                                 <label for="id_number">{{ __('Employee ID / ID Number') }}</label>
                                 <input type="text" id="id_number" name="id_number" value="{{ old('id_number') }}" placeholder="{{ __('Optional') }}">
                             </div>
