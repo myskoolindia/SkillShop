@@ -85,7 +85,9 @@ body { font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Seg
     transition: color 0.2s ease;
 }
 .tgmenu__navbar-wrap ul.navigation > li:hover > a,
-.tgmenu__navbar-wrap ul.navigation > li.active > a {
+.tgmenu__navbar-wrap ul.navigation > li.active > a,
+.tgmenu__navbar-wrap ul.navigation > li.active > a > span {
+    font-weight: 800 !important;
     color: #1363DF !important;
 }
 

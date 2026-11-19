@@ -29,22 +29,23 @@ if (session('roboquest_shop_role') === 'school'): ?>
   <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
   <polyline points="9 22 9 12 15 12 15 22"/>
 </svg>
-</div><?= 'Skillvation School Portal'; ?>
+</div><?= 'Dashboard'; ?>
 </a>
 </li>
-<?php elseif (session('roboquest_shop_role') === 'teacher'): ?>
+<?php elseif (in_array(session('roboquest_shop_role'), ['teacher', 'student'], true)): ?>
 <li>
-<a href="<?= ssoMainUrl('student/dashboard'); ?>" style="color: #4f46e5; font-weight: 600;">
+<a href="<?= ssoMainUrl('roboquest/open'); ?>" style="color: #4f46e5; font-weight: 600;">
 <div class="icon">
 <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
   <polyline points="9 22 9 12 15 12 15 22"/>
 </svg>
-</div><?= 'Skillvation Teacher Portal'; ?>
+</div><?= 'Dashboard'; ?>
 </a>
 </li>
 <?php endif;
-if (isVendor() && !empty($profileMenuDash) && (int)user()->role_id !== 3 && !in_array(session('roboquest_shop_role'), ['school', 'teacher'], true)): ?>
+if (!in_array(session('roboquest_shop_role'), ['school', 'teacher', 'student'], true)):
+if (isVendor() && !empty($profileMenuDash) && (int)user()->role_id !== 3): ?>
 <li>
 <a href="<?= dashboardUrl(); ?>">
 <div class="icon">
@@ -121,6 +122,7 @@ d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32
 </div><?= trans("profile_settings"); ?>
 </a>
 </li>
+<?php endif; ?>
 <li>
 <form action="<?= base_url('logout'); ?>" method="post" class="form-logout">
 <?= csrf_field(); ?>

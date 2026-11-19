@@ -152,8 +152,8 @@ endif; ?>
                                         $targetUrl = $isShopLink ? langBaseUrl() : mainPortalUrl($menu['link']);
                                     ?>
                                         <li class="<?= $hasChild ? 'menu-item-has-children mega-menu-parent' : ''; ?> <?= $isShopLink ? 'active' : ''; ?>">
-                                            <a href="<?= $hasChild ? 'javascript:;' : $targetUrl; ?>">
-                                                <span><?= esc($menu['label']); ?></span>
+                                            <a href="<?= $hasChild ? 'javascript:;' : $targetUrl; ?>" style="<?= $isShopLink ? 'font-weight: 800 !important; color: #1363DF !important;' : ''; ?>">
+                                                <span style="<?= $isShopLink ? 'font-weight: 800 !important; color: #1363DF !important;' : ''; ?>"><?= esc($menu['label']); ?></span>
                                             </a>
                                             <?php if ($hasChild):
                                                 $childCount = count($menu['child']);
@@ -203,18 +203,14 @@ endif; ?>
                                                 <li><a href="javascript:;" data-toggle="modal" data-target="#loginModal"><?= trans("login") ?? "Sign in"; ?></a></li>
                                                 <li><a href="<?= generateUrl('register'); ?>"><?= trans("register") ?? "Sign Up"; ?></a></li>
                                             <?php else: ?>
-                                                <?php if (session('roboquest_shop_role') === 'school'): ?>
-                                                    <li><a href="<?= ssoMainUrl('school/dashboard'); ?>" style="color:#4f46e5;font-weight:600;"><i class="icon-dashboard mr-1"></i> <?= 'School Portal'; ?></a></li>
-                                                <?php elseif (session('roboquest_shop_role') === 'teacher'): ?>
-                                                    <li><a href="<?= ssoMainUrl('student/dashboard'); ?>" style="color:#4f46e5;font-weight:600;"><i class="icon-dashboard mr-1"></i> <?= 'Teacher Portal'; ?></a></li>
-                                                <?php endif; ?>
-                                                <?php if (isVendor() && (int)user()->role_id === 2 && !in_array(session('roboquest_shop_role'), ['school', 'teacher'], true)): ?>
-                                                    <li><a href="<?= dashboardUrl(); ?>"><?= trans("dashboard") ?? "Seller Dashboard"; ?></a></li>
-                                                <?php endif; ?>
-                                                <li><a href="<?= generateUrl('orders'); ?>"><?= trans("orders") ?? "My Orders"; ?></a></li>
-                                                <li><a href="<?= generateUrl('wishlist'); ?>"><?= trans("wishlist") ?? "Wishlist"; ?></a></li>
-                                                <li><a href="<?= generateUrl('settings'); ?>"><?= trans("profile") ?? "Profile Settings"; ?></a></li>
-                                                <li><a href="<?= base_url('logout'); ?>" class="text-danger"><?= trans("logout") ?? "Logout"; ?></a></li>
+                                                <?php
+                                                    $userRole = session('roboquest_shop_role');
+                                                    $isVendorUser = isVendor() && (int)user()->role_id === 2 && !in_array($userRole, ['school', 'teacher', 'student'], true);
+                                                    $dashUrl = $isVendorUser ? dashboardUrl() : ($userRole === 'school' ? ssoMainUrl('school/dashboard') : ssoMainUrl('roboquest/open'));
+                                                ?>
+                                                <li><a href="<?= $dashUrl; ?>" style="color:#1363DF;font-weight:700;"><i class="icon-dashboard mr-1"></i> <?= trans("dashboard") ?? "Dashboard"; ?></a></li>
+                                                <li><a href="<?= generateUrl('cart'); ?>"><i class="icon-cart mr-1"></i> <?= trans("cart") ?? "Cart"; ?><?= !empty($cartItemCount) ? ' (' . esc($cartItemCount) . ')' : ''; ?></a></li>
+                                                <li><a href="<?= base_url('logout'); ?>" class="text-danger"><i class="icon-logout mr-1"></i> <?= trans("logout") ?? "Logout"; ?></a></li>
                                             <?php endif; ?>
                                         </ul>
                                     </li>
@@ -241,7 +237,7 @@ endif; ?>
                                     $targetUrl = $isShopLink ? langBaseUrl() : mainPortalUrl($menu['link']);
                                 ?>
                                     <li class="<?= $hasChild ? 'menu-item-has-children' : ''; ?>">
-                                        <a href="<?= $hasChild ? 'javascript:;' : $targetUrl; ?>" class="<?= $isShopLink ? 'text-primary font-weight-bold' : ''; ?>">
+                                        <a href="<?= $hasChild ? 'javascript:;' : $targetUrl; ?>" class="<?= $isShopLink ? 'text-primary font-weight-bold' : ''; ?>" style="<?= $isShopLink ? 'font-weight: 800 !important;' : ''; ?>">
                                             <?= esc($menu['label']); ?>
                                             <?php if ($hasChild): ?><i class="icon-arrow-down float-right mt-1"></i><?php endif; ?>
                                         </a>
@@ -255,7 +251,6 @@ endif; ?>
                                     </li>
                                 <?php endforeach; ?>
                                 <li><a href="<?= generateUrl('cart'); ?>">Cart (<?= esc($cartItemCount); ?>)</a></li>
-                                <li><a href="<?= generateUrl('wishlist'); ?>">Wishlist</a></li>
                             </ul>
 
                             <div class="mobile_menu_login mt-4">
@@ -263,11 +258,12 @@ endif; ?>
                                     <a href="javascript:;" data-toggle="modal" data-target="#loginModal" class="btn btn-primary btn-sm mr-2"><?= trans("login"); ?></a>
                                     <a href="<?= generateUrl('register'); ?>" class="btn btn-outline-primary btn-sm"><?= trans("register"); ?></a>
                                 <?php else: ?>
-                                    <?php if (isVendor() && (int)user()->role_id === 2 && !in_array(session('roboquest_shop_role'), ['school', 'teacher'], true)): ?>
-                                        <a href="<?= dashboardUrl(); ?>" class="btn btn-primary btn-sm"><?= trans("dashboard"); ?></a>
-                                    <?php else: ?>
-                                        <a href="<?= generateUrl('orders'); ?>" class="btn btn-primary btn-sm mr-2"><?= trans("orders") ?? "My Orders"; ?></a>
-                                    <?php endif; ?>
+                                    <?php
+                                        $userRole = session('roboquest_shop_role');
+                                        $isVendorUser = isVendor() && (int)user()->role_id === 2 && !in_array($userRole, ['school', 'teacher', 'student'], true);
+                                        $dashUrl = $isVendorUser ? dashboardUrl() : ($userRole === 'school' ? ssoMainUrl('school/dashboard') : ssoMainUrl('roboquest/open'));
+                                    ?>
+                                    <a href="<?= $dashUrl; ?>" class="btn btn-primary btn-sm mr-2"><?= trans("dashboard") ?? "Dashboard"; ?></a>
                                     <a href="<?= base_url('logout'); ?>" class="btn btn-danger btn-sm ml-2"><?= trans("logout"); ?></a>
                                 <?php endif; ?>
                             </div>
