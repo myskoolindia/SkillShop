@@ -99,7 +99,7 @@ class RegisteredUserController extends Controller
         $setting = Cache::get('setting');
 
         $request->validate([
-            'account_type'        => ['required', 'in:student,teacher,school,affiliate'],
+            'account_type'        => ['required', 'in:student,teacher,school'],
             'phone'               => ['required', 'string', 'max:20'],
             'phone_token'         => ['required', 'string'],
             'name'                => ['required', 'string', 'max:255'],
@@ -109,6 +109,10 @@ class RegisteredUserController extends Controller
             'school_name'         => ['required_if:account_type,school', 'nullable', 'string', 'max:255'],
             'registration_number' => ['nullable', 'string', 'max:100'],
             'contact_person'      => ['nullable', 'string', 'max:255'],
+            'board'               => ['nullable', 'string', 'max:100'],
+            // Location
+            'state'               => ['nullable', 'string', 'max:100'],
+            'city'                => ['nullable', 'string', 'max:100'],
             // Teacher specific
             'job_title'           => ['nullable', 'string', 'max:255'],
             'short_bio'           => ['nullable', 'string', 'max:1000'],
@@ -170,9 +174,14 @@ class RegisteredUserController extends Controller
             $userData['school_name']         = $request->school_name;
             $userData['registration_number'] = $request->registration_number;
             $userData['contact_person']      = $request->contact_person;
+            $userData['state']               = $request->state;
+            $userData['city']                = $request->city;
+            $userData['board']               = $request->board;
         } elseif ($role === 'teacher') {
             $userData['job_title']           = $request->job_title;
             $userData['short_bio']           = $request->short_bio;
+            $userData['state']               = $request->state;
+            $userData['city']                = $request->city;
         } elseif ($role === 'student') {
             $userData['age']                 = $request->age;
             $userData['gender']              = $request->gender;

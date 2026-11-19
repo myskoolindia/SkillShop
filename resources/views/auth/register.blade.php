@@ -212,7 +212,21 @@
             || request('scope') === 'labs'
             || in_array(request('role'), ['school', 'teacher'], true)
             || \Illuminate\Support\Str::contains(strtolower($reqRedirect), ['/labs', 'composite-skill', 'skillvation-lab', 'lab-stem', 'stem', 'ecec', 'ai-robotics']);
-        $initialRole = in_array(request('role'), ['teacher', 'student', 'affiliate'], true) ? request('role') : 'school';
+        $initialRole = in_array(request('role'), ['teacher', 'student'], true) ? request('role') : 'school';
+
+        $indianStates = [
+            'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+            'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
+            'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
+            'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+            'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
+            'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+            'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
+            'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
+        ];
+        $schoolBoards = [
+            'CBSE', 'ICSE / ISC', 'State Board', 'IB (International Baccalaureate)', 'Cambridge / IGCSE', 'Other'
+        ];
     @endphp
 
     <!-- breadcrumb-area -->
@@ -249,7 +263,7 @@
                                     @endif
                                 </div>
                                 <div class="row g-2 g-sm-3">
-                                    <div class="{{ $isLabContext ? 'col-6' : 'col-6 col-md-3' }}">
+                                    <div class="{{ $isLabContext ? 'col-6' : 'col-4' }}">
                                         <div class="reg-role-card {{ $initialRole === 'school' ? 'active' : '' }}" data-role="school" onclick="selectRole('school')">
                                             <div class="role-icon" style="background:#f3e8ff; color:#9333ea;">
                                                 <i class="fas fa-school"></i>
@@ -258,7 +272,7 @@
                                             <div class="role-subtitle">{{ __('For institutions') }}</div>
                                         </div>
                                     </div>
-                                    <div class="{{ $isLabContext ? 'col-6' : 'col-6 col-md-3' }}">
+                                    <div class="{{ $isLabContext ? 'col-6' : 'col-4' }}">
                                         <div class="reg-role-card {{ $initialRole === 'teacher' ? 'active' : '' }}" data-role="teacher" onclick="selectRole('teacher')">
                                             <div class="role-icon" style="background:#fef3c7; color:#d97706;">
                                                 <i class="fas fa-chalkboard-teacher"></i>
@@ -268,22 +282,13 @@
                                         </div>
                                     </div>
                                     @if(!$isLabContext)
-                                    <div class="col-6 col-md-3">
+                                    <div class="col-4">
                                         <div class="reg-role-card {{ $initialRole === 'student' ? 'active' : '' }}" data-role="student" onclick="selectRole('student')">
                                             <div class="role-icon" style="background:#e0f2fe; color:#0284c7;">
                                                 <i class="fas fa-user-graduate"></i>
                                             </div>
                                             <div class="role-title">{{ __('Student') }}</div>
                                             <div class="role-subtitle">{{ __('For learners') }}</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-6 col-md-3">
-                                        <div class="reg-role-card {{ $initialRole === 'affiliate' ? 'active' : '' }}" data-role="affiliate" onclick="selectRole('affiliate')">
-                                            <div class="role-icon" style="background:#ecfdf5; color:#059669;">
-                                                <i class="fas fa-handshake"></i>
-                                            </div>
-                                            <div class="role-title">{{ __('Affiliate') }}</div>
-                                            <div class="role-subtitle">{{ __('Partner & Earn') }}</div>
                                         </div>
                                     </div>
                                     @endif
@@ -393,16 +398,47 @@
                                     <div class="row gutter-20">
                                         <div class="col-md-6">
                                             <div class="form-grp">
-                                                <label for="registration_number">{{ __('Registration / Affiliation No.') }}</label>
-                                                <input type="text" id="registration_number" name="registration_number" value="{{ old('registration_number') }}" placeholder="{{ __('e.g. CBSE/2026/09') }}">
+                                                <label for="school_board">{{ __('School Board / Affiliation') }} <code>*</code></label>
+                                                <select id="school_board" name="board" class="form-control" style="border-radius:8px; height:50px;">
+                                                    <option value="">-- {{ __('Select School Board') }} --</option>
+                                                    @foreach($schoolBoards as $b)
+                                                        <option value="{{ $b }}" {{ old('board') == $b ? 'selected' : '' }}>{{ $b }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <x-frontend.validation-error name="board" />
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-grp">
-                                                <label for="contact_person">{{ __('Contact Person / Principal') }}</label>
-                                                <input type="text" id="contact_person" name="contact_person" value="{{ old('contact_person') }}" placeholder="{{ __('Principal / Admin name') }}">
+                                                <label for="registration_number">{{ __('Registration / Affiliation No.') }}</label>
+                                                <input type="text" id="registration_number" name="registration_number" value="{{ old('registration_number') }}" placeholder="{{ __('e.g. CBSE/2026/09') }}">
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="row gutter-20">
+                                        <div class="col-md-6">
+                                            <div class="form-grp">
+                                                <label for="school_state">{{ __('State / UT (India)') }} <code>*</code></label>
+                                                <select id="school_state" name="state" class="form-control" style="border-radius:8px; height:50px;">
+                                                    <option value="">-- {{ __('Select State / UT') }} --</option>
+                                                    @foreach($indianStates as $st)
+                                                        <option value="{{ $st }}" {{ old('state') == $st ? 'selected' : '' }}>{{ $st }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <x-frontend.validation-error name="state" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-grp">
+                                                <label for="school_city">{{ __('City / District') }} <code>*</code></label>
+                                                <input type="text" id="school_city" name="city" value="{{ old('city') }}" placeholder="{{ __('e.g. Bengaluru, Mumbai, Jaipur') }}">
+                                                <x-frontend.validation-error name="city" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-grp">
+                                        <label for="contact_person">{{ __('Contact Person / Principal') }}</label>
+                                        <input type="text" id="contact_person" name="contact_person" value="{{ old('contact_person') }}" placeholder="{{ __('Principal / Admin name') }}">
                                     </div>
                                 </div>
 
@@ -424,6 +460,25 @@
                                             </div>
                                         </div>
                                         @endif
+                                        <div class="col-md-6">
+                                            <div class="form-grp">
+                                                <label for="teacher_state">{{ __('State / UT (India)') }}</label>
+                                                <select id="teacher_state" name="state" class="form-control" style="border-radius:8px; height:50px;">
+                                                    <option value="">-- {{ __('Select State / UT') }} --</option>
+                                                    @foreach($indianStates as $st)
+                                                        <option value="{{ $st }}" {{ old('state') == $st ? 'selected' : '' }}>{{ $st }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <x-frontend.validation-error name="state" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-grp">
+                                                <label for="teacher_city">{{ __('City / District') }}</label>
+                                                <input type="text" id="teacher_city" name="city" value="{{ old('city') }}" placeholder="{{ __('e.g. Bengaluru, Mumbai, Delhi') }}">
+                                                <x-frontend.validation-error name="city" />
+                                            </div>
+                                        </div>
                                         <div class="col-md-12">
                                             <div class="form-grp">
                                                 <label for="job_title">{{ __('Subject / Primary Teaching Domain') }}</label>
@@ -458,17 +513,6 @@
                                                     <option value="other" {{ old('gender') == 'other' ? 'selected' : '' }}>{{ __('Other') }}</option>
                                                 </select>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {{-- Affiliate Specific Fields --}}
-                                <div id="affiliate-details-fields" style="display:none;" class="mb-3">
-                                    <div class="alert alert-success py-2.5 px-3 border-0 small d-flex align-items-center gap-2" style="background:#ecfdf5; border-radius:10px; color:#065f46;">
-                                        <i class="fas fa-coins fa-lg text-success mr-2"></i>
-                                        <div>
-                                            <strong>{{ __('Affiliate Partner Program') }}</strong>
-                                            <div>{{ __('Promote Skillvation labs, educational equipment, and certified courses to earn commissions on every successful referral.') }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -519,13 +563,6 @@
                         <div class="account__switch text-center mt-4">
                             <p>{{ __('Already have an account?') }} <a href="{{ route('login') }}" class="font-weight-bold text-primary">{{ __('Log in here') }}</a></p>
                         </div>
-
-                        <div class="text-center mt-3 pt-3 border-top">
-                            <span class="text-muted small">{{ __('Want to partner and earn referral commissions?') }}</span>
-                            <a href="{{ url('/sso/shop') }}?target=affiliate-program" class="font-weight-bold text-success small ml-1">
-                                <i class="fas fa-bullhorn mr-1"></i> {{ __('Join our Affiliate Program') }} &rarr;
-                            </a>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -553,16 +590,22 @@
             nameLabel.textContent = role === 'school' ? '{{ __("Administrator Name") }}' : '{{ __("Full Name") }}';
         }
 
-        // Switch role specific fields
-        document.getElementById('school-details-fields').style.display = role === 'school' ? 'block' : 'none';
-        document.getElementById('teacher-details-fields').style.display = role === 'teacher' ? 'block' : 'none';
-        const studentFields = document.getElementById('student-details-fields');
-        if (studentFields) {
-            studentFields.style.display = role === 'student' ? 'block' : 'none';
+        // Switch role specific fields & toggle disabled to ensure clean form submission
+        const schoolBox = document.getElementById('school-details-fields');
+        const teacherBox = document.getElementById('teacher-details-fields');
+        const studentBox = document.getElementById('student-details-fields');
+
+        if (schoolBox) {
+            schoolBox.style.display = role === 'school' ? 'block' : 'none';
+            schoolBox.querySelectorAll('input, select').forEach(el => el.disabled = (role !== 'school'));
         }
-        const affiliateFields = document.getElementById('affiliate-details-fields');
-        if (affiliateFields) {
-            affiliateFields.style.display = role === 'affiliate' ? 'block' : 'none';
+        if (teacherBox) {
+            teacherBox.style.display = role === 'teacher' ? 'block' : 'none';
+            teacherBox.querySelectorAll('input, select, textarea').forEach(el => el.disabled = (role !== 'teacher'));
+        }
+        if (studentBox) {
+            studentBox.style.display = role === 'student' ? 'block' : 'none';
+            studentBox.querySelectorAll('input, select').forEach(el => el.disabled = (role !== 'student'));
         }
     }
 
@@ -799,7 +842,7 @@
         const urlRole = urlParams.get('role');
         const oldRole = "{{ old('role', '') }}";
         const isLabContext = {{ $isLabContext ? 'true' : 'false' }};
-        const allowedRoles = isLabContext ? ['school', 'teacher'] : ['school', 'teacher', 'student', 'affiliate'];
+        const allowedRoles = isLabContext ? ['school', 'teacher'] : ['school', 'teacher', 'student'];
         let initialRole = allowedRoles.includes(urlRole) 
             ? urlRole 
             : (allowedRoles.includes(oldRole) ? oldRole : '{{ $initialRole }}');
