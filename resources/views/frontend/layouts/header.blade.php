@@ -576,7 +576,7 @@
                                                     @elseif ($lhUser->role == 'school')
                                                         @if ($lhHasPurchased)
                                                             <li><a
-                                                                    href="{{ route('school.dashboard') }}">{{ __('School Dashboard') }}</a>
+                                                                    href="{{ route('roboquest.launch') }}">{{ __('RoboQuest Lab') }}</a>
                                                             </li>
                                                         @endif
                                                     @elseif ($lhUser->role == 'vendor')
@@ -687,10 +687,10 @@
                                         <li><a href="{{ route('instructor.courses.index') }}">{{ __('Courses') }}</a></li>
                                         <li><a href="javascript:void(0)" class="text-danger logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">{{ __('Logout') }}</a></li>
                                     </ul>
-                                @elseif ($lmUser->role == 'school')
+                                        @elseif ($lmUser->role == 'school')
                                     <ul class="mobile_menu_login d-flex flex-wrap">
                                         @if ($lmHasPurchased)
-                                            <li><a href="{{ route('school.dashboard') }}">{{ __('Dashboard') }}</a></li>
+                                            <li><a href="{{ route('roboquest.launch') }}">{{ __('RoboQuest Lab') }}</a></li>
                                             <li><a href="{{ route('school.courses.index') }}">{{ __('Courses') }}</a></li>
                                         @endif
                                         <li><a href="{{ route('cart') }}">{{ __('Cart') }}</a></li>

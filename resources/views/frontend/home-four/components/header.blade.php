@@ -195,9 +195,9 @@
           </a>
         @elseif ($authUser->role === 'school')
           @if ($hasPurchased)
-            <a href="{{ route('school.dashboard') }}" class="bg-primary hover:bg-primary-dark text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm hover:shadow inline-flex items-center justify-center gap-1.5">
-              <i class="fa-solid fa-graduation-cap text-xs"></i>
-              <span>School Portal</span>
+            <a href="{{ route('roboquest.launch') }}" class="bg-primary hover:bg-primary-dark text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm hover:shadow inline-flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-rocket text-xs"></i>
+              <span>RoboQuest Lab</span>
             </a>
           @endif
         @else
@@ -317,13 +317,11 @@
         @if (!in_array($mUser->role, ['school', 'teacher', 'student'], true) || $mHasPurchased)
           <a href="{{ $mUser->role === 'vendor'
                 ? url('/club-shop/dashboard')
-                : ($mUser->role === 'school'
-                    ? route('school.dashboard')
-                    : ($mUser->role === 'instructor'
-                        ? route('instructor.dashboard')
-                        : route('roboquest.launch'))) }}"
+                : ($mUser->role === 'instructor'
+                    ? route('instructor.dashboard')
+                    : route('roboquest.launch')) }}"
              class="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-bold hover:bg-primary/20 transition-colors">
-            <i class="fa-solid fa-gauge text-xs"></i> {{ $mUser->role === 'school' ? 'School Portal' : ($mUser->role === 'vendor' ? 'Vendor Dashboard' : ($mUser->role === 'instructor' ? 'Instructor Portal' : 'RoboQuest Lab')) }}
+            <i class="fa-solid fa-gauge text-xs"></i> {{ $mUser->role === 'vendor' ? 'Vendor Dashboard' : ($mUser->role === 'instructor' ? 'Instructor Portal' : 'RoboQuest Lab') }}
           </a>
         @endif
 

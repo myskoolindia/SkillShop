@@ -206,6 +206,22 @@ class CoursePurchaseAccessTest extends TestCase
         $this->assertSame('frontend.pages.no-courses-purchased', $response->name());
     }
 
+    public function test_school_with_purchased_courses_visiting_dashboard_redirects_to_roboquest(): void
+    {
+        $school = $this->createUser('school_dash_paid@test.com', 'school');
+        $course = Course::withoutEvents(fn () => Course::create(['title' => 'Coding 102', 'slug' => 'coding-102', 'type' => 'course']));
+        $order = Order::create(['buyer_id' => $school->id, 'invoice_id' => 'INV-003', 'status' => 'completed', 'payment_status' => 'paid']);
+        Enrollment::create(['order_id' => $order->id, 'user_id' => $school->id, 'course_id' => $course->id, 'has_access' => 1]);
+
+        $this->actingAs($school);
+
+        $controller = app(SchoolDashboardController::class);
+        $response = $controller->index();
+
+        $this->assertInstanceOf(\Illuminate\Http\RedirectResponse::class, $response);
+        $this->assertSame(route('roboquest.launch'), $response->getTargetUrl());
+    }
+
     public function test_student_without_purchased_courses_visiting_dashboard_shows_no_courses_view(): void
     {
         $student = $this->createUser('student_dash_none@test.com', 'student');
