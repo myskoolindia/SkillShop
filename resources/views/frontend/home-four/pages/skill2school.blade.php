@@ -217,7 +217,7 @@
     <div style="text-align:center;margin-bottom:2rem;">
       <p style="color:var(--primary);font-weight:600;margin-bottom:.5rem;font-size:.875rem;text-transform:uppercase;letter-spacing:.06em;">Our Core Framework</p>
       <h2 style="font-size:clamp(1.5rem,3vw,2.25rem);font-weight:800;color:var(--on-surface);margin-bottom:.75rem;">
-        Why is Preschool the First Big Step?
+        CAMPS FRAMEWORK
       </h2>
       <p style="color:var(--on-surface-variant);max-width:40rem;margin:0 auto;line-height:1.7;">
         Our CAMPS framework structures every learning experience around 5 core developmental areas.
