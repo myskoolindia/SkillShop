@@ -13,7 +13,7 @@ class SignupOpensRoboquestTest extends TestCase {
     protected function setUp(): void {
         parent::setUp();
         $this->createRoboquestSchema();
-        Schema::table('users', function ($t) { foreach (['verification_token','school_name','registration_number','contact_person','job_title','short_bio','age','gender'] as $c) $t->string($c)->nullable(); $t->timestamp('phone_verified_at')->nullable(); $t->rememberToken(); });
+        Schema::table('users', function ($t) { foreach (['verification_token','school_name','registration_number','contact_person','job_title','short_bio','age','gender','state','city','board'] as $c) $t->string($c)->nullable(); $t->timestamp('phone_verified_at')->nullable(); $t->rememberToken(); });
         $migration = require database_path('migrations/2026_09_12_000002_create_phone_verifications_table.php'); $migration->up();
         $this->withoutMiddleware([\App\Http\Middleware\DemoModeMiddleware::class, \App\Http\Middleware\SetLocaleMiddleware::class, \App\Http\Middleware\ShopAudience::class]);
         config(['services.waba.driver' => 'mock']);

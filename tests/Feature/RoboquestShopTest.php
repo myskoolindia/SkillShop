@@ -97,4 +97,20 @@ class RoboquestShopTest extends TestCase
             ->assertJsonPath('orders.1.items.0.title', 'Jumper wires')->assertJsonPath('orders.1.items.0.quantity', 2);
         $this->send('/api/roboquest/shop/orders', ['externalId' => (string) $outsider->id])->assertNotFound();
     }
+
+    public function test_class_invitations_go_on_whatsapp_to_this_schools_members_with_a_phone(): void
+    {
+        config(['services.waba.driver' => 'mock']);
+        \Illuminate\Support\Facades\Log::spy();
+        $school = $this->school();
+        $kid = $this->user('kid@one.test', 'student'); $kid->update(['phone' => '919000000021']);
+        $noPhone = $this->user('nophone@one.test', 'student');
+        $outsider = $this->user('out@two.test', 'student'); $outsider->update(['phone' => '919000000022']);
+        foreach ([$kid, $noPhone] as $member) SchoolMember::create(['school_id' => $school->id, 'user_id' => $member->id, 'role_in_school' => 'student', 'status' => 'active']);
+        $body = ['externalIds' => [(string) $kid->id, (string) $noPhone->id, (string) $outsider->id], 'topic' => 'Live: counting', 'courseTitle' => 'Grade 1',
+            'startTime' => now()->addDay()->toIso8601String(), 'duration' => 45, 'hostName' => 'Ravi', 'joinUrl' => 'https://zoom.us/j/123456789'];
+        $this->send('/api/roboquest/class-invite', $body)->assertOk()->assertJsonPath('queued', 1);
+        \Illuminate\Support\Facades\Log::shouldHaveReceived('info')->withArgs(fn ($m, $c = []) => $m === '[WABA Mock Class] Invitation sent' && ($c['topic'] ?? '') === 'Live: counting')->once();
+        $this->send('/api/roboquest/class-invite', ['joinUrl' => 'https://evil.test/x'] + $body)->assertStatus(422);
+    }
 }

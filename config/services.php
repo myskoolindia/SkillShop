@@ -46,6 +46,9 @@ return [
         // RoboQuest/Skillvation sign-in details for new teachers and students: {{1}} name, {{2}} login, {{3}} password, {{4}} link.
         'login_template'         => env('WABA_LOGIN_TEMPLATE', ''),
         'login_template_lang'    => env('WABA_LOGIN_TEMPLATE_LANG', 'en'),
+        // Instructor class invitations from RoboQuest: {{1}} name, {{2}} class, {{3}} course, {{4}} time, {{5}} instructor, {{6}} link.
+        'class_template'         => env('WABA_CLASS_TEMPLATE', ''),
+        'class_template_lang'    => env('WABA_CLASS_TEMPLATE_LANG', 'en'),
         'timeout'                => (int) env('WABA_TIMEOUT', 30),
     ],
 
