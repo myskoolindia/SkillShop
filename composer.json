@@ -50,6 +50,9 @@
             "Database\\Seeders\\": "database/seeders/",
             "Modules\\": "Modules/"
         },
+        "classmap": [
+            "deploy/ComposerHook.php"
+        ],
         "files": [
             "app/Helpers/helper.php",
             "Modules/Menubuilder/app/Helpers/helper.php",
@@ -63,10 +66,10 @@
     },
     "scripts": {
         "post-autoload-dump": [
-            "@php deploy/composer-hook.php autoload"
+            "Deploy\\ComposerHook::autoload"
         ],
         "post-update-cmd": [
-            "@php deploy/composer-hook.php update"
+            "Deploy\\ComposerHook::update"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
