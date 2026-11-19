@@ -6,18 +6,24 @@ use Illuminate\Support\Facades\{Cache, DB, Http, Log};
 use RuntimeException;
 
 /**
- * Mapper API: which provider courses each Club Shop lab product includes.
+ * Mapper API: what each Club Shop product includes.
  *
- * GET {COLLAB_PRODUCT_COURSE_MAP_URL} returns
- *   {status:"success", data:[{course_id, course_title, course_type, products:[{product_id, product_title, ...}]}],
+ * Current feed, GET {COLLAB_PRODUCT_COURSE_MAP_URL} (https://collab.myskool.club/api/course-product-map):
+ *   {status:"success", data:[{product_id, product_sku, product_title, category_name,
+ *     courses:[{course_id: "course:27" | "kit:G7-K03" | "lab:ar-vr:basic", course_name, course_category_name}]}],
  *    pagination:{last_page}}
+ *   course:N  a provider course (RoboQuest course with that API ID)
+ *   kit:ID    a RoboQuest robot kit and its missions
+ *   lab:T:L   a RoboQuest Skill Lab topic T at level L (basic, advanced, premium or all)
+ * The older course-first feed ({course_id, products:[...]}) is still read, so either URL works.
  *
- * A school that has paid for a mapped lab product in Club Shop receives the mapped courses in RoboQuest.
+ * Products are matched to paid Club Shop order lines by product ID, or by SKU (bundles such as "bundle_cat_72_1" CAT-1).
  * The mapper only describes product contents; access always comes from a paid Club Shop order.
+ * Changes in the mapper reach RoboQuest within 15 minutes (cache), at the person's next RoboQuest launch.
  */
 class ProductCourseMapService
 {
-    private const CACHE_KEY = 'collab.product_course_map';
+    private const CACHE_KEY = 'collab.product_course_map.v2';
     private const FRESH_SECONDS = 900;
 
     public function enabled(): bool
@@ -26,23 +32,34 @@ class ProductCourseMapService
     }
 
     /**
-     * product_id => [course_id => ['courseId', 'title', 'courseType', 'courseTypeName']]
+     * ['products' => key => ['title', 'courses' => [courseId => course], 'kits' => [...], 'labs' => [...]], 'skus' => sku => key]
      * Uses a 15-minute cache. If the provider is unreachable, the last good list is used.
      * Throws when no list has ever been loaded, so callers fail closed instead of revoking access.
      */
-    public function productCourses(): array
+    public function catalog(): array
     {
         $cached = Cache::get(self::CACHE_KEY);
-        if (is_array($cached) && time() - ($cached['fetchedAt'] ?? 0) < self::FRESH_SECONDS) return $cached['products'];
+        if (is_array($cached) && time() - ($cached['fetchedAt'] ?? 0) < self::FRESH_SECONDS) return $cached['catalog'];
         try {
-            $products = $this->fetch();
-            Cache::forever(self::CACHE_KEY, ['fetchedAt' => time(), 'products' => $products]);
-            return $products;
+            $catalog = $this->fetch();
+            Cache::forever(self::CACHE_KEY, ['fetchedAt' => time(), 'catalog' => $catalog]);
+            return $catalog;
         } catch (\Throwable $error) {
             Log::warning('Product-course mapper unavailable: ' . $error->getMessage());
-            if (is_array($cached)) return $cached['products'];
+            if (is_array($cached)) return $cached['catalog'];
             throw new RuntimeException('The product-course mapper is unavailable.', 0, $error);
         }
+    }
+
+    /** product key => [course_id => course] (compatibility view of catalog()). */
+    public function productCourses(): array
+    {
+        return array_map(fn ($p) => $p['courses'], $this->catalog()['products']);
+    }
+
+    private function text($value, int $max): string
+    {
+        return mb_substr(trim(strip_tags((string) $value)), 0, $max);
     }
 
     private function fetch(): array
@@ -55,6 +72,15 @@ class ProductCourseMapService
             throw new RuntimeException('The mapper URL must use HTTPS without credentials.');
         }
         $products = [];
+        $skus = [];
+        $add = function (string $key, string $title, string $sku) use (&$products, &$skus) {
+            $products[$key] ??= ['title' => $title, 'courses' => [], 'kits' => [], 'labs' => []];
+            if ($sku !== '') $skus[mb_strtolower($sku)] = $key;
+        };
+        $course = function (string $key, int $courseId, string $title, string $typeName, string $productTitle) use (&$products) {
+            $products[$key]['courses'][$courseId] = ['courseId' => $courseId, 'title' => $title ?: 'Course ' . $courseId, 'courseType' => null,
+                'courseTypeName' => $typeName, 'productTitle' => $productTitle];
+        };
         $lastPage = 1;
         for ($page = 1; $page <= $lastPage; $page++) {
             $response = Http::acceptJson()->timeout(15)->withOptions(['allow_redirects' => false])
@@ -65,22 +91,40 @@ class ProductCourseMapService
             $lastPage = (int) ($payload['pagination']['last_page'] ?? 1);
             if ($lastPage < 1 || $lastPage > 100) throw new RuntimeException('Invalid mapper pagination.');
             foreach ($payload['data'] as $row) {
-                $courseId = filter_var($row['course_id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-                if (!$courseId || !is_array($row['products'] ?? null)) throw new RuntimeException('Invalid mapped course.');
-                $course = [
-                    'courseId' => $courseId,
-                    'title' => mb_substr(trim(strip_tags((string) ($row['course_title'] ?? ''))), 0, 300) ?: 'Course ' . $courseId,
-                    'courseType' => (int) ($row['course_type'] ?? 0) ?: null,
-                    'courseTypeName' => mb_substr(trim(strip_tags((string) ($row['course_type_name'] ?? ''))), 0, 100),
-                ];
-                foreach ($row['products'] as $item) {
-                    $productId = filter_var($item['product_id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-                    if (!$productId) throw new RuntimeException('Invalid mapped product.');
-                    $products[$productId][$courseId] = $course + ['productTitle' => mb_substr(trim(strip_tags((string) ($item['product_title'] ?? ''))), 0, 500)];
+                if (is_array($row['courses'] ?? null)) {
+                    // Product first: one product and everything it includes.
+                    $key = $this->text($row['product_id'] ?? '', 80);
+                    if ($key === '' || !preg_match('/^[A-Za-z0-9_-]+$/', $key)) throw new RuntimeException('Invalid mapped product.');
+                    $title = $this->text($row['product_title'] ?? '', 500);
+                    $add($key, $title, $this->text($row['product_sku'] ?? '', 100));
+                    foreach ($row['courses'] as $item) {
+                        $id = (string) ($item['course_id'] ?? '');
+                        $name = $this->text($item['course_name'] ?? '', 300);
+                        if (preg_match('/^course:(\d{1,10})$/', $id, $m) && (int) $m[1] > 0) {
+                            $course($key, (int) $m[1], $name, $this->text($item['course_category_name'] ?? '', 100), $title);
+                        } elseif (preg_match('/^kit:(G(?:[1-9]|1[0-2])-K\d{2})$/', $id, $m)) {
+                            $products[$key]['kits'][] = $m[1];
+                        } elseif (preg_match('/^lab:([a-z0-9-]{1,60}):(basic|advanced|premium|all)$/', $id, $m)) {
+                            $products[$key]['labs'][] = $m[1] . ':' . $m[2];
+                        }
+                        // Other kinds are ignored, so the mapper can add new ones without breaking access.
+                    }
+                } else {
+                    // Older course-first feed.
+                    $courseId = filter_var($row['course_id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+                    if (!$courseId || !is_array($row['products'] ?? null)) throw new RuntimeException('Invalid mapped course.');
+                    foreach ($row['products'] as $item) {
+                        $productId = filter_var($item['product_id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+                        if (!$productId) throw new RuntimeException('Invalid mapped product.');
+                        $productTitle = $this->text($item['product_title'] ?? '', 500);
+                        $add((string) $productId, $productTitle, $this->text($item['product_sku'] ?? '', 100));
+                        $course((string) $productId, $courseId, $this->text($row['course_title'] ?? '', 300), $this->text($row['course_type_name'] ?? '', 100), $productTitle);
+                    }
                 }
             }
         }
-        return $products;
+        foreach ($products as &$product) { $product['kits'] = array_values(array_unique($product['kits'])); $product['labs'] = array_values(array_unique($product['labs'])); }
+        return ['products' => $products, 'skus' => $skus];
     }
 
     /**
@@ -100,6 +144,12 @@ class ProductCourseMapService
      */
     public function paidLabProductIds(array $portalUserIds): array
     {
+        return array_values(array_unique(array_map(fn ($line) => (int) $line->product_id, array_filter($this->paidLines($portalUserIds), fn ($line) => $line->product_id !== null))));
+    }
+
+    /** Paid, not cancelled or refunded Club Shop order lines (product ID and SKU) of these portal users. */
+    private function paidLines(array $portalUserIds): array
+    {
         $emails = User::whereIn('id', $portalUserIds)->where('status', 'active')
             ->pluck('email')->filter()->map(fn($email) => mb_strtolower(trim($email)))->unique()->values();
         if ($emails->isEmpty()) return [];
@@ -109,8 +159,42 @@ class ProductCourseMapService
         return $shop->table('order_items')->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->whereIn('orders.buyer_id', $buyers)->where('orders.payment_status', 'payment_received')
             ->where(fn($query) => $query->whereNull('order_items.order_status')->orWhereNotIn('order_items.order_status', ['cancelled', 'refund_approved']))
-            ->whereNotNull('order_items.product_id')->distinct()->pluck('order_items.product_id')
-            ->map(fn($id) => (int) $id)->sort()->values()->all();
+            ->select('order_items.product_id', 'order_items.product_sku')->distinct()->get()->all();
+    }
+
+    /** Mapper product keys these portal users paid for (by product ID, or by SKU for bundles). */
+    public function paidProductKeys(array $portalUserIds): array
+    {
+        $lines = $this->paidLines($portalUserIds);
+        if (!$lines) return [];
+        $catalog = $this->catalog();
+        $keys = [];
+        foreach ($lines as $line) {
+            if ($line->product_id !== null && isset($catalog['products'][(string) $line->product_id])) $keys[(string) $line->product_id] = true;
+            $sku = mb_strtolower(trim((string) ($line->product_sku ?? '')));
+            if ($sku !== '' && isset($catalog['skus'][$sku])) $keys[$catalog['skus'][$sku]] = true;
+        }
+        $keys = array_keys($keys);
+        sort($keys);
+        return $keys;
+    }
+
+    /** Robot kits and Skill Lab sections included with the products these portal users paid for. */
+    public function unlocksForBuyers(array $portalUserIds): array
+    {
+        if (!$this->enabled()) return ['kits' => [], 'labs' => []];
+        // The mapper is only asked when this person has paid shop orders.
+        $keys = $this->paidProductKeys($portalUserIds);
+        if (!$keys) return ['kits' => [], 'labs' => []];
+        $products = $this->catalog()['products'];
+        $kits = []; $labs = [];
+        foreach ($keys as $key) {
+            array_push($kits, ...$products[$key]['kits']);
+            array_push($labs, ...$products[$key]['labs']);
+        }
+        $kits = array_values(array_unique($kits)); sort($kits);
+        $labs = array_values(array_unique($labs)); sort($labs);
+        return ['kits' => $kits, 'labs' => $labs];
     }
 
     /**
@@ -120,14 +204,14 @@ class ProductCourseMapService
     public function coursesForBuyers(array $portalUserIds): array
     {
         if (!$this->enabled()) return [];
-        $productIds = $this->paidLabProductIds($portalUserIds);
-        if (!$productIds) return [];
-        $map = $this->productCourses();
+        $keys = $this->paidProductKeys($portalUserIds);
+        if (!$keys) return [];
+        $products = $this->catalog()['products'];
         $courses = [];
-        foreach ($productIds as $productId) {
-            foreach ($map[$productId] ?? [] as $courseId => $course) {
+        foreach ($keys as $key) {
+            foreach ($products[$key]['courses'] as $courseId => $course) {
                 $courses[$courseId] ??= ['courseId' => $course['courseId'], 'title' => $course['title'], 'courseType' => $course['courseType'], 'courseTypeName' => $course['courseTypeName'], 'labProducts' => []];
-                $courses[$courseId]['labProducts'][] = ['productId' => $productId, 'title' => $course['productTitle']];
+                $courses[$courseId]['labProducts'][] = ['productId' => ctype_digit($key) ? (int) $key : $key, 'title' => $course['productTitle']];
             }
         }
         ksort($courses);

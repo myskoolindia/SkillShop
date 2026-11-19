@@ -168,7 +168,19 @@ class RoboquestService {
                 'summary'=>'Included with '.implode(', ', array_column($mapped['labProducts'], 'title')),
                 'capacity'=>null, 'chapters'=>[], 'source'=>'lab-product', 'labProducts'=>$mapped['labProducts']];
         }
-        return ['schoolId'=>$connection->school_id, 'buyerId'=>(string)$buyerId, 'members'=>$members, 'courses'=>$list, 'updatedAt'=>now()->toIso8601String()];
+        $snapshot = ['schoolId'=>$connection->school_id, 'buyerId'=>(string)$buyerId, 'members'=>$members, 'courses'=>$list, 'updatedAt'=>now()->toIso8601String()];
+        // Robot kits and Skill Lab sections from paid Club Shop products (Mapper API): the school's own purchases (for
+        // everyone in the school) and, for a teacher or student, their personal purchases. Left out when the mapper or
+        // Club Shop is unreachable, so RoboQuest keeps what it had instead of hiding paid content.
+        try {
+            $snapshot['unlocks'] = [
+                'school' => self::isPersonal($connection) ? ['kits' => [], 'labs' => []] : $this->productCourses->unlocksForBuyers([(int) $connection->school_user_id]),
+                'personal' => (int) $buyerId === (int) $connection->school_user_id ? ['kits' => [], 'labs' => []] : $this->productCourses->unlocksForBuyers([(int) $buyerId]),
+            ];
+        } catch (\Throwable $error) {
+            report($error);
+        }
+        return $snapshot;
     }
     /**
      * Provider course ID => mapped course, for the paid Club Shop lab products of these portal users.
