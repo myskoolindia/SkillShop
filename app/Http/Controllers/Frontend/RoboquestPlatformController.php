@@ -18,6 +18,8 @@ class RoboquestPlatformController extends Controller {
         $apiIds=Course::whereIn('id',$ids)->whereNotNull('api_course_id')->pluck('api_course_id')
             // Courses included with paid Club Shop lab products of the school or its active teachers (Mapper API).
             ->merge($service->schoolLabCourseIds($connection))->unique()->map(fn($id)=>(string)$id)->sort()->values();
-        return response()->json(['schoolId'=>$connection->school_id,'courseIds'=>$apiIds])->header('Cache-Control','no-store');
+        // Lab LMS bought by the school or its active teachers (single LMS, or whole categories that RoboQuest expands).
+        $lms = $service->schoolLms($connection);
+        return response()->json(['schoolId'=>$connection->school_id,'courseIds'=>$apiIds,'lms'=>$lms['lms'],'lmsCategories'=>$lms['lmsCategories']])->header('Cache-Control','no-store');
     }
 }

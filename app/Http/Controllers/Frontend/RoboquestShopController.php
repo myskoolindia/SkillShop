@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
  *   POST /api/roboquest/shop/products  (school-signed)  products of the teacher (lab) shop or the student shop
  *   POST /api/roboquest/shop/link      (school-signed)  a one-time link that opens the shop signed in as that member
  *   POST /api/roboquest/shop/orders    (school-signed)  that member's own Club Shop orders (My orders in RoboQuest)
+ *   POST /api/roboquest/class-invite   (school-signed)  WhatsApp invitations to an instructor's course class
  *   GET  /roboquest/shop-open?code=…                    signs the member in and continues to the Club Shop page
  * RoboQuest shows the products itself and opens the link in a frame for cart and payment.
  */
@@ -93,12 +94,42 @@ class RoboquestShopController extends RoboquestController
         ])->values()])->header('Cache-Control', 'no-store');
     }
 
+    /**
+     * Instructor course class: RoboQuest sends the people of this school who have the course; each with a phone number
+     * gets a WhatsApp invitation (sent after the response, so a slow provider never delays the school's sync).
+     */
+    public function classInvite(Request $request)
+    {
+        $connection = $this->authenticate($request);
+        $input = $request->validate(['externalIds' => 'required|array|min:1|max:2000', 'externalIds.*' => 'string|max:20', 'topic' => 'required|string|max:120',
+            'courseTitle' => 'nullable|string|max:300', 'startTime' => 'required|date', 'duration' => 'required|integer|min:15|max:240', 'hostName' => 'required|string|max:100',
+            'joinUrl' => ['required', 'string', 'max:500', 'regex:#^https://([a-z0-9-]+\.)*zoom\.(us|com)/#i'], 'passcode' => 'nullable|string|max:40']);
+        $people = [];
+        foreach (array_unique($input['externalIds']) as $externalId) {
+            try { $user = $this->member($connection, $externalId); } catch (\Symfony\Component\HttpKernel\Exception\HttpException) { continue; }
+            if (!empty($user->phone)) $people[] = ['phone' => $user->phone, 'name' => $user->name];
+        }
+        $class = ['topic' => $input['topic'], 'course' => $input['courseTitle'] ?? '', 'host' => $input['hostName'], 'link' => $input['joinUrl'], 'passcode' => $input['passcode'] ?? '',
+            'time' => \Carbon\Carbon::parse($input['startTime'])->setTimezone('Asia/Kolkata')->format('d M Y, g:i A') . ' IST', 'duration' => (int) $input['duration']];
+        if ($people) dispatch(function () use ($people, $class) {
+            $waba = app(\App\Services\WabaOtpService::class);
+            foreach ($people as $person) $waba->sendClassInvite($person['phone'], ['name' => $person['name']] + $class);
+        })->afterResponse();
+        return response()->json(['queued' => count($people)])->header('Cache-Control', 'no-store');
+    }
+
     public function link(Request $request)
     {
         $connection = $this->authenticate($request);
         $input = $request->validate(['externalId' => 'required|string|max:20', 'target' => ['required', 'string', 'max:300', 'regex:#^/[A-Za-z0-9/_\-.?=&%]*$#']]);
         abort_if(str_contains($input['target'], '..') || str_starts_with($input['target'], '//'), 422, 'Invalid shop page.');
         $user = $this->member($connection, $input['externalId']);
+        // A product by its Club Shop ID (RoboQuest's Buy buttons for lab LMS come from the mapper, which knows IDs).
+        if (preg_match('#^/product-id/(\d{1,10})$#', $input['target'], $m)) {
+            $slug = DB::connection('clubshop')->table('products')->where('id', (int) $m[1])->where('is_deleted', 0)->value('slug');
+            abort_unless($slug, 404, 'This product is not in the shop.');
+            $input['target'] = '/' . $slug;
+        }
         $code = bin2hex(random_bytes(32));
         DB::table('roboquest_shop_codes')->where('expires_at', '<', now()->subDay())->delete();
         DB::table('roboquest_shop_codes')->insert(['connection_id' => $connection->id, 'user_id' => $user->id, 'code_hash' => hash('sha256', $code), 'target' => $input['target'], 'expires_at' => now()->addMinutes(2), 'created_at' => now(), 'updated_at' => now()]);

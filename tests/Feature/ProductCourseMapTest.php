@@ -21,7 +21,7 @@ class ProductCourseMapTest extends TestCase {
         $shop=Schema::connection('clubshop');
         $shop->create('users',function(Blueprint $t){$t->increments('id');$t->string('email');$t->tinyInteger('email_status')->default(0);$t->tinyInteger('banned')->default(0);});
         $shop->create('orders',function(Blueprint $t){$t->increments('id');$t->integer('buyer_id');$t->string('payment_status')->nullable();});
-        $shop->create('order_items',function(Blueprint $t){$t->increments('id');$t->bigInteger('order_id');$t->integer('product_id')->nullable();$t->string('order_status')->nullable();});
+        $shop->create('order_items',function(Blueprint $t){$t->increments('id');$t->bigInteger('order_id');$t->integer('product_id')->nullable();$t->string('product_sku')->nullable();$t->string('order_status')->nullable();});
     }
     private int $mapperStatus = 200;
     private bool $mapperFaked = false;
@@ -111,5 +111,46 @@ class ProductCourseMapTest extends TestCase {
         config(['services.collab.lab_course_access'=>false]);Http::fake();
         $school=$this->user('school@lab.test');$connection=$this->connection($school);$this->labOrder('school@lab.test',85);
         $this->assertSame([],$this->snapshot($connection)['courses']);Http::assertNothingSent();
+    }
+    public function test_the_product_first_feed_unlocks_kits_skill_labs_and_courses_by_product_id_or_bundle_sku(): void {
+        config(['services.collab.product_course_map_url'=>'https://feed.test/api/course-product-map']);
+        Http::fake(['feed.test/*'=>Http::response(['status'=>'success','data'=>[
+            ['product_id'=>'bundle_cat_72_1','product_sku'=>'CAT-1','product_title'=>'Agriculture and Gardening','category_name'=>'Composite Skill Lab','courses'=>[
+                ['course_id'=>'kit:G7-K03','course_name'=>'Line-Following Delivery Robot Kit'],['course_id'=>'kit:G7-K02','course_name'=>'Rover'],['course_id'=>'video:9','course_name'=>'Unknown kinds are ignored']]],
+            ['product_id'=>'91','product_sku'=>'ARVR-1','product_title'=>'Ar/VR','courses'=>[['course_id'=>'lab:ar-vr:basic','course_name'=>'AR & VR – Basic']]],
+            ['product_id'=>'27','product_sku'=>'grade-1','product_title'=>'Grade 1','courses'=>[['course_id'=>'course:27','course_name'=>'Grade 1','course_category_name'=>'Skill2School']]],
+        ],'pagination'=>['last_page'=>1]])]);
+        $school=$this->user('school@lab.test');$connection=$this->connection($school);
+        $teacher=$this->user('teacher@lab.test','teacher');
+        \App\Models\SchoolMember::create(['school_id'=>$school->id,'user_id'=>$teacher->id,'role_in_school'=>'teacher','status'=>'active']);
+        // The school bought the bundle (order line has its own product ID, matched by SKU) and the S2S course product.
+        $shop=DB::connection('clubshop');$buyer=$shop->table('users')->insertGetId(['email'=>'school@lab.test','email_status'=>1]);
+        $order=$shop->table('orders')->insertGetId(['buyer_id'=>$buyer,'payment_status'=>'payment_received']);
+        $shop->table('order_items')->insert([['order_id'=>$order,'product_id'=>500,'product_sku'=>'cat-1','order_status'=>'processing'],['order_id'=>$order,'product_id'=>27,'product_sku'=>'grade-1','order_status'=>'processing']]);
+        $this->labOrder('teacher@lab.test',91);
+        $mine=$this->snapshot($connection);
+        $this->assertSame(['kits'=>['G7-K02','G7-K03'],'labs'=>[],'lms'=>[],'lmsCategories'=>[]],$mine['unlocks']['school']);
+        $this->assertSame(['lab-course-27'],array_column($mine['courses'],'id'));
+        $teacherView=$this->snapshot($connection,$teacher);
+        $this->assertSame(['kits'=>[],'labs'=>['ar-vr:basic'],'lms'=>[],'lmsCategories'=>[]],$teacherView['unlocks']['personal'],'a teacher\'s own purchase is theirs');
+        $this->assertSame(['G7-K02','G7-K03'],$teacherView['unlocks']['school']['kits'],'the school\'s purchase reaches its teachers');
+    }
+    public function test_lab_lms_categories_and_single_lms_reach_roboquest_and_the_master_check(): void {
+        config(['services.collab.product_course_map_url'=>'https://feed.test/api/course-product-map','services.roboquest.platform_key'=>str_repeat('p',40)]);
+        Http::fake(['feed.test/*'=>Http::response(['status'=>'success','data'=>[
+            ['product_id'=>'bundle_cat_72_1','product_sku'=>'CAT-1','product_title'=>'Agriculture and Gardening','courses'=>[['course_id'=>'lms-category:composite-agriculture-gardening']]],
+            ['product_id'=>'95','product_sku'=>'LMS-BAKING','product_title'=>'Baking (LMS)','courses'=>[['course_id'=>'lms:baking'],['course_id'=>'lms:Bad ID']]],
+        ],'pagination'=>['last_page'=>1]])]);
+        $school=$this->user('school@lab.test');$connection=$this->connection($school);
+        $teacher=$this->user('teacher@lab.test','teacher');
+        \App\Models\SchoolMember::create(['school_id'=>$school->id,'user_id'=>$teacher->id,'role_in_school'=>'teacher','status'=>'active']);
+        $shop=DB::connection('clubshop');$buyer=$shop->table('users')->insertGetId(['email'=>'school@lab.test','email_status'=>1]);
+        $order=$shop->table('orders')->insertGetId(['buyer_id'=>$buyer,'payment_status'=>'payment_received']);
+        $shop->table('order_items')->insert(['order_id'=>$order,'product_id'=>700,'product_sku'=>'CAT-1','order_status'=>'processing']);
+        $this->labOrder('teacher@lab.test',95);
+        $this->assertSame(['composite-agriculture-gardening'],$this->snapshot($connection)['unlocks']['school']['lmsCategories']);
+        $this->assertSame(['baking'],$this->snapshot($connection,$teacher)['unlocks']['personal']['lms'],'a teacher can buy a single LMS');
+        // The master's purchase check: the school and its teachers.
+        $this->entitlements()->assertOk()->assertJsonPath('lmsCategories',['composite-agriculture-gardening'])->assertJsonPath('lms',['baking']);
     }
 }

@@ -168,7 +168,19 @@ class RoboquestService {
                 'summary'=>'Included with '.implode(', ', array_column($mapped['labProducts'], 'title')),
                 'capacity'=>null, 'chapters'=>[], 'source'=>'lab-product', 'labProducts'=>$mapped['labProducts']];
         }
-        return ['schoolId'=>$connection->school_id, 'buyerId'=>(string)$buyerId, 'members'=>$members, 'courses'=>$list, 'updatedAt'=>now()->toIso8601String()];
+        $snapshot = ['schoolId'=>$connection->school_id, 'buyerId'=>(string)$buyerId, 'members'=>$members, 'courses'=>$list, 'updatedAt'=>now()->toIso8601String()];
+        // Robot kits and Skill Lab sections from paid Club Shop products (Mapper API): the school's own purchases (for
+        // everyone in the school) and, for a teacher or student, their personal purchases. Left out when the mapper or
+        // Club Shop is unreachable, so RoboQuest keeps what it had instead of hiding paid content.
+        try {
+            $snapshot['unlocks'] = [
+                'school' => self::isPersonal($connection) ? ['kits' => [], 'labs' => []] : $this->productCourses->unlocksForBuyers([(int) $connection->school_user_id]),
+                'personal' => (int) $buyerId === (int) $connection->school_user_id ? ['kits' => [], 'labs' => []] : $this->productCourses->unlocksForBuyers([(int) $buyerId]),
+            ];
+        } catch (\Throwable $error) {
+            report($error);
+        }
+        return $snapshot;
     }
     /**
      * Provider course ID => mapped course, for the paid Club Shop lab products of these portal users.
@@ -180,6 +192,12 @@ class RoboquestService {
             report($error);
             abort(503, 'Lab course access is temporarily unavailable. Existing access is unchanged; try again shortly.');
         }
+    }
+    /** Lab LMS bought by the school and its active teachers, for the master's content check. Fails closed like labCourses. */
+    public function schoolLms(RoboquestConnection $connection): array {
+        try { $unlocks = $this->productCourses->unlocksForBuyers($this->productCourses->schoolBuyerIds($connection)); }
+        catch (\Throwable $error) { report($error); abort(503, 'Lab access is temporarily unavailable. Existing access is unchanged; try again shortly.'); }
+        return ['lms' => $unlocks['lms'], 'lmsCategories' => $unlocks['lmsCategories']];
     }
     /** Lab-mapped course IDs for the school and its active teachers, for the master's content check. */
     public function schoolLabCourseIds(RoboquestConnection $connection): array {
