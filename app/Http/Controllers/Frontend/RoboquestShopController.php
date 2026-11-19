@@ -124,6 +124,12 @@ class RoboquestShopController extends RoboquestController
         $input = $request->validate(['externalId' => 'required|string|max:20', 'target' => ['required', 'string', 'max:300', 'regex:#^/[A-Za-z0-9/_\-.?=&%]*$#']]);
         abort_if(str_contains($input['target'], '..') || str_starts_with($input['target'], '//'), 422, 'Invalid shop page.');
         $user = $this->member($connection, $input['externalId']);
+        // A product by its Club Shop ID (RoboQuest's Buy buttons for lab LMS come from the mapper, which knows IDs).
+        if (preg_match('#^/product-id/(\d{1,10})$#', $input['target'], $m)) {
+            $slug = DB::connection('clubshop')->table('products')->where('id', (int) $m[1])->where('is_deleted', 0)->value('slug');
+            abort_unless($slug, 404, 'This product is not in the shop.');
+            $input['target'] = '/' . $slug;
+        }
         $code = bin2hex(random_bytes(32));
         DB::table('roboquest_shop_codes')->where('expires_at', '<', now()->subDay())->delete();
         DB::table('roboquest_shop_codes')->insert(['connection_id' => $connection->id, 'user_id' => $user->id, 'code_hash' => hash('sha256', $code), 'target' => $input['target'], 'expires_at' => now()->addMinutes(2), 'created_at' => now(), 'updated_at' => now()]);

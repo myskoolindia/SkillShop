@@ -15,6 +15,8 @@ use RuntimeException;
  *   course:N  a provider course (RoboQuest course with that API ID)
  *   kit:ID    a RoboQuest robot kit and its missions
  *   lab:T:L   a RoboQuest Skill Lab topic T at level L (basic, advanced, premium or all)
+ *   lms:ID              one LMS of the Composite Skill Lab / Skillvation Lab (RoboQuest expands nothing here)
+ *   lms-category:ID     a whole category of those labs: RoboQuest unlocks all its LMS
  * The older course-first feed ({course_id, products:[...]}) is still read, so either URL works.
  *
  * Products are matched to paid Club Shop order lines by product ID, or by SKU (bundles such as "bundle_cat_72_1" CAT-1).
@@ -74,7 +76,7 @@ class ProductCourseMapService
         $products = [];
         $skus = [];
         $add = function (string $key, string $title, string $sku) use (&$products, &$skus) {
-            $products[$key] ??= ['title' => $title, 'courses' => [], 'kits' => [], 'labs' => []];
+            $products[$key] ??= ['title' => $title, 'courses' => [], 'kits' => [], 'labs' => [], 'lms' => [], 'lmsCategories' => []];
             if ($sku !== '') $skus[mb_strtolower($sku)] = $key;
         };
         $course = function (string $key, int $courseId, string $title, string $typeName, string $productTitle) use (&$products) {
@@ -106,6 +108,10 @@ class ProductCourseMapService
                             $products[$key]['kits'][] = $m[1];
                         } elseif (preg_match('/^lab:([a-z0-9-]{1,60}):(basic|advanced|premium|all)$/', $id, $m)) {
                             $products[$key]['labs'][] = $m[1] . ':' . $m[2];
+                        } elseif (preg_match('/^lms:([a-z0-9-]{1,60})$/', $id, $m)) {
+                            $products[$key]['lms'][] = $m[1];
+                        } elseif (preg_match('/^lms-category:([a-z0-9-]{1,80})$/', $id, $m)) {
+                            $products[$key]['lmsCategories'][] = $m[1];
                         }
                         // Other kinds are ignored, so the mapper can add new ones without breaking access.
                     }
@@ -123,7 +129,7 @@ class ProductCourseMapService
                 }
             }
         }
-        foreach ($products as &$product) { $product['kits'] = array_values(array_unique($product['kits'])); $product['labs'] = array_values(array_unique($product['labs'])); }
+        foreach ($products as &$product) foreach (['kits', 'labs', 'lms', 'lmsCategories'] as $kind) $product[$kind] = array_values(array_unique($product[$kind] ?? []));
         return ['products' => $products, 'skus' => $skus];
     }
 
@@ -179,22 +185,19 @@ class ProductCourseMapService
         return $keys;
     }
 
-    /** Robot kits and Skill Lab sections included with the products these portal users paid for. */
+    /** Robot kits, Skill Lab sections and lab LMS (single, or whole categories) included with the paid products. */
     public function unlocksForBuyers(array $portalUserIds): array
     {
-        if (!$this->enabled()) return ['kits' => [], 'labs' => []];
+        $empty = ['kits' => [], 'labs' => [], 'lms' => [], 'lmsCategories' => []];
+        if (!$this->enabled()) return $empty;
         // The mapper is only asked when this person has paid shop orders.
         $keys = $this->paidProductKeys($portalUserIds);
-        if (!$keys) return ['kits' => [], 'labs' => []];
+        if (!$keys) return $empty;
         $products = $this->catalog()['products'];
-        $kits = []; $labs = [];
-        foreach ($keys as $key) {
-            array_push($kits, ...$products[$key]['kits']);
-            array_push($labs, ...$products[$key]['labs']);
-        }
-        $kits = array_values(array_unique($kits)); sort($kits);
-        $labs = array_values(array_unique($labs)); sort($labs);
-        return ['kits' => $kits, 'labs' => $labs];
+        $out = $empty;
+        foreach ($keys as $key) foreach (array_keys($empty) as $kind) array_push($out[$kind], ...($products[$key][$kind] ?? []));
+        foreach ($out as $kind => $values) { $values = array_values(array_unique($values)); sort($values); $out[$kind] = $values; }
+        return $out;
     }
 
     /**
