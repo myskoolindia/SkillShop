@@ -470,9 +470,31 @@
                                 @if ($nav_menu)
                                     <ul class="navigation">
                                         @foreach ($nav_menu as $menu)
+                                            @php
+                                                $linkUrl = $menu['link'] === '#' ? 'javascript:void(0);' : url($menu['link']);
+                                                $menuPath = trim($menu['link'] ?? '', '/');
+                                                $isActive = $menu['link'] !== '#' && (
+                                                    request()->is($menuPath) ||
+                                                    ($menuPath === '' && request()->path() === '/') ||
+                                                    request()->fullUrlIs($linkUrl) ||
+                                                    ($menuPath !== '' && request()->is($menuPath . '/*'))
+                                                );
+                                                $hasActiveChild = false;
+                                                if (!empty($menu['child'])) {
+                                                    foreach ($menu['child'] as $c) {
+                                                        $cPath = trim($c['link'] ?? '', '/');
+                                                        if (request()->is($cPath) || request()->fullUrlIs(url($c['link'])) || ($cPath !== '' && request()->is($cPath . '/*'))) {
+                                                            $hasActiveChild = true;
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                                $isCurrent = $isActive || $hasActiveChild;
+                                            @endphp
                                             @if ($menu['link'] == '/' && $setting?->show_all_homepage == 1)
-                                                <li class="menu-item-has-children">
+                                                <li class="menu-item-has-children {{ (request()->path() === '/' || request()->routeIs('home')) ? 'active' : '' }}">
                                                     <a href="{{ url('/') }}"
+                                                        style="{{ (request()->path() === '/' || request()->routeIs('home')) ? 'font-weight: 800 !important;' : '' }}"
                                                         title="">{{ __('Home') }}</a>
                                                     <ul class="sub-menu">
                                                         <li class=""><a
@@ -490,10 +512,11 @@
                                                     </ul><!-- /.sub-menu -->
                                                 </li>
                                             @else
-                                                <li class="{{ !empty($menu['child']) ? 'menu-item-has-children mega-menu-parent' : '' }}">
+                                                <li class="{{ !empty($menu['child']) ? 'menu-item-has-children mega-menu-parent' : '' }} {{ $isCurrent ? 'active' : '' }}">
                                                     <a href="{{ !empty($menu['child']) ? 'javascript:;' : url($menu['link']) }}"
+                                                        style="{{ $isCurrent ? 'font-weight: 800 !important;' : '' }}"
                                                         title="">
-                                                        <span>{{ $menu['label'] }}</span>
+                                                        <span style="{{ $isCurrent ? 'font-weight: 800 !important;' : '' }}">{{ $menu['label'] }}</span>
                                                     </a>
                                                     @if (!empty($menu['child']))
                                                         @php
@@ -512,15 +535,16 @@
                                                                 @foreach ($menu['child'] as $child)
                                                                     @php
                                                                         $childPath  = '/' . ltrim($child['link'], '/');
+                                                                        $cPathTrim  = trim($child['link'] ?? '', '/');
                                                                         $labelKey   = strtolower(trim($child['label']));
                                                                         $childMeta  = $childImageMap[$childPath] ?? null;
                                                                         $childImg   = $childMeta['image'] ?? ($childLabelMap[$labelKey] ?? 'https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?auto=format&fit=crop&w=600&q=80');
-                                                                        $isActive   = request()->is(ltrim($child['link'], '/'));
+                                                                        $childActive = request()->is($cPathTrim) || request()->fullUrlIs(url($child['link'])) || ($cPathTrim !== '' && request()->is($cPathTrim . '/*'));
                                                                     @endphp
                                                                     <a href="{{ url($child['link']) }}"
-                                                                       class="mega-card {{ $isActive ? 'mega-card--active' : '' }}"
+                                                                       class="mega-card {{ $childActive ? 'mega-card--active' : '' }}"
                                                                        style="width:{{ $colW }};">
-                                                                        <p class="mega-card__title">{{ $child['label'] }}</p>
+                                                                        <p class="mega-card__title" style="{{ $childActive ? 'font-weight: 800 !important; color: var(--tg-theme-primary, #1976d2) !important;' : '' }}">{{ $child['label'] }}</p>
                                                                         <div class="mega-card__img">
                                                                             <img src="{{ $childImg }}"
                                                                                  alt="{{ $child['label'] }}"
@@ -534,7 +558,13 @@
                                                         {{-- Mobile Text-Based Sub-Menu (for mobile slide drawer only) --}}
                                                         <ul class="sub-menu">
                                                             @foreach ($menu['child'] as $child)
-                                                                <li><a href="{{ url($child['link']) }}">{{ $child['label'] }}</a></li>
+                                                                @php
+                                                                    $cPathTrim   = trim($child['link'] ?? '', '/');
+                                                                    $childActive = request()->is($cPathTrim) || request()->fullUrlIs(url($child['link'])) || ($cPathTrim !== '' && request()->is($cPathTrim . '/*'));
+                                                                @endphp
+                                                                <li class="{{ $childActive ? 'active' : '' }}">
+                                                                    <a href="{{ url($child['link']) }}" style="{{ $childActive ? 'font-weight: 800 !important; color: var(--tg-theme-primary, #1976d2) !important;' : '' }}">{{ $child['label'] }}</a>
+                                                                </li>
                                                             @endforeach
                                                         </ul>
                                                     @endif
@@ -745,6 +775,35 @@
     align-items: center !important;
     justify-content: space-between !important;
     width: 100%;
+}
+
+/* ── Active / Open Page Menu Text (Bold) ── */
+.tgmenu__main-menu > ul > li.active > a,
+.tgmenu__main-menu > ul > li.active > a > span,
+.tgmenu__navbar-wrap > ul.navigation > li.active > a,
+.tgmenu__navbar-wrap > ul.navigation > li.active > a > span {
+    font-weight: 800 !important;
+    color: var(--tg-theme-primary, #1976d2) !important;
+}
+.tgmenu__main-menu > ul > li.active > a::after {
+    color: var(--tg-theme-primary, #1976d2) !important;
+    font-weight: 800 !important;
+}
+.tgmobile__menu .navigation li.active > a {
+    font-weight: 800 !important;
+    color: var(--tg-theme-primary, #1976d2) !important;
+}
+.sub-menu li.active > a {
+    font-weight: 800 !important;
+    color: var(--tg-theme-primary, #1976d2) !important;
+}
+.mega-card--active {
+    border-color: var(--tg-theme-primary, #1976d2) !important;
+    border-width: 2px !important;
+}
+.mega-card--active .mega-card__title {
+    font-weight: 800 !important;
+    color: var(--tg-theme-primary, #1976d2) !important;
 }
 
 @media (min-width: 1200px) {

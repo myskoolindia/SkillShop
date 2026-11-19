@@ -67,11 +67,24 @@
         @foreach ($nav_menu as $menu)
           @php
             $linkUrl = $menu['link'] === '#' ? 'javascript:void(0);' : url($menu['link']);
+            $menuPath = trim($menu['link'] ?? '', '/');
             $isActive = $menu['link'] !== '#' && (
-              request()->is(ltrim($menu['link'], '/')) || 
-              (request()->path() === '/' && $menu['link'] === '/') ||
-              request()->fullUrlIs($linkUrl)
+              request()->is($menuPath) || 
+              ($menuPath === '' && request()->path() === '/') ||
+              request()->fullUrlIs($linkUrl) ||
+              ($menuPath !== '' && request()->is($menuPath . '/*'))
             );
+            $hasActiveChild = false;
+            if (!empty($menu['child'])) {
+              foreach ($menu['child'] as $c) {
+                $cPath = trim($c['link'] ?? '', '/');
+                if (request()->is($cPath) || request()->fullUrlIs(url($c['link'])) || ($cPath !== '' && request()->is($cPath . '/*'))) {
+                  $hasActiveChild = true;
+                  break;
+                }
+              }
+            }
+            $isCurrent = $isActive || $hasActiveChild;
           @endphp
 
           @if (!empty($menu['child']) && count($menu['child']) > 0)
@@ -83,8 +96,8 @@
               $gridCols   = $childCount <= 2 ? 'grid-cols-2' : ($childCount === 3 ? 'grid-cols-3' : 'grid-cols-4');
             @endphp
             <div class="relative group">
-              <button type="button" class="nav-link inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 {{ $isActive ? 'text-primary bg-blue-50/60 font-bold' : 'text-slate-600 hover:text-primary hover:bg-slate-50' }}">
-                <span>{{ $menu['label'] }}</span>
+              <button type="button" class="nav-link inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm transition-colors duration-200 {{ $isCurrent ? 'text-primary bg-blue-50/70 font-extrabold' : 'text-slate-600 hover:text-primary hover:bg-slate-50 font-semibold' }}" style="{{ $isCurrent ? 'font-weight: 800 !important; color: #1976d2 !important;' : '' }}">
+                <span style="{{ $isCurrent ? 'font-weight: 800 !important;' : '' }}">{{ $menu['label'] }}</span>
                 <i class="fa-solid fa-chevron-down text-[10px] opacity-70 group-hover:rotate-180 transition-transform duration-200"></i>
               </button>
 
@@ -109,14 +122,15 @@
                     @foreach ($menu['child'] as $child)
                       @php
                         $childPath   = '/' . ltrim($child['link'], '/');
+                        $cPathTrim   = trim($child['link'] ?? '', '/');
                         $childMeta   = $childImageMap[$childPath] ?? null;
                         $childImage  = $childMeta['image'] ?? 'https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?auto=format&fit=crop&w=400&q=80';
                         $childDesc   = $childMeta['desc'] ?? '';
-                        $childActive = request()->is(ltrim($child['link'], '/'));
+                        $childActive = request()->is($cPathTrim) || request()->fullUrlIs(url($child['link'])) || ($cPathTrim !== '' && request()->is($cPathTrim . '/*'));
                       @endphp
                       <a href="{{ url($child['link']) }}"
                          class="group/item flex flex-col gap-3 p-3 rounded-xl border transition-all duration-200
-                                {{ $childActive ? 'border-primary shadow-md bg-blue-50/30' : 'border-slate-200 hover:border-primary hover:shadow-md bg-white' }}">
+                                {{ $childActive ? 'border-primary ring-2 ring-primary/20 shadow-md bg-blue-50/30' : 'border-slate-200 hover:border-primary hover:shadow-md bg-white' }}">
                         <div class="w-full aspect-[4/3] rounded-lg overflow-hidden bg-slate-100">
                           <img src="{{ $childImage }}"
                                alt="{{ $child['label'] }}"
@@ -124,7 +138,7 @@
                                onerror="this.onerror=null;this.style.display='none';" />
                         </div>
                         <div>
-                          <p class="text-sm font-bold text-slate-900 group-hover/item:text-primary transition-colors leading-tight">
+                          <p class="text-sm transition-colors leading-tight {{ $childActive ? 'font-extrabold text-primary' : 'font-bold text-slate-900 group-hover/item:text-primary' }}" style="{{ $childActive ? 'font-weight: 800 !important; color: #1976d2 !important;' : '' }}">
                             {{ $child['label'] }}
                           </p>
                           @if($childDesc)
@@ -140,7 +154,8 @@
             </div>
           @else
             <!-- Standard Menu Item -->
-            <a class="nav-link px-3 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 {{ $isActive ? 'text-primary bg-blue-50/60 font-bold' : 'text-slate-600 hover:text-primary hover:bg-slate-50' }}"
+            <a class="nav-link px-3 py-2 rounded-lg text-sm transition-colors duration-200 {{ $isCurrent ? 'text-primary bg-blue-50/70 font-extrabold' : 'text-slate-600 hover:text-primary hover:bg-slate-50 font-semibold' }}"
+              style="{{ $isCurrent ? 'font-weight: 800 !important; color: #1976d2 !important;' : '' }}"
               href="{{ $linkUrl }}">
               {{ $menu['label'] }}
             </a>
@@ -148,14 +163,24 @@
         @endforeach
       @else
         <!-- Fallback if menu is empty -->
-        <a class="nav-link px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary" href="{{ route('home') }}">Home</a>
-        <a class="nav-link px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary" href="{{ route('skill2school') }}">Skill 2 Skool</a>
-        <a class="nav-link px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary" href="{{ route('upskill4teacher') }}">Upskill 4 Teacher</a>
-        <a class="nav-link px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary" href="{{ route('ttt') }}">TTT</a>
-        <a class="nav-link px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary" href="{{ url('/shop') }}">Shop</a>
-        <a class="nav-link px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary" href="{{ url('/labs/composite-skill-basic') }}">Composite Skill Lab</a>
-        <a class="nav-link px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary" href="{{ url('/labs/stem') }}">Skillvation Lab</a>
-        <a class="nav-link px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary" href="{{ route('courses') }}">Courses</a>
+        @php
+          $fallbackItems = [
+            ['Home', route('home'), ''],
+            ['Skill 2 Skool', route('skill2school'), 'skill2school*'],
+            ['Upskill 4 Teacher', route('upskill4teacher'), 'upskill4teacher*'],
+            ['TTT', route('ttt'), 'ttt*'],
+            ['Shop', url('/shop'), 'shop*'],
+            ['Composite Skill Lab', url('/labs/composite-skill-basic'), 'labs/composite-skill-basic*'],
+            ['Skillvation Lab', url('/labs/stem'), 'labs/stem*'],
+            ['Courses', route('courses'), 'courses*'],
+          ];
+        @endphp
+        @foreach ($fallbackItems as [$label, $href, $pattern])
+          @php
+            $fbActive = request()->fullUrlIs($href) || ($pattern && request()->is($pattern)) || ($href === route('home') && request()->path() === '/');
+          @endphp
+          <a class="nav-link px-3 py-2 rounded-lg text-sm transition-colors duration-200 {{ $fbActive ? 'text-primary bg-blue-50/70 font-extrabold' : 'text-slate-600 hover:text-primary hover:bg-slate-50 font-semibold' }}" style="{{ $fbActive ? 'font-weight: 800 !important; color: #1976d2 !important;' : '' }}" href="{{ $href }}">{{ $label }}</a>
+        @endforeach
       @endif
     </nav>
 
@@ -247,31 +272,50 @@
         @foreach ($nav_menu as $menu)
           @php
             $linkUrl = $menu['link'] === '#' ? 'javascript:void(0);' : url($menu['link']);
+            $menuPath = trim($menu['link'] ?? '', '/');
             $isActive = $menu['link'] !== '#' && (
-              request()->is(ltrim($menu['link'], '/')) ||
-              (request()->path() === '/' && $menu['link'] === '/') ||
-              request()->fullUrlIs($linkUrl)
+              request()->is($menuPath) ||
+              ($menuPath === '' && request()->path() === '/') ||
+              request()->fullUrlIs($linkUrl) ||
+              ($menuPath !== '' && request()->is($menuPath . '/*'))
             );
+            $hasActiveChild = false;
+            if (!empty($menu['child'])) {
+              foreach ($menu['child'] as $c) {
+                $cPath = trim($c['link'] ?? '', '/');
+                if (request()->is($cPath) || request()->fullUrlIs(url($c['link'])) || ($cPath !== '' && request()->is($cPath . '/*'))) {
+                  $hasActiveChild = true;
+                  break;
+                }
+              }
+            }
+            $isCurrent = $isActive || $hasActiveChild;
           @endphp
 
           @if (!empty($menu['child']) && count($menu['child']) > 0)
             {{-- Accordion parent --}}
-            <details class="group/mob">
-              <summary class="flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer select-none list-none text-sm font-semibold text-slate-700 hover:text-primary hover:bg-slate-50 transition-colors">
-                <span>{{ $menu['label'] }}</span>
+            <details class="group/mob" {{ $hasActiveChild ? 'open' : '' }}>
+              <summary class="flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer select-none list-none text-sm transition-colors {{ $isCurrent ? 'text-primary bg-blue-50/70 font-extrabold' : 'font-semibold text-slate-700 hover:text-primary hover:bg-slate-50' }}" style="{{ $isCurrent ? 'font-weight: 800 !important; color: #1976d2 !important;' : '' }}">
+                <span style="{{ $isCurrent ? 'font-weight: 800 !important;' : '' }}">{{ $menu['label'] }}</span>
                 <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 group-open/mob:rotate-180 transition-transform duration-200"></i>
               </summary>
               <div class="ml-3 pl-3 border-l-2 border-slate-100 mt-0.5 mb-1 space-y-0.5">
                 @foreach ($menu['child'] as $child)
+                  @php
+                    $cPathTrim   = trim($child['link'] ?? '', '/');
+                    $childActive = request()->is($cPathTrim) || request()->fullUrlIs(url($child['link'])) || ($cPathTrim !== '' && request()->is($cPathTrim . '/*'));
+                  @endphp
                   <a href="{{ url($child['link']) }}"
-                     class="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-primary hover:bg-blue-50/60 transition-colors">
+                     class="block px-3 py-2 rounded-lg text-sm transition-colors {{ $childActive ? 'text-primary bg-blue-50/80 font-extrabold' : 'font-semibold text-slate-600 hover:text-primary hover:bg-blue-50/60' }}"
+                     style="{{ $childActive ? 'font-weight: 800 !important; color: #1976d2 !important;' : '' }}">
                     {{ $child['label'] }}
                   </a>
                 @endforeach
               </div>
             </details>
           @else
-            <a class="block px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ $isActive ? 'text-primary bg-blue-50 font-bold' : 'text-slate-700 hover:text-primary hover:bg-slate-50' }}"
+            <a class="block px-3 py-2.5 rounded-xl text-sm transition-colors {{ $isCurrent ? 'text-primary bg-blue-50 font-extrabold' : 'text-slate-700 hover:text-primary hover:bg-slate-50 font-semibold' }}"
+               style="{{ $isCurrent ? 'font-weight: 800 !important; color: #1976d2 !important;' : '' }}"
                href="{{ $linkUrl }}">
               {{ $menu['label'] }}
             </a>
@@ -281,17 +325,21 @@
       @else
         {{-- Fallback links when no CMS menu --}}
         @foreach([
-          ['Home',                  route('home')],
-          ['Skill 2 Skool',         route('skill2school')],
-          ['Upskill 4 Teacher',     route('upskill4teacher')],
-          ['TTT',                   route('ttt')],
-          ['Shop',                  url('/shop')],
-          ['Composite Skill Lab',   url('/labs/composite-skill-basic')],
-          ['Skillvation Lab',       url('/labs/stem')],
-          ['Courses',               route('courses')],
-        ] as [$label, $href])
+          ['Home',                  route('home'), ''],
+          ['Skill 2 Skool',         route('skill2school'), 'skill2school*'],
+          ['Upskill 4 Teacher',     route('upskill4teacher'), 'upskill4teacher*'],
+          ['TTT',                   route('ttt'), 'ttt*'],
+          ['Shop',                  url('/shop'), 'shop*'],
+          ['Composite Skill Lab',   url('/labs/composite-skill-basic'), 'labs/composite-skill-basic*'],
+          ['Skillvation Lab',       url('/labs/stem'), 'labs/stem*'],
+          ['Courses',               route('courses'), 'courses*'],
+        ] as [$label, $href, $pattern])
+          @php
+            $fbActive = request()->fullUrlIs($href) || ($pattern && request()->is($pattern)) || ($href === route('home') && request()->path() === '/');
+          @endphp
           <a href="{{ $href }}"
-             class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:text-primary hover:bg-slate-50 transition-colors {{ request()->fullUrlIs($href) ? 'text-primary bg-blue-50 font-bold' : '' }}">
+             class="block px-3 py-2.5 rounded-xl text-sm transition-colors text-slate-700 hover:text-primary hover:bg-slate-50 font-semibold {{ $fbActive ? 'text-primary bg-blue-50 font-extrabold' : '' }}"
+             style="{{ $fbActive ? 'font-weight: 800 !important; color: #1976d2 !important;' : '' }}">
             {{ $label }}
           </a>
         @endforeach
