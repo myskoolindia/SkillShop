@@ -82,36 +82,96 @@
     font-weight: 400;
     text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
   }
+  /* ── Hero Powered By Highlight Badge ──────────────── */
+  @keyframes lataaPulse {
+    0%, 100% {
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.4), 0 8px 30px rgba(11, 37, 69, 0.6);
+      border-color: rgba(56, 189, 248, 0.7);
+    }
+    50% {
+      box-shadow: 0 0 42px rgba(56, 189, 248, 0.8), 0 10px 36px rgba(11, 37, 69, 0.85);
+      border-color: #38bdf8;
+    }
+  }
+  .sv-hero-powered-wrap {
+    margin-top: 26px;
+  }
   .sv-hero-powered {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    padding: 8px 18px;
+    gap: 14px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.94) 0%, rgba(30, 58, 138, 0.95) 50%, rgba(15, 23, 42, 0.94) 100%);
+    border: 2px solid #38bdf8;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 10px 22px 10px 12px;
     border-radius: 9999px;
-    font-size: 14.5px;
+    font-size: 15px;
     color: #ffffff !important;
     text-decoration: none;
-    transition: all 0.3s ease;
+    transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: 0 0 25px rgba(56, 189, 248, 0.4), 0 8px 30px rgba(11, 37, 69, 0.6);
+    animation: lataaPulse 3.5s infinite ease-in-out;
+    position: relative;
+    max-width: 100%;
+    box-sizing: border-box;
   }
   .sv-hero-powered:hover {
-    background: rgba(255, 255, 255, 0.22);
-    border-color: #60a5fa;
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.98) 0%, rgba(2, 132, 199, 0.98) 100%);
+    border-color: #7dd3fc;
     color: #ffffff !important;
-    transform: translateY(-2px);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 0 45px rgba(56, 189, 248, 0.85), 0 14px 40px rgba(0, 0, 0, 0.5);
   }
   .sv-hero-powered .badge-chip {
-    background: linear-gradient(135deg, #2563eb, #38bdf8);
+    background: linear-gradient(135deg, #06b6d4 0%, #2563eb 50%, #38bdf8 100%);
     color: #ffffff;
-    padding: 3px 10px;
+    padding: 6px 14px;
     border-radius: 9999px;
-    font-weight: 700;
-    font-size: 12px;
-    letter-spacing: 0.5px;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
+    box-shadow: 0 0 16px rgba(6, 182, 212, 0.65);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .sv-hero-powered .sv-powered-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    color: #f1f5f9;
+    line-height: 1.4;
+  }
+  .sv-hero-powered .sv-powered-highlight {
+    color: #38bdf8;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+  }
+  .sv-hero-powered .sv-arrow-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(56, 189, 248, 0.2);
+    border: 1px solid rgba(56, 189, 248, 0.5);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #38bdf8;
+    font-size: 12px;
+    margin-left: 2px;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+  }
+  .sv-hero-powered:hover .sv-arrow-btn {
+    background: #38bdf8;
+    color: #0f172a;
+    transform: translateX(4px);
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.8);
   }
 
   /* ── Pill Buttons ─────────────────────────────────── */
@@ -809,11 +869,17 @@
         <h1>Building Future-Ready Schools Through Skill Education and AI</h1>
         <div class="sv-hero-tagline">One Integrated Ecosystem. Four Powerful Solutions. One Intelligent AI Backbone.</div>
         <p class="sv-hero-desc">Skillvation brings together structured skill education, teacher development, experiential learning infrastructure and intelligent AI technology to transform how schools teach, learn and prepare students for the future.</p>
-        <a href="{{ route('lataa') }}" class="sv-hero-powered">
-          <span class="badge-chip">LATAA OS</span>
-          <span>Powered by <strong>LATAA OS</strong> &ndash; Learning and Teaching AI Assistant Operating System</span>
-          <i class="fa-solid fa-arrow-right" style="font-size: 11px;"></i>
-        </a>
+        <div class="sv-hero-powered-wrap">
+          <a href="{{ route('lataa') }}" class="sv-hero-powered">
+            <span class="badge-chip"><i class="fa-solid fa-microchip"></i> LATAA OS</span>
+            <span class="sv-powered-label">
+              <span>Powered by</span>
+              <strong class="sv-powered-highlight">LATAA OS</strong>
+              <span>&ndash; Learning and Teaching AI Assistant Operating System</span>
+            </span>
+            <span class="sv-arrow-btn"><i class="fa-solid fa-arrow-right"></i></span>
+          </a>
+        </div>
       </div>
     </div>
   </section>
@@ -1231,7 +1297,7 @@
     <style>
       .sv-eco-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#6d28d9;background:#f3e8ff;border:1px solid #e9d5ff;padding:5px 14px;border-radius:999px;margin-bottom:18px;}
       .sv-eco-intro{text-align:center;max-width:940px;margin:0 auto 72px;}
-      .sv-eco-intro h2{font-size:clamp(28px,3.8vw,44px);font-weight:800;color:#1e1b4b;line-height:1.2;margin-bottom:22px;}
+      .sv-eco-intro h2{font-size:clamp(28px,3.8vw,30px);font-weight:800;color:#1e1b4b;line-height:1.2;margin-bottom:22px;}
       .sv-eco-intro p{font-size:17px;color:#475569;line-height:1.8;margin-bottom:14px;}
       .sv-lataa-core-hub{display:inline-flex;flex-direction:column;align-items:center;background:linear-gradient(135deg,#1e1b4b 0%,#1e3a8a 100%);color:#ffffff;padding:18px 36px;border-radius:18px;box-shadow:0 12px 28px rgba(30,27,75,0.18);margin:16px auto 28px;border:1px solid rgba(96,165,250,0.35);text-decoration:none;transition:transform .3s ease;}
       .sv-lataa-core-hub:hover{transform:translateY(-2px);color:#ffffff;}
@@ -1495,7 +1561,7 @@
       {{-- How LATAA OS transforms the Skillvation ecosystem --}}
       <div class="sv-eco-intro" data-reveal="fade-up">
         <div class="sv-eco-eyebrow"><i class="fa-solid fa-robot" style="font-size:11px;"></i> How LATAA OS Transforms the Skillvation Ecosystem</div>
-        <h2>From Planning to Practice.<br><span style="color:#2563eb;">From Learning to Mastery.</span></h2>
+        <h2>From Planning to Practice. <span style="color:#2563eb;">From Learning to Mastery.</span></h2>
         
         <a href="{{ route('lataa') }}" class="sv-lataa-core-hub">
           <span class="sv-lataa-core-badge"><i class="fa-solid fa-microchip"></i> LATAA OS</span>
@@ -1610,12 +1676,12 @@
           'alt'   => 'LATAA OS',
           'grad'  => 'linear-gradient(135deg,rgba(3,105,161,.6),rgba(14,165,233,.35))',
           'bBg'   => '#0369a1','bIcon'=>'fa-robot','bLabel'=>'LATAA OS',
-          'tagBg' => '#e0f2fe','tagClr'=>'#0369a1','tagIcon'=>'fa-robot','tagLabel'=>'Artificial Intelligence',
-          'clr'   => '#0369a1','title'=>'AI Lataa (Learning & teaching assist)',
-          'sub'   => 'AI-Powered Support for Learning & Teaching',
-          'body'  => 'At the heart of Skillvation is LATaA OS, our purpose-built AI operating system designed exclusively for educational institutions.<br> LATAA OS brings intelligent assistance to students, teachers and academic institutions. It supports personalised learning, lesson preparation, teaching resources, assessments and academic development – making everyday teaching and learning more effective, accessible and engaging.<br> Unlike general-purpose AI tools, LATaA OS is designed around the needs of schools, educators and learners.',
-          'pts'   => ['AI assistance for teachers','Enhanced student engagement','Practical AI exposure','Digital readiness building','Adapts to emerging tech'],
-          'qt'    => 'Enabling schools to embrace AI as part of modern education.',
+          'tagBg' => '#e0f2fe','tagClr'=>'#0369a1','tagIcon'=>'fa-robot','tagLabel'=>'Learning and Teaching AI Assistant Operating System',
+          'clr'   => '#0369a1','title'=>'One Intelligent AI. Every Learning Journey',
+          'sub'   => 'LATAA OS empowers every Skillvation solution:',
+          'body'  => 'At the heart of Skillvation is LATAA OS, our purpose-built AI operating system designed exclusively for educational institutions.<br> LATAA OS brings intelligent assistance to students, teachers and academic institutions. It supports personalised learning, lesson preparation, teaching resources, assessments and academic development – making everyday teaching and learning more effective, accessible and engaging.<br> Unlike general-purpose AI tools, LATAA OS is designed around the needs of schools, educators and learners.',
+          'pts'   => ['CAMPS: Supports personalised student learning, conceptual understanding, practice and competency development','TTT: Assists teachers with lesson plans, teaching scripts, classroom resources and assessments','U4T: Supports continuous professional learning, subject enrichment and teacher development','Composite Skill Labs & Skillvation Labs: Supports curriculum planning, practical session preparation, instructional resources and project-based learning'],
+          'qt'    => 'One AI ecosystem. Multiple educational applications. One connected learning experience.',
         ],
       ];
       @endphp

@@ -284,6 +284,125 @@
 </section>
 <!-- END: Subject-Specific Training Modules -->
 
+<!-- BEGIN: Strengthened by LATAA OS Section -->
+<section class="py-20 bg-gradient-to-b from-blue-50/60 via-white to-slate-50 relative overflow-hidden border-b border-slate-200/70">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-12">
+      
+      <!-- Left Column: Header and Overview -->
+      <div class="lg:col-span-7">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider mb-4 border border-blue-200 shadow-sm">
+          <i class="fa-solid fa-microchip text-blue-600"></i> Strengthened by LATAA OS
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4 leading-tight">
+          AI-Powered Teaching Assistance for Skill Education
+        </h2>
+        <p class="text-slate-600 text-lg leading-relaxed mb-6">
+          <strong>LATAA OS</strong> strengthens the TTT programme by integrating AI-powered academic assistance into teacher preparation and classroom delivery.
+        </p>
+
+        <h3 class="text-base font-bold text-slate-800 uppercase tracking-wide mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-wand-magic-sparkles text-blue-600"></i> It supports teachers with:
+        </h3>
+
+        <div class="space-y-3.5">
+          <div class="flex items-start gap-3.5 p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-300">
+            <span class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-base shadow-xs mt-0.5">
+              <i class="fa-solid fa-clipboard-list"></i>
+            </span>
+            <div class="text-slate-700 font-medium text-base leading-snug pt-1">
+              AI-assisted lesson planning and teaching scripts.
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3.5 p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all duration-300">
+            <span class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 text-base shadow-xs mt-0.5">
+              <i class="fa-solid fa-folder-open"></i>
+            </span>
+            <div class="text-slate-700 font-medium text-base leading-snug pt-1">
+              Structured teaching resources and learning materials.
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3.5 p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-sm hover:shadow-md hover:border-amber-300 transition-all duration-300">
+            <span class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 text-base shadow-xs mt-0.5">
+              <i class="fa-solid fa-lightbulb"></i>
+            </span>
+            <div class="text-slate-700 font-medium text-base leading-snug pt-1">
+              Activity-based teaching ideas and classroom support.
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3.5 p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all duration-300">
+            <span class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 text-base shadow-xs mt-0.5">
+              <i class="fa-solid fa-file-circle-check"></i>
+            </span>
+            <div class="text-slate-700 font-medium text-base leading-snug pt-1">
+              Question banks, worksheets, and assessments.
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3.5 p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-sm hover:shadow-md hover:border-purple-300 transition-all duration-300">
+            <span class="w-9 h-9 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0 text-base shadow-xs mt-0.5">
+              <i class="fa-solid fa-cubes-stacked"></i>
+            </span>
+            <div class="text-slate-700 font-medium text-base leading-snug pt-1">
+              Assistance in translating curriculum concepts into practical learning experiences.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Visual Card -->
+      <div class="lg:col-span-5">
+        <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-blue-200/60 bg-slate-900 group">
+          <img src="{{ asset('frontend/img/skillbox/lataa_hero_ai.jpg') }}" alt="LATAA OS AI-Powered Teaching Assistance" class="w-full h-[430px] object-cover group-hover:scale-105 transition-transform duration-700 opacity-90" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent"></div>
+          
+          <div class="absolute top-4 right-4">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/90 text-slate-950 text-xs font-extrabold uppercase tracking-wider backdrop-blur-md shadow-lg">
+              <i class="fa-solid fa-sparkles text-[10px]"></i> AI Assistant
+            </span>
+          </div>
+
+          <div class="absolute bottom-6 left-6 right-6 text-white">
+            <div class="text-xs uppercase tracking-widest text-cyan-400 font-bold mb-1">LATAA OS FOR TEACHERS</div>
+            <h4 class="text-xl font-bold mb-2">Empowering Modern Educators</h4>
+            <p class="text-slate-300 text-sm leading-relaxed mb-4">
+              AI intelligence that saves teacher preparation time while elevating experiential classroom delivery.
+            </p>
+            <a href="{{ route('lataa') }}" class="inline-flex items-center gap-2 text-cyan-300 hover:text-white font-semibold text-sm transition-colors duration-200">
+              Discover LATAA OS Platform <i class="fa-solid fa-arrow-right text-xs"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Outcome Callout Banner -->
+    <div class="bg-gradient-to-r from-blue-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-xl border border-blue-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div class="flex items-start gap-4">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white text-xl flex-shrink-0 shadow-lg mt-0.5">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div>
+          <span class="inline-block text-xs font-bold tracking-widest uppercase text-cyan-300 mb-1">The Outcome</span>
+          <p class="text-base sm:text-lg text-slate-100 font-medium leading-relaxed m-0">
+            Teachers are equipped not only with the methodology to teach skill education but also with intelligent tools to plan, prepare, and deliver lessons effectively.
+          </p>
+        </div>
+      </div>
+      <a href="{{ route('lataa') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-sm transition-all duration-300 shadow-md flex-shrink-0 hover:scale-105">
+        Explore LATAA OS <i class="fa-solid fa-arrow-right text-xs"></i>
+      </a>
+    </div>
+
+  </div>
+</section>
+<!-- END: Strengthened by LATAA OS Section -->
+
 <!-- BEGIN: Why Choose Section -->
 <section class="py-20 relative">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
