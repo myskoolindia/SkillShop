@@ -403,7 +403,7 @@
           <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center text-xl shadow-xs group-hover:scale-110 group-hover:bg-cyan-500/20 transition-all">
             <i class="fa-solid fa-book-bookmark"></i>
           </div>
-          <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">Pillar 01</span>
+          <!-- <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">Pillar 01</span> -->
         </div>
         <h3 class="text-lg font-bold text-white mb-2 group-hover:text-cyan-300 transition-colors">Curriculum Alignment</h3>
         <p class="text-slate-400 text-sm leading-relaxed m-0">Supports the integration of skill subjects, learning objectives, and classroom activities.</p>
@@ -415,7 +415,7 @@
           <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 flex items-center justify-center text-xl shadow-xs group-hover:scale-110 group-hover:bg-indigo-500/20 transition-all">
             <i class="fa-solid fa-chalkboard-user"></i>
           </div>
-          <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">Pillar 02</span>
+          <!-- <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">Pillar 02</span> -->
         </div>
         <h3 class="text-lg font-bold text-white mb-2 group-hover:text-indigo-300 transition-colors">Teacher Assistance</h3>
         <p class="text-slate-400 text-sm leading-relaxed m-0">Helps teachers prepare lesson plans, teaching scripts, and instructional resources.</p>
@@ -427,7 +427,7 @@
           <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-xl shadow-xs group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all">
             <i class="fa-solid fa-cubes-stacked"></i>
           </div>
-          <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Pillar 03</span>
+          <!-- <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Pillar 03</span> -->
         </div>
         <h3 class="text-lg font-bold text-white mb-2 group-hover:text-emerald-300 transition-colors">Project-Based Learning</h3>
         <p class="text-slate-400 text-sm leading-relaxed m-0">Supports the development of practical activities and project-oriented learning experiences.</p>
@@ -444,7 +444,7 @@
           <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center text-xl shadow-xs group-hover:scale-110 group-hover:bg-amber-500/20 transition-all">
             <i class="fa-solid fa-file-lines"></i>
           </div>
-          <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/20">Pillar 04</span>
+          <!-- <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/20">Pillar 04</span> -->
         </div>
         <h3 class="text-lg font-bold text-white mb-2 group-hover:text-amber-300 transition-colors">Learning Resources</h3>
         <p class="text-slate-400 text-sm leading-relaxed m-0">Assists in creating worksheets, question banks, and assessments.</p>
@@ -456,7 +456,7 @@
           <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400 flex items-center justify-center text-xl shadow-xs group-hover:scale-110 group-hover:bg-purple-500/20 transition-all">
             <i class="fa-solid fa-network-wired"></i>
           </div>
-          <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/20">Pillar 05</span>
+          <!-- <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/20">Pillar 05</span> -->
         </div>
         <h3 class="text-lg font-bold text-white mb-2 group-hover:text-purple-300 transition-colors">Academic Support</h3>
         <p class="text-slate-400 text-sm leading-relaxed m-0">Helps teachers organise and deliver structured learning experiences across different skill domains.</p>
@@ -480,7 +480,7 @@
             <i class="fa-solid fa-boxes-stacked"></i>
           </div>
           <div>
-            <div class="text-xs font-bold uppercase text-slate-400">Step 01</div>
+            <!-- <div class="text-xs font-bold uppercase text-slate-400">Step 01</div> -->
             <div class="text-white font-bold text-base">Lab Infrastructure</div>
             <p class="text-slate-300 text-xs mt-0.5 m-0 leading-normal">Compliant equipment, tools & setup</p>
           </div>
@@ -493,7 +493,7 @@
             <i class="fa-solid fa-microchip"></i>
           </div>
           <div>
-            <div class="text-xs font-bold uppercase text-cyan-400">Step 02 &bull; LATAA OS</div>
+            <!-- <div class="text-xs font-bold uppercase text-cyan-400">Step 02 &bull; LATAA OS</div> -->
             <div class="text-cyan-200 font-extrabold text-base">Academic Guidance</div>
             <p class="text-slate-200 text-xs mt-0.5 m-0 leading-normal">Curriculum, lessons & assessment</p>
           </div>
@@ -505,7 +505,7 @@
             <i class="fa-solid fa-lightbulb"></i>
           </div>
           <div>
-            <div class="text-xs font-bold uppercase text-slate-400">Step 03</div>
+            <!-- <div class="text-xs font-bold uppercase text-slate-400">Step 03</div> -->
             <div class="text-white font-bold text-base">Active Learning</div>
             <p class="text-slate-300 text-xs mt-0.5 m-0 leading-normal">Hands-on, experiential student mastery</p>
           </div>
