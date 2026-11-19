@@ -26,8 +26,11 @@ class SsoBridgeController extends Controller
             $target = $request->query('target', '');
             $shopUrl = rtrim(config('sso.shop_url', url('/club-shop')), '/');
 
-            // If target is admin panel or vendor dashboard, require login
-            if ($request->has('admin') || in_array(ltrim($target, '/'), ['admin', 'dashboard', 'dashboard/add-product', 'dashboard/products'])) {
+            $targetLower = strtolower(ltrim($target, '/'));
+            $isCartOrCheckout = preg_match('/(cart|checkout|buy)/i', $targetLower);
+
+            // If target is admin panel, vendor dashboard, or any cart/checkout purchase flow, require login
+            if ($request->has('admin') || $isCartOrCheckout || in_array($targetLower, ['admin', 'dashboard', 'dashboard/add-product', 'dashboard/products'])) {
                 $loginRoute = $request->has('admin') ? 'admin.login' : 'login';
                 return redirect()->guest(route($loginRoute, ['redirect' => $request->fullUrl()]));
             }

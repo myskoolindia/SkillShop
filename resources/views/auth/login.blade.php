@@ -545,6 +545,17 @@
                 }
             });
         }
+
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('tab') === 'otp' || urlParams.get('auth') === 'whatsapp' || urlParams.get('whatsapp') === '1') {
+                switchLoginTab('otp');
+            }
+            const phoneParam = urlParams.get('phone');
+            if (phoneParam && phoneInput) {
+                phoneInput.value = phoneParam.replace(/[^0-9]/g, '').slice(-10);
+            }
+        } catch (e) {}
     });
 </script>
 @endpush

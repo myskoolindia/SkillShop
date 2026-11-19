@@ -233,7 +233,7 @@
         </div>
 
         <div class="flex flex-wrap gap-4 pt-3">
-          <a href="#cta-section"
+          <a href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section', 'tab' => 'otp']) }}"
              class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-brand-orange hover:bg-brand-orangehover text-white text-sm font-bold shadow-lg shadow-brand-orange/25 transition-all hover:-translate-y-0.5">
             <i class="fa-solid fa-calendar-check"></i> Book a Skill Lab Visit
           </a>
@@ -1063,7 +1063,7 @@
             </button>
             <div class="sks-customise-menu" id="sks-customise-menu"
                  style="display:none;position:absolute;right:0;bottom:calc(100% + 8px);min-width:230px;background:#fff;border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);overflow:hidden;z-index:50;">
-              <a id="sks-opt-cart" href="{{ url('/sso/shop') }}?target=%2Fbasic-cart"
+              <a id="sks-opt-cart" href="{{ auth()->check() ? url('/sso/shop') . '?target=%2Fbasic-cart' : route('login', ['redirect' => url('/sso/shop') . '?target=%2Fbasic-cart', 'tab' => 'otp']) }}"
                  style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;border-bottom:1px solid #eef1f6;transition:background .15s;"
                  onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
                 <i class="fa-solid fa-cart-shopping" style="color:#f4742b;width:16px;"></i>
@@ -1077,20 +1077,20 @@
               </a>
             </div>
           </div>
-          <a id="sks-request-proposal-btn" href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section?package=basic']) }}"
+          <a id="sks-request-proposal-btn" href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section?package=basic', 'tab' => 'otp']) }}"
              data-package="basic"
-             onclick="if(window.setEnquiryPackage){window.setEnquiryPackage('basic');}"
+             onclick="@if(auth()->check()) if(window.setEnquiryPackage){window.setEnquiryPackage('basic');} @endif"
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
             <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
           </a> -->
           {{-- Two direct action buttons: Buy Skill Lab (→ Basic cart) + Request for Proposal --}}
-          <a href="{{ url('/sso/shop') }}?target=%2Fbasic-cart"
+          <a href="{{ auth()->check() ? url('/sso/shop') . '?target=%2Fbasic-cart' : route('login', ['redirect' => url('/sso/shop') . '?target=%2Fbasic-cart', 'tab' => 'otp']) }}"
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;text-decoration:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
             <i class="fa-solid fa-cart-shopping" style="font-size:11px;"></i> Buy Skill Lab
           </a>
-          <a id="sks-request-proposal-btn" href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section?package=basic']) }}"
+          <a id="sks-request-proposal-btn" href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section?package=basic', 'tab' => 'otp']) }}"
              data-package="basic"
-             onclick="if(window.setEnquiryPackage){window.setEnquiryPackage('basic');}"
+             onclick="@if(auth()->check()) if(window.setEnquiryPackage){window.setEnquiryPackage('basic');} @endif"
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
             <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request for Proposal
           </a>
@@ -1197,7 +1197,7 @@
             </button>
             <div class="sks-customise-menu"
                  style="display:none;position:absolute;right:0;bottom:calc(100% + 8px);min-width:230px;background:#fff;border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);overflow:hidden;z-index:50;">
-              <a href="{{ url('/sso/shop') }}?target=%2Fadvance-cart"
+              <a href="{{ auth()->check() ? url('/sso/shop') . '?target=%2Fadvance-cart' : route('login', ['redirect' => url('/sso/shop') . '?target=%2Fadvance-cart', 'tab' => 'otp']) }}"
                  style="display:flex;align-items:center;gap:10px;padding:13px 16px;color:#0b2545;font-size:13px;font-weight:600;text-decoration:none;border-bottom:1px solid #eef1f6;transition:background .15s;"
                  onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
                 <i class="fa-solid fa-cart-shopping" style="color:#f4742b;width:16px;"></i>
@@ -1211,20 +1211,20 @@
               </a>
             </div>
           </div>
-          <a id="sks-adv-request-proposal-btn" href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section?package=advance']) }}"
+          <a id="sks-adv-request-proposal-btn" href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section?package=advance', 'tab' => 'otp']) }}"
              data-package="advance"
-             onclick="if(window.setEnquiryPackage){window.setEnquiryPackage('advance');}"
+             onclick="@if(auth()->check()) if(window.setEnquiryPackage){window.setEnquiryPackage('advance');} @endif"
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
             <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request Proposal
           </a> -->
           {{-- Two direct action buttons: Buy Skill Lab (→ Advance cart) + Request for Proposal --}}
-          <a href="{{ url('/sso/shop') }}?target=%2Fadvance-cart"
+          <a href="{{ auth()->check() ? url('/sso/shop') . '?target=%2Fadvance-cart' : route('login', ['redirect' => url('/sso/shop') . '?target=%2Fadvance-cart', 'tab' => 'otp']) }}"
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:#f4742b;color:#fff;font-size:13px;font-weight:700;border:none;text-decoration:none;cursor:pointer;transition:all .2s;white-space:nowrap;">
             <i class="fa-solid fa-cart-shopping" style="font-size:11px;"></i> Buy Skill Lab
           </a>
-          <a id="sks-adv-request-proposal-btn" href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section?package=advance']) }}"
+          <a id="sks-adv-request-proposal-btn" href="{{ auth()->check() ? '#cta-section' : route('login', ['redirect' => url()->current() . '#cta-section?package=advance', 'tab' => 'otp']) }}"
              data-package="advance"
-             onclick="if(window.setEnquiryPackage){window.setEnquiryPackage('advance');}"
+             onclick="@if(auth()->check()) if(window.setEnquiryPackage){window.setEnquiryPackage('advance');} @endif"
              style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;">
             <i class="fa-solid fa-file-lines" style="font-size:11px;"></i> Request for Proposal
           </a>
@@ -1517,87 +1517,43 @@
               </p>
             </form>
           @else
-            <div class="p-3.5 mb-4 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs text-blue-900 flex items-center justify-between gap-3 flex-wrap">
-              <div class="flex items-center gap-2">
-                <i class="fa-solid fa-circle-info text-blue-600"></i>
-                <span>School or educator?</span>
+            <div class="bg-gradient-to-br from-slate-50 to-orange-50/40 rounded-2xl border-2 border-orange-200/80 p-6 sm:p-8 text-center shadow-md">
+              <div class="w-16 h-16 rounded-2xl bg-brand-navy text-white mx-auto flex items-center justify-center text-2xl shadow-lg mb-4">
+                <i class="fa-solid fa-school-flag text-brand-orange"></i>
               </div>
-              <div class="flex items-center gap-3">
-                <a href="{{ route('login', ['redirect' => url()->current() . '#cta-section']) }}" class="font-bold text-brand-navy hover:text-brand-orange underline whitespace-nowrap">
-                  Sign in &rarr;
+              <h4 class="text-xl font-black text-brand-navy mb-2">School Sign In / Registration Required</h4>
+              <p class="text-xs sm:text-sm text-slate-600 max-w-lg mx-auto mb-6">
+                Official CBSE Composite Skill Lab proposals, equipment inventories, and inspection-ready layout blueprints are issued exclusively to verified schools and teachers. Please verify your WhatsApp number to continue.
+              </p>
+
+              <div class="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto mb-6">
+                <a href="{{ route('login', ['redirect' => url()->current() . '#cta-section', 'tab' => 'otp']) }}"
+                   class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-2">
+                  <i class="fa-brands fa-whatsapp text-base"></i>
+                  <span>Sign In with WhatsApp</span>
                 </a>
-                <span class="text-blue-300">|</span>
-                <a href="{{ route('register', ['scope' => 'labs', 'redirect' => url()->current() . '#cta-section']) }}" class="font-bold text-brand-navy hover:text-brand-orange underline whitespace-nowrap">
-                  Register School / Teacher &rarr;
+                <a href="{{ route('register', ['scope' => 'labs', 'redirect' => url()->current() . '#cta-section']) }}"
+                   class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-brand-navy hover:bg-brand-darknavy text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-building-columns"></i>
+                  <span>Register School Account</span>
                 </a>
+              </div>
+
+              <div class="pt-5 border-t border-slate-200/80 grid grid-cols-1 sm:grid-cols-3 gap-3 text-left text-xs text-slate-600">
+                <div class="flex items-center gap-2">
+                  <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                  <span>WhatsApp OTP Verification</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                  <span>CBSE Compliance Document</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                  <span>Academic Specialist Demo</span>
+                </div>
               </div>
             </div>
-
-            <form class="space-y-4" id="planEnquiryForm" data-source="composite-skill-lab-basic" data-title="Composite Skill Lab Basic Package">
-              <input type="hidden" name="source"       id="planSource">
-              <input type="hidden" name="course_title" id="planTitle">
-              <input type="hidden" name="quotation"    id="planQuotation">
-
-              <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">School Name *</label>
-                <input type="text" name="school" required placeholder="e.g. Delhi Public School" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Contact Person *</label>
-                  <input type="text" name="name" required placeholder="Your full name" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
-                </div>
-                <div>
-                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Designation</label>
-                  <input type="text" name="designation" placeholder="e.g. Principal / Academic Director" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
-                </div>
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="sm:col-span-2">
-                  @include('frontend.home-four.partials._phone_otp', [
-                    'formId'       => 'planEnquiryForm',
-                    'phoneInputId' => 'plan_phone',
-                    'submitBtnId'  => 'planEnquiryBtn',
-                    'inputClass'   => 'w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm transition-all',
-                  ])
-                </div>
-                <div class="sm:col-span-2">
-                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Email Address *</label>
-                  <input type="email" name="email" required placeholder="principal@school.edu.in" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
-                </div>
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">City *</label>
-                  <input type="text" name="city" required placeholder="e.g. Mumbai, Maharashtra" class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all" />
-                </div>
-                <div>
-                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Request Type *</label>
-                  <select name="message" required class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all">
-                    <option value="Request Detailed Proposal">Request detailed proposal</option>
-                    <option value="Book a Skill Lab Visit">Book a Skill Lab Visit</option>
-                    <option value="Schedule a Demo with Academic Team">Schedule a Demo with Academic Team</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Message / Space Available</label>
-                <textarea name="address" rows="3" placeholder="Tell us about your space dimensions (e.g. 600 sq ft) or specific skill areas of interest..." class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:border-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-navy/20 transition-all"></textarea>
-              </div>
-
-              <button type="submit" id="planEnquiryBtn" class="w-full py-4 rounded-xl bg-brand-orange hover:bg-brand-orangehover text-white text-sm font-bold shadow-lg shadow-brand-orange/20 transition-all duration-200">
-                Request Proposal
-              </button>
-
-              <p class="text-xs text-center text-slate-400 mt-2">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:-1px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                Your information is confidential. No spam.
-              </p>
-            </form>
           @endauth
           </div>
 
@@ -2446,7 +2402,7 @@ Promise.all([
     itemsEl: document.getElementById('sks-items'),
     btnCart: document.getElementById('sks-opt-cart'),
     btnP: document.getElementById('sks-btn-product'),
-    customiseUrl: '{{ url("/sso/shop") }}?target=%2Fbasic-cart',
+    customiseUrl: '{{ auth()->check() ? url("/sso/shop") . "?target=%2Fbasic-cart" : route("login", ["redirect" => url("/sso/shop") . "?target=%2Fbasic-cart", "tab" => "otp"]) }}',
     viewportEl: document.getElementById('sks-carousel-viewport'),
     prevBtn: document.getElementById('sks-box-prev'),
     nextBtn: document.getElementById('sks-box-next'),
