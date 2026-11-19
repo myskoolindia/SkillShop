@@ -119,10 +119,191 @@
   </div>
 </section>
 
+{{-- ═════════════════════════════════════════════════════════════════════
+     1.5 MAKING FOUNDATIONAL SKILL EDUCATION SMARTER WITH LATAA OS
+     ═════════════════════════════════════════════════════════════════════ --}}
+<!-- BEGIN: LATAA OS Foundational Skill Education Section -->
+<section class="py-20 lg:py-28 bg-gradient-to-br from-slate-950 via-[#0a1630] to-slate-950 text-white relative overflow-hidden border-y border-cyan-500/20">
+  <!-- Ambient background glow elements -->
+  <div class="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-cyan-500/15 blur-3xl pointer-events-none"></div>
+  <div class="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-blue-600/15 blur-3xl pointer-events-none"></div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    
+    <!-- Section Header -->
+    <div class="text-center max-w-3xl mx-auto mb-14">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-400 text-xs font-bold uppercase tracking-widest shadow-sm mb-4">
+        <i class="fa-solid fa-microchip"></i> Foundational Skill Education &bull; LATAA OS
+      </div>
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight mb-5 leading-tight">
+        Making Foundational Skill Education <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-400">Smarter and More Effective</span>
+      </h2>
+      <p class="text-slate-300 text-base sm:text-lg leading-relaxed mb-3">
+        <strong>Skill2Skool</strong> brings the CAMPS framework into everyday school learning through structured activities, experiential learning and practical skill development for Grades 1 to 5.
+      </p>
+      <p class="text-cyan-300/90 text-base sm:text-lg font-medium leading-relaxed m-0">
+        <strong>LATAA OS</strong> strengthens this programme by providing AI-powered academic assistance to teachers, helping them plan, prepare and deliver meaningful CAMPS learning experiences.
+      </p>
+    </div>
+
+    <!-- Infographic Sub-Badge -->
+    <div class="text-center mb-10">
+      <div class="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-slate-900/80 border border-cyan-500/30 text-cyan-300 text-xs font-bold uppercase tracking-wider shadow-inner">
+        <i class="fa-solid fa-layer-group text-cyan-400"></i> How LATAA OS Strengthens CAMPS
+      </div>
+    </div>
+
+    <!-- 5 CAMPS Framework Infographic Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 mb-12">
+      
+      <!-- C - Communication -->
+      <div class="group relative p-6 rounded-2xl bg-slate-900/70 border border-red-500/20 hover:border-red-400/60 transition-all duration-300 shadow-xl hover:-translate-y-1.5 hover:shadow-red-500/10 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 flex items-center justify-center text-xl shadow-xs group-hover:scale-110 group-hover:bg-red-500/20 transition-all">
+              <i class="fa-solid fa-comments"></i>
+            </div>
+            <span class="text-xs font-black px-2.5 py-1 rounded-md bg-red-500/10 text-red-300 border border-red-500/20">C</span>
+          </div>
+          <h3 class="text-base font-bold text-white mb-2 group-hover:text-red-300 transition-colors">Communication</h3>
+          <p class="text-slate-400 text-xs leading-relaxed m-0">Supports teachers with speaking activities, vocabulary exercises, storytelling and presentation ideas.</p>
+        </div>
+      </div>
+
+      <!-- A - Art & Craft -->
+      <div class="group relative p-6 rounded-2xl bg-slate-900/70 border border-purple-500/20 hover:border-purple-400/60 transition-all duration-300 shadow-xl hover:-translate-y-1.5 hover:shadow-purple-500/10 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400 flex items-center justify-center text-xl shadow-xs group-hover:scale-110 group-hover:bg-purple-500/20 transition-all">
+              <i class="fa-solid fa-palette"></i>
+            </div>
+            <span class="text-xs font-black px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/20">A</span>
+          </div>
+          <h3 class="text-base font-bold text-white mb-2 group-hover:text-purple-300 transition-colors">Art &amp; Craft</h3>
+          <p class="text-slate-400 text-xs leading-relaxed m-0">Assists in developing creative activities, craft ideas and hands-on learning experiences.</p>
+        </div>
+      </div>
+
+      <!-- M - Math for Real Life -->
+      <div class="group relative p-6 rounded-2xl bg-slate-900/70 border border-blue-500/20 hover:border-blue-400/60 transition-all duration-300 shadow-xl hover:-translate-y-1.5 hover:shadow-blue-500/10 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-400 flex items-center justify-center text-xl shadow-xs group-hover:scale-110 group-hover:bg-blue-500/20 transition-all">
+              <i class="fa-solid fa-calculator"></i>
+            </div>
+            <span class="text-xs font-black px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-300 border border-blue-500/20">M</span>
+          </div>
+          <h3 class="text-base font-bold text-white mb-2 group-hover:text-blue-300 transition-colors">Math for Real Life</h3>
+          <p class="text-slate-400 text-xs leading-relaxed m-0">Helps create practical mathematical activities connected to everyday situations.</p>
+        </div>
+      </div>
+
+      <!-- P - Personality Development -->
+      <div class="group relative p-6 rounded-2xl bg-slate-900/70 border border-emerald-500/20 hover:border-emerald-400/60 transition-all duration-300 shadow-xl hover:-translate-y-1.5 hover:shadow-emerald-500/10 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-xl shadow-xs group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all">
+              <i class="fa-solid fa-star"></i>
+            </div>
+            <span class="text-xs font-black px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">P</span>
+          </div>
+          <h3 class="text-base font-bold text-white mb-2 group-hover:text-emerald-300 transition-colors">Personality Development</h3>
+          <p class="text-slate-400 text-xs leading-relaxed m-0">Supports activities focusing on confidence, values, teamwork, decision-making and social skills.</p>
+        </div>
+      </div>
+
+      <!-- S - Science & STEM -->
+      <div class="group relative p-6 rounded-2xl bg-slate-900/70 border border-amber-500/20 hover:border-amber-400/60 transition-all duration-300 shadow-xl hover:-translate-y-1.5 hover:shadow-amber-500/10 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center text-xl shadow-xs group-hover:scale-110 group-hover:bg-amber-500/20 transition-all">
+              <i class="fa-solid fa-flask"></i>
+            </div>
+            <span class="text-xs font-black px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/20">S</span>
+          </div>
+          <h3 class="text-base font-bold text-white mb-2 group-hover:text-amber-300 transition-colors">Science &amp; STEM</h3>
+          <p class="text-slate-400 text-xs leading-relaxed m-0">Assists teachers with experiments, activity ideas, models and project-based learning resources.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Active Transformation Infographic Banner: Empowering Teachers -->
+    <div class="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-slate-900/90 via-[#0d1d3d] to-slate-900/90 border border-cyan-500/30 shadow-2xl relative">
+      <div class="text-center mb-8">
+        <span class="text-xs font-bold uppercase tracking-widest text-cyan-400">Intelligent Teaching Assistance</span>
+        <h3 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">Empowering Teachers. Enriching Student Experiences.</h3>
+        <p class="text-slate-300 text-sm mt-2 max-w-2xl mx-auto">LATAA OS supports teachers with practical, AI-assisted tools built directly for foundational classrooms:</p>
+      </div>
+
+      <!-- 5 Teacher Support Points Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        
+        <!-- Support Point 1 -->
+        <div class="flex flex-col items-center text-center p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-cyan-400/40 transition-colors group">
+          <div class="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-file-lines"></i>
+          </div>
+          <p class="text-slate-200 text-xs font-medium leading-relaxed m-0">AI-assisted lesson plans and teaching scripts.</p>
+        </div>
+
+        <!-- Support Point 2 -->
+        <div class="flex flex-col items-center text-center p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-sky-400/40 transition-colors group">
+          <div class="w-11 h-11 rounded-xl bg-sky-500/10 border border-sky-400/30 text-sky-300 flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-bullseye"></i>
+          </div>
+          <p class="text-slate-200 text-xs font-medium leading-relaxed m-0">Activity ideas aligned with CAMPS learning objectives.</p>
+        </div>
+
+        <!-- Support Point 3 -->
+        <div class="flex flex-col items-center text-center p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-indigo-400/40 transition-colors group">
+          <div class="w-11 h-11 rounded-xl bg-indigo-500/10 border border-indigo-400/30 text-indigo-300 flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-book-open"></i>
+          </div>
+          <p class="text-slate-200 text-xs font-medium leading-relaxed m-0">Teaching-learning materials and worksheets.</p>
+        </div>
+
+        <!-- Support Point 4 -->
+        <div class="flex flex-col items-center text-center p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-emerald-400/40 transition-colors group">
+          <div class="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-clipboard-check"></i>
+          </div>
+          <p class="text-slate-200 text-xs font-medium leading-relaxed m-0">Age-appropriate quizzes and assessments.</p>
+        </div>
+
+        <!-- Support Point 5 -->
+        <div class="flex flex-col items-center text-center p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-purple-400/40 transition-colors group">
+          <div class="w-11 h-11 rounded-xl bg-purple-500/10 border border-purple-400/30 text-purple-300 flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-shapes"></i>
+          </div>
+          <p class="text-slate-200 text-xs font-medium leading-relaxed m-0">Structured classroom activity resources.</p>
+        </div>
+
+      </div>
+
+      <!-- Narrative & Outcome Footnote -->
+      <div class="mt-8 pt-6 border-t border-white/10 flex flex-col lg:flex-row items-center justify-between gap-6 text-center lg:text-left">
+        <div class="space-y-1.5 max-w-3xl">
+          <p class="text-sm sm:text-base text-slate-200 leading-relaxed m-0">
+            With <strong>LATAA OS</strong>, Skill2Skool ensures that teachers have the exact guidance, creative resources, and day-to-day intelligence to make foundational skill learning joyful and impactful.
+          </p>
+        </div>
+        <a href="{{ route('lataa') }}" class="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-extrabold text-sm transition-all duration-300 shadow-lg shadow-cyan-500/25 flex-shrink-0 hover:scale-105">
+          <span>Explore LATAA OS</span>
+          <i class="fa-solid fa-arrow-right text-xs"></i>
+        </a>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+<!-- END: LATAA OS Foundational Skill Education Section -->
+
 {{-- ══════════════════════════════════════════════
      2. IMPORTANCE OF THE CURRICULUM (image)
 ══════════════════════════════════════════════ --}}
-<section style="padding:0 24px;margin-top:-4rem;position:relative;z-index:20;margin-bottom:4rem;">
+<section style="padding:0 24px;margin-top:4rem;position:relative;z-index:20;margin-bottom:4rem;">
   <div style="max-width:1280px;margin:0 auto;">
     <div style="border-radius:1rem;overflow:hidden;box-shadow:0 25px 50px -12px rgba(0,0,0,.25);background:#fff;padding:8px;">
       <img src="{{asset('frontend/img/skillbox/curriculum_1176f84f.jpeg')}}"
