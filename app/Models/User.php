@@ -258,12 +258,15 @@ class User extends Authenticatable {
             }
         }
 
-        // 3. Check paid Club Shop lab products mapping to courses
+        // 3. Check paid Club Shop lab products: mapped courses, and also lab LMS categories, single LMS, kits and
+        //    Skill Labs, which open RoboQuest content without any course.
         try {
             $mapService = app(\App\Services\ProductCourseMapService::class);
             if ($mapService->enabled()) {
-                $labCourses = $mapService->coursesForBuyers([$this->id]);
-                if (!empty($labCourses)) {
+                if (!empty($mapService->coursesForBuyers([$this->id]))) {
+                    return true;
+                }
+                if (array_filter($mapService->unlocksForBuyers([$this->id]))) {
                     return true;
                 }
             }
@@ -272,6 +275,19 @@ class User extends Authenticatable {
         }
 
         // 4. For school: check if school has paid orders containing course items
+        // 5. Teachers and students of a school that bought lab content (a category opens it for the whole school).
+        if (in_array($this->role, ['teacher', 'student'], true)) {
+            $schools = \App\Models\SchoolMember::where('user_id', $this->id)->active()->pluck('school_id')->all();
+            try {
+                $mapService = app(\App\Services\ProductCourseMapService::class);
+                if ($schools && $mapService->enabled() && array_filter($mapService->unlocksForBuyers($schools))) {
+                    return true;
+                }
+            } catch (\Throwable $e) {
+                // Fail safe
+            }
+        }
+
         if ($this->role === 'school') {
             $hasCourseOrder = \Modules\Order\app\Models\OrderItem::whereIn('order_id', \Illuminate\Support\Facades\DB::table('orders')
                 ->where('buyer_id', $this->id)
