@@ -576,7 +576,7 @@
                                                     @elseif ($lhUser->role == 'school')
                                                         @if ($lhHasPurchased)
                                                             <li><a
-                                                                    href="{{ route('roboquest.launch') }}">{{ __('RoboQuest Lab') }}</a>
+                                                                    href="{{ route('roboquest.launch') }}">{{ __('Dashboard') }}</a>
                                                             </li>
                                                         @endif
                                                     @elseif ($lhUser->role == 'vendor')
@@ -584,24 +584,11 @@
                                                     @else
                                                         @if ($lhHasPurchased)
                                                             <li><a
-                                                                    href="{{ route('roboquest.launch') }}">{{ __('RoboQuest Lab') }}</a>
-                                                            </li>
-                                                            <li><a
-                                                                    href="{{ route('student.dashboard') }}">{{ __('Student Dashboard') }}</a>
+                                                                    href="{{ route('roboquest.launch') }}">{{ __('Dashboard') }}</a>
                                                             </li>
                                                         @endif
                                                     @endif
                                                     <li><a href="{{ route('cart') }}"><i class="fas fa-shopping-cart mr-1"></i> {{ __('Cart') }}@if(\Cart::count() > 0) ({{ \Cart::count() }})@endif</a></li>
-                                                    <li><a href="{{ route('sso.shop', ['target' => '/orders']) }}" target="_blank" style="color:#d97706; font-weight:600;"><i class="fas fa-shopping-bag mr-1"></i> {{ __('Club Shop & Orders') }}</a>
-                                                    </li>
-                                                    <li><a
-                                                            href="{{ $lhUser->role == 'instructor' ? route('instructor.setting.index') : ($lhUser->role == 'school' ? route('school.profile.index') : route('student.setting.index')) }}">{{ __('Profile') }}</a>
-                                                    </li>
-                                                    @if ($lhHasPurchased)
-                                                        <li><a
-                                                                href="{{ $lhUser->role == 'instructor' ? route('instructor.courses.index') : ($lhUser->role == 'school' ? route('school.courses.index') : route('student.enrolled-courses')) }}">{{ __('Courses') }}</a>
-                                                        </li>
-                                                    @endif
                                                     <li><a href="javascript:void(0)"
                                                             class="text-danger logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">{{ __('Logout') }}</a>
                                                     </li>
@@ -684,28 +671,22 @@
                                 @elseif ($lmUser->role == 'instructor')
                                     <ul class="mobile_menu_login d-flex flex-wrap">
                                         <li><a href="{{ route('instructor.dashboard') }}">{{ __('Dashboard') }}</a></li>
-                                        <li><a href="{{ route('instructor.courses.index') }}">{{ __('Courses') }}</a></li>
                                         <li><a href="javascript:void(0)" class="text-danger logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">{{ __('Logout') }}</a></li>
                                     </ul>
-                                        @elseif ($lmUser->role == 'school')
+                                @elseif ($lmUser->role == 'school')
                                     <ul class="mobile_menu_login d-flex flex-wrap">
                                         @if ($lmHasPurchased)
-                                            <li><a href="{{ route('roboquest.launch') }}">{{ __('RoboQuest Lab') }}</a></li>
-                                            <li><a href="{{ route('school.courses.index') }}">{{ __('Courses') }}</a></li>
+                                            <li><a href="{{ route('roboquest.launch') }}">{{ __('Dashboard') }}</a></li>
                                         @endif
                                         <li><a href="{{ route('cart') }}">{{ __('Cart') }}</a></li>
-                                        <li><a href="{{ route('school.profile.index') }}">{{ __('Profile') }}</a></li>
                                         <li><a href="javascript:void(0)" class="text-danger logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">{{ __('Logout') }}</a></li>
                                     </ul>
                                 @else
                                     <ul class="mobile_menu_login d-flex flex-wrap">
                                         @if ($lmHasPurchased)
-                                            <li><a href="{{ route('roboquest.launch') }}">{{ __('RoboQuest Lab') }}</a></li>
-                                            <li><a href="{{ route('student.dashboard') }}">{{ __('Dashboard') }}</a></li>
-                                            <li><a href="{{ route('student.enrolled-courses') }}">{{ __('Courses') }}</a></li>
+                                            <li><a href="{{ route('roboquest.launch') }}">{{ __('Dashboard') }}</a></li>
                                         @endif
                                         <li><a href="{{ route('cart') }}">{{ __('Cart') }}</a></li>
-                                        <li><a href="{{ route('student.setting.index') }}">{{ __('Profile') }}</a></li>
                                         <li><a href="javascript:void(0)" class="text-danger logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">{{ __('Logout') }}</a></li>
                                     </ul>
                                 @endif
