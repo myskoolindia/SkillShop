@@ -15,6 +15,7 @@ class ProductCourseMapTest extends TestCase {
     protected function setUp(): void {
         parent::setUp();
         $this->createRoboquestSchema();
+        if(!Schema::hasTable('school_course_assignments'))Schema::create('school_course_assignments',function(Blueprint $t){$t->id();$t->foreignId('school_id');$t->foreignId('course_id');$t->foreignId('user_id');$t->string('role_in_school')->default('student');$t->string('status')->default('active');$t->timestamps();});
         config(['services.collab.lab_course_access'=>true,'services.collab.product_course_map_url'=>self::MAP_URL,'services.roboquest.platform_key'=>str_repeat('p',40),
             'database.connections.clubshop'=>['driver'=>'sqlite','database'=>':memory:','prefix'=>'']]);
         DB::purge('clubshop');
@@ -152,5 +153,12 @@ class ProductCourseMapTest extends TestCase {
         $this->assertSame(['baking'],$this->snapshot($connection,$teacher)['unlocks']['personal']['lms'],'a teacher can buy a single LMS');
         // The master's purchase check: the school and its teachers.
         $this->entitlements()->assertOk()->assertJsonPath('lmsCategories',['composite-agriculture-gardening'])->assertJsonPath('lms',['baking']);
+        // Lab products alone (no course) count as a purchase: login and the school dashboard open RoboQuest.
+        $this->assertTrue($school->fresh()->hasPurchasedCourses(),'a school that bought only a lab category');
+        $this->assertTrue($teacher->fresh()->hasPurchasedCourses(),'a teacher who bought one LMS, in a school that bought a category');
+        $student=$this->user('student@lab.test','student');
+        \App\Models\SchoolMember::create(['school_id'=>$school->id,'user_id'=>$student->id,'role_in_school'=>'student','status'=>'active']);
+        $this->assertTrue($student->fresh()->hasPurchasedCourses(),'a student of a school that bought a lab category');
+        $this->assertFalse($this->user('other@lab.test','student')->hasPurchasedCourses(),'nobody else');
     }
 }
