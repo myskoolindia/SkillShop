@@ -3158,7 +3158,7 @@
           <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center text-xl shadow-xs group-hover:scale-110 group-hover:bg-cyan-500/20 transition-all">
             <i class="fa-solid fa-book-bookmark"></i>
           </div>
-          <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">Feature 01</span>
+          <!-- <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">Feature 01</span> -->
         </div>
         <h3 class="text-lg font-bold text-white mb-2 group-hover:text-cyan-300 transition-colors">Lesson Planning & Resources</h3>
         <p class="text-slate-400 text-sm leading-relaxed m-0">Curriculum-linked lesson planning and teaching resources.</p>
@@ -3170,7 +3170,7 @@
           <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 flex items-center justify-center text-xl shadow-xs group-hover:scale-110 group-hover:bg-indigo-500/20 transition-all">
             <i class="fa-solid fa-lightbulb"></i>
           </div>
-          <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">Feature 02</span>
+          <!-- <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">Feature 02</span> -->
         </div>
         <h3 class="text-lg font-bold text-white mb-2 group-hover:text-indigo-300 transition-colors">Activity & Project Ideas</h3>
         <p class="text-slate-400 text-sm leading-relaxed m-0">AI-assisted activity and project ideas.</p>
@@ -3182,7 +3182,7 @@
           <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-xl shadow-xs group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all">
             <i class="fa-solid fa-chalkboard-user"></i>
           </div>
-          <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Feature 03</span>
+          <!-- <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Feature 03</span> -->
         </div>
         <h3 class="text-lg font-bold text-white mb-2 group-hover:text-emerald-300 transition-colors">Teacher Preparation</h3>
         <p class="text-slate-400 text-sm leading-relaxed m-0">Teacher preparation and classroom delivery.</p>
@@ -3199,7 +3199,7 @@
           <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center text-xl shadow-xs group-hover:scale-110 group-hover:bg-amber-500/20 transition-all">
             <i class="fa-solid fa-file-circle-check"></i>
           </div>
-          <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/20">Feature 04</span>
+          <!-- <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/20">Feature 04</span> -->
         </div>
         <h3 class="text-lg font-bold text-white mb-2 group-hover:text-amber-300 transition-colors">Worksheets & Assessments</h3>
         <p class="text-slate-400 text-sm leading-relaxed m-0">Worksheets, assessments, and learning materials.</p>
@@ -3211,7 +3211,7 @@
           <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400 flex items-center justify-center text-xl shadow-xs group-hover:scale-110 group-hover:bg-purple-500/20 transition-all">
             <i class="fa-solid fa-network-wired"></i>
           </div>
-          <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/20">Feature 05</span>
+          <!-- <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/20">Feature 05</span> -->
         </div>
         <h3 class="text-lg font-bold text-white mb-2 group-hover:text-purple-300 transition-colors">Structured Academic Support</h3>
         <p class="text-slate-400 text-sm leading-relaxed m-0">Structured academic support for practical skill development.</p>

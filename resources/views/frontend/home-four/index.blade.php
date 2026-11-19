@@ -618,10 +618,30 @@
   }
 
   @media (max-width: 600px) {
+    .skillvation-container {
+      padding: 0 16px;
+    }
+    .skillvation-section {
+      padding: 48px 0 !important;
+    }
     .skillvation-stats-grid,
     .skillvation-figures-grid,
     .skillvation-news-grid {
       grid-template-columns: 1fr;
+      gap: 14px;
+      margin: 24px 0;
+    }
+    .skillvation-stat-card {
+      padding: 22px 18px;
+      border-radius: 12px;
+    }
+    .skillvation-stat-card .stat-title {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+    .skillvation-stat-card .stat-desc {
+      font-size: 13.5px;
+      line-height: 1.55;
     }
     .skillvation-split-banner-left {
       padding: 30px 20px;
@@ -945,30 +965,41 @@
     </div>
   </section>
 
-  <!-- 3. Skills for the Future Global Platform -->
+  <!-- 3. LATAA OS – The Intelligence Behind Skillvation -->
   <section class="skillvation-section bg-light sv-section-skills" data-reveal="slide-right">
     <div class="skillvation-container">
-      <div class="skillvation-grid-2col">
+      <div class="skillvation-grid-2col equal" style="align-items: center; gap: 40px;">
         <div>
-          <h2 class="text-3xl font-bold mb-4">Skills for the Future</h2>
-          <!-- <p>
-            The <a href="https://www.unesco.org/en/global-education-coalition/skills-academy/skills-future?hub=182955" target="_blank" rel="noopener" class="text-blue-600 underline font-semibold">Skills for the Future platform</a> is an open-access global hub convened by UNESCO’s Global Skills Academy, in collaboration with KPMG International. The platform empowers businesses, civil society, and youth to scale up impact, foster inclusive partnerships, and accelerate progress toward SDG 4 on Quality Education. By connecting initiatives and amplifying collective action, it aims to build a more inclusive, resilient, and future-ready generation.
-          </p> -->
-          <p>Skill 2 Skool supports schools in identifying and nurturing student strengths through structured observation, reflection, and skill mapping. By focusing on aptitude, interest, and behaviour patterns, schools gain deeper insights into student potential—supporting informed guidance, confidence building, and holistic development.</p>
-          <p class="font-bold text-gray-900 mt-4 mb-6">
-            Become part of a global movement to equip young students for the future!
+          <div class="sv-section-eyebrow" style="display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #0284c7; background: #e0f2fe; padding: 4px 14px; border-radius: 999px; margin-bottom: 14px;">
+            <i class="fa-solid fa-microchip"></i> Education-First AI Operating System
+          </div>
+          <h2 class="text-3xl font-bold mb-4" style="font-size: clamp(24px, 2.8vw, 34px); line-height: 1.25; color: #0f172a;">
+            LATAA OS &ndash; <span style="color: #2563eb;">The Intelligence Behind Skillvation</span>
+          </h2>
+          <p style="color: #475569; font-size: 14.5px; line-height: 1.75; margin-bottom: 12px;">
+            <strong>LATAA OS</strong> (Learning and Teaching AI Assistant Operating System) is a purpose-built, AI-powered education platform developed to enhance the way educational institutions plan, deliver and evaluate learning. Designed to address the evolving needs of schools, teachers and students, it brings together curriculum intelligence, AI-assisted content creation, instructional support and assessment capabilities within an integrated learning ecosystem.
           </p>
-          <!-- <a href="/skill2school" target="_blank" rel="noopener" class="skillvation-pill-btn">
-            <span>Explore existing skills initiatives</span>
-            <i class="fa-solid fa-arrow-right"></i>
-          </a> -->
+          <p style="color: #475569; font-size: 14.5px; line-height: 1.75; margin-bottom: 12px;">
+            By translating curriculum requirements into structured lesson plans, teaching scripts, learning resources, classroom activities and assessments, LATAA OS enables teachers to improve instructional efficiency, deliver more engaging learning experiences and address diverse learner needs. It reduces the effort involved in academic preparation while strengthening consistency, relevance and effectiveness in classroom delivery.
+          </p>
+          <p style="color: #475569; font-size: 14.5px; line-height: 1.75; margin-bottom: 12px;">
+            As the intelligence layer powering Skillvation, LATAA OS connects our programmes, laboratories and teacher development initiatives with technology-driven academic support—helping schools move beyond access to educational resources towards more structured, effective and outcome-oriented learning.
+          </p>
+          <p style="color: #1e1b4b; font-size: 15px; font-weight: 700; line-height: 1.6; margin-top: 14px; margin-bottom: 20px;">
+            LATAA OS powers our vision of making skill education smarter, more connected and future-ready.
+          </p>
+          <a href="{{ route('lataa') }}" class="skillvation-pill-btn" style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #1d4ed8, #0284c7); color: #ffffff !important; padding: 11px 26px; border-radius: 999px; font-weight: 700; font-size: 13.5px; text-decoration: none; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35); transition: transform .25s ease, box-shadow .25s ease;">
+            <span>Explore LATAA OS Platform</span>
+            <i class="fa-solid fa-arrow-right text-xs"></i>
+          </a>
         </div>
 
-        <div>
-          <div class="skillvation-media-card" style="height: auto !important; background: #ffffff; border: 1px solid var(--skillvation-border); padding: 10px;">
-            <img src="{{ asset('/frontend/img/skillbox/homeimg01.jpeg')}}" alt="Skills for the Future" style="width: 100%; height: auto; object-fit: contain;">
-          </div>
-          <!-- <div class="skillvation-media-caption">© UNESCO</div> -->
+        <div style="display: flex; justify-content: center; align-items: center;">
+          <a href="{{ route('lataa') }}" title="Explore LATAA OS Ecosystem" style="display: block; max-width: 490px; width: 100%; text-decoration: none; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;">
+            <div style="position: relative; border-radius: 24px; overflow: hidden; box-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.16); border: 1px solid rgba(226, 232, 240, 0.8); background: #ffffff;">
+              <img src="{{ asset('frontend/img/skillbox/lataa_ecosystem_diagram.jpg') }}" alt="LATAA OS Platform - Intelligent Skill Ecosystem" style="width: 100%; height: auto; display: block; object-fit: contain;">
+            </div>
+          </a>
         </div>
       </div>
 
@@ -1296,20 +1327,44 @@
 
     <style>
       .sv-eco-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#6d28d9;background:#f3e8ff;border:1px solid #e9d5ff;padding:5px 14px;border-radius:999px;margin-bottom:18px;}
-      .sv-eco-intro{text-align:center;max-width:940px;margin:0 auto 72px;}
-      .sv-eco-intro h2{font-size:clamp(28px,3.8vw,30px);font-weight:800;color:#1e1b4b;line-height:1.2;margin-bottom:22px;}
+      .sv-eco-intro{text-align:center;max-width:1200px;margin:0 auto 72px;}
+      .sv-eco-intro-header{max-width:920px;margin:0 auto;}
+      .sv-eco-intro h2{font-size:clamp(28px,3.8vw,34px);font-weight:800;color:#1e1b4b;line-height:1.2;margin-bottom:22px;}
       .sv-eco-intro p{font-size:17px;color:#475569;line-height:1.8;margin-bottom:14px;}
       .sv-lataa-core-hub{display:inline-flex;flex-direction:column;align-items:center;background:linear-gradient(135deg,#1e1b4b 0%,#1e3a8a 100%);color:#ffffff;padding:18px 36px;border-radius:18px;box-shadow:0 12px 28px rgba(30,27,75,0.18);margin:16px auto 28px;border:1px solid rgba(96,165,250,0.35);text-decoration:none;transition:transform .3s ease;}
       .sv-lataa-core-hub:hover{transform:translateY(-2px);color:#ffffff;}
       .sv-lataa-core-badge{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#2563eb,#38bdf8);color:#ffffff;font-size:13px;font-weight:800;letter-spacing:0.08em;padding:4px 14px;border-radius:999px;margin-bottom:8px;text-transform:uppercase;}
       .sv-lataa-core-title{font-size:17px;font-weight:700;color:#f1f5f9;letter-spacing:0.02em;}
-      .sv-lataa-transform-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:0 auto 28px;text-align:left;}
-      @media(max-width:860px){.sv-lataa-transform-grid{grid-template-columns:repeat(2,1fr);}}
-      @media(max-width:520px){.sv-lataa-transform-grid{grid-template-columns:1fr;}}
-      .sv-transform-card{background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:20px 18px;box-shadow:0 4px 16px rgba(30,27,75,0.05);transition:all .3s ease;display:flex;flex-direction:column;align-items:flex-start;}
-      .sv-transform-card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(37,99,235,0.12);border-color:#93c5fd;}
-      .sv-transform-pill{display:inline-block;font-size:13.5px;font-weight:800;color:#1d4ed8;background:#eff6ff;border:1px solid #bfdbfe;padding:4px 12px;border-radius:8px;margin-bottom:10px;letter-spacing:0.03em;}
-      .sv-transform-card p{font-size:14px;color:#475569;line-height:1.55;margin:0;font-weight:500;}
+      
+      /* Big & Colorful Transform Grid */
+      .sv-lataa-transform-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin:32px auto 36px;text-align:left;width:100%;}
+      @media(max-width:1024px){.sv-lataa-transform-grid{grid-template-columns:repeat(2,1fr);gap:18px;}}
+      @media(max-width:640px){.sv-lataa-transform-grid{grid-template-columns:1fr;gap:16px;}}
+      
+      .sv-transform-card{position:relative;border-radius:22px;padding:28px 24px;transition:all .35s cubic-bezier(.34,1.56,.64,1);display:flex;flex-direction:column;justify-content:space-between;min-height:245px;text-decoration:none;overflow:hidden;color:#ffffff;}
+      .sv-transform-card::before{content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.24) 0%,transparent 70%);pointer-events:none;}
+      .sv-transform-card:hover{transform:translateY(-8px) scale(1.02);color:#ffffff;}
+      
+      .sv-transform-card.card-camps{background:linear-gradient(140deg,#f59e0b 0%,#ea580c 50%,#c2410c 100%);box-shadow:0 14px 30px -6px rgba(234,88,12,.42),0 6px 14px rgba(217,119,6,.2);border:1px solid rgba(254,215,170,.45);}
+      .sv-transform-card.card-camps:hover{box-shadow:0 22px 42px -6px rgba(234,88,12,.55),0 8px 18px rgba(217,119,6,.3);}
+      
+      .sv-transform-card.card-ttt{background:linear-gradient(140deg,#10b981 0%,#059669 50%,#047857 100%);box-shadow:0 14px 30px -6px rgba(5,150,105,.42),0 6px 14px rgba(5,150,105,.2);border:1px solid rgba(167,243,208,.45);}
+      .sv-transform-card.card-ttt:hover{box-shadow:0 22px 42px -6px rgba(5,150,105,.55),0 8px 18px rgba(5,150,105,.3);}
+      
+      .sv-transform-card.card-u4t{background:linear-gradient(140deg,#f43f5e 0%,#e11d48 50%,#be123c 100%);box-shadow:0 14px 30px -6px rgba(225,29,72,.42),0 6px 14px rgba(225,29,72,.2);border:1px solid rgba(254,205,211,.45);}
+      .sv-transform-card.card-u4t:hover{box-shadow:0 22px 42px -6px rgba(225,29,72,.55),0 8px 18px rgba(225,29,72,.3);}
+      
+      .sv-transform-card.card-labs{background:linear-gradient(140deg,#3b82f6 0%,#2563eb 50%,#1d4ed8 100%);box-shadow:0 14px 30px -6px rgba(37,99,235,.42),0 6px 14px rgba(37,99,235,.2);border:1px solid rgba(191,219,254,.45);}
+      .sv-transform-card.card-labs:hover{box-shadow:0 22px 42px -6px rgba(37,99,235,.55),0 8px 18px rgba(37,99,235,.3);}
+      
+      .sv-transform-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+      .sv-transform-icon-box{width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.22);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:20px;color:#ffffff;}
+      .sv-transform-badge{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,255,255,.22);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.35);padding:4px 12px;border-radius:999px;color:#ffffff;}
+      .sv-transform-card h3{font-size:24px;font-weight:900;color:#ffffff;margin:0 0 6px;letter-spacing:.02em;line-height:1.15;}
+      .sv-transform-card .sv-transform-subtitle{font-size:14.5px;font-weight:700;color:rgba(255,255,255,.95);margin-bottom:10px;line-height:1.35;}
+      .sv-transform-card p{font-size:13.5px;color:rgba(255,255,255,.9);line-height:1.55;margin:0 0 16px;font-weight:500;}
+      .sv-transform-link{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:#ffffff;text-transform:uppercase;letter-spacing:.06em;opacity:.92;transition:gap .25s ease,opacity .25s ease;}
+      .sv-transform-card:hover .sv-transform-link{gap:10px;opacity:1;}
       .sv-eco-connected-banner{background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:12px;padding:12px 24px;display:inline-flex;align-items:center;gap:18px;margin:0 auto 24px;flex-wrap:wrap;justify-content:center;}
       .sv-eco-connected-title{font-size:13px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:0.06em;display:inline-flex;align-items:center;gap:8px;}
       .sv-eco-connected-nodes{display:inline-flex;align-items:center;gap:10px;font-size:14px;font-weight:600;color:#1e40af;}
@@ -1380,14 +1435,76 @@
       .sv-tagline em{font-size:14px;font-style:italic;color:#a5b4fc;font-weight:600;}
 
       @media(max-width:860px){
-        .sv-eco-row,.sv-eco-row.rev-layout{grid-template-columns:1fr;direction:ltr;}
-        .sv-eco-img-pane{min-height:240px;}
-        .sv-eco-content{padding:32px 28px;}
+        .sv-eco-intro{margin:0 auto 48px;}
+        .sv-eco-row,.sv-eco-row.rev-layout{grid-template-columns:1fr;direction:ltr;margin-bottom:20px;}
+        .sv-eco-img-pane{min-height:240px;height:260px;}
+        .sv-eco-img-pane img{transform:none !important;}
+        .sv-eco-content{padding:28px 22px;}
         .sv-eco-bullets{grid-template-columns:1fr;}
         .sv-journey-grid{grid-template-columns:1fr;}
         .sv-commit{grid-template-columns:1fr;}
         .sv-tagline{min-width:0;}
-        .sv-eco-pipeline{padding:40px 24px;}
+        .sv-eco-pipeline{padding:36px 20px;}
+        .sv-eco-stripe{gap:12px;margin:0 auto 36px;}
+        .sv-eco-stripe h2{font-size:22px;white-space:normal;text-align:center;}
+        .sv-eco-stripe-line{display:none;}
+      }
+
+      @media(max-width:640px){
+        #sv-ecosystem{padding-top:48px !important;padding-bottom:48px !important;}
+        .sv-eco-eyebrow{font-size:11px;padding:4px 12px;margin-bottom:14px;white-space:normal;text-align:center;}
+        .sv-eco-intro h2{font-size:24px;line-height:1.25;margin-bottom:14px;}
+        .sv-eco-intro p{font-size:14.5px;line-height:1.65;}
+        
+        .sv-lataa-core-hub{width:100%;max-width:360px;padding:14px 16px;margin:12px auto 18px;box-sizing:border-box;}
+        .sv-lataa-core-badge{font-size:11px;padding:3px 10px;}
+        .sv-lataa-core-title{font-size:14px;text-align:center;line-height:1.35;}
+
+        .sv-lataa-transform-grid{grid-template-columns:1fr;gap:14px;margin:18px auto 26px;}
+        .sv-transform-card{min-height:auto;padding:22px 18px;border-radius:18px;}
+        .sv-transform-card:hover{transform:translateY(-4px) scale(1.01);}
+        .sv-transform-top{margin-bottom:14px;}
+        .sv-transform-icon-box{width:42px;height:42px;font-size:18px;border-radius:12px;}
+        .sv-transform-badge{font-size:10px;padding:3px 10px;}
+        .sv-transform-card h3{font-size:21px;margin-bottom:3px;}
+        .sv-transform-subtitle{font-size:13.5px;margin-bottom:6px;}
+        .sv-transform-card p{font-size:13px;line-height:1.5;margin-bottom:14px;}
+        .sv-transform-link{font-size:12px;}
+
+        .sv-eco-connected-banner{display:flex;flex-direction:column;gap:8px;padding:12px 14px;width:100%;border-radius:12px;margin:0 auto 20px;}
+        .sv-eco-connected-title{font-size:11.5px;}
+        .sv-eco-connected-nodes{font-size:12.5px;gap:8px;flex-wrap:wrap;justify-content:center;}
+        .sv-lataa-conclusion{font-size:14px;line-height:1.65;}
+
+        .sv-eco-row{border-radius:16px;margin-bottom:18px;}
+        .sv-eco-img-pane{height:220px;min-height:220px;}
+        .sv-eco-badge{bottom:12px;left:12px;padding:6px 12px 6px 6px;max-width:calc(100% - 24px);box-sizing:border-box;}
+        .sv-eco-badge-icon{width:28px;height:28px;}
+        .sv-eco-badge-icon i{font-size:12px !important;}
+        .sv-eco-badge span{font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .sv-eco-num{top:12px;right:12px;width:34px;height:34px;font-size:14px;}
+
+        .sv-eco-content{padding:22px 18px;}
+        .sv-eco-tag{font-size:10px;padding:3px 10px;margin-bottom:12px;}
+        .sv-eco-content h3{font-size:20px;line-height:1.3;margin-bottom:6px;}
+        .sv-eco-sub-label{font-size:12px;margin-bottom:10px;}
+        .sv-eco-content p.body{font-size:13.5px;line-height:1.65;margin-bottom:16px;}
+        .sv-eco-bullets{gap:8px;margin-bottom:16px;}
+        .sv-eco-bullets li{font-size:13px;line-height:1.5;}
+        .sv-eco-quote{font-size:12.5px;padding-top:12px;line-height:1.55;}
+
+        .sv-eco-pipeline{padding:28px 16px;border-radius:16px;margin-top:36px;}
+        .sv-eco-pipeline h2{font-size:21px;line-height:1.25;}
+        .sv-pipe-sub{font-size:11px;margin-bottom:20px;}
+        .sv-journey-card{padding:18px 14px;}
+        .sv-commit{padding-top:20px;gap:18px;}
+        .sv-tagline{padding:18px 14px;}
+        .sv-tagline p{font-size:19px;}
+        .sv-tagline em{font-size:12px;}
+
+        .sv-advantage-section{margin-top:44px;}
+        .sv-advantage-section h2{font-size:21px;margin-bottom:20px;}
+        .sv-advantage-card{padding:18px 16px;}
       }
 
       /* ── The Skillvation Advantage ── */
@@ -1569,22 +1686,81 @@
         </a>
 
         <div class="sv-lataa-transform-grid">
-          <div class="sv-transform-card">
-            <span class="sv-transform-pill">CAMPS</span>
-            <p>AI-assisted student learning</p>
-          </div>
-          <div class="sv-transform-card">
-            <span class="sv-transform-pill">TTT</span>
-            <p>AI-assisted teaching preparation</p>
-          </div>
-          <div class="sv-transform-card">
-            <span class="sv-transform-pill">U4T</span>
-            <p>AI-enabled teacher development</p>
-          </div>
-          <div class="sv-transform-card">
-            <span class="sv-transform-pill">Skill Labs</span>
-            <p>AI-supported practical learning</p>
-          </div>
+          <!-- 1. CAMPS -->
+          <a href="{{ route('skill2school') }}" class="sv-transform-card card-camps" title="Explore CAMPS Programme">
+            <div>
+              <div class="sv-transform-top">
+                <div class="sv-transform-icon-box">
+                  <i class="fa-solid fa-shapes"></i>
+                </div>
+                <!-- <span class="sv-transform-badge">Grades 1–5</span> -->
+              </div>
+              <h3>CAMPS</h3>
+              <div class="sv-transform-subtitle">AI-Assisted Student Learning</div>
+              <!-- <p>Personalised foundational learning, experiential activities &amp; competency development.</p> -->
+            </div>
+            <!-- <div class="sv-transform-link">
+              <span>Explore CAMPS</span>
+              <i class="fa-solid fa-arrow-right text-xs"></i>
+            </div> -->
+          </a>
+
+          <!-- 2. TTT -->
+          <a href="{{ route('upskill4teacher') }}" class="sv-transform-card card-ttt" title="Explore TTT Programme">
+            <div>
+              <div class="sv-transform-top">
+                <div class="sv-transform-icon-box">
+                  <i class="fa-solid fa-chalkboard-user"></i>
+                </div>
+                <!-- <span class="sv-transform-badge">Educator Prep</span> -->
+              </div>
+              <h3>TTT</h3>
+              <div class="sv-transform-subtitle">AI-Assisted Teaching Preparation</div>
+              <!-- <p>Lesson plans, teaching scripts, worksheets, question banks &amp; classroom delivery resources.</p> -->
+            </div>
+            <!-- <div class="sv-transform-link">
+              <span>Explore TTT</span>
+              <i class="fa-solid fa-arrow-right text-xs"></i>
+            </div> -->
+          </a>
+
+          <!-- 3. U4T -->
+          <a href="{{ route('upskill4teacher') }}" class="sv-transform-card card-u4t" title="Explore U4T Programme">
+            <div>
+              <div class="sv-transform-top">
+                <div class="sv-transform-icon-box">
+                  <i class="fa-solid fa-award"></i>
+                </div>
+                <!-- <span class="sv-transform-badge">Professional Growth</span> -->
+              </div>
+              <h3>U4T</h3>
+              <div class="sv-transform-subtitle">AI-Enabled Teacher Development</div>
+              <!-- <p>Continuous professional upskilling, modern pedagogy, ed-tech awareness &amp; leadership.</p> -->
+            </div>
+            <!-- <div class="sv-transform-link">
+              <span>Explore U4T</span>
+              <i class="fa-solid fa-arrow-right text-xs"></i>
+            </div> -->
+          </a>
+
+          <!-- 4. Skill Labs -->
+          <a href="{{ route('labs.composite-skill-basic') }}" class="sv-transform-card card-labs" title="Explore Skill Labs">
+            <div>
+              <div class="sv-transform-top">
+                <div class="sv-transform-icon-box">
+                  <i class="fa-solid fa-flask-vial"></i>
+                </div>
+                <!-- <span class="sv-transform-badge">Hands-On Hub</span> -->
+              </div>
+              <h3>Skill Labs</h3>
+              <div class="sv-transform-subtitle">AI-Supported Practical Learning</div>
+              <!-- <p>Composite Skill Labs &amp; Skillvation Labs with DIY kits, experiment guides &amp; project learning.</p> -->
+            </div>
+            <!-- <div class="sv-transform-link">
+              <span>Explore Labs</span>
+              <i class="fa-solid fa-arrow-right text-xs"></i>
+            </div> -->
+          </a>
         </div>
 
         <div class="sv-eco-connected-banner">
@@ -1616,9 +1792,9 @@
         [
           'rev'   => false,
           'num'   => '01',
-          'img'   => asset('frontend/img/skillbox/Workonmaterialsandmachines.jpeg'),
-          'alt'   => 'Skill Education Infrastructure — Labs',
-          'grad'  => 'linear-gradient(135deg,rgba(180,83,9,.6),rgba(245,158,11,.35))',
+          'img'   => asset('frontend/img/skillbox/camps_ecosystem_new.jpg'),
+          'alt'   => 'CAMPS - Foundational Skill Education for Primary School',
+          'grad'  => 'linear-gradient(135deg,rgba(180,83,9,.25),rgba(245,158,11,.1))',
           'bBg'   => '#b45309','bIcon'=>'fa-building-columns','bLabel'=>'CAMPS',
           'tagBg' => '#fffbeb','tagClr'=>'#b45309','tagIcon'=>'fa-building-columns','tagLabel'=>'Learning Environments',
           'clr'   => '#b45309','title'=>'Making Skill Education an Integral Part of School Learning',
@@ -1672,9 +1848,9 @@
         [
           'rev'   => false,
           'num'   => '05',
-          'img'   => asset('frontend/img/skillbox/ai_empowered.jpg'),
-          'alt'   => 'LATAA OS',
-          'grad'  => 'linear-gradient(135deg,rgba(3,105,161,.6),rgba(14,165,233,.35))',
+          'img'   => asset('frontend/img/skillbox/lataa_ecosystem_new.jpg'),
+          'alt'   => 'LATAA OS - Education-First AI Operating System',
+          'grad'  => 'linear-gradient(135deg,rgba(3,105,161,.25),rgba(14,165,233,.1))',
           'bBg'   => '#0369a1','bIcon'=>'fa-robot','bLabel'=>'LATAA OS',
           'tagBg' => '#e0f2fe','tagClr'=>'#0369a1','tagIcon'=>'fa-robot','tagLabel'=>'Learning and Teaching AI Assistant Operating System',
           'clr'   => '#0369a1','title'=>'One Intelligent AI. Every Learning Journey',

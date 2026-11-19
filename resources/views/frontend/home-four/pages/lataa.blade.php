@@ -163,79 +163,154 @@
     transform: translateY(-3px);
   }
 
-  /* ── Interactive 3-User Cards ── */
+  /* ── Interactive 3-User Cards (Multiple Colors) ── */
   .lataa-persona-card {
-    background: #ffffff;
-    border-radius: 14px;
-    padding: 34px 28px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
-    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 22px;
+    padding: 36px 30px;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     height: 100%;
     position: relative;
     overflow: hidden;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
   }
 
-  .lataa-persona-card::after {
+  .lataa-persona-card::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 5px;
-    transition: height 0.3s ease;
+    top: -50px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.22) 0%, transparent 70%);
+    pointer-events: none;
   }
 
-  .persona-student::after { background: linear-gradient(90deg, #0284c7, #38bdf8); }
-  .persona-teacher::after { background: linear-gradient(90deg, #7c3aed, #a855f7); }
-  .persona-institution::after { background: linear-gradient(90deg, #d97706, #fbbf24); }
-
   .lataa-persona-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+    transform: translateY(-8px) scale(1.02);
+  }
+
+  /* 1. Student Card - Vibrant Ocean Blue */
+  .persona-student {
+    background: linear-gradient(145deg, #0284c7 0%, #0369a1 45%, #075985 100%);
+    box-shadow: 0 16px 36px -6px rgba(2, 132, 199, 0.42), 0 6px 14px rgba(7, 89, 133, 0.25);
+    border: 1px solid rgba(186, 230, 253, 0.45);
+  }
+  .persona-student:hover {
+    box-shadow: 0 24px 48px -6px rgba(2, 132, 199, 0.58), 0 8px 20px rgba(7, 89, 133, 0.35);
+  }
+
+  /* 2. Teacher Card - Vibrant Royal Violet */
+  .persona-teacher {
+    background: linear-gradient(145deg, #7c3aed 0%, #6d28d9 45%, #581c87 100%);
+    box-shadow: 0 16px 36px -6px rgba(124, 58, 237, 0.42), 0 6px 14px rgba(88, 28, 135, 0.25);
+    border: 1px solid rgba(233, 213, 255, 0.45);
+  }
+  .persona-teacher:hover {
+    box-shadow: 0 24px 48px -6px rgba(124, 58, 237, 0.58), 0 8px 20px rgba(88, 28, 135, 0.35);
+  }
+
+  /* 3. Institution Card - Vibrant Sunset Amber / Gold */
+  .persona-institution {
+    background: linear-gradient(145deg, #ea580c 0%, #d97706 45%, #b45309 100%);
+    box-shadow: 0 16px 36px -6px rgba(234, 88, 12, 0.42), 0 6px 14px rgba(180, 83, 9, 0.25);
+    border: 1px solid rgba(254, 215, 170, 0.45);
+  }
+  .persona-institution:hover {
+    box-shadow: 0 24px 48px -6px rgba(234, 88, 12, 0.58), 0 8px 20px rgba(180, 83, 9, 0.35);
+  }
+
+  .persona-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
   }
 
   .persona-icon-circle {
-    width: 60px;
-    height: 60px;
-    border-radius: 14px;
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.6rem;
-    margin-bottom: 20px;
+    font-size: 1.5rem;
+    background: rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #ffffff !important;
+    margin-bottom: 0;
   }
 
-  .persona-student .persona-icon-circle { background: #e0f2fe; color: #0284c7; }
-  .persona-teacher .persona-icon-circle { background: #f3e8ff; color: #7c3aed; }
-  .persona-institution .persona-icon-circle { background: #fef3c7; color: #d97706; }
+  .persona-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    padding: 4px 12px;
+    border-radius: 999px;
+    color: #ffffff;
+  }
+
+  .lataa-persona-card h3 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #ffffff !important;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+
+  .lataa-persona-card .persona-tagline {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 18px;
+    line-height: 1.4;
+  }
+  .persona-student .persona-tagline { color: #bae6fd !important; }
+  .persona-teacher .persona-tagline { color: #f5d0fe !important; }
+  .persona-institution .persona-tagline { color: #fef08a !important; }
 
   .lataa-checklist {
     list-style: none;
     padding: 0;
-    margin: 20px 0 0 0;
+    margin: 14px 0 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
 
   .lataa-checklist li {
     position: relative;
-    padding-left: 26px;
-    margin-bottom: 12px;
-    color: #475569;
-    font-size: 0.93rem;
-    line-height: 1.5;
+    padding-left: 28px;
+    color: rgba(255, 255, 255, 0.93);
+    font-size: 0.92rem;
+    line-height: 1.55;
+    font-weight: 500;
   }
 
   .lataa-checklist li::before {
     content: '✓';
     position: absolute;
     left: 0;
-    top: 1px;
-    font-weight: 800;
+    top: 2px;
+    font-size: 11px;
+    font-weight: 900;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff !important;
   }
-
-  .persona-student .lataa-checklist li::before { color: #0284c7; }
-  .persona-teacher .lataa-checklist li::before { color: #7c3aed; }
-  .persona-institution .lataa-checklist li::before { color: #d97706; }
 
   /* ── Features Grid ── */
   .lataa-feature-box {
@@ -427,14 +502,14 @@
         <p class="text-white-50 mb-4" style="font-size:0.95rem;">
           <strong class="text-white">One platform. Three key users. Endless learning possibilities.</strong>
         </p>
-        <div class="lataa-cta-group">
+        <!-- <div class="lataa-cta-group">
           <a href="{{ asset('uploads/docs/LATAA_OS_Platform_Overview.pdf') }}" target="_blank" class="btn-lataa-primary">
             <i class="fas fa-file-pdf"></i> Download Official Overview (PDF)
           </a>
           <a href="#three-experiences" class="btn-lataa-outline">
             <i class="fas fa-compass"></i> Explore The Ecosystem
           </a>
-        </div>
+        </div> -->
       </div>
       <div class="col-lg-5 mt-5 mt-lg-0 text-center">
         <div style="position:relative; display:inline-block; border-radius:18px; padding:8px; background:rgba(255,255,255,0.06); border:1px solid rgba(6,182,212,0.35); box-shadow: 0 25px 60px rgba(0,0,0,0.6);">
@@ -456,7 +531,7 @@
     <div class="row align-items-center">
       <div class="col-lg-6 mb-4 mb-lg-0">
         <div class="pe-lg-4">
-          <span class="text-primary font-weight-bold text-uppercase" style="letter-spacing:1px; font-size:0.85rem;">Section 1 &bull; Overview</span>
+          <!-- <span class="text-primary font-weight-bold text-uppercase" style="letter-spacing:1px; font-size:0.85rem;">Section 1 &bull; Overview</span> -->
           <h2 class="h1 font-weight-bold mt-2 mb-3" style="color:#0f172a;">AI Designed Around Education.<br><span style="color:#0284c7;">Not Just Adapted for It.</span></h2>
           <p class="text-secondary" style="font-size:1.05rem; line-height:1.7;">
             <strong>LATAA OS</strong> is an AI-powered learning and teaching assistant operating system developed specifically for educational institutions.
@@ -475,35 +550,8 @@
         </div>
       </div>
       <div class="col-lg-6">
-        <div class="row g-3">
-          <div class="col-sm-6">
-            <div class="p-4 rounded-3 h-100" style="background:#f8fafc; border:1px solid #e2e8f0;">
-              <div class="h3 font-weight-bold text-primary mb-2">360°</div>
-              <h5 class="font-weight-bold text-dark">Holistic Ecosystem</h5>
-              <p class="text-muted small mb-0">Unifies learner, instructor, and administration workflows in one shared space.</p>
-            </div>
-          </div>
-          <div class="col-sm-6">
-            <div class="p-4 rounded-3 h-100" style="background:#f8fafc; border:1px solid #e2e8f0;">
-              <div class="h3 font-weight-bold text-success mb-2">100%</div>
-              <h5 class="font-weight-bold text-dark">Curriculum-Aligned</h5>
-              <p class="text-muted small mb-0">Calibrated to CBSE, NEP 2020, and national academic learning competencies.</p>
-            </div>
-          </div>
-          <div class="col-sm-6">
-            <div class="p-4 rounded-3 h-100" style="background:#f8fafc; border:1px solid #e2e8f0;">
-              <div class="h3 font-weight-bold text-warning mb-2">3 Tiers</div>
-              <h5 class="font-weight-bold text-dark">Adaptive Levels</h5>
-              <p class="text-muted small mb-0">Easy, Medium, and Hard dynamic difficulty scaling for truly personalized support.</p>
-            </div>
-          </div>
-          <div class="col-sm-6">
-            <div class="p-4 rounded-3 h-100" style="background:#f8fafc; border:1px solid #e2e8f0;">
-              <div class="h3 font-weight-bold text-info mb-2">24/7</div>
-              <h5 class="font-weight-bold text-dark">Beyond Classroom</h5>
-              <p class="text-muted small mb-0">Continuous learning guidance and interactive practice for students anytime, anywhere.</p>
-            </div>
-          </div>
+        <div style="position:relative; border-radius:20px; overflow:hidden; box-shadow:0 16px 40px -10px rgba(15,23,42,0.18); border:1px solid #e2e8f0; background:#ffffff; transition:transform .3s ease, box-shadow .3s ease;">
+          <img src="{{ asset('frontend/img/skillbox/lataa_designed_around_education.jpg') }}" alt="LATAA OS - AI Designed Around Education, Not Just Adapted for It" class="img-fluid" style="width:100%; height:auto; display:block; object-fit:contain;">
         </div>
       </div>
     </div>
@@ -516,7 +564,7 @@
 <section id="three-experiences" class="py-5" style="background:#f8fafc;">
   <div class="container py-4">
     <div class="text-center max-w-700 mx-auto mb-5">
-      <span class="text-primary font-weight-bold text-uppercase" style="letter-spacing:1px; font-size:0.85rem;">Section 2 &bull; User Personas</span>
+      <!-- <span class="text-primary font-weight-bold text-uppercase" style="letter-spacing:1px; font-size:0.85rem;">Section 2 &bull; User Personas</span> -->
       <h2 class="h1 font-weight-bold mt-2 mb-3" style="color:#0f172a;">One AI. Three Educational Experiences.</h2>
       <p class="text-secondary" style="font-size:1.05rem;">
         LATAA OS empowers every stakeholder in the school ecosystem with specialized AI intelligence.
@@ -527,11 +575,14 @@
       <!-- 1. STUDENTS -->
       <div class="col-lg-4">
         <div class="lataa-persona-card persona-student">
-          <div class="persona-icon-circle">
-            <i class="fas fa-user-graduate"></i>
+          <div class="persona-card-header">
+            <div class="persona-icon-circle">
+              <i class="fas fa-user-graduate"></i>
+            </div>
+            <span class="persona-badge">Learners</span>
           </div>
-          <h3 class="h4 font-weight-bold text-dark mb-1">1. LATAA for Students</h3>
-          <p class="text-primary font-weight-bold mb-3" style="font-size:0.95rem;">An intelligent learning companion.</p>
+          <h3>1. LATAA OS for Students</h3>
+          <p class="persona-tagline">An intelligent learning companion.</p>
           <ul class="lataa-checklist">
             <li>Understand concepts through interactive explanations.</li>
             <li>Learn at an appropriate level of difficulty.</li>
@@ -546,11 +597,14 @@
       <!-- 2. TEACHERS -->
       <div class="col-lg-4">
         <div class="lataa-persona-card persona-teacher">
-          <div class="persona-icon-circle">
-            <i class="fas fa-chalkboard-teacher"></i>
+          <div class="persona-card-header">
+            <div class="persona-icon-circle">
+              <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <span class="persona-badge">Educators</span>
           </div>
-          <h3 class="h4 font-weight-bold text-dark mb-1">2. LATAA for Teachers</h3>
-          <p class="text-purple font-weight-bold mb-3" style="color:#7c3aed; font-size:0.95rem;">An intelligent teaching assistant.</p>
+          <h3>2. LATAA OS for Teachers</h3>
+          <p class="persona-tagline">An intelligent teaching assistant.</p>
           <ul class="lataa-checklist">
             <li>Generate structured, board-aligned lesson plans.</li>
             <li>Create teaching and learning materials (TLM).</li>
@@ -566,11 +620,14 @@
       <!-- 3. INSTITUTIONS -->
       <div class="col-lg-4">
         <div class="lataa-persona-card persona-institution">
-          <div class="persona-icon-circle">
-            <i class="fas fa-school"></i>
+          <div class="persona-card-header">
+            <div class="persona-icon-circle">
+              <i class="fas fa-school"></i>
+            </div>
+            <span class="persona-badge">Institutions</span>
           </div>
-          <h3 class="h4 font-weight-bold text-dark mb-1">3. LATAA for Institutions</h3>
-          <p class="text-warning font-weight-bold mb-3" style="color:#d97706; font-size:0.95rem;">An intelligent academic support ecosystem.</p>
+          <h3>3. LATAA OS for Institutions</h3>
+          <p class="persona-tagline">An intelligent academic support ecosystem.</p>
           <ul class="lataa-checklist">
             <li>Support consistent, standardized academic delivery.</li>
             <li>Enable structured teaching and learning resources.</li>
@@ -591,7 +648,7 @@
 <section class="py-5" style="background:#ffffff;">
   <div class="container py-4">
     <div class="text-center max-w-700 mx-auto mb-5">
-      <span class="text-primary font-weight-bold text-uppercase" style="letter-spacing:1px; font-size:0.85rem;">Section 3 &bull; Core Capabilities</span>
+      <!-- <span class="text-primary font-weight-bold text-uppercase" style="letter-spacing:1px; font-size:0.85rem;">Section 3 &bull; Core Capabilities</span> -->
       <h2 class="h1 font-weight-bold mt-2 mb-3" style="color:#0f172a;">Intelligent Features of LATAA OS</h2>
       <p class="text-secondary" style="font-size:1.05rem;">
         Built from the ground up to solve real classroom and institutional challenges.
@@ -659,7 +716,7 @@
   <div class="container py-4">
     <div class="row align-items-center">
       <div class="col-lg-5 mb-4 mb-lg-0">
-        <span class="text-primary font-weight-bold text-uppercase" style="letter-spacing:1px; font-size:0.85rem;">Section 4 &bull; Methodology</span>
+        <!-- <span class="text-primary font-weight-bold text-uppercase" style="letter-spacing:1px; font-size:0.85rem;">Section 4 &bull; Methodology</span> -->
         <h2 class="h1 font-weight-bold mt-2 mb-3" style="color:#0f172a;">How LATAA OS Works</h2>
         <h4 class="h5 text-primary mb-3">Intelligence That Understands the Learning Process</h4>
         <p class="text-secondary" style="line-height:1.7;">
@@ -668,11 +725,11 @@
         <p class="text-secondary" style="line-height:1.7;">
           The platform follows a structured, scientifically proven methodology that ensures accuracy, safety, and instructional integrity at every step.
         </p>
-        <div class="mt-4">
+        <!-- <div class="mt-4">
           <a href="{{ asset('uploads/docs/LATAA_OS_Platform_Overview.pdf') }}" target="_blank" class="btn btn-outline-primary font-weight-bold px-4 py-2">
             <i class="fas fa-download me-1"></i> Get Whitepaper PDF
           </a>
-        </div>
+        </div> -->
       </div>
 
       <div class="col-lg-7">
@@ -726,7 +783,7 @@
 <section class="py-5" style="background:#ffffff;">
   <div class="container py-4">
     <div class="text-center max-w-700 mx-auto mb-5">
-      <span class="text-primary font-weight-bold text-uppercase" style="letter-spacing:1px; font-size:0.85rem;">Section 6 &bull; Differentiators</span>
+      <!-- <span class="text-primary font-weight-bold text-uppercase" style="letter-spacing:1px; font-size:0.85rem;">Section 6 &bull; Differentiators</span> -->
       <h2 class="h1 font-weight-bold mt-2 mb-3" style="color:#0f172a;">Why LATAA OS is Different</h2>
       <h4 class="h5 text-primary mb-3">Purpose-Built for the Education Sector</h4>
       <p class="text-secondary" style="font-size:1.05rem;">
@@ -782,7 +839,7 @@
 <section class="py-5" style="background:#0b1120; color:#ffffff;">
   <div class="container py-4">
     <div class="text-center max-w-700 mx-auto mb-5">
-      <span class="text-info font-weight-bold text-uppercase" style="letter-spacing:1px; font-size:0.85rem;">Section 7 &bull; Unified Matrix</span>
+      <!-- <span class="text-info font-weight-bold text-uppercase" style="letter-spacing:1px; font-size:0.85rem;">Section 7 &bull; Unified Matrix</span> -->
       <h2 class="h1 font-weight-bold mt-2 mb-3 text-white">LATAA OS &amp; Skillvation: One Connected Ecosystem</h2>
       <h4 class="h5" style="color:#38bdf8;">AI That Doesn't Stop at the Screen. It Enters the Classroom.</h4>
       <p class="text-white-50" style="font-size:1.05rem;">
@@ -870,11 +927,11 @@
       <div class="h4 font-weight-bold text-info mb-4">
         LATAA OS &mdash; Your Intelligent Partner in Teaching and Learning.
       </div>
-      <div>
+      <!-- <div>
         <a href="{{ asset('uploads/docs/LATAA_OS_Platform_Overview.pdf') }}" target="_blank" class="btn-lataa-primary">
           <i class="fas fa-file-pdf"></i> Download Complete LATAA OS PDF Document
         </a>
-      </div>
+      </div> -->
     </div>
   </div>
 </section>
