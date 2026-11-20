@@ -456,8 +456,8 @@
       <h2 style="font-size:clamp(1.5rem,3vw,2.25rem);font-weight:700;color:var(--on-surface);">Start Learning What Matters</h2>
     </div>
 
-    <!-- Complete 5-Grade Bundle Package Box -->
-    <div class="mb-12 max-w-5xl mx-auto rounded-3xl bg-gradient-to-br from-slate-900 via-[#0a1630] to-slate-900 text-white p-8 md:p-10 shadow-2xl border border-cyan-500/30 relative overflow-hidden">
+    <!-- CAMPS Complete 5-Grade Programme (Single Card) -->
+    <div class="mb-12 max-w-5xl mx-auto rounded-3xl bg-gradient-to-br from-slate-900 via-[#0a1630] to-slate-900 text-white p-8 md:p-10 shadow-2xl border border-cyan-500/30 relative overflow-hidden" id="camps-package-card">
       <!-- Decorative background glow -->
       <div class="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-cyan-500/15 blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-blue-600/15 blur-3xl pointer-events-none"></div>
@@ -465,14 +465,44 @@
       <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
         <div class="lg:w-2/3 space-y-4 text-left">
           <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 text-xs font-extrabold uppercase tracking-wider">
-            <i class="fa-solid fa-layer-group"></i> All 5 Grades Included &bull; Single School Package
+            <i class="fa-solid fa-layer-group"></i> All 5 Grades Included &bull; Single School Package &bull; CAMPS
           </div>
           <h3 class="text-2xl sm:text-3xl font-black text-white tracking-tight leading-snug">
-            Skill 2 Skool Complete Programme <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-400">(Grades 1 to 5)</span>
+            CAMPS Complete Programme <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-400">(Grades 1 to 5)</span>
           </h3>
           <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
-            All five grades are purchased together as a single complete school package. Enrolling equips your entire primary wing with structured foundational CAMPS skill curriculum, LATAA OS AI teacher copilot, worksheets, and competency assessments.
+            All five grades are included together in the single complete CAMPS school package. Enrolling equips your entire primary wing with structured foundational CAMPS skill curriculum, LATAA OS AI teacher copilot, worksheets, and competency assessments.
           </p>
+
+          <!-- 5-Grades Preview Strip inside the Single Card -->
+          <div class="pt-2">
+            <div class="text-xs font-bold text-cyan-300 uppercase tracking-wider mb-2.5">
+              <i class="fa-solid fa-graduation-cap me-1"></i> Grades Included in this Package:
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center">
+              <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/40 transition-colors">
+                <span class="block text-xs font-black text-white">Grade 1</span>
+                <span class="block text-[10px] text-slate-400">Foundational</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/40 transition-colors">
+                <span class="block text-xs font-black text-white">Grade 2</span>
+                <span class="block text-[10px] text-slate-400">Experiential</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/40 transition-colors">
+                <span class="block text-xs font-black text-white">Grade 3</span>
+                <span class="block text-[10px] text-slate-400">Cognitive</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/40 transition-colors">
+                <span class="block text-xs font-black text-white">Grade 4</span>
+                <span class="block text-[10px] text-slate-400">Analytical</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/40 transition-colors col-span-2 sm:col-span-1">
+                <span class="block text-xs font-black text-white">Grade 5</span>
+                <span class="block text-[10px] text-slate-400">Advanced</span>
+              </div>
+            </div>
+          </div>
+
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 text-xs sm:text-sm text-slate-200">
             <div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-cyan-400"></i> Grade 1 to Grade 5 Full Access</div>
             <div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-cyan-400"></i> NEP 2020 &amp; NCF 2023 Aligned</div>
@@ -497,15 +527,6 @@
       </div>
     </div>
 
-    @include('frontend.home-four.components.course-carousel', [
-      'type'      => '8',
-      'upskill'   => '0',
-      'is_bundle' => true,
-      'title'     => 'Grades Included in the Package',
-      'subtitle'  => 'All 5 grades are part of the complete Skill 2 Skool foundational curriculum package',
-      'tagline'   => 'Skill Readiness & Student Mapping'
-    ])
-
     <!-- ══════════════════════════════════════════════
          3 CREDIT PRODUCTS FOR SALE
     ══════════════════════════════════════════════ -->
@@ -515,7 +536,7 @@
           <i class="fa-solid fa-coins text-cyan-600"></i> AI Teacher Copilot Credits
         </div>
         <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-3">
-          Choose Your Skill 2 Skool Credit Pack
+          Choose Your CAMPS Credit Pack
         </h2>
         <p class="text-slate-600 text-base leading-relaxed">
           Fuel your classroom with LATAA OS AI Copilot credits for instant NEP-aligned lesson plans, automated student assessment rubrics, and dynamic printable skill worksheets.

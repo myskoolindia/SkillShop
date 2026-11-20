@@ -907,7 +907,7 @@
 </section>
 
 <!-- ══════════════════════════════════════════════════════════════ -->
-<!-- SECTION: CHOOSE YOUR SKILL 2 SKOOL CREDIT PACK                 -->
+<!-- SECTION: CHOOSE YOUR CAMPS CREDIT PACK                         -->
 <!-- ══════════════════════════════════════════════════════════════ -->
 <section class="py-5" style="background:#f8fafc;" id="skill2school-ai-credits">
   <div class="container py-4">
@@ -916,7 +916,7 @@
         <i class="fa-solid fa-coins text-cyan-600"></i> AI Teacher Copilot Credits
       </div>
       <h2 class="display-6 font-weight-bold text-dark mb-3">
-        Choose Your Skill 2 Skool Credit Pack
+        Choose Your CAMPS Credit Pack
       </h2>
       <p class="text-secondary" style="font-size:1.05rem;">
         Fuel your classroom with LATAA OS AI Copilot credits for instant NEP-aligned lesson plans, automated student assessment rubrics, and dynamic printable skill worksheets.
