@@ -100,11 +100,13 @@
                           <span class="text-base font-extrabold text-slate-900">{{ $pPrice }}</span>
                           <div class="text-[11px] text-cyan-700 font-bold leading-tight">Package: ₹25,000 (All 5 Grades)</div>
                         </div>
-                        <div class="flex items-center gap-1.5">
-                          <button type="button" onclick="carouselBuyNow(event, '{{ $pId }}', '{{ $pApiId }}', true)" class="px-3.5 py-1.5 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-full transition-all shadow-sm active:scale-95 flex items-center gap-1" title="Buy complete 5-grade package">
-                            <i class="fa-solid fa-bolt text-[10px]"></i> Buy Now
-                          </button>
-                        </div>
+                        @if(!$isBundle)
+                          <div class="flex items-center gap-1.5">
+                            <button type="button" onclick="carouselBuyNow(event, '{{ $pId }}', '{{ $pApiId }}', false)" class="px-3.5 py-1.5 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-full transition-all shadow-sm active:scale-95 flex items-center gap-1">
+                              <i class="fa-solid fa-bolt text-[10px]"></i> Buy Now
+                            </button>
+                          </div>
+                        @endif
                       </div>
                     </div>
                   </a>
@@ -239,9 +241,7 @@ document.addEventListener("DOMContentLoaded", function () {
         : `<span class="text-base font-extrabold text-slate-900">${escapeHtml(price)}</span>`;
 
       const buyButtonHtml = isBundleMode
-        ? `<button type="button" onclick="carouselBuyNow(event, '${escapeHtml(courseId)}', '${escapeHtml(course.api_course_id || '')}', true)" class="px-3.5 py-1.5 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-full transition-all shadow-sm active:scale-95 flex items-center gap-1" title="Buy complete 5-grade package">
-             <i class="fa-solid fa-bolt text-[10px]"></i> Buy Now
-           </button>`
+        ? ''
         : `<button type="button" onclick="carouselBuyNow(event, '${escapeHtml(courseId)}', '${escapeHtml(course.api_course_id || '')}', false)" class="px-3 py-1.5 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-full transition-all shadow-sm active:scale-95 flex items-center gap-1">
              <i class="fa-solid fa-bolt text-[10px]"></i> Buy Now
            </button>`;
@@ -266,9 +266,7 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>
             <div class="pt-4 border-t border-slate-100 flex items-center justify-between mt-auto gap-2">
               ${priceHtml}
-              <div class="flex items-center gap-1.5">
-                ${buyButtonHtml}
-              </div>
+              ${buyButtonHtml ? `<div class="flex items-center gap-1.5">${buyButtonHtml}</div>` : ''}
             </div>
           </div>
           </a>
