@@ -46,7 +46,7 @@
     $childImageMap = [
         '/'                     => ['image' => asset('designs/img/logo.png'),              'desc' => 'Back to homepage'],
         '/skill2school'         => ['image' => asset('designs/img/skill2school-2.jpeg'),   'desc' => 'School-wide skill curriculum'],
-        '/upskill4teacher'      => ['image' => asset('designs/img/TTT-1.png'),             'desc' => 'Professional educator development'],
+        '/upskill4school'       => ['image' => asset('designs/img/TTT-1.png'),             'desc' => 'Institutional & school development'],
         '/ttt'                  => ['image' => asset('designs/img/TTT-1.png'),             'desc' => 'Master trainer & bootcamp'],
         '/shop'                 => ['image' => asset('frontend/img/skillbox/skillbox_banner.png'), 'desc' => 'Interactive kits & learning boxes'],
         '/SkillBox'             => ['image' => asset('frontend/img/skillbox/skillbox_banner.png'), 'desc' => 'Interactive kits & learning boxes'],

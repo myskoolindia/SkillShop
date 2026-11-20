@@ -156,11 +156,49 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
         if (!$course) {
             $course = \App\Models\Course::with(['category.translation', 'instructor', 'chapters.chapterItems', 'reviews.user'])->where('api_course_id', $id)->first();
         }
+        if (!$course && ctype_digit((string)$id)) {
+            try {
+                $apiBase = rtrim(env('APP_API_BASE', 'https://collab.myskool.club'), '/');
+                $apiUrl  = env('APP_API') ?: "{$apiBase}/api/collab-courses";
+                $apiRes  = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(8)->get($apiUrl);
+                if ($apiRes->successful()) {
+                    $apiCourses = $apiRes->json()['courses']['data'] ?? [];
+                    $apiCourseData = collect($apiCourses)->firstWhere('id', (int)$id);
+                    if ($apiCourseData) {
+                        $coverFile = $apiCourseData['cover_image'] ?? null;
+                        $thumb = $coverFile ? "{$apiBase}/assets/images/event/cover/{$coverFile}" : 'designs/img/TTT-1.png';
+                        $price = (float)($apiCourseData['price'] ?? 0);
+                        
+                        $course = \App\Models\Course::create([
+                            'title' => $apiCourseData['title'] ?? 'Skill Course',
+                            'slug' => \Illuminate\Support\Str::slug($apiCourseData['slug'] ?? $apiCourseData['title'] ?? ('course-' . $id)),
+                            'api_course_id' => $id,
+                            'course_code' => $apiCourseData['course_code'] ?? ('crs-' . $id),
+                            'price' => $price,
+                            'discount' => 0,
+                            'instructor_id' => 1,
+                            'category_id' => 1,
+                            'type' => 'course',
+                            'thumbnail' => $thumb,
+                            'description' => $apiCourseData['description'] ?? '',
+                            'seo_description' => strip_tags($apiCourseData['short_description'] ?? ($apiCourseData['description'] ?? '')),
+                            'status' => 'active',
+                            'is_approved' => 'approved',
+                        ]);
+                        $course->load(['category.translation', 'instructor', 'chapters.chapterItems', 'reviews.user']);
+                    }
+                }
+            } catch (\Throwable $e) {}
+        }
         return view('frontend.home-four.pages.course-detail', compact('course', 'id'));
     })->name('courses.detail');
 
+    Route::get('/upskill4school', function () {
+        return view('frontend.home-four.pages.upskill-school');
+    })->name('upskill4school');
+
     Route::get('/upskill4teacher', function () {
-        return view('frontend.home-four.pages.upskill-teacher');
+        return redirect()->route('upskill4school', [], 301);
     })->name('upskill4teacher');
 
     Route::get('/lataa', function () {
@@ -269,8 +307,10 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
         $lmsOnly = $request->get('lms_only'); // '1' = only courses with LMS created in backend
 
         // ── Proxy all courses from external devapi ──────────────────────
+        $apiBase = rtrim(env('APP_API_BASE', 'https://collab.myskool.club'), '/');
+        $apiUrl  = env('APP_API') ?: "{$apiBase}/api/collab-courses";
         try {
-            $response = \Illuminate\Support\Facades\Http::timeout(8)->get(env('APP_API'));
+            $response = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(8)->get($apiUrl);
             $apiCourses = $response->successful()
                 ? collect($response->json()['courses']['data'] ?? [])
                 : collect();
@@ -280,7 +320,7 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
 
         // ── Filter by type ──────────────────────────────────────────────
         if ($type !== null && $type !== '') {
-            $types = array_map('trim', explode(',', (string)$type));
+            $types = array_values(array_filter(array_map('trim', explode(',', (string)$type))));
             $apiCourses = $apiCourses->filter(
                 fn($c) => in_array((string)($c['type'] ?? ''), $types, true)
             );
@@ -297,32 +337,8 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
             ? \App\Models\Course::with(['category.translation'])->get()
             : collect();
 
-        // ── Filter by LMS created only if requested ────────────────────
-        if ($lmsOnly == '1') {
-            $apiCourses = $apiCourses->filter(function ($c) use ($lmsCourses) {
-                $cId = (string)($c['id'] ?? '');
-                $cCode = strtolower(trim($c['course_code'] ?? ''));
-                $cTitle = strtolower(trim($c['title'] ?? ''));
-                $cSlug = strtolower(trim($c['slug'] ?? ''));
-
-                return $lmsCourses->contains(function ($lms) use ($cId, $cCode, $cTitle, $cSlug) {
-                    $lmsApiId = (string)($lms->api_course_id ?? '');
-                    $lmsId = (string)($lms->id ?? '');
-                    $lmsCode = strtolower(trim($lms->course_code ?? ''));
-                    $lmsTitle = strtolower(trim($lms->title ?? ''));
-                    $lmsSlug = strtolower(trim($lms->slug ?? ''));
-
-                    return ($lmsApiId && $lmsApiId === $cId)
-                        || ($lmsId === $cId)
-                        || ($lmsCode && $cCode && $lmsCode === $cCode)
-                        || ($lmsTitle && $cTitle && $lmsTitle === $cTitle)
-                        || ($lmsSlug && $cSlug && $lmsSlug === $cSlug);
-                });
-            });
-        }
-
         // ── Image base URL (devcollab hosts the cover images) ───────────
-        $imgBase = rtrim(env('APP_API_BASE'), '/');
+        $imgBase = $apiBase;
         $fallback = asset('designs/img/TTT-1.png');
 
         // ── Map to standardised shape ───────────────────────────────────
@@ -409,24 +425,29 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
                 $dbQuery = \App\Models\Course::active()->with(['category.translation', 'instructor:id,name']);
                 if ($type !== null && $type !== '') {
                     $types = array_map('trim', explode(',', (string)$type));
-                    $dbQuery->where(function ($q) use ($types) {
-                        $q->whereIn('type', $types);
-                        if (in_array('8', $types)) {
-                            $q->orWhere('title', 'like', '%Grade%')
-                              ->orWhere('title', 'like', '%Beauty%')
-                              ->orWhere('title', 'like', '%Skill%');
-                        }
-                        if (in_array('10', $types) || in_array('5', $types)) {
-                            $q->orWhere('title', 'like', '%TTT%')
-                              ->orWhere('title', 'like', '%TEACHER%')
-                              ->orWhere('title', 'like', '%TRAINER%')
-                              ->orWhere('title', 'like', '%WORKSHOP%');
+                    $dbQuery->where(function ($q) use ($types, $upskill) {
+                        if (in_array('8', $types) && (string)$upskill === '0') {
+                            $q->whereIn('api_course_id', [27, 2, 52, 53, 54])
+                              ->orWhereIn('id', [10, 1, 5, 13, 14]);
+                        } else {
+                            $q->whereIn('type', $types);
+                            if (in_array('8', $types)) {
+                                $q->orWhere('title', 'like', '%Grade%')
+                                  ->orWhere('title', 'like', '%Beauty%')
+                                  ->orWhere('title', 'like', '%Skill%');
+                            }
+                            if (in_array('10', $types) || in_array('5', $types)) {
+                                $q->orWhere('title', 'like', '%TTT%')
+                                  ->orWhere('title', 'like', '%TEACHER%')
+                                  ->orWhere('title', 'like', '%TRAINER%')
+                                  ->orWhere('title', 'like', '%WORKSHOP%');
+                            }
                         }
                     });
                 }
                 $dbCourses = $dbQuery->get();
                 if ($dbCourses->isNotEmpty()) {
-                    $courses = $dbCourses->map(function ($course) use ($fallback) {
+                    $courses = $dbCourses->map(function ($course) use ($fallback, $type) {
                         $thumb = $course->thumbnail ? asset($course->thumbnail) : $fallback;
                         $catName = $course->category?->translation?->name ?? 'Skill Course';
                         $effectivePrice = $course->discount > 0 ? (float)$course->discount : (float)$course->price;
@@ -438,7 +459,7 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
                             'api_course_id'            => $course->api_course_id ?? $course->id,
                             'lms_id'                   => $course->id,
                             'has_lms'                  => true,
-                            'type'                     => $course->type,
+                            'type'                     => $type ? (int)$type : 8,
                             'upskill'                  => 0,
                             'title'                    => $course->title,
                             'slug'                     => $course->slug,
@@ -467,6 +488,17 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
             } catch (\Throwable $e) {
                 // Ignore DB fallback error
             }
+        }
+
+        if ($type === '8' && (string)$upskill === '0' && $courses->isNotEmpty()) {
+            $orderMap = [27 => 1, 2 => 2, 52 => 3, 53 => 4, 54 => 5, 10 => 1, 1 => 2, 5 => 3, 13 => 4, 14 => 5];
+            $courses = $courses->sortBy(function ($c) use ($orderMap) {
+                $apiId = (int)($c['api_course_id'] ?? 0);
+                $lmsId = (int)($c['id'] ?? 0);
+                if (isset($orderMap[$apiId])) return $orderMap[$apiId];
+                if (isset($orderMap[$lmsId])) return $orderMap[$lmsId];
+                return (int)filter_var($c['title'] ?? '', FILTER_SANITIZE_NUMBER_INT) ?: 99;
+            })->values();
         }
 
         return response()->json([
@@ -510,6 +542,7 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
     Route::get('cart', [CartController::class, 'index'])->name('cart');
     Route::post('add-to-cart/{id}', [CartController::class, 'addToCart'])->name('add-to-cart');
     Route::post('add-to-cart-by-api-id/{api_course_id}', [CartController::class, 'addToCartByApiId'])->name('add-to-cart-by-api-id');
+    Route::post('add-skill2school-bundle', [CartController::class, 'addSkill2SchoolBundle'])->name('cart.add-skill2school-bundle');
     Route::get('remove-cart-item/{rowId}', [CartController::class, 'removeCartItem'])->name('remove-cart-item');
     Route::post('apply-coupon', [CartController::class, 'applyCoupon'])->name('apply-coupon');
     Route::get('remove-coupon', [CartController::class, 'removeCoupon'])->name('remove-coupon');

@@ -12,6 +12,13 @@
   $formattedPrice = $effectivePrice > 0 ? '₹ ' . number_format($effectivePrice, 0) : 'Free';
   $formattedOriginalPrice = '₹ ' . number_format($originalPrice, 0);
   $currentCourseId = $course ? $course->id : ($id ?? '');
+  $s2sIds = [27, 2, 52, 53, 54];
+  $s2sLocalIds = [10, 1, 5, 13, 14];
+  $isS2SGrade = $course && (
+    in_array((int)($course->api_course_id ?? 0), $s2sIds, true)
+    || in_array((int)$course->id, $s2sLocalIds, true)
+    || (preg_match('/^Grade\s+[1-5]$/i', trim($courseTitle)) && !str_contains(strtolower($courseTitle), 'teacher'))
+  );
 @endphp
 
 @section('meta_title', ($courseTitle ? $courseTitle . ' - ' : '') . 'Course Details - ' . config('app.name', 'Skillvation'))
@@ -157,20 +164,29 @@
             </div>
           </div>
 
+          @if ($isS2SGrade)
+            <div class="mb-3 p-3 bg-cyan-50 border border-cyan-200 rounded-xl text-xs text-cyan-900 flex items-start gap-2">
+              <i class="fa-solid fa-layer-group text-cyan-600 mt-0.5 flex-shrink-0"></i>
+              <div>
+                <span class="font-bold">Skill 2 Skool 5-Grade Package:</span> This grade is part of the complete foundational programme (Grades 1 to 5). Purchasing unlocks all 5 grades together (₹25,000 package).
+              </div>
+            </div>
+          @endif
+
           <!-- Action Buttons -->
           <div class="flex flex-col gap-2.5">
             {{-- Buy Now --}}
             <button id="buy-now-btn" type="button" onclick="buyNow()"
               class="bg-primary hover:bg-primary-dark text-white px-6 py-3.5 rounded-full text-sm font-bold w-full transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
               <i class="fa-solid fa-bolt text-xs"></i>
-              <span>Buy Now</span>
+              <span>{{ $isS2SGrade ? 'Enroll All 5 Grades Now' : 'Buy Now' }}</span>
             </button>
 
             {{-- Add to Cart --}}
             <button id="add-to-cart-btn" type="button" onclick="addToCartAction()"
               class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-6 py-3 rounded-full text-sm font-bold w-full transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2">
               <i class="fa-solid fa-cart-shopping text-xs"></i>
-              <span>Add to Cart</span>
+              <span>{{ $isS2SGrade ? 'Add 5-Grade Bundle to Cart' : 'Add to Cart' }}</span>
             </button>
 
             {{-- Request a Quote Button --}}
@@ -237,6 +253,8 @@
 <script>
   const API_URL = window.APP_CONFIG?.COURSES_API_URL || '/api/collab-courses';
   const CART_API_BASE = window.APP_CONFIG?.APP_URL || window.location.origin;
+  const APP_API_BASE = window.APP_CONFIG?.APP_API_BASE || '{{ rtrim(env("APP_API_BASE", "https://collab.myskool.club"), "/") }}';
+  const APP_API = APP_API_BASE + '/api/collab-courses';
 
   // Extract ID from URL params or pathname
   const urlParams = new URLSearchParams(window.location.search);
@@ -333,7 +351,7 @@
         fullImgUrl = cover;
       } else {
         // Raw filename from devapi — build devcollab URL
-        const apiBase = '{{ env("APP_API_BASE") }}';
+        const apiBase = APP_API_BASE;
         fullImgUrl = apiBase + '/assets/images/event/cover/' + cover;
       }
       setCourseImage('course-main-image', fullImgUrl);

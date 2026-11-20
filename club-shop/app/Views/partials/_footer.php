@@ -25,7 +25,7 @@ $social_links = getPortalSocialLinks();
 //     $footer_menu_two = [
 //         ['label' => 'Skill 2 Skool', 'link' => '/skill2school'],
 //         ['label' => 'TTT', 'link' => '/ttt'],
-//         ['label' => 'Upskill 4 Teacher', 'link' => '/upskill4teacher'],
+//         ['label' => 'Upskill 4 School', 'link' => '/upskill4school'],
 //         ['label' => 'Shop', 'link' => '/club-shop'],
 //         ['label' => 'Blog', 'link' => '/blog'],
 //         ['label' => 'Contact', 'link' => '/contact'],

@@ -4,7 +4,21 @@
   $tagline = $tagline ?? 'Skill Learning Programs';
   $courseType = $type ?? null;
   $courseUpskill = $upskill ?? null;
-  $courseLmsOnly = $lms_only ?? null;
+  $isBundle = !empty($is_bundle) || ($courseType === '8' && (string)$courseUpskill === '0');
+
+  $preloadedCourses = collect();
+  if ($isBundle && class_exists('\App\Models\Course')) {
+      $gradeOrder = [27 => 1, 2 => 2, 52 => 3, 53 => 4, 54 => 5, 10 => 1, 1 => 2, 5 => 3, 13 => 4, 14 => 5];
+      $preloadedCourses = \App\Models\Course::active()
+          ->where(function($q) {
+              $q->whereIn('api_course_id', [27, 2, 52, 53, 54])
+                ->orWhereIn('id', [10, 1, 5, 13, 14]);
+          })
+          ->get()
+          ->sortBy(function($c) use ($gradeOrder) {
+              return $gradeOrder[$c->api_course_id] ?? ($gradeOrder[$c->id] ?? 99);
+          })->values();
+  }
 @endphp
 
 <!-- BEGIN: Dynamic Courses Carousel Component -->
@@ -28,7 +42,7 @@
     <div class="relative">
       
       <!-- Loading State -->
-      <div id="courses-loading" class="text-center py-16">
+      <div id="courses-loading" class="{{ $preloadedCourses->isNotEmpty() ? 'hidden ' : '' }}text-center py-16">
         <div class="inline-flex items-center gap-3 text-primary font-medium text-sm">
           <i class="fa-solid fa-circle-notch fa-spin text-xl"></i>
           <span>Loading courses...</span>
@@ -48,9 +62,56 @@
       </div>
 
       <!-- Courses Container -->
-      <div id="courses-carousel-wrapper" class="hidden relative">
+      <div id="courses-carousel-wrapper" class="{{ $preloadedCourses->isEmpty() ? 'hidden ' : '' }}relative">
         <div id="courses-container" class="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-6 scrollbar-hide">
-          <!-- Dynamically populated via JS -->
+          @if($preloadedCourses->isNotEmpty())
+            @foreach($preloadedCourses as $pCourse)
+              @php
+                $pId = $pCourse->id;
+                $pApiId = $pCourse->api_course_id ?? $pCourse->id;
+                $pTitle = $pCourse->title ?? 'Untitled Course';
+                $pDesc = $pCourse->short_description ?? ($pCourse->description ?? '');
+                $pDesc = Str::limit(strip_tags($pDesc), 130);
+                $pPrice = $pCourse->price > 0 ? '₹ ' . number_format($pCourse->price, 0) : '₹ 5,000';
+                $pThumb = $pCourse->thumbnail ? (str_starts_with($pCourse->thumbnail, 'http') ? $pCourse->thumbnail : asset($pCourse->thumbnail)) : asset('designs/img/TTT-1.png');
+                $pDetailUrl = url('/course-detail/' . $pId);
+              @endphp
+              <div class="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] xl:w-[calc(25%-18px)] flex-shrink-0 snap-start">
+                <div class="h-full border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 bg-white flex flex-col justify-between group">
+                  <a href="{{ $pDetailUrl }}">  
+                    <div class="h-48 bg-slate-100 overflow-hidden relative">
+                      <img src="{{ $pThumb }}" alt="{{ $pTitle }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null;this.src='{{ asset('designs/img/TTT-1.png') }}';" />
+                      <div class="absolute top-3 left-3 flex flex-wrap items-center gap-1.5 z-10">
+                        <span class="px-2.5 py-1 bg-cyan-700/95 backdrop-blur-sm text-white text-[10px] font-extrabold uppercase tracking-wider rounded-full shadow-sm">Part of 5-Grade Package</span>
+                        <span class="px-2.5 py-1 bg-amber-500/95 backdrop-blur-sm text-white text-[10px] font-extrabold uppercase tracking-wider rounded-full shadow-sm">CAMPS</span>
+                      </div>
+                    </div>
+                    <div class="p-3 flex flex-col flex-grow justify-between space-y-3">
+                      <div>
+                        <h3 class="text-base font-bold text-slate-900 group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+                          {{ $pTitle }}
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">
+                          {{ $pDesc }}
+                        </p>
+                      </div>
+                      <div class="pt-4 border-t border-slate-100 flex items-center justify-between mt-auto gap-2">
+                        <div>
+                          <span class="text-base font-extrabold text-slate-900">{{ $pPrice }}</span>
+                          <div class="text-[11px] text-cyan-700 font-bold leading-tight">Package: ₹25,000 (All 5 Grades)</div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                          <button type="button" onclick="carouselBuyNow(event, '{{ $pId }}', '{{ $pApiId }}', true)" class="px-3.5 py-1.5 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-full transition-all shadow-sm active:scale-95 flex items-center gap-1" title="Buy complete 5-grade package">
+                            <i class="fa-solid fa-bolt text-[10px]"></i> Buy Now
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              </div>
+            @endforeach
+          @endif
         </div>
 
         <!-- Navigation Buttons -->
@@ -62,15 +123,20 @@
             <i class="fa-solid fa-chevron-right text-sm"></i>
           </button>
         </div>
-      </div>
 
-      <!-- See All Link -->
-      <!-- <div id="courses-see-all" class="text-center mt-8">
-        <a href="{{ route('courses') }}" class="inline-flex items-center gap-2 px-7 py-3 rounded-full border border-primary text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all shadow-sm">
-          <span>View All Courses</span>
-          <i class="fa-solid fa-arrow-right text-xs"></i>
-        </a>
-      </div> -->
+        <!-- Single Bottom Button for Complete Bundle (When in Bundle Mode) -->
+        @if($isBundle)
+          <div class="text-center mt-8 pt-4">
+            <button type="button" onclick="carouselBuyNow(event, '', '', true)" id="carousel-bottom-bundle-btn" class="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold text-sm sm:text-base shadow-lg shadow-cyan-500/25 transition-all duration-300 active:scale-95">
+              <i class="fa-solid fa-layer-group"></i>
+              <span>Enroll All 5 Grades Now</span>
+              <i class="fa-solid fa-arrow-right text-xs"></i>
+            </button>
+            <div class="text-xs text-slate-500 mt-2 font-medium">Single purchase &bull; ₹25,000 for Grades 1 to 5</div>
+          </div>
+        @endif
+
+      </div>
 
     </div>
 
@@ -82,8 +148,9 @@
 document.addEventListener("DOMContentLoaded", function () {
   const targetType = "{{ $courseType }}";
   const targetUpskill = "{{ $courseUpskill }}";
-  const targetLmsOnly = "{{ $courseLmsOnly }}";
-  let apiUrl = window.APP_CONFIG?.COURSES_API_URL || '/api/collab-courses';
+  const isBundleMode = {{ $isBundle ? 'true' : 'false' }};
+  const hasPreloaded = {{ $preloadedCourses->isNotEmpty() ? 'true' : 'false' }};
+  let apiUrl = window.APP_CONFIG?.COURSES_API_URL || '{{ url("/api/collab-courses") }}';
   
   const queryParams = [];
   if (targetType) {
@@ -91,9 +158,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   if (targetUpskill !== '') {
     queryParams.push(`upskill=${encodeURIComponent(targetUpskill)}`);
-  }
-  if (targetLmsOnly !== '') {
-    queryParams.push(`lms_only=${encodeURIComponent(targetLmsOnly)}`);
   }
   if (queryParams.length > 0) {
     const sep = apiUrl.includes('?') ? '&' : '?';
@@ -113,28 +177,44 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function renderCards(courses) {
-    containerEl.innerHTML = '';
-    
-    // Filter by type if provided and courses have type property
-    const targetTypes = targetType ? targetType.split(',').map(s => s.trim()).filter(Boolean) : [];
-    let filteredCourses = targetTypes.length > 0 
-      ? courses.filter(c => c.type === undefined || c.type === null || targetTypes.includes(String(c.type)) || targetTypes.includes(String(c.course_type)))
-      : courses;
+    let filteredCourses = courses;
 
-    if (targetLmsOnly === '1') {
-      filteredCourses = filteredCourses.filter(c => c.has_lms === true || c.lms_id || c.has_lms === 1);
+    if (isBundleMode) {
+      // For bundle mode, sort sequentially by Grade 1 -> Grade 5
+      const gradeOrder = { '27': 1, '2': 2, '52': 3, '53': 4, '54': 5, '10': 1, '1': 2, '5': 3, '13': 4, '14': 5 };
+      filteredCourses = courses.filter(c => {
+        const id = String(c.api_course_id || c.id || '');
+        const title = String(c.title || '');
+        return gradeOrder[id] !== undefined || /Grade\s*[1-5]/i.test(title);
+      });
+      filteredCourses.sort((a, b) => {
+        const ordA = gradeOrder[String(a.api_course_id)] ?? (gradeOrder[String(a.id)] ?? (gradeOrder[String(a.lms_id)] ?? 99));
+        const ordB = gradeOrder[String(b.api_course_id)] ?? (gradeOrder[String(b.id)] ?? (gradeOrder[String(b.lms_id)] ?? 99));
+        return ordA - ordB;
+      });
+    } else {
+      const targetTypes = targetType ? targetType.split(',').map(s => s.trim()).filter(Boolean) : [];
+      if (targetTypes.length > 0) {
+        filteredCourses = filteredCourses.filter(c => c.type === undefined || c.type === null || targetTypes.includes(String(c.type)) || targetTypes.includes(String(c.course_type)));
+      }
     }
 
     if (filteredCourses.length === 0) {
-      emptyEl.classList.remove('hidden');
+      if (!hasPreloaded) {
+        emptyEl.classList.remove('hidden');
+        wrapperEl.classList.add('hidden');
+      }
       return;
     }
+
+    // Replace container HTML with rendered cards
+    containerEl.innerHTML = '';
 
     filteredCourses.forEach(course => {
       const title = course.title || 'Untitled Course';
       const desc = course.short_description || course.description || '';
       const price = course.formatted_price || ('₹ ' + (course.price || 0));
-      const image = course.thumbnail || course.cover_image || course.image || window.APP_CONFIG?.IMAGE_FALLBACK || '';
+      const image = course.thumbnail || course.cover_image || course.image || window.APP_CONFIG?.IMAGE_FALLBACK || '{{ asset("designs/img/TTT-1.png") }}';
       const cat = course.category_name || course.category || 'Skill Course';
       const courseId = course.lms_id || course.id || '';
       const courseUrl = courseId
@@ -143,15 +223,36 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const card = document.createElement('div');
       card.className = "w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] xl:w-[calc(25%-18px)] flex-shrink-0 snap-start";
+      
+      const badgeHtml = isBundleMode
+        ? `<div class="flex flex-wrap items-center gap-1.5">
+             <span class="px-2.5 py-1 bg-cyan-700/95 backdrop-blur-sm text-white text-[10px] font-extrabold uppercase tracking-wider rounded-full shadow-sm">Part of 5-Grade Package</span>
+             <span class="px-2.5 py-1 bg-amber-500/95 backdrop-blur-sm text-white text-[10px] font-extrabold uppercase tracking-wider rounded-full shadow-sm">CAMPS</span>
+           </div>`
+        : `<span class="px-2.5 py-1 bg-white/90 backdrop-blur-sm text-primary text-[11px] font-bold rounded-full shadow-sm border border-slate-100">${escapeHtml(cat)}</span>`;
+
+      const priceHtml = isBundleMode
+        ? `<div>
+            <span class="text-base font-extrabold text-slate-900">${escapeHtml(price)}</span>
+            <div class="text-[11px] text-cyan-700 font-bold leading-tight">Package: ₹25,000 (All 5 Grades)</div>
+           </div>`
+        : `<span class="text-base font-extrabold text-slate-900">${escapeHtml(price)}</span>`;
+
+      const buyButtonHtml = isBundleMode
+        ? `<button type="button" onclick="carouselBuyNow(event, '${escapeHtml(courseId)}', '${escapeHtml(course.api_course_id || '')}', true)" class="px-3.5 py-1.5 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-full transition-all shadow-sm active:scale-95 flex items-center gap-1" title="Buy complete 5-grade package">
+             <i class="fa-solid fa-bolt text-[10px]"></i> Buy Now
+           </button>`
+        : `<button type="button" onclick="carouselBuyNow(event, '${escapeHtml(courseId)}', '${escapeHtml(course.api_course_id || '')}', false)" class="px-3 py-1.5 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-full transition-all shadow-sm active:scale-95 flex items-center gap-1">
+             <i class="fa-solid fa-bolt text-[10px]"></i> Buy Now
+           </button>`;
+
       card.innerHTML = `
         <div class="h-full border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 bg-white flex flex-col justify-between group">
         <a href="${courseUrl}">  
           <div class="h-48 bg-slate-100 overflow-hidden relative">
-            <img src="${escapeHtml(image)}" alt="${escapeHtml(title)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null;this.src='${window.APP_CONFIG?.IMAGE_FALLBACK || ''}';" />
-            <div class="absolute top-3 left-3">
-              <span class="px-2.5 py-1 bg-white/90 backdrop-blur-sm text-primary text-[11px] font-bold rounded-full shadow-sm border border-slate-100">
-                ${escapeHtml(cat)}
-              </span>
+            <img src="${escapeHtml(image)}" alt="${escapeHtml(title)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null;this.src='${window.APP_CONFIG?.IMAGE_FALLBACK || '{{ asset("designs/img/TTT-1.png") }}'}';" />
+            <div class="absolute top-3 left-3 z-10">
+              ${badgeHtml}
             </div>
           </div>
           <div class="p-3 flex flex-col flex-grow justify-between space-y-3">
@@ -164,12 +265,9 @@ document.addEventListener("DOMContentLoaded", function () {
               </p>
             </div>
             <div class="pt-4 border-t border-slate-100 flex items-center justify-between mt-auto gap-2">
-              <span class="text-base font-extrabold text-slate-900">${escapeHtml(price)}</span>
+              ${priceHtml}
               <div class="flex items-center gap-1.5">
-                <button type="button" onclick="carouselBuyNow(event, '${escapeHtml(courseId)}', '${escapeHtml(course.api_course_id || '')}')" class="px-3 py-1.5 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-full transition-all shadow-sm active:scale-95 flex items-center gap-1">
-                  <i class="fa-solid fa-bolt text-[10px]"></i> Buy Now
-                </button>
-                
+                ${buyButtonHtml}
               </div>
             </div>
           </div>
@@ -179,6 +277,7 @@ document.addEventListener("DOMContentLoaded", function () {
       containerEl.appendChild(card);
     });
 
+    emptyEl.classList.add('hidden');
     wrapperEl.classList.remove('hidden');
   }
 
@@ -191,15 +290,19 @@ document.addEventListener("DOMContentLoaded", function () {
       loadingEl.classList.add('hidden');
       const courses = res.courses?.data || res.data || (Array.isArray(res) ? res : []);
       if (!courses || courses.length === 0) {
-        emptyEl.classList.remove('hidden');
+        if (!hasPreloaded) {
+          emptyEl.classList.remove('hidden');
+        }
         return;
       }
       renderCards(courses);
     })
     .catch(err => {
-      console.error('Course API load error:', err);
+      console.warn('Course API load warning:', err);
       loadingEl.classList.add('hidden');
-      errorEl.classList.remove('hidden');
+      if (!hasPreloaded) {
+        errorEl.classList.remove('hidden');
+      }
     });
 
   if (prevBtn && nextBtn) {
@@ -211,7 +314,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  window.carouselBuyNow = async function(e, courseId, apiId) {
+  window.carouselBuyNow = async function(e, courseId, apiId, forceBundle) {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -224,9 +327,27 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-    const targetId = courseId || apiId;
+    const shouldBundle = forceBundle || isBundleMode;
 
     try {
+      if (shouldBundle) {
+        const bundleRes = await fetch('{{ route("cart.add-skill2school-bundle") }}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ _token: csrfToken })
+        });
+        const bundleData = await bundleRes.json();
+        if (bundleData.status === 'success' || bundleData.status === 'already') {
+          window.location.href = bundleData.checkout_url || '{{ route("checkout.index") }}';
+          return;
+        }
+      }
+
+      const targetId = courseId || apiId;
       const res = await fetch('{{ url("/add-to-cart") }}/' + encodeURIComponent(targetId), {
         method: 'POST',
         headers: {

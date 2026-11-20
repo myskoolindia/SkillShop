@@ -47,7 +47,7 @@
       <h4 class="font-bold text-on-surface mb-4">Quick Links</h4>
       <ul class="space-y-2 text-sm text-on-surface-variant">
         <li><a class="hover:text-primary transition-colors" href="{{ route('skill2school') }}">Skill 2 Skool</a></li>
-        <li><a class="hover:text-primary transition-colors" href="{{ route('upskill4teacher') }}">Upskill 4 Teacher</a></li>
+        <li><a class="hover:text-primary transition-colors" href="{{ route('upskill4school') }}">Upskill 4 School</a></li>
         <li><a class="hover:text-primary transition-colors" href="{{ route('ttt') }}">Train the Trainer</a></li>
         <li><a class="hover:text-primary transition-colors" href="{{ route('labs') }}">STEMbot Labs</a></li>
       </ul>

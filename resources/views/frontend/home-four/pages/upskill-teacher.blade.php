@@ -273,7 +273,6 @@
 @include('frontend.home-four.components.course-carousel', [
   'type' => '8',
   'upskill' => '1',
-  'lms_only' => '1',
   'title' => 'Explore Our Courses',
   'subtitle' => 'Because great teachers never stop learning. Discover 33+ NEP-aligned professional tracks.',
   'tagline' => 'CBSE Skill Education'

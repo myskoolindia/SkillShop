@@ -455,16 +455,102 @@
       <p style="color:var(--primary);font-weight:600;margin-bottom:.5rem;font-size:.875rem;text-transform:uppercase;letter-spacing:.06em;">Skill Readiness &amp; Student Mapping</p>
       <h2 style="font-size:clamp(1.5rem,3vw,2.25rem);font-weight:700;color:var(--on-surface);">Start Learning What Matters</h2>
     </div>
+
+    <!-- Complete 5-Grade Bundle Package Box -->
+    <div class="mb-12 max-w-5xl mx-auto rounded-3xl bg-gradient-to-br from-slate-900 via-[#0a1630] to-slate-900 text-white p-8 md:p-10 shadow-2xl border border-cyan-500/30 relative overflow-hidden">
+      <!-- Decorative background glow -->
+      <div class="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-cyan-500/15 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-blue-600/15 blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
+        <div class="lg:w-2/3 space-y-4 text-left">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 text-xs font-extrabold uppercase tracking-wider">
+            <i class="fa-solid fa-layer-group"></i> All 5 Grades Included &bull; Single School Package
+          </div>
+          <h3 class="text-2xl sm:text-3xl font-black text-white tracking-tight leading-snug">
+            Skill 2 Skool Complete Programme <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-400">(Grades 1 to 5)</span>
+          </h3>
+          <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+            All five grades are purchased together as a single complete school package. Enrolling equips your entire primary wing with structured foundational CAMPS skill curriculum, LATAA OS AI teacher copilot, worksheets, and competency assessments.
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 text-xs sm:text-sm text-slate-200">
+            <div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-cyan-400"></i> Grade 1 to Grade 5 Full Access</div>
+            <div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-cyan-400"></i> NEP 2020 &amp; NCF 2023 Aligned</div>
+            <div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-cyan-400"></i> LATAA OS AI Lesson Plans</div>
+            <div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-cyan-400"></i> Activity Kits &amp; Assessment Worksheets</div>
+          </div>
+        </div>
+
+        <div class="lg:w-1/3 w-full flex flex-col items-center justify-center p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm text-center">
+          <span class="text-xs uppercase font-bold text-slate-300 tracking-wider">Complete Package Price</span>
+          <div class="text-3xl sm:text-4xl font-black text-white mt-1 mb-1">
+            ₹25,000
+          </div>
+          <span class="text-xs text-cyan-300 mb-5 font-semibold">Includes All 5 Grades (Single Purchase)</span>
+          
+          <button type="button" onclick="buySkill2SchoolBundle(event)" id="s2s-bundle-btn" class="w-full py-3.5 px-6 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black text-sm transition-all duration-300 shadow-lg shadow-cyan-500/25 active:scale-95 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-bolt"></i>
+            <span>Enroll All 5 Grades Now</span>
+          </button>
+          <span class="text-[11px] text-slate-400 mt-2.5">Single transaction &bull; Unlocks Grades 1 to 5</span>
+        </div>
+      </div>
+    </div>
+
     @include('frontend.home-four.components.course-carousel', [
-      'type'     => '8',
-      'upskill'  => '0',
-      'lms_only' => '1',
-      'title'    => '',
-      'subtitle' => '',
-      'tagline'  => 'Skill Readiness & Student Mapping'
+      'type'      => '8',
+      'upskill'   => '0',
+      'is_bundle' => true,
+      'title'     => 'Grades Included in the Package',
+      'subtitle'  => 'All 5 grades are part of the complete Skill 2 Skool foundational curriculum package',
+      'tagline'   => 'Skill Readiness & Student Mapping'
     ])
   </div>
 </section>
+
+@push('scripts')
+<script>
+window.buySkill2SchoolBundle = async function(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  const btn = document.getElementById('s2s-bundle-btn') || (e ? e.currentTarget : null);
+  const oldHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm"></i> Adding All 5 Grades...';
+  }
+
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+  try {
+    const res = await fetch('{{ route("cart.add-skill2school-bundle") }}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken,
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ _token: csrfToken })
+    });
+
+    const data = await res.json();
+    if (data.status === 'success' || data.status === 'already') {
+      window.location.href = data.checkout_url || '{{ route("checkout.index") }}';
+    } else {
+      if (typeof toastr !== 'undefined') toastr.error(data.message || 'Error adding bundle to cart');
+      else alert(data.message || 'Error adding bundle to cart');
+      if (btn) { btn.disabled = false; btn.innerHTML = oldHtml; }
+    }
+  } catch (err) {
+    console.error(err);
+    if (btn) { btn.disabled = false; btn.innerHTML = oldHtml; }
+    window.location.href = '{{ route("checkout.index") }}';
+  }
+};
+</script>
+@endpush
 
 {{-- ══════════════════════════════════════════════
      7. ACTIVE PARTICIPATION

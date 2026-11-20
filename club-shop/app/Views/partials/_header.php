@@ -6,7 +6,7 @@ if (empty($nav_menu)) {
         ['label' => 'Home', 'link' => '/'],
         ['label' => 'Skill 2 Skool', 'link' => '/skill2school'],
         ['label' => 'TTT', 'link' => '/ttt'],
-        ['label' => 'Upskill 4 Teacher', 'link' => '/upskill4teacher'],
+        ['label' => 'Upskill 4 School', 'link' => '/upskill4school'],
         ['label' => 'Shop', 'link' => '/club-shop'],
         [
             'label' => 'Labs',
@@ -24,7 +24,7 @@ if (empty($nav_menu)) {
 $childImageMap = [
     '/'                     => ['image' => mainPortalUrl('designs/img/logo.png'),              'desc' => 'Back to homepage'],
     '/skill2school'         => ['image' => mainPortalUrl('designs/img/skill2school-2.jpeg'),   'desc' => 'School-wide skill curriculum'],
-    '/upskill4teacher'      => ['image' => mainPortalUrl('designs/img/TTT-1.png'),             'desc' => 'Professional educator development'],
+    '/upskill4school'       => ['image' => mainPortalUrl('designs/img/TTT-1.png'),             'desc' => 'Institutional & school development'],
     '/ttt'                  => ['image' => mainPortalUrl('designs/img/TTT-1.png'),             'desc' => 'Master trainer & bootcamp'],
     '/shop'                 => ['image' => mainPortalUrl('frontend/img/skillbox/skillbox_banner.png'), 'desc' => 'Interactive kits & learning boxes'],
     '/club-shop'            => ['image' => mainPortalUrl('frontend/img/skillbox/skillbox_banner.png'), 'desc' => 'Interactive kits & learning boxes'],

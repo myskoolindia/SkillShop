@@ -143,26 +143,25 @@
             });
         </script>
     @endif
-    @stack('scripts')
-    @if (customCode()?->javascript)
-        <script>
-            "use strict";
-            {!! customCode()->javascript !!}
-        </script>
-    @endif
-
   <!-- Dynamic JS Global Config -->
   <script>
     window.APP_CONFIG = {
       API_BASE_URL: "{{ url('/') }}",
       COURSES_API_URL: "{{ url('/api/collab-courses') }}",
-      IMAGE_BASE_URL: "",
+      APP_API_BASE: "{{ rtrim(env('APP_API_BASE', 'https://collab.myskool.club'), '/') }}",
+      IMAGE_BASE_URL: "{{ rtrim(env('APP_API_BASE', 'https://collab.myskool.club'), '/') }}",
       IMAGE_FALLBACK: "{{ asset('designs/img/TTT-1.png') }}",
       APP_URL: "{{ url('/') }}"
     };
   </script>
 
-  <!-- @stack('scripts') -->
+  @stack('scripts')
+  @if (customCode()?->javascript)
+      <script>
+          "use strict";
+          {!! customCode()->javascript !!}
+      </script>
+  @endif
 </body>
 
 </html>

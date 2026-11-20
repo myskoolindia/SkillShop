@@ -51,7 +51,7 @@
 </li>
 
 <li class="nav-item"><a href="<?= mainPortalUrl('skill2school'); ?>" class="nav-link">Skill2School</a></li>
-<li class="nav-item"><a href="<?= mainPortalUrl('upskill4teacher'); ?>" class="nav-link">Upskill4Teacher</a></li>
+<li class="nav-item"><a href="<?= mainPortalUrl('upskill4school'); ?>" class="nav-link">Upskill 4 School</a></li>
 <li class="nav-item"><a href="<?= mainPortalUrl('courses'); ?>" class="nav-link"><?= trans("courses") ?? "Courses"; ?></a></li>
 
 <li class="nav-item bg-light rounded"><a href="<?= langBaseUrl(); ?>" class="nav-link font-weight-bold text-primary"><i class="icon-cart mr-1"></i> Club Shop & Products</a></li>

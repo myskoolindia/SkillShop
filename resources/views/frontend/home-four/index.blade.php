@@ -1724,18 +1724,18 @@
             </div> -->
           </a>
 
-          <!-- 3. U4T -->
-          <a href="{{ route('upskill4teacher') }}" class="sv-transform-card card-u4t" title="Explore U4T Programme">
+          <!-- 3. U4S -->
+          <a href="{{ route('upskill4school') }}" class="sv-transform-card card-u4t" title="Explore U4S Programme">
             <div>
               <div class="sv-transform-top">
                 <div class="sv-transform-icon-box">
                   <i class="fa-solid fa-award"></i>
                 </div>
-                <!-- <span class="sv-transform-badge">Professional Growth</span> -->
+                <!-- <span class="sv-transform-badge">Institutional Growth</span> -->
               </div>
-              <h3>U4T</h3>
-              <div class="sv-transform-subtitle">AI-Enabled Teacher Development</div>
-              <!-- <p>Continuous professional upskilling, modern pedagogy, ed-tech awareness &amp; leadership.</p> -->
+              <h3>U4S</h3>
+              <div class="sv-transform-subtitle">AI-Enabled School Development</div>
+              <!-- <p>Continuous institutional upskilling, modern pedagogy, ed-tech awareness &amp; leadership.</p> -->
             </div>
             <!-- <div class="sv-transform-link">
               <span>Explore U4T</span>
@@ -1821,15 +1821,15 @@
           'rev'   => false,
           'num'   => '03',
           'img'   => asset('frontend/img/skillbox/teacher_upskilling.jpg'),
-          'alt'   => 'Upskill For Teacher Programme',
+          'alt'   => 'Upskill For School Programme',
           'grad'  => 'linear-gradient(135deg,rgba(223, 63, 63, 0.6),rgba(226, 127, 88, 0.35))',
-          'bBg'   => '#882b00','bIcon'=>'fa-chalkboard-user','bLabel'=>'U4T – Upskill for Teachers',
-          'tagBg' => '#ecfdf5','tagClr'=>'#882b00','tagIcon'=>'fa-chalkboard-user','tagLabel'=>'Teacher Development',
-          'clr'   => '#882b00','title'=>'Continuous Learning for the Educators of Tomorrow',
-          'sub'   => 'What U4T offers:',
-          'body'  => 'Teaching is an evolving profession. U4T provides educators with opportunities to continuously upgrade their knowledge, professional capabilities and classroom practices through structured learning programmes and digital learning experiences.',
-          'pts'   => ['Self-paced professional development courses','Subject and domain-specific upskilling','Modern teaching methodologies','Educational technology and AI awareness','Child psychology and classroom management','Communication, leadership and professional development','Continuous learning and development pathways'],
-          'qt'    => 'Empowered by LATAA OS: Educators can access AI-assisted learning, explore new concepts, strengthen subject knowledge and receive support in applying their learning to classroom practice.',
+          'bBg'   => '#882b00','bIcon'=>'fa-school','bLabel'=>'U4S – Upskill for Schools',
+          'tagBg' => '#ecfdf5','tagClr'=>'#882b00','tagIcon'=>'fa-school','tagLabel'=>'School Development',
+          'clr'   => '#882b00','title'=>'Continuous Learning for the Schools of Tomorrow',
+          'sub'   => 'What U4S offers:',
+          'body'  => 'Education is an evolving landscape. U4S provides schools and educators with opportunities to continuously upgrade institutional capabilities, modern pedagogy, and classroom practices through structured learning programmes and digital experiences.',
+          'pts'   => ['Institutional professional development courses','Subject and domain-specific school upskilling','Modern teaching methodologies and leadership','Educational technology and AI awareness','Classroom management and academic excellence','Communication, leadership and school development','Continuous institutional growth pathways'],
+          'qt'    => 'Empowered by LATAA OS: Schools can access AI-assisted learning, explore new concepts, strengthen institutional knowledge and receive support in applying modern pedagogical practices.',
         ],
         [
           'rev'   => true,

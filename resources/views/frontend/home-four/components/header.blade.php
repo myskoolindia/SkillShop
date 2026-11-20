@@ -7,7 +7,7 @@
     $childImageMap = [
         '/'                 => ['image' => asset('designs/img/logo.png'),              'desc' => 'Back to homepage'],
         '/skill2school'     => ['image' => asset('designs/img/skill2school-2.jpeg'),   'desc' => 'School-wide skill curriculum'],
-        '/upskill4teacher'  => ['image' => asset('designs/img/TTT-1.png'),             'desc' => 'Professional educator development'],
+        '/upskill4school'   => ['image' => asset('designs/img/TTT-1.png'),             'desc' => 'Institutional & school development'],
         '/ttt'              => ['image' => asset('designs/img/TTT-1.png'),             'desc' => 'Master trainer & bootcamp program'],
         '/shop'             => ['image' => asset('frontend/img/skillbox/skillbox_banner.png'), 'desc' => 'Interactive kits & learning boxes'],
         '/SkillBox'         => ['image' => asset('frontend/img/skillbox/skillbox_banner.png'), 'desc' => 'Interactive kits & learning boxes'],
@@ -167,7 +167,7 @@
           $fallbackItems = [
             ['Home', route('home'), ''],
             ['Skill 2 Skool', route('skill2school'), 'skill2school*'],
-            ['Upskill 4 Teacher', route('upskill4teacher'), 'upskill4teacher*'],
+            ['Upskill 4 School', route('upskill4school'), 'upskill4school*'],
             ['TTT', route('ttt'), 'ttt*'],
             ['Shop', url('/shop'), 'shop*'],
             ['Composite Skill Lab', url('/labs/composite-skill-basic'), 'labs/composite-skill-basic*'],
@@ -327,7 +327,7 @@
         @foreach([
           ['Home',                  route('home'), ''],
           ['Skill 2 Skool',         route('skill2school'), 'skill2school*'],
-          ['Upskill 4 Teacher',     route('upskill4teacher'), 'upskill4teacher*'],
+          ['Upskill 4 School',     route('upskill4school'), 'upskill4school*'],
           ['TTT',                   route('ttt'), 'ttt*'],
           ['Shop',                  url('/shop'), 'shop*'],
           ['Composite Skill Lab',   url('/labs/composite-skill-basic'), 'labs/composite-skill-basic*'],

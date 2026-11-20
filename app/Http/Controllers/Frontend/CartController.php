@@ -13,6 +13,98 @@ use Modules\Coupon\app\Models\Coupon;
 class CartController extends Controller {
     use RedirectHelperTrait;
 
+    protected array $skill2schoolGradeApiIds = [27, 2, 52, 53, 54];
+    protected array $skill2schoolGradeCourseIds = [10, 1, 5, 13, 14];
+
+    public function isSkill2SchoolGradeCourse($course): bool {
+        if (!$course) {
+            return false;
+        }
+        if (in_array((int)($course->api_course_id ?? 0), $this->skill2schoolGradeApiIds, true)) {
+            return true;
+        }
+        if (in_array((int)($course->id ?? 0), $this->skill2schoolGradeCourseIds, true)) {
+            return true;
+        }
+        $title = strtolower(trim($course->title ?? ''));
+        if (preg_match('/^grade\s*[1-5](\b|$)/i', $title) && !str_contains($title, 'teacher') && !str_contains($title, 'upskill')) {
+            return true;
+        }
+        return false;
+    }
+
+    public function addSkill2SchoolBundle(Request $request) {
+        $courses = Course::active()
+            ->whereIn('api_course_id', $this->skill2schoolGradeApiIds)
+            ->get();
+
+        if ($courses->isEmpty()) {
+            $courses = Course::active()
+                ->whereIn('id', $this->skill2schoolGradeCourseIds)
+                ->get();
+        }
+
+        if ($courses->isEmpty()) {
+            return response([
+                'status'  => 'error',
+                'message' => __('Skill 2 Skool courses could not be found!'),
+            ]);
+        }
+
+        $allAlreadyInCart = true;
+        $addedAny = false;
+
+        foreach ($courses as $c) {
+            if ($this->checkIfOwnCourse($c->id)) {
+                continue;
+            }
+            if (!$this->checkItemExist($c->id)) {
+                $allAlreadyInCart = false;
+                $price = $c->discount > 0 ? $c->discount : $c->price;
+                Cart::add([
+                    'id'      => $c->id,
+                    'name'    => $c->title,
+                    'qty'     => 1,
+                    'price'   => $price,
+                    'weight'  => 0,
+                    'options' => [
+                        'image'          => $c->thumbnail,
+                        'slug'           => $c->slug,
+                        'real_price'     => $c->price,
+                        'discount_price' => $c->discount,
+                        'bundle'         => 'skill2school_5grades',
+                        'api_course_id'  => $c->api_course_id,
+                    ],
+                ]);
+                $addedAny = true;
+            }
+        }
+
+        $this->updateCouponDiscountAmount();
+
+        $cartCount = Cart::content()->count();
+        $checkoutUrl = route('checkout.index');
+        $cartUrl = route('cart');
+
+        if (!$addedAny && $allAlreadyInCart) {
+            return response([
+                'status'       => 'already',
+                'message'      => __('All 5 Skill 2 Skool grades are already in your cart!'),
+                'checkout_url' => $checkoutUrl,
+                'cart_url'     => $cartUrl,
+                'cart_count'   => $cartCount,
+            ]);
+        }
+
+        return response([
+            'status'       => 'success',
+            'message'      => __('Skill 2 Skool Complete Programme (All 5 Grades) added to cart!'),
+            'cart_count'   => $cartCount,
+            'checkout_url' => $checkoutUrl,
+            'cart_url'     => $cartUrl,
+        ]);
+    }
+
     function index() {
         // if cart is empty then remove coupon session
         if (Cart::content()->count() == 0) {
@@ -35,6 +127,10 @@ class CartController extends Controller {
         }
         if (!$course) {
             $course = Course::active()->where('slug', $id)->first();
+        }
+
+        if ($course && $this->isSkill2SchoolGradeCourse($course)) {
+            return $this->addSkill2SchoolBundle($request);
         }
 
         if (!$course) {
@@ -95,14 +191,41 @@ class CartController extends Controller {
     }
 
     function removeCartItem(string $rowId) {
-        $cartItem = Cart::get($rowId)?->toArray();
+        $cartItem = Cart::get($rowId);
         if ($cartItem) {
-            unset($cartItem['rowId'], $cartItem['id']);
-            $cartItem['price'] = currency($cartItem['price']);
-            $cartItem['options']['real_price'] = currency($cartItem['options']['real_price']);
-            $cartItem['options']['image'] = asset($cartItem['options']['image']);
-            $cartItem['options']['slug'] = route('course.show', $cartItem['options']['slug']);
-            $cartItem['user'] = auth('web')->check() ? [
+            $isBundle = ($cartItem->options?->bundle === 'skill2school_5grades')
+                || in_array((int)($cartItem->options?->api_course_id ?? 0), $this->skill2schoolGradeApiIds, true)
+                || in_array((int)$cartItem->id, $this->skill2schoolGradeCourseIds, true);
+
+            if ($isBundle) {
+                // If any grade in the 5-grade bundle is removed, remove all 5 grades together
+                foreach (Cart::content() as $rId => $item) {
+                    $itemIsBundle = ($item->options?->bundle === 'skill2school_5grades')
+                        || in_array((int)($item->options?->api_course_id ?? 0), $this->skill2schoolGradeApiIds, true)
+                        || in_array((int)$item->id, $this->skill2schoolGradeCourseIds, true);
+                    if ($itemIsBundle) {
+                        Cart::remove($rId);
+                    }
+                }
+
+                $this->updateCouponDiscountAmount();
+
+                $notification = [
+                    'messege'    => __('Skill 2 Skool Complete Programme (All 5 Grades) removed from cart!'),
+                    'alert-type' => 'success',
+                ];
+                return redirect()->back()->with($notification);
+            }
+        }
+
+        $cartItemData = $cartItem?->toArray();
+        if ($cartItemData) {
+            unset($cartItemData['rowId'], $cartItemData['id']);
+            $cartItemData['price'] = currency($cartItemData['price']);
+            $cartItemData['options']['real_price'] = currency($cartItemData['options']['real_price']);
+            $cartItemData['options']['image'] = asset($cartItemData['options']['image']);
+            $cartItemData['options']['slug'] = route('course.show', $cartItemData['options']['slug']);
+            $cartItemData['user'] = auth('web')->check() ? [
                 'name'  => auth('web')->user()->name,
                 'email' => auth('web')->user()->email,
             ] : 'guest';
@@ -110,9 +233,8 @@ class CartController extends Controller {
             $settings = cache()->get('setting');
             $marketingSettings = cache()->get('marketing_setting');
             if ($settings->google_tagmanager_status == 'active' && $marketingSettings->remove_from_cart) {
-                session()->put('removeFromCart', $cartItem);
+                session()->put('removeFromCart', $cartItemData);
             }
-
         }
         Cart::remove($rowId);
         $notification = [
@@ -147,6 +269,7 @@ class CartController extends Controller {
     }
 
     function checkIfOwnCourse(string $id) {
+        if (!userAuth()) return false;
         return Course::where('id', $id)->where('instructor_id', userAuth()?->id)->exists();
     }
 
@@ -154,6 +277,46 @@ class CartController extends Controller {
         $course = Course::where('api_course_id', $api_course_id)
             ->where('status', 'active')
             ->first();
+
+        if ($course && $this->isSkill2SchoolGradeCourse($course)) {
+            return $this->addSkill2SchoolBundle($request);
+        }
+
+        if (!$course) {
+            try {
+                $apiBase = rtrim(env('APP_API_BASE', 'https://collab.myskool.club'), '/');
+                $apiUrl  = env('APP_API') ?: "{$apiBase}/api/collab-courses";
+                $apiRes  = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(8)->get($apiUrl);
+                if ($apiRes->successful()) {
+                    $apiCourses = $apiRes->json()['courses']['data'] ?? [];
+                    $apiCourseData = collect($apiCourses)->firstWhere('id', (int)$api_course_id);
+                    if ($apiCourseData) {
+                        $coverFile = $apiCourseData['cover_image'] ?? null;
+                        $thumb = $coverFile ? "{$apiBase}/assets/images/event/cover/{$coverFile}" : 'designs/img/TTT-1.png';
+                        $price = (float)($apiCourseData['price'] ?? 0);
+                        
+                        $course = Course::create([
+                            'title' => $apiCourseData['title'] ?? 'Skill Course',
+                            'slug' => \Illuminate\Support\Str::slug($apiCourseData['slug'] ?? $apiCourseData['title'] ?? ('course-' . $api_course_id)),
+                            'api_course_id' => $api_course_id,
+                            'course_code' => $apiCourseData['course_code'] ?? ('crs-' . $api_course_id),
+                            'price' => $price,
+                            'discount' => 0,
+                            'instructor_id' => 1,
+                            'category_id' => 1,
+                            'type' => 'course',
+                            'thumbnail' => $thumb,
+                            'description' => $apiCourseData['description'] ?? '',
+                            'seo_description' => strip_tags($apiCourseData['short_description'] ?? ($apiCourseData['description'] ?? '')),
+                            'status' => 'active',
+                            'is_approved' => 'approved',
+                        ]);
+                    }
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Auto-sync LMS course: ' . $e->getMessage());
+            }
+        }
 
         if (!$course) {
             return response(['status' => 'error', 'message' => 'Course not found.']);
