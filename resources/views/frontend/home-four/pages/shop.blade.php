@@ -1183,16 +1183,20 @@
       emptyState.classList.add('hidden');
 
       try {
-        const res = await fetch('{{ url('/api/shop-products') }}?per_page=100');
+        const res = await fetch('{{ url('/api/shop-products') }}?per_page=100&skillvation_or_pedaskill=skillvation');
         if (!res.ok) throw new Error('Unable to load the student shop');
         const json = await res.json();
         const pages = Math.min(Number(json.pagination?.pages || json.last_page || 1), 20);
         const remaining = await Promise.all(Array.from({length: Math.max(0, pages - 1)}, async (_, i) => {
-          const response = await fetch('{{ url('/api/shop-products') }}?per_page=100&page=' + (i + 2));
+          const response = await fetch('{{ url('/api/shop-products') }}?per_page=100&skillvation_or_pedaskill=skillvation&page=' + (i + 2));
           if (!response.ok) throw new Error('Unable to load another product page');
           return response.json();
         }));
-        allProducts = [...new Map([...(json.data || []), ...remaining.flatMap(page => page.data || [])].map(item => [item.id, item])).values()];
+        allProducts = [...new Map([...(json.data || []), ...remaining.flatMap(page => page.data || [])].map(item => [item.id, item])).values()]
+          .filter(item => {
+            const brand = (item.skillvation_or_pedaskill || '').toLowerCase().trim();
+            return brand === 'skillvation';
+          });
         applyFilters();
       } catch (err) {
         console.error('Error fetching products:', err);
@@ -1210,6 +1214,8 @@
       const sortBy = sortSelect.value;
 
       filteredProducts = allProducts.filter(item => {
+        const brand = (item.skillvation_or_pedaskill || '').toLowerCase().trim();
+        if (brand && brand !== 'skillvation') return false;
         const title = (item.title || item.course_name || '').toLowerCase();
         const tags = (item.tags || '').toLowerCase();
         const matchesQuery = !q || title.includes(q) || tags.includes(q);

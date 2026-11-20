@@ -274,10 +274,17 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
             $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false])->timeout(15)->get($url, [
                 'page' => $page,
                 'per_page' => $perPage,
+                'skillvation_or_pedaskill' => 'skillvation',
             ]);
             if ($response->successful()) {
                 $resData = $response->json();
                 $items = collect($resData['data'] ?? []);
+
+                // Only include products belonging to skillvation
+                $items = $items->filter(function ($item) {
+                    $flag = strtolower(trim((string)($item['skillvation_or_pedaskill'] ?? '')));
+                    return $flag === 'skillvation';
+                })->values();
 
                 if ($search !== '') {
                     $items = $items->filter(function ($item) use ($search) {
