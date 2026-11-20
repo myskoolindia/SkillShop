@@ -108,7 +108,7 @@
                             <th><?= trans("stock") . '/' . trans("status"); ?></th>
                             <th><?= trans('page_views'); ?></th>
                             <th><?= trans('date'); ?></th>
-                            <th class="max-width-120"><?= trans('options'); ?></th>
+                            <th style="width: 140px; min-width: 140px;"><?= trans('options'); ?></th>
                         </tr>
                         </thead>
                         <tbody>
@@ -206,7 +206,17 @@
                                             </div>
                                         <?php endif; ?>
                                     </td>
-                                    <td style="width: 120px;">
+                                    <td style="width: 140px; min-width: 140px;">
+                                        <div class="product-vis-toggle-wrapper m-b-5" title="Visibility: Yes (Listed on site) / No (Package only / Hidden)">
+                                            <span style="font-size:10px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.3px;">Visible:</span>
+                                            <label class="switch-modern-vis">
+                                                <input type="checkbox" class="vis-checkbox" id="vis_input_<?= $item->id; ?>" <?= $item->visibility == 1 ? 'checked' : ''; ?> onchange="toggleProductVisibility(<?= $item->id; ?>);">
+                                                <span class="vis-slider"></span>
+                                            </label>
+                                            <span class="vis-text-label" id="vis_label_<?= $item->id; ?>" style="font-size:11px; font-weight:700; color:<?= $item->visibility == 1 ? '#10b981' : '#ef4444'; ?>;">
+                                                <?= $item->visibility == 1 ? trans("yes") : trans("no"); ?>
+                                            </span>
+                                        </div>
                                         <form action="<?= base_url('Dashboard/addRemoveAffiliateProductPost'); ?>" method="post">
                                             <?= csrf_field(); ?>
                                             <input type="hidden" name="product_id" value="<?= $item->id; ?>">
@@ -272,3 +282,107 @@
     </div>
 </div>
 <?= view('dashboard/product/_modal_promote'); ?>
+
+<style>
+.switch-modern-vis {
+    position: relative;
+    display: inline-block;
+    width: 32px;
+    height: 17px;
+    margin-bottom: 0;
+    vertical-align: middle;
+    cursor: pointer;
+}
+.switch-modern-vis input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+.switch-modern-vis .vis-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #cbd5e1;
+    transition: .2s ease;
+    border-radius: 17px;
+}
+.switch-modern-vis .vis-slider:before {
+    position: absolute;
+    content: "";
+    height: 13px;
+    width: 13px;
+    left: 2px;
+    bottom: 2px;
+    background-color: #ffffff;
+    transition: .2s ease;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.switch-modern-vis input:checked + .vis-slider {
+    background-color: #10b981;
+}
+.switch-modern-vis input:checked + .vis-slider:before {
+    transform: translateX(15px);
+}
+.product-vis-toggle-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin-bottom: 6px;
+    user-select: none;
+}
+</style>
+
+<script>
+function toggleProductVisibility(productId) {
+    var checkbox = $('#vis_input_' + productId);
+    var label = $('#vis_label_' + productId);
+    var isChecked = checkbox.is(':checked');
+
+    var data = {
+        'product_id': productId
+    };
+    if (typeof MdsConfig !== 'undefined' && MdsConfig.csrfTokenName) {
+        data[MdsConfig.csrfTokenName] = $('meta[name="X-CSRF-TOKEN"]').attr('content');
+    }
+
+    $.ajax({
+        type: 'POST',
+        url: generateUrl('Dashboard/toggleProductVisibilityPost'),
+        data: data,
+        dataType: 'json',
+        success: function(response) {
+            if (response && response.status == 1) {
+                var isVis = response.visibility == 1;
+                checkbox.prop('checked', isVis);
+                label.text(response.label || (isVis ? '<?= trans("yes"); ?>' : '<?= trans("no"); ?>'));
+                label.css('color', isVis ? '#10b981' : '#ef4444');
+            } else {
+                checkbox.prop('checked', !isChecked);
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: (response && response.message) ? response.message : 'Error updating visibility'
+                    });
+                }
+            }
+        },
+        error: function() {
+            checkbox.prop('checked', !isChecked);
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Network error occurred'
+                });
+            }
+        }
+    });
+}
+</script>

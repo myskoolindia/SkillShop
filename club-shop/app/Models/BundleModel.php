@@ -173,8 +173,7 @@ class BundleModel extends BaseModel
 
             if ($onlyActive) {
                 $productsQuery->where('p.status', 1)
-                    ->where('p.is_deleted', 0)
-                    ->where('p.is_active', 1);
+                    ->where('p.is_deleted', 0);
             }
 
             $productsResult = $productsQuery->get()->getResultObject();

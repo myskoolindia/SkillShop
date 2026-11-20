@@ -538,6 +538,42 @@ class DashboardController extends BaseController
     }
 
     /**
+     * Toggle Product Visibility Post
+     */
+    public function toggleProductVisibilityPost()
+    {
+        $productId = (int)inputPost('product_id');
+        $product = $this->productModel->getProduct($productId);
+        if (!empty($product) && ($product->user_id == user()->id || isAdmin() || hasPermission('products'))) {
+            $newVisibility = (int)($product->visibility == 1 ? 0 : 1);
+            $updateData = [
+                'visibility' => $newVisibility
+            ];
+            if ($newVisibility == 1) {
+                if ($product->status == 1 && $product->is_deleted != 1 && $product->is_draft != 1) {
+                    $updateData['is_active'] = 1;
+                }
+            } else {
+                $updateData['is_active'] = 0;
+            }
+
+            $this->db->table('products')->where('id', $productId)->update($updateData);
+
+            return $this->response->setJSON([
+                'status' => 1,
+                'visibility' => $newVisibility,
+                'label' => $newVisibility == 1 ? trans("yes") : trans("no"),
+                'message' => trans("msg_updated")
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status' => 0,
+            'message' => trans("msg_error")
+        ]);
+    }
+
+    /**
      * Delete Product
      */
     public function deleteProduct()

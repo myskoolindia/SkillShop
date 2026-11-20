@@ -513,6 +513,7 @@ $postArray = [
     'Dashboard/generateCsvObjectPost',
     'Dashboard/importCsvItemPost',
     'Dashboard/duplicateProductPost',
+    'Dashboard/toggleProductVisibilityPost',
     'Dashboard/deleteProduct',
     'Dashboard/approveDeclineRefund',
     'Dashboard/deleteShippingLocationPost',
