@@ -105,6 +105,112 @@ class CartController extends Controller {
         ]);
     }
 
+    public function getOrCreateCreditCourse(int $credits) {
+        $configs = [
+            10 => [
+                'title'       => 'Product 1 - 10 Credits (Free Trial)',
+                'slug'        => 'skill2school-product-10-credits',
+                'price'       => 0,
+                'course_code' => 'S2S-CREDIT-10',
+                'thumbnail'   => 'designs/img/credit-10.png',
+                'description' => '10 Skill2School Credits for LATAA OS AI Copilot, Student Assessments, and Lesson Plans.',
+            ],
+            100 => [
+                'title'       => 'Product 2 - 100 Credits (Standard)',
+                'slug'        => 'skill2school-product-100-credits',
+                'price'       => 100,
+                'course_code' => 'S2S-CREDIT-100',
+                'thumbnail'   => 'designs/img/credit-100.png',
+                'description' => '100 Skill2School Credits for LATAA OS AI Copilot, Student Assessments, and Lesson Plans.',
+            ],
+            1000 => [
+                'title'       => 'Product 3 - 1000 Credits (Pro)',
+                'slug'        => 'skill2school-product-1000-credits',
+                'price'       => 1000,
+                'course_code' => 'S2S-CREDIT-1000',
+                'thumbnail'   => 'designs/img/credit-1000.png',
+                'description' => '1000 Skill2School Credits for LATAA OS AI Copilot, Student Assessments, and Lesson Plans.',
+            ],
+        ];
+
+        if (!isset($configs[$credits])) {
+            return null;
+        }
+
+        $cfg = $configs[$credits];
+
+        $course = Course::where('slug', $cfg['slug'])->first();
+        if (!$course) {
+            $course = Course::create([
+                'title'          => $cfg['title'],
+                'slug'           => $cfg['slug'],
+                'price'          => $cfg['price'],
+                'discount'       => 0,
+                'course_code'    => $cfg['course_code'],
+                'instructor_id'  => 1,
+                'category_id'    => 1,
+                'type'           => 'credits',
+                'thumbnail'      => $cfg['thumbnail'],
+                'description'    => $cfg['description'],
+                'seo_description'=> $cfg['description'],
+                'status'         => 'active',
+                'is_approved'    => 'approved',
+            ]);
+        }
+
+        return $course;
+    }
+
+    public function addCreditProduct(Request $request) {
+        $credits = (int)$request->input('credits', 0);
+        $course = $this->getOrCreateCreditCourse($credits);
+
+        if (!$course) {
+            return response([
+                'status'  => 'error',
+                'message' => __('Invalid credit package selected!'),
+            ]);
+        }
+
+        if ($this->checkItemExist($course->id)) {
+            return response([
+                'status'       => 'already',
+                'message'      => __(':title is already in your cart!', ['title' => $course->title]),
+                'checkout_url' => route('checkout.index'),
+                'cart_url'     => route('cart'),
+                'cart_count'   => Cart::content()->count(),
+            ]);
+        }
+
+        $price = (float)$course->price;
+
+        Cart::add([
+            'id'      => $course->id,
+            'name'    => $course->title,
+            'qty'     => 1,
+            'price'   => $price,
+            'weight'  => 0,
+            'options' => [
+                'image'          => $course->thumbnail,
+                'slug'           => $course->slug,
+                'real_price'     => $course->price,
+                'discount_price' => 0,
+                'product_type'   => 'credits',
+                'credits'        => $credits,
+            ],
+        ]);
+
+        $this->updateCouponDiscountAmount();
+
+        return response([
+            'status'       => 'success',
+            'message'      => __(':title added to cart successfully!', ['title' => $course->title]),
+            'cart_count'   => Cart::content()->count(),
+            'checkout_url' => route('checkout.index'),
+            'cart_url'     => route('cart'),
+        ]);
+    }
+
     function index() {
         // if cart is empty then remove coupon session
         if (Cart::content()->count() == 0) {
