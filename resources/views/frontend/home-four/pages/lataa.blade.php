@@ -907,6 +907,172 @@
 </section>
 
 <!-- ══════════════════════════════════════════════════════════════ -->
+<!-- SECTION: CHOOSE YOUR SKILL 2 SKOOL CREDIT PACK                 -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section class="py-5" style="background:#f8fafc;" id="skill2school-ai-credits">
+  <div class="container py-4">
+    <div class="text-center max-w-700 mx-auto mb-5">
+      <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:9999px; background:#e0f2fe; border:1px solid #7dd3fc; color:#0369a1; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">
+        <i class="fa-solid fa-coins text-cyan-600"></i> AI Teacher Copilot Credits
+      </div>
+      <h2 class="display-6 font-weight-bold text-dark mb-3">
+        Choose Your Skill 2 Skool Credit Pack
+      </h2>
+      <p class="text-secondary" style="font-size:1.05rem;">
+        Fuel your classroom with LATAA OS AI Copilot credits for instant NEP-aligned lesson plans, automated student assessment rubrics, and dynamic printable skill worksheets.
+      </p>
+    </div>
+
+    <div class="row g-4 max-w-1100 mx-auto align-items-stretch">
+      
+      <!-- Product 1: 10 Credits (Free) -->
+      <div class="col-lg-4 col-md-6 d-flex">
+        <div class="card w-100 border-0 rounded-4 p-4 shadow-sm hover-shadow transition-all d-flex flex-column justify-content-between" style="background:#ffffff; border:1px solid #e2e8f0 !important; border-radius:24px;">
+          <div>
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <span class="badge" style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; font-size:11px; padding:6px 10px; border-radius:9999px; font-weight:700;">
+                <i class="fa-solid fa-gift me-1"></i> FREE TRIAL
+              </span>
+              <span class="text-muted small fw-bold text-uppercase" style="letter-spacing:0.5px;">Product 1</span>
+            </div>
+
+            <div class="d-inline-flex align-items-center justify-content-center text-white mb-4" style="width:54px; height:54px; border-radius:16px; background:linear-gradient(135deg, #34d399 0%, #14b8a6 100%); font-size:22px; box-shadow:0 4px 12px rgba(20,184,166,0.3);">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+
+            <h3 class="h5 font-weight-bold text-dark mb-1">Product 1</h3>
+            <p class="text-muted small mb-3">Starter Pack &bull; Free Trial for Teachers</p>
+
+            <div class="d-flex align-items-baseline gap-2 mb-3 pb-3 border-bottom">
+              <span class="h1 font-weight-bold text-dark mb-0">₹0</span>
+              <span class="badge bg-success-subtle text-success fw-bold text-uppercase ms-1">Free</span>
+            </div>
+
+            <div class="p-2 px-3 rounded-3 mb-4 d-flex align-items-center justify-content-between" style="background:#f8fafc; border:1px solid #e2e8f0;">
+              <span class="text-dark fw-bold small"><i class="fa-solid fa-coins text-warning me-1"></i> Credits:</span>
+              <span class="h6 font-weight-bold text-success mb-0">10</span>
+            </div>
+
+            <ul class="list-unstyled text-secondary small mb-4" style="line-height:2;">
+              <li><i class="fa-solid fa-circle-check text-success me-2"></i><strong>10 AI Generation Credits</strong> for trial</li>
+              <li><i class="fa-solid fa-circle-check text-success me-2"></i>Instant LATAA OS Lesson Plans</li>
+              <li><i class="fa-solid fa-circle-check text-success me-2"></i>Sample Student Skill Assessment</li>
+              <li><i class="fa-solid fa-circle-check text-success me-2"></i>No Payment Required &bull; Instant Access</li>
+            </ul>
+          </div>
+
+          <div>
+            <button type="button" onclick="buyCreditProduct(10, event)" id="credit-btn-10" class="btn btn-success w-100 py-3 fw-bold rounded-3 shadow-sm d-flex align-items-center justify-content-center gap-2" style="border-radius:14px; font-size:0.95rem;">
+              <i class="fa-solid fa-gift"></i>
+              <span>Buy Now (Free)</span>
+            </button>
+            <small class="d-block text-center text-muted mt-2">Free instant activation</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product 2: 100 Credits (₹100) - Most Popular -->
+      <div class="col-lg-4 col-md-6 d-flex">
+        <div class="card w-100 border-0 rounded-4 p-4 shadow-lg transition-all d-flex flex-column justify-content-between position-relative" style="background:linear-gradient(180deg, #0f172a 0%, #0e1e3e 100%); color:#ffffff; border:2px solid #38bdf8 !important; border-radius:24px;">
+          <!-- Ribbon -->
+          <div class="position-absolute" style="top:-14px; left:50%; transform:translateX(-50%); background:linear-gradient(90deg, #38bdf8 0%, #3b82f6 100%); color:#0f172a; font-weight:800; font-size:11px; padding:4px 16px; border-radius:9999px; text-transform:uppercase; letter-spacing:0.5px; box-shadow:0 4px 10px rgba(56,189,248,0.4); white-space:nowrap;">
+            ★ Most Popular
+          </div>
+
+          <div>
+            <div class="d-flex align-items-center justify-content-between mb-3 mt-1">
+              <span class="badge" style="background:rgba(56,189,248,0.15); color:#38bdf8; border:1px solid rgba(56,189,248,0.4); font-size:11px; padding:6px 10px; border-radius:9999px; font-weight:700;">
+                <i class="fa-solid fa-bolt me-1"></i> STANDARD PACK
+              </span>
+              <span class="text-white-50 small fw-bold text-uppercase" style="letter-spacing:0.5px;">Product 2</span>
+            </div>
+
+            <div class="d-inline-flex align-items-center justify-content-center text-white mb-4" style="width:54px; height:54px; border-radius:16px; background:linear-gradient(135deg, #38bdf8 0%, #2563eb 100%); font-size:22px; box-shadow:0 6px 16px rgba(56,189,248,0.4);">
+              <i class="fa-solid fa-cubes-stacked"></i>
+            </div>
+
+            <h3 class="h5 font-weight-bold text-white mb-1">Product 2</h3>
+            <p class="text-white-50 small mb-3">Standard School Pack &bull; Regular Use</p>
+
+            <div class="d-flex align-items-baseline gap-2 mb-3 pb-3" style="border-bottom:1px solid rgba(255,255,255,0.1);">
+              <span class="h1 font-weight-bold text-white mb-0">₹100</span>
+              <span class="text-white-50 small ms-1">/ 100 Credits (₹1/credit)</span>
+            </div>
+
+            <div class="p-2 px-3 rounded-3 mb-4 d-flex align-items-center justify-content-between" style="background:rgba(255,255,255,0.08); border:1px solid rgba(56,189,248,0.3);">
+              <span class="text-white fw-bold small"><i class="fa-solid fa-coins text-warning me-1"></i> Credits:</span>
+              <span class="h6 font-weight-bold text-info mb-0" style="color:#38bdf8 !important;">100</span>
+            </div>
+
+            <ul class="list-unstyled text-white-50 small mb-4" style="line-height:2;">
+              <li><i class="fa-solid fa-circle-check text-info me-2" style="color:#38bdf8 !important;"></i><strong class="text-white">100 Full AI Generation Credits</strong></li>
+              <li><i class="fa-solid fa-circle-check text-info me-2" style="color:#38bdf8 !important;"></i>CAMPS Curriculum Copilot across Grades 1-5</li>
+              <li><i class="fa-solid fa-circle-check text-info me-2" style="color:#38bdf8 !important;"></i>Printable Student Assessment Worksheets</li>
+              <li><i class="fa-solid fa-circle-check text-info me-2" style="color:#38bdf8 !important;"></i>Classroom Mapping &amp; Evaluation Rubrics</li>
+            </ul>
+          </div>
+
+          <div>
+            <button type="button" onclick="buyCreditProduct(100, event)" id="credit-btn-100" class="btn w-100 py-3 fw-bold rounded-3 shadow-sm d-flex align-items-center justify-content-center gap-2" style="background:linear-gradient(90deg, #38bdf8 0%, #3b82f6 100%); color:#0f172a; font-weight:800; border:none; border-radius:14px; font-size:0.95rem; box-shadow:0 6px 18px rgba(56,189,248,0.35);">
+              <i class="fa-solid fa-bolt"></i>
+              <span>Buy Now</span>
+            </button>
+            <small class="d-block text-center text-white-50 mt-2">Instant checkout &bull; ₹100</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product 3: 1000 Credits (₹1,000) - Pro Pack -->
+      <div class="col-lg-4 col-md-6 d-flex">
+        <div class="card w-100 border-0 rounded-4 p-4 shadow-sm hover-shadow transition-all d-flex flex-column justify-content-between" style="background:#ffffff; border:1px solid #e2e8f0 !important; border-radius:24px;">
+          <div>
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <span class="badge" style="background:#faf5ff; color:#7e22ce; border:1px solid #e9d5ff; font-size:11px; padding:6px 10px; border-radius:9999px; font-weight:700;">
+                <i class="fa-solid fa-crown me-1 text-purple"></i> BEST VALUE
+              </span>
+              <span class="text-muted small fw-bold text-uppercase" style="letter-spacing:0.5px;">Product 3</span>
+            </div>
+
+            <div class="d-inline-flex align-items-center justify-content-center text-white mb-4" style="width:54px; height:54px; border-radius:16px; background:linear-gradient(135deg, #a855f7 0%, #6366f1 100%); font-size:22px; box-shadow:0 4px 12px rgba(168,85,247,0.3);">
+              <i class="fa-solid fa-gem"></i>
+            </div>
+
+            <h3 class="h5 font-weight-bold text-dark mb-1">Product 3</h3>
+            <p class="text-muted small mb-3">Enterprise Pack &bull; Annual Primary Wing</p>
+
+            <div class="d-flex align-items-baseline gap-2 mb-3 pb-3 border-bottom">
+              <span class="h1 font-weight-bold text-dark mb-0">₹1,000</span>
+              <span class="text-muted small ms-1">/ 1000 Credits</span>
+            </div>
+
+            <div class="p-2 px-3 rounded-3 mb-4 d-flex align-items-center justify-content-between" style="background:#f8fafc; border:1px solid #e2e8f0;">
+              <span class="text-dark fw-bold small"><i class="fa-solid fa-coins text-warning me-1"></i> Credits:</span>
+              <span class="h6 font-weight-bold mb-0" style="color:#9333ea;">1000</span>
+            </div>
+
+            <ul class="list-unstyled text-secondary small mb-4" style="line-height:2;">
+              <li><i class="fa-solid fa-circle-check text-purple me-2" style="color:#9333ea;"></i><strong class="text-dark">1,000 High-Volume AI Credits</strong></li>
+              <li><i class="fa-solid fa-circle-check text-purple me-2" style="color:#9333ea;"></i>Full Primary Wing Multi-Teacher Access</li>
+              <li><i class="fa-solid fa-circle-check text-purple me-2" style="color:#9333ea;"></i>Unlimited Student Activity Generation</li>
+              <li><i class="fa-solid fa-circle-check text-purple me-2" style="color:#9333ea;"></i>Priority AI Processing &amp; Custom Rubrics</li>
+            </ul>
+          </div>
+
+          <div>
+            <button type="button" onclick="buyCreditProduct(1000, event)" id="credit-btn-1000" class="btn w-100 py-3 fw-bold rounded-3 shadow-sm d-flex align-items-center justify-content-center gap-2" style="background:#9333ea; color:#ffffff; border-radius:14px; font-size:0.95rem; box-shadow:0 4px 12px rgba(147,51,234,0.25);">
+              <i class="fa-solid fa-crown"></i>
+              <span>Buy Now</span>
+            </button>
+            <small class="d-block text-center text-muted mt-2">Instant checkout &bull; ₹1,000</small>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
 <!-- SECTION 8: CLOSING BANNER                                      -->
 <!-- ══════════════════════════════════════════════════════════════ -->
 <section class="py-5" style="background:#ffffff;">
@@ -937,4 +1103,48 @@
 </section>
 
 @endsection
+
+@push('scripts')
+<script>
+window.buyCreditProduct = async function(credits, e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  const btn = document.getElementById('credit-btn-' + credits) || (e ? e.currentTarget : null);
+  const oldHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm"></i> Processing...';
+  }
+
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+  try {
+    const res = await fetch('{{ route("cart.add-credit-product") }}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken,
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ credits: credits, _token: csrfToken })
+    });
+
+    const data = await res.json();
+    if (data.status === 'success' || data.status === 'already') {
+      window.location.href = data.checkout_url || '{{ route("checkout.index") }}';
+    } else {
+      if (typeof toastr !== 'undefined') toastr.error(data.message || 'Error adding credit package to cart');
+      else alert(data.message || 'Error adding credit package to cart');
+      if (btn) { btn.disabled = false; btn.innerHTML = oldHtml; }
+    }
+  } catch (err) {
+    console.error(err);
+    if (btn) { btn.disabled = false; btn.innerHTML = oldHtml; }
+    window.location.href = '{{ route("checkout.index") }}';
+  }
+};
+</script>
+@endpush
 
