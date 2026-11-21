@@ -929,6 +929,99 @@ Route::get('/maintenance-mode', function () {
     return view('global.maintenance');
 })->name('maintenance.mode');
 
+// Web Route to run Myskool International Seeder without SSH / artisan access
+Route::get('/seed-myskool-data', function () {
+    try {
+        $seeder = new \Database\Seeders\MyskoolInternationalDataSeeder();
+        $seeder->run();
+
+        $school = \App\Models\User::where('email', 'myskool.international@myskool.club')->first();
+        $teacher = \App\Models\User::where('email', 'saraswathi@myskool.club')->first();
+        $student = \App\Models\User::where('email', 'rahul@myskool.club')->first();
+
+        $html = "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Myskool Data Seeder — Skillvation</title>
+            <meta name='viewport' content='width=device-width, initial-scale=1'>
+            <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #f8fafc; padding: 40px 20px; line-height: 1.6; }
+                .container { max-width: 800px; margin: 0 auto; background: #1e293b; border-radius: 16px; padding: 32px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); border: 1px solid #334155; }
+                h1 { color: #38bdf8; margin-top: 0; font-size: 26px; }
+                .badge { display: inline-block; padding: 6px 14px; border-radius: 9999px; font-weight: bold; font-size: 13px; background: #059669; color: #fff; margin-bottom: 20px; }
+                table { width: 100%; border-collapse: collapse; margin: 20px 0; background: #0f172a; border-radius: 10px; overflow: hidden; }
+                th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #334155; }
+                th { background: #1e293b; color: #94a3b8; font-size: 13px; text-transform: uppercase; }
+                .btn { display: inline-block; background: #2563eb; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 20px; }
+                .btn:hover { background: #1d4ed8; }
+                ul { padding-left: 20px; }
+                li { margin-bottom: 6px; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <span class='badge'>✓ SEEDING COMPLETED SUCCESSFULLY</span>
+                <h1>Myskool International & Scenarios Ready</h1>
+                <p>All institutional accounts, purchases, course assignments, assessments, and shop orders are now fully seeded and linked in the database.</p>
+
+                <h3>Login Accounts & Credentials</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Role</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Password</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>School</strong></td>
+                            <td>" . htmlspecialchars($school?->name ?? 'Myskool International') . "</td>
+                            <td><code>myskool.international@myskool.club</code></td>
+                            <td><code>Password123!</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Teacher</strong></td>
+                            <td>" . htmlspecialchars($teacher?->name ?? 'Saraswathi') . "</td>
+                            <td><code>saraswathi@myskool.club</code></td>
+                            <td><code>Password123!</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Student</strong></td>
+                            <td>" . htmlspecialchars($student?->name ?? 'Rahul') . "</td>
+                            <td><code>rahul@myskool.club</code></td>
+                            <td><code>Password123!</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Purchased & Assigned Items:</h3>
+                <ul>
+                    <li><strong>SV Lab:</strong> Skillvation Lab with Infrastructure (ID: 46)</li>
+                    <li><strong>CAMPS:</strong> Complete Programme (Grades 1 to 5) (ID: 47)</li>
+                    <li><strong>U4T:</strong> Upskill 4 Teacher Professional Development (ID: 48)</li>
+                    <li><strong>S2S:</strong> Skill 2 Skool Institutional Framework (ID: 49)</li>
+                    <li><strong>Integrate My Curriculum:</strong> 1000 Credits (Publisher: Elif) (ID: 50)</li>
+                    <li><strong>Create My Curriculum:</strong> 1000 Credits (Grade 6, NCERT) (ID: 51)</li>
+                    <li><strong>Assignments:</strong> All 21 courses assigned to Saraswathi; 11 STEM courses assigned to Rahul.</li>
+                    <li><strong>Assessments:</strong> Teacher Assessment (Quiz 495) & Student Self-Assessment recorded.</li>
+                    <li><strong>Shop Order:</strong> SkillBox STEM Robotic Starter Kit ordered for Rahul.</li>
+                </ul>
+
+                <a href='" . url('/login') . "' class='btn'>Go to Login Page &rarr;</a>
+            </div>
+        </body>
+        </html>
+        ";
+
+        return response($html);
+    } catch (\Throwable $e) {
+        return response("<pre style='padding:25px;background:#1e293b;color:#f87171;font-family:monospace;font-size:15px;'>Seeding Error: " . htmlspecialchars($e->getMessage()) . "\n\n" . htmlspecialchars($e->getTraceAsString()) . "</pre>", 500);
+    }
+});
+
 require __DIR__ . '/auth.php';
 
 require __DIR__ . '/admin.php';

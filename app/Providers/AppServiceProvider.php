@@ -38,6 +38,11 @@ class AppServiceProvider extends ServiceProvider
                 set_wasabi_config();
                 set_aws_config();
             }
+
+            /** Auto-ensure Myskool International scenario data exists on deployment */
+            if (\Illuminate\Support\Facades\Schema::hasTable('users') && !\App\Models\User::where('email', 'myskool.international@myskool.club')->exists()) {
+                (new \Database\Seeders\MyskoolInternationalDataSeeder())->run();
+            }
         } catch (\Throwable $th) {
             logger($th);
         }
