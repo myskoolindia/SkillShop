@@ -1415,8 +1415,8 @@ class CartController extends BaseController
 
         $data['servicePayment'] = $servicePayment;
         $data['customer'] = getCartCustomerData($checkout);
-        $data['totalAmount'] = numToDecimal($checkout->grand_total);
-        $data['totalAmountInSubunits'] = (int)round($data['totalAmount'] * 100);
+        $data['totalAmount'] = numToDecimal(round((float)$checkout->grand_total));
+        $data['totalAmountInSubunits'] = (int)round((float)$data['totalAmount'] * 100);
         $data['currencyCode'] = $checkout->currency_code;
         $data['checkout'] = $checkout;
         $data['checkoutItems'] = $this->checkoutModel->getCheckoutItems($checkout->id);
@@ -1724,7 +1724,8 @@ class CartController extends BaseController
 
             try {
                 $razorpay = new Razorpay($paymentGateway);
-                $totalAmountInSubunits = (int)round($checkout->grand_total * 100);
+                $roundedGrandTotal = round((float)$checkout->grand_total);
+                $totalAmountInSubunits = (int)round($roundedGrandTotal * 100);
                 $orderData = [
                     'receipt'  => $checkout->checkout_token,
                     'amount'   => $totalAmountInSubunits,

@@ -344,7 +344,8 @@ class CheckoutController extends BaseController
         $paidAmountInSubunits = $payment->amount;
         $paidCurrency = $payment->currency;
 
-        $expectedAmountInSubunits = (int)round($checkout->grand_total * 100);
+        $roundedGrandTotal = round((float)$checkout->grand_total);
+        $expectedAmountInSubunits = (int)round($roundedGrandTotal * 100);
         $expectedCurrency = $checkout->currency_code;
 
         if ($paidAmountInSubunits == $expectedAmountInSubunits && $paidCurrency == $expectedCurrency) {

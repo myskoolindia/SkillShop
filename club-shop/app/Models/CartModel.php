@@ -938,14 +938,14 @@ class CartModel extends BaseModel
         $cartItem->listing_type = $product->listing_type;
         $cartItem->product_title = $product->title;
         $cartItem->product_url = generateProductUrl($product);
-        $cartItem->unit_price_base = numToDecimal($unitPriceBase);
-        $cartItem->unit_price = numToDecimal($unitPrice);
-        $cartItem->original_unit_price = numToDecimal($originalUnitPrice);
-        $cartItem->total_price = numToDecimal($totalPrice);
-        $cartItem->original_total_price = numToDecimal($originalTotalPrice);
+        $cartItem->unit_price_base = numToDecimal(round((float)$unitPriceBase));
+        $cartItem->unit_price = numToDecimal(round((float)$unitPrice));
+        $cartItem->original_unit_price = numToDecimal(round((float)$originalUnitPrice));
+        $cartItem->total_price = numToDecimal(round((float)$totalPrice));
+        $cartItem->original_total_price = numToDecimal(round((float)$originalTotalPrice));
         $cartItem->has_discount = ((float)$originalUnitPrice > (float)$unitPrice);
         $cartItem->discount_amount = max(0, (float)$originalTotalPrice - (float)$totalPrice);
-        $cartItem->product_vat = $vatAmount;
+        $cartItem->product_vat = round((float)$vatAmount);
         $cartItem->product_vat_rate = $vatRate;
         $cartItem->seller_id = $product->user_id;
         $cartItem->markup_rate = $product->markup_rate ?? getProductMarkupRate($product);
@@ -1209,6 +1209,14 @@ class CartModel extends BaseModel
         if ($includeTransactionFee) {
             $cartTotal = $this->setTransactionFee($cartTotal, $cart->payment_method);
         }
+
+        // Ensure totals are rounded cleanly to whole currency units without floating-point fraction drift
+        // (matching storefront integer price display rule in priceDecimal)
+        $cartTotal->subtotal = round((float)$cartTotal->subtotal);
+        $cartTotal->vat = round((float)$cartTotal->vat);
+        $cartTotal->shipping_cost = round((float)$cartTotal->shipping_cost);
+        $cartTotal->total_before_shipping = round((float)$cartTotal->subtotal + (float)$cartTotal->vat);
+        $cartTotal->total = round((float)$cartTotal->total_before_shipping + (float)$cartTotal->shipping_cost);
 
         $cart->totals = $cartTotal;
 
