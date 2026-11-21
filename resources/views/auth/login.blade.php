@@ -221,7 +221,12 @@
                                 </div>
                                 <div class="form-grp">
                                     <label for="password">{{ __('Password') }} <code>*</code></label>
-                                    <input id="password" type="password" placeholder="{{ __('Enter your password') }}" name="password" required>
+                                    <div class="position-relative password-toggle-box" style="position: relative;">
+                                        <input id="password" type="password" placeholder="{{ __('Enter your password') }}" name="password" required style="padding-right: 48px;">
+                                        <button type="button" id="togglePasswordBtn" class="password-toggle-btn" aria-label="{{ __('Show / Hide password') }}" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: transparent; border: none; padding: 6px 8px; cursor: pointer; color: #64748b; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; z-index: 5;">
+                                            <i class="far fa-eye" id="togglePasswordIcon"></i>
+                                        </button>
+                                    </div>
                                     <x-frontend.validation-error name="password" />
                                 </div>
                                 <div class="account__check">
@@ -556,6 +561,25 @@
                 phoneInput.value = phoneParam.replace(/[^0-9]/g, '').slice(-10);
             }
         } catch (e) {}
+
+        // Eye view password toggle
+        const toggleBtn = document.getElementById('togglePasswordBtn');
+        const passInput = document.getElementById('password');
+        const passIcon = document.getElementById('togglePasswordIcon');
+        if (toggleBtn && passInput && passIcon) {
+            toggleBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                if (passInput.type === 'password') {
+                    passInput.type = 'text';
+                    passIcon.className = 'fas fa-eye-slash';
+                    passIcon.style.color = '#2563eb';
+                } else {
+                    passInput.type = 'password';
+                    passIcon.className = 'far fa-eye';
+                    passIcon.style.color = '#64748b';
+                }
+            });
+        }
     });
 </script>
 @endpush

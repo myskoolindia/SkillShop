@@ -25,7 +25,36 @@
             @endforeach
         </div>
         <div class="form-grp"><label for="rq-email">{{ __('Email address') }}</label><input id="rq-email" name="login" type="email" autocomplete="username" value="{{ old('login', request('email', request('login', ''))) }}" required></div>
-        <div class="form-grp"><label for="rq-password">{{ __('Password') }}</label><input id="rq-password" name="password" type="password" autocomplete="current-password" required></div>
+        <div class="form-grp">
+            <label for="rq-password">{{ __('Password') }}</label>
+            <div style="position: relative;">
+                <input id="rq-password" name="password" type="password" autocomplete="current-password" required style="padding-right: 48px;">
+                <button type="button" id="toggleRqPasswordBtn" aria-label="{{ __('Show / Hide password') }}" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: transparent; border: none; padding: 6px 8px; cursor: pointer; color: #7053c5; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; z-index: 5;">
+                    <i class="far fa-eye" id="toggleRqPasswordIcon"></i>
+                </button>
+            </div>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const btn = document.getElementById('toggleRqPasswordBtn');
+                const inp = document.getElementById('rq-password');
+                const ico = document.getElementById('toggleRqPasswordIcon');
+                if (btn && inp && ico) {
+                    btn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        if (inp.type === 'password') {
+                            inp.type = 'text';
+                            ico.className = 'fas fa-eye-slash';
+                            ico.style.color = '#5735c4';
+                        } else {
+                            inp.type = 'password';
+                            ico.className = 'far fa-eye';
+                            ico.style.color = '#7053c5';
+                        }
+                    });
+                }
+            });
+        </script>
         @if($setting && $setting->recaptcha_status==='active')<div class="g-recaptcha" data-sitekey="{{ $setting->recaptcha_site_key }}"></div>@endif
         <button type="submit" class="btn btn-two w-100">{{ __('Sign in to RoboQuest') }}</button>
         <a class="rq-login-help" href="{{ route('password.request') }}">{{ __('Forgot your password?') }}</a>
