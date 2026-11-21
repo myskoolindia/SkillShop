@@ -667,15 +667,60 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
 
                                     <!-- 2. Secondary Action: Request Detailed Proposal to Email -->
                                     <div class="row-custom m-t-5 m-b-15">
+                                        <style>
+                                            #sendProposalBtn {
+                                                background-color: #f0f9ff !important;
+                                                color: #0284c7 !important;
+                                                border: 2px solid #0284c7 !important;
+                                                font-weight: 700 !important;
+                                                font-size: 15px !important;
+                                                border-radius: 8px !important;
+                                                padding: 12px 14px !important;
+                                                box-shadow: 0 1px 3px rgba(2, 132, 199, 0.12) !important;
+                                                transition: all 0.2s ease-in-out !important;
+                                                display: flex !important;
+                                                align-items: center !important;
+                                                justify-content: center !important;
+                                                gap: 8px !important;
+                                                width: 100% !important;
+                                                cursor: pointer !important;
+                                                text-decoration: none !important;
+                                            }
+                                            #sendProposalBtn,
+                                            #sendProposalBtn *,
+                                            #sendProposalBtn i,
+                                            #sendProposalBtn span {
+                                                color: #0284c7 !important;
+                                            }
+                                            #sendProposalBtn:hover,
+                                            #sendProposalBtn:focus,
+                                            #sendProposalBtn:active {
+                                                background-color: #0284c7 !important;
+                                                border-color: #0284c7 !important;
+                                                color: #ffffff !important;
+                                                box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25) !important;
+                                            }
+                                            #sendProposalBtn:hover *,
+                                            #sendProposalBtn:focus *,
+                                            #sendProposalBtn:active *,
+                                            #sendProposalBtn:hover i,
+                                            #sendProposalBtn:focus i,
+                                            #sendProposalBtn:active i,
+                                            #sendProposalBtn:hover span,
+                                            #sendProposalBtn:focus span,
+                                            #sendProposalBtn:active span {
+                                                color: #ffffff !important;
+                                            }
+                                        </style>
                                         <?php if (!authCheck()): ?>
                                             <div style="margin-bottom:8px;">
                                                 <input type="email" id="proposalGuestEmail" class="form-control form-input" placeholder="Enter email for proposal quotation" style="font-size:13px; height:38px; border-radius:6px;">
                                             </div>
                                         <?php endif; ?>
                                         <button type="button" id="sendProposalBtn" class="btn btn-block"
-                                            style="background:#f0f9ff; color:#0369a1; border:1px solid #7dd3fc; font-weight:700; padding:10px 14px; border-radius:6px; font-size:14px;"
                                             onclick="sendCartProposal(this)">
-                                            <i class="fa-solid fa-file-lines m-r-5"></i> Request Detailed Proposal
+                                            <i class="fa-solid fa-file-lines" style="color: #0284c7 !important; font-size: 15px !important; margin-right: 6px;"></i>
+                                            <span style="color: #0284c7 !important; font-weight: 700 !important; font-size: 15px !important;">Request Detailed Proposal</span>
                                         </button>
                                         <div id="sendProposalMsg" style="margin-top:10px; font-size:13px; display:none; text-align:center;"></div>
                                     </div>
@@ -706,8 +751,9 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                             return;
                                         }
 
-                                        var orig = btn.innerHTML;
-                                        btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Sending Proposal…';
+                                        var defaultContent = '<i class="fa-solid fa-file-lines" style="color: inherit !important; font-size: 15px !important; margin-right: 6px;"></i> <span style="color: inherit !important; font-weight: 700 !important; font-size: 15px !important;">Request Detailed Proposal</span>';
+                                        btn.disabled = true;
+                                        btn.innerHTML = '<i class="fa fa-spinner fa-spin" style="margin-right: 6px;"></i> <span>Sending Proposal…</span>';
                                         var fd = new FormData();
                                         fd.append('plan_key', cfg.planKey || '');
                                         fd.append('user_email', targetEmail);
@@ -741,18 +787,23 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                                     msg.style.color = '#15803d';
                                                     msg.innerHTML = '<i class="fa-solid fa-circle-check"></i> ' + (res.body.message || 'Proposal sent to your email.');
                                                 }
-                                                btn.innerHTML = '<i class="fa fa-check"></i> Proposal Sent';
+                                                btn.innerHTML = '<i class="fa fa-check" style="margin-right: 6px;"></i> <span>Proposal Sent</span>';
+                                                btn.style.setProperty('background-color', '#15803d', 'important');
+                                                btn.style.setProperty('border-color', '#15803d', 'important');
+                                                btn.style.setProperty('color', '#ffffff', 'important');
                                             } else {
                                                 if (msg) {
                                                     msg.style.color = '#b91c1c';
                                                     msg.innerHTML = (res.body && res.body.message) ? res.body.message : 'Could not send the proposal. Please check your email and try again.';
                                                 }
-                                                btn.disabled = false; btn.innerHTML = orig;
+                                                btn.disabled = false;
+                                                btn.innerHTML = defaultContent;
                                             }
                                         })
                                         .catch(function(){
                                             if (msg) { msg.style.display = 'block'; msg.style.color = '#b91c1c'; msg.innerHTML = 'Network error. Please try again.'; }
-                                            btn.disabled = false; btn.innerHTML = orig;
+                                            btn.disabled = false;
+                                            btn.innerHTML = defaultContent;
                                         });
                                     }
                                     </script>
