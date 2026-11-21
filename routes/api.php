@@ -124,12 +124,11 @@ Route::post("/roboquest/shop/orders", [\App\Http\Controllers\Frontend\RoboquestS
 Route::post("/roboquest/class-invite", [\App\Http\Controllers\Frontend\RoboquestShopController::class,"classInvite"])->middleware("throttle:120,1");
 Route::post("/roboquest/members", [\App\Http\Controllers\Frontend\RoboquestMembersController::class,"handle"])->middleware("throttle:600,1");
 
-// RoboQuest / Admin Orders API - Exposes the https://devpro.skillvation.com/admin/orders list for RoboQuest
+// RoboQuest Orders API (Authenticated & Confidential - strictly isolated per school/caller)
 Route::match(['GET', 'POST'], '/roboquest/orders', [\App\Http\Controllers\Api\RoboquestOrdersApiController::class, 'index'])->middleware('throttle:300,1');
 Route::match(['GET', 'POST'], '/roboquest/admin/orders', [\App\Http\Controllers\Api\RoboquestOrdersApiController::class, 'index'])->middleware('throttle:300,1');
-Route::match(['GET', 'POST'], '/admin/orders', [\App\Http\Controllers\Api\RoboquestOrdersApiController::class, 'index'])->middleware('throttle:300,1');
 Route::get('/roboquest/orders/{id}', [\App\Http\Controllers\Api\RoboquestOrdersApiController::class, 'show'])->middleware('throttle:300,1');
-Route::get('/admin/orders/{id}', [\App\Http\Controllers\Api\RoboquestOrdersApiController::class, 'show'])->middleware('throttle:300,1');
+Route::get('/roboquest/admin/orders/{id}', [\App\Http\Controllers\Api\RoboquestOrdersApiController::class, 'show'])->middleware('throttle:300,1');
 
 // Auto-Launch RoboQuest SSO URL for User/School
 Route::match(['GET', 'POST'], '/roboquest/auto-launch', function (\Illuminate\Http\Request $request, \App\Services\RoboquestService $service) {
