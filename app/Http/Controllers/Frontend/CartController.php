@@ -219,10 +219,10 @@ class CartController extends Controller {
 
         $products = Cart::content();
         $cartTotal = $this->cartTotal();
-        $discountPercent = Session::has('offer_percentage') ? Session::get('offer_percentage') : 0;
-        $discountAmount = ($cartTotal * $discountPercent) / 100;
-        $total = currency($cartTotal - $discountAmount);
+        $discountAmount = (float)Session::get('coupon_discount_amount', 0);
+        $total = currency(max(0, $cartTotal - $discountAmount));
         $coupon = Session::has('coupon_code') ? Session::get('coupon_code') : '';
+        $discountPercent = Session::has('offer_percentage') ? Session::get('offer_percentage') : 0;
         return view('frontend.pages.cart', compact('products', 'total', 'discountAmount', 'discountPercent', 'coupon'));
     }
 
@@ -471,6 +471,49 @@ class CartController extends Controller {
         ]);
     }
 
+    public function calculateCouponDiscount($cartTotal, $coupon, $cartItems = null): float {
+        if (!$coupon) {
+            return 0.0;
+        }
+
+        $applicableTotal = (float)$cartTotal;
+
+        // If coupon is restricted to specific courses, only calculate discount on those matching courses
+        $courseIds = is_array($coupon->course_ids) ? $coupon->course_ids : (json_decode($coupon->course_ids ?? '', true) ?: []);
+        if (!empty($courseIds) && $cartItems && count($cartItems) > 0) {
+            $applicableTotal = 0.0;
+            $courseIdsStr = array_map('strval', $courseIds);
+            foreach ($cartItems as $item) {
+                $itemId = (string)$item->id;
+                $apiId = (string)($item->options->api_course_id ?? '');
+                if (in_array($itemId, $courseIdsStr, true) || ($apiId && in_array($apiId, $courseIdsStr, true))) {
+                    $applicableTotal += (float)($item->price * $item->qty);
+                }
+            }
+        }
+
+        if ($applicableTotal <= 0) {
+            return 0.0;
+        }
+
+        $discountType = $coupon->discount_type ?? 'percentage';
+        $discount = 0.0;
+
+        if ($discountType === 'fixed') {
+            $fixedVal = (float)($coupon->discount_amount ?: $coupon->offer_percentage ?: 0);
+            $discount = min($fixedVal, $applicableTotal);
+        } else {
+            $percentage = (float)($coupon->offer_percentage ?: 0);
+            $discount = ($applicableTotal * $percentage) / 100.0;
+
+            if (!empty($coupon->max_discount_amount) && $coupon->max_discount_amount > 0) {
+                $discount = min($discount, (float)$coupon->max_discount_amount);
+            }
+        }
+
+        return max(0.0, round($discount, 2));
+    }
+
     function applyCoupon(Request $request) {
         $rules = [
             'coupon' => 'required',
@@ -481,42 +524,103 @@ class CartController extends Controller {
 
         $request->validate($rules, $customMessages);
 
-        $coupon = Coupon::where(['coupon_code' => $request->coupon, 'status' => 'active'])->first();
+        $code = trim((string)$request->coupon);
+        $coupon = Coupon::whereRaw('LOWER(coupon_code) = ?', [strtolower($code)])
+            ->where('status', 'active')
+            ->first();
+
+        $isAjax = $request->ajax() || $request->wantsJson();
 
         if (!$coupon) {
-            $notification = __('Invalid coupon');
-
-            return response()->json(['message' => $notification], 403);
+            $msg = __('Invalid or inactive coupon code');
+            return $isAjax ? response()->json(['message' => $msg], 404) : redirect()->back()->with(['messege' => $msg, 'alert-type' => 'error']);
         }
 
-        if ($coupon->expired_date < date('Y-m-d')) {
-            $notification = __('Coupon already expired');
-
-            return response()->json(['message' => $notification], 403);
+        // Validity checks
+        if (!$coupon->hasStarted()) {
+            $msg = __('This coupon is not yet active. Valid from :date', ['date' => date('d M Y', strtotime($coupon->start_date))]);
+            return $isAjax ? response()->json(['message' => $msg], 403) : redirect()->back()->with(['messege' => $msg, 'alert-type' => 'error']);
         }
 
-        if ($this->cartTotal() < $coupon->min_price) {
-            $notification = __('Minimum order amount should be :amount', ['amount' => currency($coupon->min_price)]);
-
-            return response()->json(['message' => $notification], 403);
-        }
-        if ($this->cartTotal() <= 0) {
-            $notification = __('Cart amount should be greater than 0');
-
-            return response()->json(['message' => $notification], 403);
+        if ($coupon->isExpired()) {
+            $msg = __('Coupon already expired');
+            return $isAjax ? response()->json(['message' => $msg], 403) : redirect()->back()->with(['messege' => $msg, 'alert-type' => 'error']);
         }
 
-        $discountAmount = currency(($this->cartTotal() * $coupon->offer_percentage) / 100);
-        $total = currency($this->cartTotal() - ($this->cartTotal() * $coupon->offer_percentage) / 100);
+        if ($coupon->hasReachedTotalLimit()) {
+            $msg = __('This coupon has reached its maximum total usage limit');
+            return $isAjax ? response()->json(['message' => $msg], 403) : redirect()->back()->with(['messege' => $msg, 'alert-type' => 'error']);
+        }
 
-        /** when coupon will be handle for particular seller or author , above condition will be used  */
+        $userId = auth()->id() ?? auth('web')->id();
+        if ($userId && $coupon->hasReachedUserLimit($userId)) {
+            $msg = __('You have already used this coupon the maximum allowed number of times');
+            return $isAjax ? response()->json(['message' => $msg], 403) : redirect()->back()->with(['messege' => $msg, 'alert-type' => 'error']);
+        }
+
+        $cartTotal = $this->cartTotal();
+        if ($cartTotal <= 0) {
+            $msg = __('Cart amount should be greater than 0');
+            return $isAjax ? response()->json(['message' => $msg], 403) : redirect()->back()->with(['messege' => $msg, 'alert-type' => 'error']);
+        }
+
+        $minPrice = (float)($coupon->min_price ?? 0);
+        if ($minPrice > 0 && $cartTotal < $minPrice) {
+            $msg = __('Minimum order amount should be :amount', ['amount' => currency($minPrice)]);
+            return $isAjax ? response()->json(['message' => $msg], 403) : redirect()->back()->with(['messege' => $msg, 'alert-type' => 'error']);
+        }
+
+        // Course scope check
+        $courseIds = is_array($coupon->course_ids) ? $coupon->course_ids : (json_decode($coupon->course_ids ?? '', true) ?: []);
+        $cartItems = Cart::content();
+        if (!empty($courseIds)) {
+            $hasMatchingCourse = false;
+            $courseIdsStr = array_map('strval', $courseIds);
+            foreach ($cartItems as $item) {
+                $itemId = (string)$item->id;
+                $apiId = (string)($item->options->api_course_id ?? '');
+                if (in_array($itemId, $courseIdsStr, true) || ($apiId && in_array($apiId, $courseIdsStr, true))) {
+                    $hasMatchingCourse = true;
+                    break;
+                }
+            }
+            if (!$hasMatchingCourse) {
+                $msg = __('This coupon is only valid for specific course(s) not currently in your cart');
+                return $isAjax ? response()->json(['message' => $msg], 403) : redirect()->back()->with(['messege' => $msg, 'alert-type' => 'error']);
+            }
+        }
+
+        $discountAmount = $this->calculateCouponDiscount($cartTotal, $coupon, $cartItems);
+        if ($discountAmount <= 0) {
+            $msg = __('This coupon could not provide a discount on the current cart');
+            return $isAjax ? response()->json(['message' => $msg], 403) : redirect()->back()->with(['messege' => $msg, 'alert-type' => 'error']);
+        }
+
+        $total = max(0, $cartTotal - $discountAmount);
+
+        Session::put('coupon_id', $coupon->id);
         Session::put('coupon_code', $coupon->coupon_code);
-        Session::put('offer_percentage', $coupon->offer_percentage);
-        Session::put('coupon_discount_amount', ($this->cartTotal() * $coupon->offer_percentage) / 100);
+        Session::put('discount_type', $coupon->discount_type ?? 'percentage');
+        Session::put('offer_percentage', (float)$coupon->offer_percentage);
+        Session::put('coupon_discount_amount', $discountAmount);
 
-        $notification = __('Coupon applied successful');
+        $notification = __('Coupon applied successfully!');
 
-        return response()->json(['message' => $notification, 'coupon_code' => $coupon->coupon_code, 'offer_percentage' => $coupon->offer_percentage, 'discount_amount' => $discountAmount, 'total' => $total]);
+        if ($isAjax) {
+            return response()->json([
+                'success'         => true,
+                'message'         => $notification,
+                'coupon_code'     => $coupon->coupon_code,
+                'discount_type'   => $coupon->discount_type ?? 'percentage',
+                'offer_percentage'=> $coupon->offer_percentage,
+                'discount_amount' => currency($discountAmount),
+                'discount_raw'    => $discountAmount,
+                'total'           => currency($total),
+                'total_raw'       => $total,
+            ]);
+        }
+
+        return redirect()->back()->with(['messege' => $notification, 'alert-type' => 'success']);
     }
 
     function updateCouponDiscountAmount() {
@@ -524,13 +628,20 @@ class CartController extends Controller {
             return;
         }
 
-        $coupon = Coupon::where(['coupon_code' => Session::get('coupon_code'), 'status' => 'active'])->first();
-        // update discount amount
-        Session::put('coupon_discount_amount', ($this->cartTotal() * $coupon->offer_percentage) / 100);
+        $coupon = Coupon::whereRaw('LOWER(coupon_code) = ?', [strtolower(Session::get('coupon_code'))])
+            ->where('status', 'active')
+            ->first();
+
+        if (!$coupon || $coupon->isExpired() || ($coupon->min_price > 0 && $this->cartTotal() < $coupon->min_price)) {
+            $this->destroyCouponSession();
+            return;
+        }
+
+        $discountAmount = $this->calculateCouponDiscount($this->cartTotal(), $coupon, Cart::content());
+        Session::put('coupon_discount_amount', $discountAmount);
     }
 
     function removeCoupon() {
-
         $this->destroyCouponSession();
 
         $notification = [
@@ -541,7 +652,9 @@ class CartController extends Controller {
     }
 
     function destroyCouponSession() {
+        Session::forget('coupon_id');
         Session::forget('coupon_code');
+        Session::forget('discount_type');
         Session::forget('offer_percentage');
         Session::forget('coupon_discount_amount');
     }

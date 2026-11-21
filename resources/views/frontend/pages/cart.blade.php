@@ -71,8 +71,8 @@
                                         <form action="{{ route('apply-coupon') }}" class="cart__actions-form coupon-form"
                                             method="POST">
                                             @csrf
-                                            <input type="text" name="coupon" placeholder="Coupon code">
-                                            <button type="submit" class="btn">{{ __('Apply coupon') }}</button>
+                                            <input type="text" name="coupon" placeholder="{{ __('Coupon code') }}" value="{{ old('coupon', $coupon) }}" autocomplete="off" style="text-transform:uppercase;">
+                                            <button type="submit" class="btn" id="btn-apply-coupon">{{ __('Apply coupon') }}</button>
                                         </form>
                                     </td>
                                 </tr>
@@ -89,10 +89,16 @@
                                         <p class="coupon-discount m-0">
                                             <span>{{ __('Discount') }}</span>
                                             <br>
-                                            <small>{{ $coupon }} ({{ $discountPercent }} %)<a
-                                                    class="ms-2 text-danger" href="/remove-coupon">×</a></small>
+                                            <small><strong class="text-primary">{{ $coupon }}</strong> 
+                                                @if (Session::get('discount_type') === 'fixed')
+                                                    ({{ __('Flat') }})
+                                                @elseif ($discountPercent > 0)
+                                                    ({{ $discountPercent }}%)
+                                                @endif
+                                                <a class="ms-2 text-danger font-weight-bold" href="/remove-coupon" title="{{ __('Remove Coupon') }}">×</a>
+                                            </small>
                                         </p>
-                                        <span class="discount-amount">{{ currency($discountAmount) }}</span>
+                                        <span class="discount-amount text-success font-weight-bold">- {{ currency($discountAmount) }}</span>
                                     @else
                                         <p class="coupon-discount m-0">
                                             <span>{{ __('Discount') }}</span>
@@ -119,6 +125,55 @@
     </div>
     <!-- cart-area-end -->
 @endsection
+@push('scripts')
+<script>
+    $(document).on('submit', '.coupon-form', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        var btn = form.find('button[type="submit"]');
+        var input = form.find('input[name="coupon"]');
+        var code = input.val().trim();
+
+        if (!code) {
+            if (window.toastr) {
+                toastr.error("{{ __('Please enter a coupon code') }}");
+            } else {
+                alert("{{ __('Please enter a coupon code') }}");
+            }
+            return;
+        }
+
+        btn.prop('disabled', true).text("{{ __('Applying...') }}");
+
+        $.ajax({
+            url: form.attr('action'),
+            method: 'POST',
+            data: form.serialize(),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                if (window.toastr) {
+                    toastr.success(response.message || "{{ __('Coupon applied successfully!') }}");
+                }
+                setTimeout(function() {
+                    window.location.reload();
+                }, 600);
+            },
+            error: function(xhr) {
+                btn.prop('disabled', false).text("{{ __('Apply coupon') }}");
+                var msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : "{{ __('Invalid coupon code') }}";
+                if (window.toastr) {
+                    toastr.error(msg);
+                } else {
+                    alert(msg);
+                }
+            }
+        });
+    });
+</script>
+@endpush
+
 @if (session('removeFromCart') && $setting->google_tagmanager_status == 'active' && $marketing_setting?->remove_from_cart)
     @php
         $removeFromCart = session('removeFromCart');

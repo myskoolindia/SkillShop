@@ -248,7 +248,17 @@ class User extends Authenticatable {
             return true;
         }
 
-        // 2. For teachers/students: check active course assignments from school
+        // 2. Active teacher or student in a school (added in RoboQuest or by school administration)
+        if (in_array($this->role, ['teacher', 'student'], true)) {
+            $isSchoolMember = \App\Models\SchoolMember::where('user_id', $this->id)
+                ->where('status', 'active')
+                ->exists();
+            if ($isSchoolMember) {
+                return true;
+            }
+        }
+
+        // 3. For teachers/students: check active course assignments from school
         if (in_array($this->role, ['teacher', 'student'], true)) {
             $hasAssignment = \App\Models\SchoolCourseAssignment::where('user_id', $this->id)
                 ->where('status', 'active')
@@ -258,7 +268,7 @@ class User extends Authenticatable {
             }
         }
 
-        // 3. Check paid Club Shop lab products: mapped courses, and also lab LMS categories, single LMS, kits and
+        // 4. Check paid Club Shop lab products: mapped courses, and also lab LMS categories, single LMS, kits and
         //    Skill Labs, which open RoboQuest content without any course.
         try {
             $mapService = app(\App\Services\ProductCourseMapService::class);
@@ -274,20 +284,39 @@ class User extends Authenticatable {
             // Fail safe
         }
 
-        // 4. For school: check if school has paid orders containing course items
-        // 5. Teachers and students of a school that bought lab content (a category opens it for the whole school).
+        // 5. Teachers and students of a school that is connected to RoboQuest, has courses, or bought lab content
         if (in_array($this->role, ['teacher', 'student'], true)) {
             $schools = \App\Models\SchoolMember::where('user_id', $this->id)->active()->pluck('school_id')->all();
-            try {
-                $mapService = app(\App\Services\ProductCourseMapService::class);
-                if ($schools && $mapService->enabled() && array_filter($mapService->unlocksForBuyers($schools))) {
+            if (!empty($schools)) {
+                // If school has a RoboQuest connection
+                if (\App\Models\RoboquestConnection::whereIn('school_user_id', $schools)->exists()) {
                     return true;
                 }
-            } catch (\Throwable $e) {
-                // Fail safe
+
+                // If school has paid course orders
+                $schoolHasCourseOrder = \Modules\Order\app\Models\OrderItem::whereIn('order_id', \Illuminate\Support\Facades\DB::table('orders')
+                    ->whereIn('buyer_id', $schools)
+                    ->where('status', 'completed')
+                    ->where('payment_status', 'paid')
+                    ->select('id'))
+                    ->whereNotNull('course_id')
+                    ->exists();
+                if ($schoolHasCourseOrder) {
+                    return true;
+                }
+
+                try {
+                    $mapService = app(\App\Services\ProductCourseMapService::class);
+                    if ($mapService->enabled() && array_filter($mapService->unlocksForBuyers($schools))) {
+                        return true;
+                    }
+                } catch (\Throwable $e) {
+                    // Fail safe
+                }
             }
         }
 
+        // 6. For school: check if school has paid orders containing course items or RoboQuest connection
         if ($this->role === 'school') {
             $hasCourseOrder = \Modules\Order\app\Models\OrderItem::whereIn('order_id', \Illuminate\Support\Facades\DB::table('orders')
                 ->where('buyer_id', $this->id)
@@ -297,6 +326,10 @@ class User extends Authenticatable {
                 ->whereNotNull('course_id')
                 ->exists();
             if ($hasCourseOrder) {
+                return true;
+            }
+
+            if (\App\Models\RoboquestConnection::where('school_user_id', $this->id)->exists()) {
                 return true;
             }
         }

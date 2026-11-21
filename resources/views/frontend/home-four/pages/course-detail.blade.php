@@ -4,7 +4,21 @@
   $courseTitle = $course ? $course->title : '';
   $courseDesc = $course ? $course->description : '';
   $courseShortDesc = $course ? ($course->short_description ?: $course->seo_description) : '';
-  $courseImg = $course && $course->thumbnail ? asset($course->thumbnail) : asset('designs/img/TTT-1.png');
+
+  $campsImg = null;
+  if ($course) {
+      $apiId = (int)($course->api_course_id ?? 0);
+      $localId = (int)($course->id ?? 0);
+      if ($apiId && file_exists(public_path("uploads/courses/camps/{$apiId}.png"))) {
+          $campsImg = asset("uploads/courses/camps/{$apiId}.png");
+      } elseif ($localId && file_exists(public_path("uploads/courses/camps/{$localId}.png"))) {
+          $campsImg = asset("uploads/courses/camps/{$localId}.png");
+      } elseif ($course->slug && file_exists(public_path("uploads/courses/camps/{$course->slug}.png"))) {
+          $campsImg = asset("uploads/courses/camps/{$course->slug}.png");
+      }
+  }
+
+  $courseImg = $campsImg ?: ($course && $course->thumbnail ? asset($course->thumbnail) : asset('designs/img/TTT-1.png'));
   $originalPrice = $course ? (float)$course->price : 0;
   $discountPrice = $course ? (float)$course->discount : 0;
   $hasDiscount = $discountPrice > 0 && $discountPrice < $originalPrice;
@@ -13,7 +27,7 @@
   $formattedOriginalPrice = '₹ ' . number_format($originalPrice, 0);
   $currentCourseId = $course ? $course->id : ($id ?? '');
   $s2sIds = [27, 2, 52, 53, 54];
-  $s2sLocalIds = [10, 1, 5, 13, 14];
+  $s2sLocalIds = [1, 10, 5, 13, 14];
   $isS2SGrade = $course && (
     in_array((int)($course->api_course_id ?? 0), $s2sIds, true)
     || in_array((int)$course->id, $s2sLocalIds, true)
@@ -275,6 +289,16 @@
     if (!courseId) return;
 
     try {
+      const pathSlug = window.location.pathname.toLowerCase().split('/').filter(Boolean).pop() || '';
+      const gradeToApiMap = {
+        'grade-1': '27', 'grade1': '27', 'grade-01': '27',
+        'grade-2': '2',  'grade2': '2',  'grade-02': '2',
+        'grade-3': '52', 'grade3': '52', 'grade-03': '52',
+        'grade-4': '53', 'grade4': '53', 'grade-04': '53',
+        'grade-5': '54', 'grade5': '54', 'grade-05': '54',
+      };
+      const expectedApiId = gradeToApiMap[pathSlug] || '{{ $course ? $course->api_course_id : "" }}';
+
       // Try local proxy first (has correct image base URLs built in)
       const response = await fetch(API_URL);
       if (!response.ok) throw new Error('local api failed');
@@ -282,12 +306,18 @@
       const result = await response.json();
       const courses = result.courses?.data || result.data || (Array.isArray(result) ? result : []);
 
-      let course = courses.find(item =>
-        String(item.id) === String(courseId) ||
-        String(item.lms_id) === String(courseId) ||
-        String(item.api_course_id) === String(courseId) ||
-        String(item.slug) === String(courseId)
-      );
+      let course = null;
+      if (expectedApiId) {
+        course = courses.find(item => String(item.api_course_id || item.id) === String(expectedApiId));
+      }
+      if (!course) {
+        course = courses.find(item =>
+          String(item.id) === String(courseId) ||
+          String(item.lms_id) === String(courseId) ||
+          String(item.api_course_id) === String(courseId) ||
+          String(item.slug) === String(courseId)
+        );
+      }
 
       if (course) {
         updateCourse(course);
@@ -301,11 +331,11 @@
       const devCourses = devResult.courses?.data || [];
 
       // course-detail/{id} = local DB id, so find by api_course_id match
-      // Try to get api_course_id from page variable
-      const apiCourseId = '{{ $course ? $course->api_course_id : "" }}';
+      const searchApiId = expectedApiId || '{{ $course ? $course->api_course_id : "" }}';
       course = devCourses.find(item =>
-        String(item.id) === String(apiCourseId) ||
-        String(item.id) === String(courseId)
+        (searchApiId && String(item.id) === String(searchApiId)) ||
+        String(item.id) === String(courseId) ||
+        String(item.slug) === String(pathSlug)
       );
 
       if (course) updateCourse(course);

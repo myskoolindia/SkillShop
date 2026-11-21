@@ -21,12 +21,11 @@ class CheckOutController extends Controller
 
         // Repurchases and renewals are permitted. Students, teachers, and schools can purchase again.
         $cartTotal = $this->cartTotal();
-        $discountPercent = Session::has('offer_percentage') ? Session::get('offer_percentage') : 0;
-        $discountAmount = ($cartTotal * $discountPercent) / 100;
-        $total = currency($cartTotal - $discountAmount);
+        $discountAmount = (float)Session::get('coupon_discount_amount', 0);
+        $payable_amount = max(0, $cartTotal - $discountAmount);
+        $total = currency($payable_amount);
         $coupon = Session::has('coupon_code') ? Session::get('coupon_code') : '';
-
-        $payable_amount = $cartTotal - $discountAmount;
+        $discountPercent = Session::has('offer_percentage') ? Session::get('offer_percentage') : 0;
         Session::put('payable_amount', $payable_amount);
         $user = userAuth();
 

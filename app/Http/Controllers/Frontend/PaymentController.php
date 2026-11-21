@@ -416,6 +416,23 @@ class PaymentController extends Controller
             ]);
         }
 
+        if (Session::has('coupon_code')) {
+            try {
+                $cCode = Session::get('coupon_code');
+                $appliedCoupon = \Modules\Coupon\app\Models\Coupon::whereRaw('LOWER(coupon_code) = ?', [strtolower($cCode)])->first();
+                if ($appliedCoupon) {
+                    $appliedCoupon->increment('times_used');
+                    \Modules\Coupon\app\Models\CouponHistory::create([
+                        'author_id'       => $appliedCoupon->author_id ?? 0,
+                        'user_id'         => $user->id,
+                        'coupon_code'     => $appliedCoupon->coupon_code,
+                        'coupon_id'       => $appliedCoupon->id,
+                        'discount_amount' => (float)Session::get('coupon_discount_amount', 0),
+                    ]);
+                }
+            } catch (\Throwable $e) {}
+        }
+
         Session::forget([
             'after_success_url',
             'after_faild_url',
@@ -586,6 +603,23 @@ class PaymentController extends Controller
         //     'payment_method' => $order->payment_method
         // ]);
 
+        if (Session::has('coupon_code')) {
+            try {
+                $cCode = Session::get('coupon_code');
+                $appliedCoupon = \Modules\Coupon\app\Models\Coupon::whereRaw('LOWER(coupon_code) = ?', [strtolower($cCode)])->first();
+                if ($appliedCoupon) {
+                    $appliedCoupon->increment('times_used');
+                    \Modules\Coupon\app\Models\CouponHistory::create([
+                        'author_id'       => $appliedCoupon->author_id ?? 0,
+                        'user_id'         => $user->id,
+                        'coupon_code'     => $appliedCoupon->coupon_code,
+                        'coupon_id'       => $appliedCoupon->id,
+                        'discount_amount' => (float)Session::get('coupon_discount_amount', 0),
+                    ]);
+                }
+            } catch (\Throwable $e) {}
+        }
+
         Session::forget([
             'after_success_url',
             'after_faild_url',
@@ -645,6 +679,23 @@ class PaymentController extends Controller
             ];
             session()->put('enrollFailed', $order_failed);
         }
+        if (Session::has('coupon_code')) {
+            try {
+                $cCode = Session::get('coupon_code');
+                $appliedCoupon = \Modules\Coupon\app\Models\Coupon::whereRaw('LOWER(coupon_code) = ?', [strtolower($cCode)])->first();
+                if ($appliedCoupon) {
+                    $appliedCoupon->increment('times_used');
+                    \Modules\Coupon\app\Models\CouponHistory::create([
+                        'author_id'       => $appliedCoupon->author_id ?? 0,
+                        'user_id'         => $user->id,
+                        'coupon_code'     => $appliedCoupon->coupon_code,
+                        'coupon_id'       => $appliedCoupon->id,
+                        'discount_amount' => (float)Session::get('coupon_discount_amount', 0),
+                    ]);
+                }
+            } catch (\Throwable $e) {}
+        }
+
         Session::forget([
             'after_success_url',
             'after_faild_url',

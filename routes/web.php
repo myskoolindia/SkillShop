@@ -63,10 +63,11 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
         return match ($user->role) {
             'vendor'     => redirect(url('/club-shop/dashboard')),
             'school'     => redirect()->route('school.dashboard'),
-            'teacher'    => redirect()->route('student.dashboard'),
+            'teacher'    => redirect()->route('roboquest.launch'),
+            'student'    => redirect()->route('roboquest.launch'),
             'instructor' => redirect()->route('instructor.dashboard'),
             'admin'      => redirect()->route('admin.dashboard'),
-            default      => redirect()->route('student.dashboard'),
+            default      => redirect()->route('roboquest.launch'),
         };
     })->middleware('auth')->name('dashboard');
     Route::get('/roboquest/sign-in', [\App\Http\Controllers\Frontend\RoboquestController::class,'signIn'])->name('roboquest.signin');
@@ -149,37 +150,67 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
     })->name('ttt');
 
     Route::get('/course-detail/{id}', function ($id) {
-        $gradeAliasMap = [
-            'grade-1'  => 1,
-            'grade1'   => 1,
-            'grade-01' => 1,
-            'grade 1'  => 1,
-            'grade-2'  => 10,
-            'grade2'   => 10,
-            'grade-02' => 10,
-            'grade 2'  => 10,
-            'grade-3'  => 5,
-            'grade3'   => 5,
-            'grade-03' => 5,
-            'grade 3'  => 5,
-            'grade-4'  => 13,
-            'grade4'   => 13,
-            'grade-04' => 13,
-            'grade 4'  => 13,
-            'grade-5'  => 14,
-            'grade5'   => 14,
-            'grade-05' => 14,
-            'grade 5'  => 14,
-        ];
         $cleanId = strtolower(trim((string)$id));
-        $lookupId = $gradeAliasMap[$cleanId] ?? $id;
 
-        $course = \App\Models\Course::with(['category.translation', 'instructor', 'chapters.chapterItems', 'reviews.user'])->find($lookupId);
+        $gradeMap = [
+            'grade-1'  => ['api_id' => 27, 'slug' => 'grade-1', 'title' => 'Grade 1', 'local_id' => 1],
+            'grade1'   => ['api_id' => 27, 'slug' => 'grade-1', 'title' => 'Grade 1', 'local_id' => 1],
+            'grade-01' => ['api_id' => 27, 'slug' => 'grade-1', 'title' => 'Grade 1', 'local_id' => 1],
+            'grade 1'  => ['api_id' => 27, 'slug' => 'grade-1', 'title' => 'Grade 1', 'local_id' => 1],
+            'grade-2'  => ['api_id' => 2,  'slug' => 'grade-2', 'title' => 'Grade 2', 'local_id' => 10],
+            'grade2'   => ['api_id' => 2,  'slug' => 'grade-2', 'title' => 'Grade 2', 'local_id' => 10],
+            'grade-02' => ['api_id' => 2,  'slug' => 'grade-2', 'title' => 'Grade 2', 'local_id' => 10],
+            'grade 2'  => ['api_id' => 2,  'slug' => 'grade-2', 'title' => 'Grade 2', 'local_id' => 10],
+            'grade-3'  => ['api_id' => 52, 'slug' => 'grade-3', 'title' => 'Grade 3', 'local_id' => 5],
+            'grade3'   => ['api_id' => 52, 'slug' => 'grade-3', 'title' => 'Grade 3', 'local_id' => 5],
+            'grade-03' => ['api_id' => 52, 'slug' => 'grade-3', 'title' => 'Grade 3', 'local_id' => 5],
+            'grade 3'  => ['api_id' => 52, 'slug' => 'grade-3', 'title' => 'Grade 3', 'local_id' => 5],
+            'grade-4'  => ['api_id' => 53, 'slug' => 'grade-4', 'title' => 'Grade 4', 'local_id' => 13],
+            'grade4'   => ['api_id' => 53, 'slug' => 'grade-4', 'title' => 'Grade 4', 'local_id' => 13],
+            'grade-04' => ['api_id' => 53, 'slug' => 'grade-4', 'title' => 'Grade 4', 'local_id' => 13],
+            'grade 4'  => ['api_id' => 53, 'slug' => 'grade-4', 'title' => 'Grade 4', 'local_id' => 13],
+            'grade-5'  => ['api_id' => 54, 'slug' => 'grade-5', 'title' => 'Grade 5', 'local_id' => 14],
+            'grade5'   => ['api_id' => 54, 'slug' => 'grade-5', 'title' => 'Grade 5', 'local_id' => 14],
+            'grade-05' => ['api_id' => 54, 'slug' => 'grade-5', 'title' => 'Grade 5', 'local_id' => 14],
+            'grade 5'  => ['api_id' => 54, 'slug' => 'grade-5', 'title' => 'Grade 5', 'local_id' => 14],
+        ];
+
+        $gradeInfo = $gradeMap[$cleanId] ?? null;
+        $course = null;
+
+        if ($gradeInfo) {
+            // Priority 1: match by exact api_course_id (27=Grade 1, 2=Grade 2, 52=Grade 3, 53=Grade 4, 54=Grade 5)
+            $course = \App\Models\Course::with(['category.translation', 'instructor', 'chapters.chapterItems', 'reviews.user'])
+                ->where('api_course_id', $gradeInfo['api_id'])
+                ->first();
+
+            // Priority 2: match by slug
+            if (!$course) {
+                $course = \App\Models\Course::with(['category.translation', 'instructor', 'chapters.chapterItems', 'reviews.user'])
+                    ->where('slug', $gradeInfo['slug'])
+                    ->first();
+            }
+
+            // Priority 3: match by local id
+            if (!$course && isset($gradeInfo['local_id'])) {
+                $course = \App\Models\Course::with(['category.translation', 'instructor', 'chapters.chapterItems', 'reviews.user'])
+                    ->find($gradeInfo['local_id']);
+            }
+
+            if ($course) {
+                $course->title = $gradeInfo['title'];
+                $course->api_course_id = $gradeInfo['api_id'];
+            }
+        }
+
         if (!$course) {
-            $course = \App\Models\Course::with(['category.translation', 'instructor', 'chapters.chapterItems', 'reviews.user'])->where('slug', $lookupId)->first();
+            $course = \App\Models\Course::with(['category.translation', 'instructor', 'chapters.chapterItems', 'reviews.user'])->find($id);
         }
         if (!$course) {
-            $course = \App\Models\Course::with(['category.translation', 'instructor', 'chapters.chapterItems', 'reviews.user'])->where('api_course_id', $lookupId)->first();
+            $course = \App\Models\Course::with(['category.translation', 'instructor', 'chapters.chapterItems', 'reviews.user'])->where('slug', $id)->first();
+        }
+        if (!$course) {
+            $course = \App\Models\Course::with(['category.translation', 'instructor', 'chapters.chapterItems', 'reviews.user'])->where('api_course_id', $id)->first();
         }
         if (!$course && ctype_digit((string)$id)) {
             try {
@@ -556,7 +587,7 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
         }
 
         if ($type === '8' && (string)$upskill === '0' && $courses->isNotEmpty()) {
-            $orderMap = [27 => 1, 2 => 2, 52 => 3, 53 => 4, 54 => 5, 10 => 1, 1 => 2, 5 => 3, 13 => 4, 14 => 5];
+            $orderMap = [27 => 1, 2 => 2, 52 => 3, 53 => 4, 54 => 5, 1 => 1, 10 => 2, 5 => 3, 13 => 4, 14 => 5];
             $courses = $courses->sortBy(function ($c) use ($orderMap) {
                 $apiId = (int)($c['api_course_id'] ?? 0);
                 $lmsId = (int)($c['id'] ?? 0);
