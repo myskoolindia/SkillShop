@@ -97,6 +97,25 @@ class ProductCourseMapTest extends TestCase {
         $this->assertSame([(string)$course->id],array_column($courses,'id'));$this->assertSame(30,$courses[0]['capacity']);
         $this->entitlements()->assertOk()->assertJsonPath('courseIds',['98']);
     }
+    public function test_the_mapper_of_2026_11_21_courses_sold_on_skillvation_never_match_club_shop_orders(): void {
+        config(['services.collab.product_course_map_url'=>'https://feed.test/api/course-product-map']);
+        Http::fake(['feed.test/*'=>Http::response(json_decode(file_get_contents(base_path('tests/Fixtures/course-product-map-2026-11-21.json')),true))]);
+        $school=$this->user('school@lab.test');$connection=$this->connection($school);
+        $catalog=app(\App\Services\ProductCourseMapService::class)->catalog();
+        $this->assertArrayNotHasKey('2',$catalog['products'],'Grade 2 (sold as a course, category s2s) is not a Club Shop product');
+        $this->assertArrayNotHasKey('27',$catalog['products']);$this->assertArrayNotHasKey('grade-2-68b96',$catalog['skus']);
+        $this->assertSame(['G6-K01'],$catalog['products']['203']['kits']);
+        // An unrelated Club Shop product #2 unlocks nothing; the kit and a lab bundle do.
+        $this->labOrder('school@lab.test',2);
+        $this->assertSame([],$this->snapshot($connection)['unlocks']['school']['kits']);
+        $this->assertSame([],array_filter($this->snapshot($connection)['courses'],fn($c)=>($c['externalCourseId']??null)==2));
+        $this->labOrder('school@lab.test',203);
+        $shop=DB::connection('clubshop');$buyer=$shop->table('users')->where('email','school@lab.test')->value('id');
+        $order=$shop->table('orders')->insertGetId(['buyer_id'=>$buyer,'payment_status'=>'payment_received']);
+        $shop->table('order_items')->insert(['order_id'=>$order,'product_id'=>700,'product_sku'=>'CAT-1','order_status'=>'processing']);
+        $unlocks=$this->snapshot($connection)['unlocks']['school'];
+        $this->assertSame(['G6-K01'],$unlocks['kits']);$this->assertSame(['food','herbal-heritage'],$unlocks['lms']);
+    }
     public function test_credit_packs_are_not_sent_to_roboquest_as_courses(): void {
         $school=$this->user('school@credits.test');$connection=$this->connection($school);
         $grade=Course::withoutEvents(fn()=>Course::create(['title'=>'Grade 1','slug'=>'grade-1','type'=>'course','api_course_id'=>27,'course_code'=>'grade-1-b3a464']));
@@ -133,14 +152,15 @@ class ProductCourseMapTest extends TestCase {
         $school=$this->user('school@lab.test');$connection=$this->connection($school);
         $teacher=$this->user('teacher@lab.test','teacher');
         \App\Models\SchoolMember::create(['school_id'=>$school->id,'user_id'=>$teacher->id,'role_in_school'=>'teacher','status'=>'active']);
-        // The school bought the bundle (order line has its own product ID, matched by SKU) and the S2S course product.
+        // The school bought the bundle (order line has its own product ID, matched by SKU). A row that only maps a course to
+        // itself (Grade 1 → course:27) is a course sold on Skillvation, not a Club Shop product: Club Shop line 27 gets nothing.
         $shop=DB::connection('clubshop');$buyer=$shop->table('users')->insertGetId(['email'=>'school@lab.test','email_status'=>1]);
         $order=$shop->table('orders')->insertGetId(['buyer_id'=>$buyer,'payment_status'=>'payment_received']);
         $shop->table('order_items')->insert([['order_id'=>$order,'product_id'=>500,'product_sku'=>'cat-1','order_status'=>'processing'],['order_id'=>$order,'product_id'=>27,'product_sku'=>'grade-1','order_status'=>'processing']]);
         $this->labOrder('teacher@lab.test',91);
         $mine=$this->snapshot($connection);
         $this->assertSame(['kits'=>['G7-K02','G7-K03'],'labs'=>[],'lms'=>[],'lmsCategories'=>[]],$mine['unlocks']['school']);
-        $this->assertSame(['lab-course-27'],array_column($mine['courses'],'id'));
+        $this->assertSame([],array_column($mine['courses'],'id'));
         $teacherView=$this->snapshot($connection,$teacher);
         $this->assertSame(['kits'=>[],'labs'=>['ar-vr:basic'],'lms'=>[],'lmsCategories'=>[]],$teacherView['unlocks']['personal'],'a teacher\'s own purchase is theirs');
         $this->assertSame(['G7-K02','G7-K03'],$teacherView['unlocks']['school']['kits'],'the school\'s purchase reaches its teachers');
