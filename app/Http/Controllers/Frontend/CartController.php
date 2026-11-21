@@ -113,7 +113,7 @@ class CartController extends Controller {
                 'price'       => 0,
                 'course_code' => 'S2S-CREDIT-10',
                 'thumbnail'   => 'designs/img/credit-10.png',
-                'description' => '10 Skill2School Credits for LATAA OS AI Copilot, Student Assessments, and Lesson Plans.',
+                'description' => '10 Skill2School Credits for LATAA-OS, Student Assessments, and Lesson Plans.',
             ],
             100 => [
                 'title'       => 'Product 2 - 100 Credits (Standard)',
@@ -121,7 +121,7 @@ class CartController extends Controller {
                 'price'       => 100,
                 'course_code' => 'S2S-CREDIT-100',
                 'thumbnail'   => 'designs/img/credit-100.png',
-                'description' => '100 Skill2School Credits for LATAA OS AI Copilot, Student Assessments, and Lesson Plans.',
+                'description' => '100 Skill2School Credits for LATAA-OS, Student Assessments, and Lesson Plans.',
             ],
             1000 => [
                 'title'       => 'Product 3 - 1000 Credits (Pro)',
@@ -129,7 +129,7 @@ class CartController extends Controller {
                 'price'       => 1000,
                 'course_code' => 'S2S-CREDIT-1000',
                 'thumbnail'   => 'designs/img/credit-1000.png',
-                'description' => '1000 Skill2School Credits for LATAA OS AI Copilot, Student Assessments, and Lesson Plans.',
+                'description' => '1000 Skill2School Credits for LATAA-OS, Student Assessments, and Lesson Plans.',
             ],
         ];
 

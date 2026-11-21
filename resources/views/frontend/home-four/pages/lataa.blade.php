@@ -907,19 +907,19 @@
 </section>
 
 <!-- ══════════════════════════════════════════════════════════════ -->
-<!-- SECTION: CHOOSE YOUR CAMPS CREDIT PACK                         -->
+<!-- SECTION: INTEGRATE MY CURRICULUM                               -->
 <!-- ══════════════════════════════════════════════════════════════ -->
 <section class="py-5" style="background:#f8fafc;" id="skill2school-ai-credits">
   <div class="container py-4">
     <div class="text-center max-w-700 mx-auto mb-5">
       <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:9999px; background:#e0f2fe; border:1px solid #7dd3fc; color:#0369a1; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">
-        <i class="fa-solid fa-coins text-cyan-600"></i> AI Teacher Copilot Credits
+        <i class="fa-solid fa-coins text-cyan-600"></i> AI Teacher LATAA-OS Credits
       </div>
       <h2 class="display-6 font-weight-bold text-dark mb-3">
-        Choose Your CAMPS Credit Pack
+        Integrate my Curriculum
       </h2>
       <p class="text-secondary" style="font-size:1.05rem;">
-        Fuel your classroom with LATAA OS AI Copilot credits for instant NEP-aligned lesson plans, automated student assessment rubrics, and dynamic printable skill worksheets.
+        Fuel your classroom with LATAA-OS credits for instant NEP-aligned lesson plans, automated student assessment rubrics, and dynamic printable skill worksheets.
       </p>
     </div>
 
@@ -1006,7 +1006,7 @@
 
             <ul class="list-unstyled text-white-50 small mb-4" style="line-height:2;">
               <li><i class="fa-solid fa-circle-check text-info me-2" style="color:#38bdf8 !important;"></i><strong class="text-white">100 Full AI Generation Credits</strong></li>
-              <li><i class="fa-solid fa-circle-check text-info me-2" style="color:#38bdf8 !important;"></i>CAMPS Curriculum Copilot across Grades 1-5</li>
+              <li><i class="fa-solid fa-circle-check text-info me-2" style="color:#38bdf8 !important;"></i>CAMPS Curriculum with LATAA-OS across Grades 1-5</li>
               <li><i class="fa-solid fa-circle-check text-info me-2" style="color:#38bdf8 !important;"></i>Printable Student Assessment Worksheets</li>
               <li><i class="fa-solid fa-circle-check text-info me-2" style="color:#38bdf8 !important;"></i>Classroom Mapping &amp; Evaluation Rubrics</li>
             </ul>

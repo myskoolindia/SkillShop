@@ -471,7 +471,7 @@
             CAMPS Complete Programme <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-400">(Grades 1 to 5)</span>
           </h3>
           <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
-            All five grades are included together in the single complete CAMPS school package. Enrolling equips your entire primary wing with structured foundational CAMPS skill curriculum, LATAA OS AI teacher copilot, worksheets, and competency assessments.
+            All five grades are included together in the single complete CAMPS school package. Enrolling equips your entire primary wing with structured foundational CAMPS skill curriculum, LATAA-OS AI teacher assistant, worksheets, and competency assessments.
           </p>
 
           <!-- 5-Grades Preview Strip inside the Single Card -->
@@ -506,7 +506,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 text-xs sm:text-sm text-slate-200">
             <div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-cyan-400"></i> Grade 1 to Grade 5 Full Access</div>
             <div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-cyan-400"></i> NEP 2020 &amp; NCF 2023 Aligned</div>
-            <div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-cyan-400"></i> LATAA OS AI Lesson Plans</div>
+            <div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-cyan-400"></i> LATAA-OS AI Lesson Plans</div>
             <div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-cyan-400"></i> Activity Kits &amp; Assessment Worksheets</div>
           </div>
         </div>
@@ -533,13 +533,13 @@
     <div class="mt-20 pt-16 border-t border-slate-200/80" id="skill2school-ai-credits">
       <div class="text-center max-w-3xl mx-auto mb-12">
         <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-100/80 border border-cyan-300 text-cyan-800 text-xs font-black uppercase tracking-wider mb-3 shadow-sm">
-          <i class="fa-solid fa-coins text-cyan-600"></i> AI Teacher Copilot Credits
+          <i class="fa-solid fa-coins text-cyan-600"></i> AI Teacher LATAA-OS Credits
         </div>
         <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-3">
-          Choose Your CAMPS Credit Pack
+          Integrate my Curriculum
         </h2>
         <p class="text-slate-600 text-base leading-relaxed">
-          Fuel your classroom with LATAA OS AI Copilot credits for instant NEP-aligned lesson plans, automated student assessment rubrics, and dynamic printable skill worksheets.
+          Fuel your classroom with LATAA-OS credits for instant NEP-aligned lesson plans, automated student assessment rubrics, and dynamic printable skill worksheets.
         </p>
       </div>
 
@@ -642,7 +642,7 @@
               </li>
               <li class="flex items-start gap-2.5">
                 <i class="fa-solid fa-circle-check text-cyan-400 mt-0.5 text-sm"></i>
-                <span>CAMPS Curriculum Copilot across Grades 1-5</span>
+                <span>CAMPS Curriculum with LATAA-OS across Grades 1-5</span>
               </li>
               <li class="flex items-start gap-2.5">
                 <i class="fa-solid fa-circle-check text-cyan-400 mt-0.5 text-sm"></i>
