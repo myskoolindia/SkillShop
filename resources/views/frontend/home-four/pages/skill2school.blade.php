@@ -480,26 +480,31 @@
               <i class="fa-solid fa-graduation-cap me-1"></i> Grades Included in this Package:
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center">
-              <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/40 transition-colors">
-                <span class="block text-xs font-black text-white">Grade 1</span>
+              <a href="{{ url('/course-detail/grade-1') }}" class="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400 hover:bg-white/10 transition-all block group cursor-pointer">
+                <span class="block text-xs font-black text-white group-hover:text-cyan-300 transition-colors">Grade 1</span>
                 <span class="block text-[10px] text-slate-400">Foundational</span>
-              </div>
-              <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/40 transition-colors">
-                <span class="block text-xs font-black text-white">Grade 2</span>
+                <span class="block text-[9px] text-cyan-400/90 font-semibold mt-1 group-hover:underline">View Details <i class="fa-solid fa-arrow-right text-[8px] ms-0.5"></i></span>
+              </a>
+              <a href="{{ url('/course-detail/grade-2') }}" class="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400 hover:bg-white/10 transition-all block group cursor-pointer">
+                <span class="block text-xs font-black text-white group-hover:text-cyan-300 transition-colors">Grade 2</span>
                 <span class="block text-[10px] text-slate-400">Experiential</span>
-              </div>
-              <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/40 transition-colors">
-                <span class="block text-xs font-black text-white">Grade 3</span>
+                <span class="block text-[9px] text-cyan-400/90 font-semibold mt-1 group-hover:underline">View Details <i class="fa-solid fa-arrow-right text-[8px] ms-0.5"></i></span>
+              </a>
+              <a href="{{ url('/course-detail/grade-3') }}" class="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400 hover:bg-white/10 transition-all block group cursor-pointer">
+                <span class="block text-xs font-black text-white group-hover:text-cyan-300 transition-colors">Grade 3</span>
                 <span class="block text-[10px] text-slate-400">Cognitive</span>
-              </div>
-              <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/40 transition-colors">
-                <span class="block text-xs font-black text-white">Grade 4</span>
+                <span class="block text-[9px] text-cyan-400/90 font-semibold mt-1 group-hover:underline">View Details <i class="fa-solid fa-arrow-right text-[8px] ms-0.5"></i></span>
+              </a>
+              <a href="{{ url('/course-detail/grade-4') }}" class="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400 hover:bg-white/10 transition-all block group cursor-pointer">
+                <span class="block text-xs font-black text-white group-hover:text-cyan-300 transition-colors">Grade 4</span>
                 <span class="block text-[10px] text-slate-400">Analytical</span>
-              </div>
-              <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/40 transition-colors col-span-2 sm:col-span-1">
-                <span class="block text-xs font-black text-white">Grade 5</span>
+                <span class="block text-[9px] text-cyan-400/90 font-semibold mt-1 group-hover:underline">View Details <i class="fa-solid fa-arrow-right text-[8px] ms-0.5"></i></span>
+              </a>
+              <a href="{{ url('/course-detail/grade-5') }}" class="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400 hover:bg-white/10 transition-all block group cursor-pointer col-span-2 sm:col-span-1">
+                <span class="block text-xs font-black text-white group-hover:text-cyan-300 transition-colors">Grade 5</span>
                 <span class="block text-[10px] text-slate-400">Advanced</span>
-              </div>
+                <span class="block text-[9px] text-cyan-400/90 font-semibold mt-1 group-hover:underline">View Details <i class="fa-solid fa-arrow-right text-[8px] ms-0.5"></i></span>
+              </a>
             </div>
           </div>
 
@@ -520,9 +525,9 @@
           
           <button type="button" onclick="buySkill2SchoolBundle(event)" id="s2s-bundle-btn" class="w-full py-3.5 px-6 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black text-sm transition-all duration-300 shadow-lg shadow-cyan-500/25 active:scale-95 flex items-center justify-center gap-2">
             <i class="fa-solid fa-bolt"></i>
-            <span>Enroll All 5 Grades Now</span>
+            <span>Buy Now</span>
           </button>
-          <span class="text-[11px] text-slate-400 mt-2.5">Single transaction &bull; Unlocks Grades 1 to 5</span>
+          <span class="text-[11px] text-slate-400 mt-2.5 font-medium">( CAMPS Grade 1 to 5)</span>
         </div>
       </div>
     </div>

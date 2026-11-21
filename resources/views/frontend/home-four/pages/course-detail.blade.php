@@ -168,7 +168,7 @@
             <div class="mb-3 p-3 bg-cyan-50 border border-cyan-200 rounded-xl text-xs text-cyan-900 flex items-start gap-2">
               <i class="fa-solid fa-layer-group text-cyan-600 mt-0.5 flex-shrink-0"></i>
               <div>
-                <span class="font-bold">Skill 2 Skool 5-Grade Package:</span> This grade is part of the complete foundational programme (Grades 1 to 5). Purchasing unlocks all 5 grades together (₹25,000 package).
+                <span class="font-bold">CAMPS 5-Grade Package:</span> This grade is part of the complete foundational programme (Grades 1 to 5). Purchasing unlocks all 5 grades together (₹25,000 package).
               </div>
             </div>
           @endif
@@ -179,14 +179,17 @@
             <button id="buy-now-btn" type="button" onclick="buyNow()"
               class="bg-primary hover:bg-primary-dark text-white px-6 py-3.5 rounded-full text-sm font-bold w-full transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
               <i class="fa-solid fa-bolt text-xs"></i>
-              <span>{{ $isS2SGrade ? 'Enroll All 5 Grades Now' : 'Buy Now' }}</span>
+              <span>Buy Now</span>
             </button>
+            @if ($isS2SGrade)
+              <span class="text-[11px] text-gray-500 text-center -mt-1 mb-1 font-medium">( CAMPS Grade 1 to 5)</span>
+            @endif
 
             {{-- Add to Cart --}}
             <button id="add-to-cart-btn" type="button" onclick="addToCartAction()"
               class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-6 py-3 rounded-full text-sm font-bold w-full transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2">
               <i class="fa-solid fa-cart-shopping text-xs"></i>
-              <span>{{ $isS2SGrade ? 'Add 5-Grade Bundle to Cart' : 'Add to Cart' }}</span>
+              <span>{{ $isS2SGrade ? 'Add CAMPS 5-Grade Bundle to Cart' : 'Add to Cart' }}</span>
             </button>
 
             {{-- Request a Quote Button --}}
@@ -343,7 +346,7 @@
       }
     }
 
-    const cover = course.cover_image || course.thumbnail || course.image;
+    const cover = course.thumbnail || course.cover_image || course.image;
     if (cover) {
       let fullImgUrl;
       if (cover.startsWith('http') || cover.startsWith('/')) {

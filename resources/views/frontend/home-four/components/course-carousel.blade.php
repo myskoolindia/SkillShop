@@ -130,11 +130,11 @@
         @if($isBundle)
           <div class="text-center mt-8 pt-4">
             <button type="button" onclick="carouselBuyNow(event, '', '', true)" id="carousel-bottom-bundle-btn" class="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold text-sm sm:text-base shadow-lg shadow-cyan-500/25 transition-all duration-300 active:scale-95">
-              <i class="fa-solid fa-layer-group"></i>
-              <span>Enroll All 5 Grades Now</span>
+              <i class="fa-solid fa-bolt"></i>
+              <span>Buy Now</span>
               <i class="fa-solid fa-arrow-right text-xs"></i>
             </button>
-            <div class="text-xs text-slate-500 mt-2 font-medium">Single purchase &bull; ₹25,000 for Grades 1 to 5</div>
+            <div class="text-xs text-slate-500 mt-2 font-medium">( CAMPS Grade 1 to 5)</div>
           </div>
         @endif
 

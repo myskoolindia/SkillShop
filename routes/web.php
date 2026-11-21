@@ -149,12 +149,37 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
     })->name('ttt');
 
     Route::get('/course-detail/{id}', function ($id) {
-        $course = \App\Models\Course::with(['category.translation', 'instructor', 'chapters.chapterItems', 'reviews.user'])->find($id);
+        $gradeAliasMap = [
+            'grade-1'  => 1,
+            'grade1'   => 1,
+            'grade-01' => 1,
+            'grade 1'  => 1,
+            'grade-2'  => 10,
+            'grade2'   => 10,
+            'grade-02' => 10,
+            'grade 2'  => 10,
+            'grade-3'  => 5,
+            'grade3'   => 5,
+            'grade-03' => 5,
+            'grade 3'  => 5,
+            'grade-4'  => 13,
+            'grade4'   => 13,
+            'grade-04' => 13,
+            'grade 4'  => 13,
+            'grade-5'  => 14,
+            'grade5'   => 14,
+            'grade-05' => 14,
+            'grade 5'  => 14,
+        ];
+        $cleanId = strtolower(trim((string)$id));
+        $lookupId = $gradeAliasMap[$cleanId] ?? $id;
+
+        $course = \App\Models\Course::with(['category.translation', 'instructor', 'chapters.chapterItems', 'reviews.user'])->find($lookupId);
         if (!$course) {
-            $course = \App\Models\Course::with(['category.translation', 'instructor', 'chapters.chapterItems', 'reviews.user'])->where('slug', $id)->first();
+            $course = \App\Models\Course::with(['category.translation', 'instructor', 'chapters.chapterItems', 'reviews.user'])->where('slug', $lookupId)->first();
         }
         if (!$course) {
-            $course = \App\Models\Course::with(['category.translation', 'instructor', 'chapters.chapterItems', 'reviews.user'])->where('api_course_id', $id)->first();
+            $course = \App\Models\Course::with(['category.translation', 'instructor', 'chapters.chapterItems', 'reviews.user'])->where('api_course_id', $lookupId)->first();
         }
         if (!$course && ctype_digit((string)$id)) {
             try {
