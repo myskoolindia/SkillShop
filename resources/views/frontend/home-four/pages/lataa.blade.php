@@ -923,7 +923,7 @@
       </p>
     </div>
 
-    <div class="row g-4 max-w-1100 mx-auto align-items-stretch">
+    <div id="lataa-create-products-grid" class="row g-4 max-w-1100 mx-auto align-items-stretch justify-content-center">
       
       <!-- Product 1: 10 Credits (Free) -->
       <div class="col-lg-4 col-md-6 d-flex">
@@ -1145,6 +1145,233 @@ window.buyCreditProduct = async function(credits, e) {
     window.location.href = '{{ route("checkout.index") }}';
   }
 };
+
+window.buyLataaCourse = async function(courseId, credits, price, e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  const btn = e ? e.currentTarget : null;
+  const oldHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm"></i> Processing...';
+  }
+
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+  try {
+    const res = await fetch('{{ url('/add-to-cart-by-api-id') }}/' + courseId, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken,
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ _token: csrfToken })
+    });
+
+    const data = await res.json();
+    if (data.status === 'success' || data.status === 'already') {
+      window.location.href = data.checkout_url || '{{ route("checkout.index") }}';
+    } else {
+      if (credits) {
+        return buyCreditProduct(credits, e);
+      }
+      if (typeof toastr !== 'undefined') toastr.error(data.message || 'Error adding product to cart');
+      else alert(data.message || 'Error adding product to cart');
+      if (btn) { btn.disabled = false; btn.innerHTML = oldHtml; }
+    }
+  } catch (err) {
+    console.error(err);
+    if (btn) { btn.disabled = false; btn.innerHTML = oldHtml; }
+    window.location.href = '{{ route("checkout.index") }}';
+  }
+};
+
+function renderLataaCreateCourses(courses, container) {
+  if (!courses || courses.length === 0) return;
+
+  const colClass = courses.length === 1 
+    ? 'col-lg-5 col-md-8 mx-auto' 
+    : (courses.length === 2 ? 'col-lg-5 col-md-6' : 'col-lg-4 col-md-6');
+
+  const themes = [
+    {
+      isDark: false,
+      badgeText: 'FREE TRIAL',
+      badgeBg: '#ecfdf5',
+      badgeColor: '#047857',
+      badgeBorder: '#a7f3d0',
+      badgeIcon: 'fa-gift',
+      icon: 'fa-wand-magic-sparkles',
+      iconBg: 'linear-gradient(135deg, #34d399 0%, #14b8a6 100%)',
+      iconShadow: '0 4px 12px rgba(20,184,166,0.3)',
+      creditsColor: '#059669',
+      btnClass: 'btn-success',
+      btnStyle: 'border-radius:14px; font-size:0.95rem;',
+      checkColor: 'text-success'
+    },
+    {
+      isDark: true,
+      badgeText: 'STANDARD PACK',
+      badgeBg: 'rgba(56,189,248,0.15)',
+      badgeColor: '#38bdf8',
+      badgeBorder: 'rgba(56,189,248,0.4)',
+      badgeIcon: 'fa-bolt',
+      icon: 'fa-cubes-stacked',
+      iconBg: 'linear-gradient(135deg, #38bdf8 0%, #2563eb 100%)',
+      iconShadow: '0 6px 16px rgba(56,189,248,0.4)',
+      creditsColor: '#38bdf8',
+      btnClass: 'btn-info',
+      btnStyle: 'background:linear-gradient(90deg, #38bdf8 0%, #3b82f6 100%); color:#0f172a; font-weight:800; border:none; border-radius:14px; font-size:0.95rem; box-shadow:0 6px 18px rgba(56,189,248,0.35);',
+      checkColor: 'text-info'
+    },
+    {
+      isDark: false,
+      badgeText: 'BEST VALUE',
+      badgeBg: '#faf5ff',
+      badgeColor: '#7e22ce',
+      badgeBorder: '#e9d5ff',
+      badgeIcon: 'fa-crown',
+      icon: 'fa-gem',
+      iconBg: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
+      iconShadow: '0 4px 12px rgba(168,85,247,0.3)',
+      creditsColor: '#9333ea',
+      btnClass: 'btn-purple',
+      btnStyle: 'background:#9333ea; color:#ffffff; border-radius:14px; font-size:0.95rem; box-shadow:0 4px 12px rgba(147,51,234,0.25);',
+      checkColor: 'text-purple'
+    }
+  ];
+
+  container.innerHTML = courses.map((course, idx) => {
+    const isSingle = courses.length === 1;
+    const theme = isSingle ? themes[1] : themes[idx % themes.length];
+    const isDark = theme.isDark;
+    const title = course.title || `Product ${idx + 1}`;
+    const price = Number(course.price || 0);
+    const credits = parseInt(course.credits || 0);
+    const shortDesc = course.short_description || `LATAA-OS Credits Pack • ${credits} Credits`;
+    const courseId = course.id || course.api_course_id;
+
+    // Resolve cover image from API
+    const rawCover = course.cover_image || course.raw_cover_image || course.thumbnail || '';
+    let coverImgUrl = '';
+    if (rawCover) {
+      if (rawCover.startsWith('http') || rawCover.startsWith('/')) {
+        coverImgUrl = rawCover;
+      } else {
+        coverImgUrl = 'http://devcollab.local/assets/images/event/cover/' + rawCover;
+      }
+    }
+
+    const cardBg = isDark
+      ? 'background:linear-gradient(180deg, #0f172a 0%, #0e1e3e 100%); color:#ffffff; border:2px solid #38bdf8 !important;'
+      : 'background:#ffffff; border:1px solid #e2e8f0 !important;';
+
+    const ribbon = (isDark || course.is_featured || isSingle) ? `
+      <div class="position-absolute" style="top:-14px; left:50%; transform:translateX(-50%); background:linear-gradient(90deg, #38bdf8 0%, #3b82f6 100%); color:#0f172a; font-weight:800; font-size:11px; padding:4px 16px; border-radius:9999px; text-transform:uppercase; letter-spacing:0.5px; box-shadow:0 4px 10px rgba(56,189,248,0.4); white-space:nowrap; z-index:5;">
+        ★ Most Popular
+      </div>
+    ` : '';
+
+    const priceBadge = price === 0
+      ? `<span class="badge bg-success-subtle text-success fw-bold text-uppercase ms-1">Free</span>`
+      : `<span class="${isDark ? 'text-white-50' : 'text-muted'} small ms-1">/ ${credits} Credits ${credits > 0 ? ('(₹' + (price/credits).toFixed(0) + '/credit)') : ''}</span>`;
+
+    const badgeLabel = price === 0 ? 'FREE TRIAL' : (theme.badgeText || `PRODUCT ${idx + 1}`);
+
+    return `
+      <div class="${colClass} d-flex">
+        <div class="card w-100 border-0 rounded-4 p-4 ${isDark ? 'shadow-lg' : 'shadow-sm hover-shadow'} transition-all d-flex flex-column justify-content-between position-relative" style="${cardBg} border-radius:24px;">
+          ${ribbon}
+          <div>
+            <div class="d-flex align-items-center justify-content-between mb-3 ${isDark ? 'mt-1' : ''}">
+              <span class="badge" style="background:${theme.badgeBg}; color:${theme.badgeColor}; border:1px solid ${theme.badgeBorder}; font-size:11px; padding:6px 10px; border-radius:9999px; font-weight:700;">
+                <i class="fa-solid ${theme.badgeIcon} me-1"></i> ${badgeLabel}
+              </span>
+              <span class="${isDark ? 'text-white-50' : 'text-muted'} small fw-bold text-uppercase" style="letter-spacing:0.5px;">PRODUCT ${idx + 1}</span>
+            </div>
+
+            ${coverImgUrl ? `
+              <div class="mb-3 overflow-hidden rounded-3 position-relative" style="height:140px; background:${isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9'}; border:1px solid ${isDark ? 'rgba(56,189,248,0.3)' : '#e2e8f0'}; border-radius:18px;">
+                <img src="${coverImgUrl}" alt="${title}" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.parentElement.style.display='none'">
+              </div>
+            ` : `
+              <div class="d-inline-flex align-items-center justify-content-center text-white mb-4" style="width:54px; height:54px; border-radius:16px; background:${theme.iconBg}; font-size:22px; box-shadow:${theme.iconShadow};">
+                <i class="fa-solid ${theme.icon}"></i>
+              </div>
+            `}
+
+            <h3 class="h5 font-weight-bold ${isDark ? 'text-white' : 'text-dark'} mb-1">${title}</h3>
+            <p class="${isDark ? 'text-white-50' : 'text-muted'} small mb-3">${shortDesc}</p>
+
+            <div class="d-flex align-items-baseline gap-2 mb-3 pb-3" style="border-bottom:1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'};">
+              <span class="h1 font-weight-bold ${isDark ? 'text-white' : 'text-dark'} mb-0">₹${Number(price).toLocaleString('en-IN')}</span>
+              ${priceBadge}
+            </div>
+
+            <div class="p-2 px-3 rounded-3 mb-4 d-flex align-items-center justify-content-between" style="${isDark ? 'background:rgba(255,255,255,0.08); border:1px solid rgba(56,189,248,0.3);' : 'background:#f8fafc; border:1px solid #e2e8f0;'}">
+              <span class="${isDark ? 'text-white' : 'text-dark'} fw-bold small"><i class="fa-solid fa-coins text-warning me-1"></i> Credits:</span>
+              <span class="h6 font-weight-bold mb-0" style="color:${theme.creditsColor} !important;">${credits}</span>
+            </div>
+
+            <ul class="list-unstyled ${isDark ? 'text-white-50' : 'text-secondary'} small mb-4" style="line-height:2;">
+              <li><i class="fa-solid fa-circle-check ${theme.checkColor} me-2"></i><strong class="${isDark ? 'text-white' : 'text-dark'}">${credits} Full AI Generation Credits</strong></li>
+              <li><i class="fa-solid fa-circle-check ${theme.checkColor} me-2"></i>CAMPS Curriculum with LATAA-OS Integration</li>
+              <li><i class="fa-solid fa-circle-check ${theme.checkColor} me-2"></i>Automated Student Assessment Rubrics</li>
+              <li><i class="fa-solid fa-circle-check ${theme.checkColor} me-2"></i>Dynamic Printable Skill Worksheets</li>
+            </ul>
+          </div>
+
+          <div>
+            <button type="button" onclick="buyLataaCourse(${courseId}, ${credits}, ${price}, event)" class="btn ${theme.btnClass} w-100 py-3 fw-bold rounded-3 shadow-sm d-flex align-items-center justify-content-center gap-2" style="${theme.btnStyle}">
+              <i class="fa-solid ${price === 0 ? 'fa-gift' : 'fa-bolt'}"></i>
+              <span>${price === 0 ? 'Buy Now (Free)' : 'Buy Now'}</span>
+            </button>
+            <small class="d-block text-center ${isDark ? 'text-white-50' : 'text-muted'} mt-2">${price === 0 ? 'Free instant activation' : ('Instant checkout • ₹' + Number(price).toLocaleString('en-IN'))}</small>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function loadLataaCreateCourses() {
+  const container = document.getElementById('lataa-create-products-grid');
+  if (!container) return;
+
+  const directApiUrl = 'http://devcollab.local/api/collab-courses?type=15';
+  const proxyApiUrl = '{{ url("/api/collab-courses?type=15") }}';
+
+  let courses = [];
+  try {
+    let res = await fetch(directApiUrl).catch(() => null);
+    if (!res || !res.ok) {
+      res = await fetch(proxyApiUrl);
+    }
+    if (res && res.ok) {
+      const json = await res.json();
+      const rawList = json.courses?.data || json.data || (Array.isArray(json) ? json : []);
+      // Filter condition: "lata_type": "create"
+      courses = rawList.filter(item => {
+        const lataType = (item.lata_type || '').toLowerCase().trim();
+        return lataType === 'create';
+      });
+    }
+  } catch (err) {
+    console.warn('Could not load LATAA create courses from API:', err);
+  }
+
+  if (courses && courses.length > 0) {
+    renderLataaCreateCourses(courses, container);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadLataaCreateCourses);
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  loadLataaCreateCourses();
+}
 </script>
 @endpush
 

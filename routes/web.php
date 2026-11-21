@@ -370,6 +370,14 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
             );
         }
 
+        // ── Filter by lata_type ─────────────────────────────────────────
+        $lataType = $request->get('lata_type');
+        if ($lataType !== null && $lataType !== '') {
+            $apiCourses = $apiCourses->filter(
+                fn($c) => strtolower(trim((string)($c['lata_type'] ?? ''))) === strtolower(trim((string)$lataType))
+            );
+        }
+
         $lmsCourses = class_exists('\App\Models\Course')
             ? \App\Models\Course::with(['category.translation'])->get()
             : collect();
@@ -449,6 +457,9 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
                 'has_lms'                  => (bool)$matchingLms,
                 'type'                     => $c['type'] ?? null,
                 'upskill'                  => $c['upskill'] ?? 0,
+                'lata_type'                => $c['lata_type'] ?? null,
+                'credits'                  => $c['credits'] ?? null,
+                'raw_cover_image'          => $c['cover_image'] ?? null,
                 'title'                    => $c['title'] ?? '',
                 'slug'                     => $matchingLms?->slug ?? ($c['slug'] ?? ''),
                 'description'              => strip_tags($c['description'] ?? ''),

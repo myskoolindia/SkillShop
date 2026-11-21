@@ -548,7 +548,7 @@
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
+      <div id="s2s-integrate-products-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
         
         <!-- Product 1: 10 Credits (Free) -->
         <div class="relative flex flex-col justify-between rounded-3xl bg-white border border-slate-200/90 p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
@@ -733,6 +733,231 @@
 
 @push('scripts')
 <script>
+window.buyLataaCourse = async function(courseId, credits, price, e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  const btn = e ? e.currentTarget : null;
+  const oldHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm"></i> Processing...';
+  }
+
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+  try {
+    const res = await fetch('{{ url('/add-to-cart-by-api-id') }}/' + courseId, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken,
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ _token: csrfToken })
+    });
+
+    const data = await res.json();
+    if (data.status === 'success' || data.status === 'already') {
+      window.location.href = data.checkout_url || '{{ route("checkout.index") }}';
+    } else {
+      if (credits) {
+        return buyCreditProduct(credits, e);
+      }
+      if (typeof toastr !== 'undefined') toastr.error(data.message || 'Error adding product to cart');
+      else alert(data.message || 'Error adding product to cart');
+      if (btn) { btn.disabled = false; btn.innerHTML = oldHtml; }
+    }
+  } catch (err) {
+    console.error(err);
+    if (btn) { btn.disabled = false; btn.innerHTML = oldHtml; }
+    window.location.href = '{{ route("checkout.index") }}';
+  }
+};
+
+function renderS2SIntegrateCourses(courses, container) {
+  if (!courses || courses.length === 0) return;
+
+  const themes = [
+    {
+      isDark: false,
+      badgeText: 'STARTER PACK',
+      badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      badgeIcon: 'fa-gift text-emerald-500',
+      icon: 'fa-wand-magic-sparkles',
+      iconBg: 'bg-gradient-to-tr from-emerald-400 to-teal-500 shadow-emerald-500/30',
+      creditsColor: 'text-emerald-600',
+      btnClass: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20',
+      checkColor: 'text-emerald-500'
+    },
+    {
+      isDark: true,
+      badgeText: 'STANDARD PACK',
+      badgeClass: 'bg-cyan-500/20 text-cyan-300 border-cyan-400/40',
+      badgeIcon: 'fa-bolt text-cyan-300',
+      icon: 'fa-cubes-stacked',
+      iconBg: 'bg-gradient-to-tr from-cyan-400 to-blue-600 shadow-cyan-500/30',
+      creditsColor: 'text-cyan-300',
+      btnClass: 'bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 shadow-cyan-500/30 font-black',
+      checkColor: 'text-cyan-400'
+    },
+    {
+      isDark: false,
+      badgeText: 'BEST VALUE',
+      badgeClass: 'bg-purple-50 text-purple-700 border-purple-200',
+      badgeIcon: 'fa-crown text-purple-600',
+      icon: 'fa-gem',
+      iconBg: 'bg-gradient-to-tr from-purple-500 to-indigo-600 shadow-purple-500/30',
+      creditsColor: 'text-purple-600',
+      btnClass: 'bg-purple-600 hover:bg-purple-700 text-white shadow-purple-600/20',
+      checkColor: 'text-purple-600'
+    }
+  ];
+
+  container.innerHTML = courses.map((course, idx) => {
+    const isSingle = courses.length === 1;
+    const theme = isSingle ? themes[1] : themes[idx % themes.length];
+    const isDark = theme.isDark;
+    const title = course.title || `Product ${idx + 1}`;
+    const price = Number(course.price || 0);
+    const credits = parseInt(course.credits || 0);
+    const shortDesc = course.short_description || `LATAA-OS Credits Pack • ${credits} Credits`;
+    const courseId = course.id || course.api_course_id;
+
+    // Resolve cover image from API
+    const rawCover = course.cover_image || course.raw_cover_image || course.thumbnail || '';
+    let coverImgUrl = '';
+    if (rawCover) {
+      if (rawCover.startsWith('http') || rawCover.startsWith('/')) {
+        coverImgUrl = rawCover;
+      } else {
+        coverImgUrl = 'http://devcollab.local/assets/images/event/cover/' + rawCover;
+      }
+    }
+
+    const cardClasses = isDark
+      ? 'relative flex flex-col justify-between rounded-3xl bg-gradient-to-b from-slate-900 to-[#0e1e3e] text-white p-8 shadow-2xl border-2 border-cyan-400 hover:border-cyan-300 transition-all duration-300 hover:-translate-y-2'
+      : 'relative flex flex-col justify-between rounded-3xl bg-white border border-slate-200/90 p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1';
+
+    const ribbon = (isDark || course.is_featured) ? `
+      <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 font-black text-[11px] uppercase tracking-wider shadow-md whitespace-nowrap z-10">
+        ★ Most Popular
+      </div>
+    ` : '';
+
+    const priceHtml = price === 0
+      ? `<span class="text-4xl font-black ${isDark ? 'text-white' : 'text-slate-900'}">₹0</span>
+         <span class="text-sm font-semibold text-emerald-600 uppercase">Free</span>`
+      : `<span class="text-4xl font-black ${isDark ? 'text-white' : 'text-slate-900'}">₹${price.toLocaleString('en-IN')}</span>
+         <span class="text-xs font-medium ${isDark ? 'text-slate-300' : 'text-slate-500'}">/ ${credits} Credits ${credits > 0 ? ('(₹' + (price/credits).toFixed(0) + '/credit)') : ''}</span>`;
+
+    const badgeLabel = price === 0 ? 'FREE TRIAL' : (theme.badgeText || `PRODUCT ${idx + 1}`);
+
+    return `
+      <div class="${cardClasses}">
+        ${ribbon}
+        <div>
+          <div class="flex items-center justify-between mb-4 ${isDark ? 'mt-1' : ''}">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${theme.badgeClass}">
+              <i class="fa-solid ${theme.badgeIcon}"></i> ${badgeLabel}
+            </span>
+            <span class="text-xs font-bold ${isDark ? 'text-slate-400' : 'text-slate-400'} uppercase tracking-wider">PRODUCT ${idx + 1}</span>
+          </div>
+
+          ${coverImgUrl ? `
+            <div class="mb-4 overflow-hidden rounded-2xl relative h-36 border ${isDark ? 'border-cyan-400/30 bg-slate-800/40' : 'border-slate-100 bg-slate-50'}">
+              <img src="${coverImgUrl}" alt="${title}" class="w-full h-full object-cover block" onerror="this.parentElement.style.display='none'">
+            </div>
+          ` : `
+            <div class="w-14 h-14 rounded-2xl ${theme.iconBg} flex items-center justify-center text-white text-2xl shadow-md mb-5">
+              <i class="fa-solid ${theme.icon}"></i>
+            </div>
+          `}
+
+          <h3 class="text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'} mb-1">${title}</h3>
+          <p class="text-xs ${isDark ? 'text-slate-300' : 'text-slate-500'} mb-4">${shortDesc}</p>
+
+          <div class="flex items-baseline gap-2 mb-2 pb-4 border-b ${isDark ? 'border-white/10' : 'border-slate-100'}">
+            ${priceHtml}
+          </div>
+
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl ${isDark ? 'bg-white/10 border border-cyan-400/30 text-white' : 'bg-slate-50 border border-slate-200/80 text-slate-800'} font-extrabold text-sm mb-6 w-full">
+            <i class="fa-solid fa-coins text-amber-400"></i>
+            <span>Credits: <strong class="${theme.creditsColor} text-base">${credits}</strong></span>
+          </div>
+
+          <!-- Features Infographics List -->
+          <ul class="space-y-3 text-xs sm:text-sm ${isDark ? 'text-slate-200' : 'text-slate-600'} mb-8">
+            <li class="flex items-start gap-2.5">
+              <i class="fa-solid fa-circle-check ${theme.checkColor} mt-0.5 text-sm"></i>
+              <span><strong>${credits} Full AI Generation Credits</strong></span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <i class="fa-solid fa-circle-check ${theme.checkColor} mt-0.5 text-sm"></i>
+              <span>CAMPS Curriculum with LATAA-OS Integration</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <i class="fa-solid fa-circle-check ${theme.checkColor} mt-0.5 text-sm"></i>
+              <span>Automated Student Assessment Rubrics</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <i class="fa-solid fa-circle-check ${theme.checkColor} mt-0.5 text-sm"></i>
+              <span>Dynamic Printable Skill Worksheets</span>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <button type="button" onclick="buyLataaCourse(${courseId}, ${credits}, ${price}, event)" class="w-full py-3.5 px-6 rounded-2xl ${theme.btnClass} active:scale-95 text-sm transition-all duration-200 shadow-md flex items-center justify-center gap-2">
+            <i class="fa-solid ${price === 0 ? 'fa-gift' : 'fa-bolt'}"></i>
+            <span>${price === 0 ? 'Buy Now (Free)' : 'Buy Now'}</span>
+          </button>
+          <span class="block text-center text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-400'} mt-2 font-medium">
+            ${price === 0 ? 'Free instant activation' : ('Instant checkout • ₹' + price.toLocaleString('en-IN'))}
+          </span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function loadS2SIntegrateCourses() {
+  const container = document.getElementById('s2s-integrate-products-grid');
+  if (!container) return;
+
+  const directApiUrl = 'http://devcollab.local/api/collab-courses?type=15';
+  const proxyApiUrl = '{{ url("/api/collab-courses?type=15") }}';
+
+  let courses = [];
+  try {
+    let res = await fetch(directApiUrl).catch(() => null);
+    if (!res || !res.ok) {
+      res = await fetch(proxyApiUrl);
+    }
+    if (res && res.ok) {
+      const json = await res.json();
+      const rawList = json.courses?.data || json.data || (Array.isArray(json) ? json : []);
+      // Filter condition: "lata_type": "integrate"
+      courses = rawList.filter(item => {
+        const lataType = (item.lata_type || '').toLowerCase().trim();
+        return lataType === 'integrate';
+      });
+    }
+  } catch (err) {
+    console.warn('Could not load LATAA integrate courses from API:', err);
+  }
+
+  if (courses && courses.length > 0) {
+    renderS2SIntegrateCourses(courses, container);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadS2SIntegrateCourses);
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  loadS2SIntegrateCourses();
+}
+
 window.buyCreditProduct = async function(credits, e) {
   if (e) {
     e.preventDefault();
