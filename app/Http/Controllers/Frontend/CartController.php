@@ -398,7 +398,8 @@ class CartController extends Controller {
                     $apiCourseData = collect($apiCourses)->firstWhere('id', (int)$api_course_id);
                     if ($apiCourseData) {
                         $coverFile = $apiCourseData['cover_image'] ?? null;
-                        $thumb = $coverFile ? "{$apiBase}/assets/images/event/cover/{$coverFile}" : 'designs/img/TTT-1.png';
+                        $localU4s = file_exists(public_path("uploads/courses/u4s/{$api_course_id}.png")) ? "uploads/courses/u4s/{$api_course_id}.png" : null;
+                        $thumb = $localU4s ?: ($coverFile ? "{$apiBase}/assets/images/event/cover/{$coverFile}" : 'designs/img/TTT-1.png');
                         $price = (float)($apiCourseData['price'] ?? 0);
                         
                         $course = Course::create([

@@ -166,7 +166,8 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
                     $apiCourseData = collect($apiCourses)->firstWhere('id', (int)$id);
                     if ($apiCourseData) {
                         $coverFile = $apiCourseData['cover_image'] ?? null;
-                        $thumb = $coverFile ? "{$apiBase}/assets/images/event/cover/{$coverFile}" : 'designs/img/TTT-1.png';
+                        $localU4s = file_exists(public_path("uploads/courses/u4s/{$id}.png")) ? "uploads/courses/u4s/{$id}.png" : null;
+                        $thumb = $localU4s ?: ($coverFile ? "{$apiBase}/assets/images/event/cover/{$coverFile}" : 'designs/img/TTT-1.png');
                         $price = (float)($apiCourseData['price'] ?? 0);
                         
                         $course = \App\Models\Course::create([
@@ -371,9 +372,18 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
 
             $lmsId = $matchingLms ? $matchingLms->id : $c['id'];
             $coverFile = $c['cover_image'] ?? null;
-            $thumb = $coverFile
-                ? "{$imgBase}/assets/images/event/cover/{$coverFile}"
-                : ($matchingLms && $matchingLms->thumbnail ? asset($matchingLms->thumbnail) : $fallback);
+
+            $localU4s = null;
+            if (file_exists(public_path("uploads/courses/u4s/{$c['id']}.png"))) {
+                $localU4s = asset("uploads/courses/u4s/{$c['id']}.png");
+            } elseif ($cSlug && file_exists(public_path("uploads/courses/u4s/{$cSlug}.png"))) {
+                $localU4s = asset("uploads/courses/u4s/{$cSlug}.png");
+            }
+
+            $thumb = $localU4s
+                ?: ($matchingLms && $matchingLms->thumbnail ? (str_starts_with($matchingLms->thumbnail, 'http') ? $matchingLms->thumbnail : asset($matchingLms->thumbnail)) : null)
+                ?: ($coverFile ? "{$imgBase}/assets/images/event/cover/{$coverFile}" : null)
+                ?: $fallback;
 
             $price = (float)($c['price'] ?? ($matchingLms ? $matchingLms->price : 0));
             $formatted = $price > 0 ? '₹ ' . number_format($price, 0) : 'Free';
