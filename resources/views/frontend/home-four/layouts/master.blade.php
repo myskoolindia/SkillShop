@@ -162,6 +162,9 @@
           {!! customCode()->javascript !!}
       </script>
   @endif
+    {{-- Back/Forward can show this page from the browser's memory: reload it, so the menu (Dashboard) is current
+         and forms such as sign-in get a fresh token instead of "419 Page Expired". --}}
+    <script>window.addEventListener('pageshow', function (e) { if (e.persisted) location.reload(); });</script>
 </body>
 
 </html>

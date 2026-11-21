@@ -127,7 +127,9 @@ class RoboquestService {
         $ids = Enrollment::query()->where('user_id', $buyerId)->where('has_access', 1)
             ->whereIn('order_id', DB::table('orders')->where('buyer_id', $buyerId)->where('status', 'completed')->where('payment_status', 'paid')->select('id'))
             ->pluck('course_id')->unique();
-        $courses = Course::whereIn('id', $ids)->with('chapters.chapterItems.lesson')->get();
+        // Credit packs (S2S-CREDIT-…) are bought like courses but have no lessons: they are not sent as courses.
+        $courses = Course::whereIn('id', $ids)->where(fn($q) => $q->whereNull('course_code')->orWhere('course_code', 'not like', 'S2S-CREDIT-%'))
+            ->with('chapters.chapterItems.lesson')->get();
         $memberUsers = self::isPersonal($connection)
             // Personal space: everyone who has opened it and still has no school (joining a school ends their access here).
             ? User::whereIn('id', DB::table('roboquest_launch_codes')->where('connection_id', $connection->id)->whereNotNull('used_at')->select('user_id'))
