@@ -536,7 +536,7 @@
           <i class="fa-solid fa-coins text-cyan-600"></i> AI Teacher LATAA-OS Credits
         </div>
         <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-3">
-          Integrate my Curriculum
+          Create My Curriculum
         </h2>
         <p class="text-slate-600 text-base leading-relaxed">
           Fuel your classroom with LATAA-OS credits for instant NEP-aligned lesson plans, automated student assessment rubrics, and dynamic printable skill worksheets.
