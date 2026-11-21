@@ -112,7 +112,7 @@
       Equip Your Students With Future Ready Skills<br>That Matter
     </h1>
     <p style="font-size:clamp(1rem,1.4vw,1.2rem);max-width:56rem;margin:0 auto;color:#fff;opacity:.92;line-height:1.78;">
-      Skill 2 Skool enables schools to deliver new-age skill education aligned with NEP 2020, NCF 2023, SAFAL, and
+      Camps enables schools to deliver new-age skill education aligned with NEP 2020, NCF 2023, SAFAL, and
       SQAAF, ensuring students are prepared not just for assessments—but for life beyond the classroom. Our skill
       ecosystem is designed to complement academics while strengthening competency, confidence, and real-world readiness.
     </p>
@@ -327,13 +327,13 @@
 <section style="padding:4rem 0;">
   <div class="s2s-container" style="text-align:center;">
     <p style="color:var(--primary);font-weight:600;margin-bottom:.5rem;font-size:.875rem;text-transform:uppercase;letter-spacing:.06em;">
-      Skill 2 Skool Skill Framework
+      Camps Skill Framework
     </p>
     <h2 style="font-size:clamp(1.5rem,2.8vw,2.25rem);font-weight:800;color:var(--on-surface);margin-bottom:1rem;">
       Structured. Aligned. Measurable
     </h2>
     <p style="color:var(--on-surface-variant);max-width:42rem;margin:0 auto 3rem;line-height:1.7;">
-      Skill 2 Skool provides schools with a structured skill framework that focuses on
+      Camps provides schools with a structured skill framework that focuses on
     </p>
 
     <div class="grid-4" style="text-align:left;">
@@ -382,7 +382,7 @@
     <p style="color:var(--primary);font-weight:600;margin-bottom:.5rem;font-size:.875rem;text-transform:uppercase;letter-spacing:.06em;">Skill Readiness &amp; Student Mapping</p>
     <h2 style="font-size:clamp(1.5rem,3vw,2.25rem);font-weight:700;margin-bottom:1.5rem;color:var(--on-surface);">Understanding Strengths Beyond Marks</h2>
     <p style="color:var(--on-surface-variant);max-width:48rem;margin:0 auto;font-size:1.1rem;line-height:1.78;">
-      Skill 2 Skool supports schools in identifying and nurturing student strengths through structured observation,
+      Camps supports schools in identifying and nurturing student strengths through structured observation,
       reflection, and skill mapping. By focusing on aptitude, interest, and behaviour patterns, schools gain deeper
       insights into student potential—supporting informed guidance, confidence building, and holistic development.
     </p>
@@ -1081,7 +1081,7 @@ window.buySkill2SchoolBundle = async function(e) {
     <p class="text-primary font-semibold mb-2 text-sm uppercase tracking-wider">Skill Readiness &amp; Student Mapping</p>
     <h2 class="text-3xl md:text-4xl font-bold mb-6 text-on-surface">A Skill Ecosystem for Your School</h2>
     <p class="text-on-surface-variant max-w-3xl mx-auto text-lg mb-12">
-      Skill 2 Skool enables schools to offer exposure to diverse skill domains, supporting well-rounded development
+      Camps enables schools to offer exposure to diverse skill domains, supporting well-rounded development
       across cognitive, creative, digital, and life skills. These domains collectively contribute to
     </p>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-16 text-left">
@@ -1159,7 +1159,7 @@ window.buySkill2SchoolBundle = async function(e) {
           src="{{ asset('designs/img/skill2school-4.jpeg') }}" />
       </div>
       <div>
-        <h3 class="text-2xl font-bold mb-6 text-on-surface">Skill 2 Skool contributes to key SQAAF domains, including</h3>
+        <h3 class="text-2xl font-bold mb-6 text-on-surface">Camps contributes to key SQAAF domains, including</h3>
         <ul class="space-y-4">
           @foreach(['Curriculum & Pedagogy','Student Development','Teaching-Learning Practices','School Culture & Quality Processes'] as $item)
           <li class="flex items-center gap-3">
@@ -1172,7 +1172,7 @@ window.buySkill2SchoolBundle = async function(e) {
     </div>
     <div class="grid md:grid-cols-2 gap-12 items-center">
       <div class="order-2 md:order-1">
-        <h3 class="text-2xl font-bold mb-6 text-on-surface">Skill 2 Skool strengthens competencies assessed under SAFAL by promoting</h3>
+        <h3 class="text-2xl font-bold mb-6 text-on-surface">Camps strengthens competencies assessed under SAFAL by promoting</h3>
         <ul class="space-y-4">
           @foreach(['Application-based learning','Reasoning and analytical thinking','Communication and expression','Student confidence and engagement'] as $item)
           <li class="flex items-center gap-3">

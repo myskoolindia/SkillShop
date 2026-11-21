@@ -354,44 +354,11 @@
             </div>
             <?= view('partials/_ad_spaces', ['adSpace' => 'product_1', 'class' => 'mb-4']); ?>
             <?php if (!empty($userProducts) && $generalSettings->multi_vendor_system == 1): ?>
-                <div class="col-12 section section-related-products m-t-30">
-                    <strong class="title"><?= trans("more_from"); ?>&nbsp;<a href="<?= generateProfileUrl($user->slug); ?>"><?= esc(getUsername($user)); ?></a></strong>
-                    <div class="row row-product">
-                        <?php $count = 0;
-                        $maxCount = $generalSettings->index_products_per_row == 6 ? 6 : 5;
-                        foreach ($userProducts as $item):
-                            if ($count < $maxCount):?>
-                                <div class="col-6 col-sm-4 col-md-3 col-product <?= $generalSettings->index_products_per_row == 5 ? 'col-product-5' : 'col-product-6'; ?>">
-                                    <?= view('product/_product_item', ['product' => $item]); ?>
-                                </div>
-                            <?php endif;
-                            $count++;
-                        endforeach; ?>
-                    </div>
-                    <?php if (countItems($userProducts) > 5): ?>
-                        <div class="row-custom text-center">
-                            <a href="<?= generateProfileUrl($product->user_slug); ?>" class="link-see-more"><span><?= trans("view_all"); ?>&nbsp;</span><i class="icon-arrow-right"></i></a>
-                        </div>
-                    <?php endif; ?>
-                </div>
+                
             <?php endif;
             if (!empty($relatedProducts) && countItems($relatedProducts) > 0):
                 shuffle($relatedProducts); ?>
-                <div class="col-12 section section-related-products">
-                    <strong class="title"><?= trans("you_may_also_like"); ?></strong>
-                    <div class="row row-product">
-                        <?php $i = 0;
-                        $maxCount = $generalSettings->index_products_per_row == 6 ? 12 : 10;
-                        foreach ($relatedProducts as $item):
-                            if ($i < $maxCount):?>
-                                <div class="col-6 col-sm-4 col-md-3 col-product <?= $generalSettings->index_products_per_row == 5 ? 'col-product-5' : 'col-product-6'; ?>">
-                                    <?= view('product/_product_item', ['product' => $item]); ?>
-                                </div>
-                            <?php endif;
-                            $i++;
-                        endforeach; ?>
-                    </div>
-                </div>
+               
             <?php endif; ?>
             <?= view('partials/_ad_spaces', ['adSpace' => 'product_2', 'class' => 'mb-4']); ?>
         </div>
