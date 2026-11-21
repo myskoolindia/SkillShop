@@ -97,6 +97,15 @@ class ProductCourseMapTest extends TestCase {
         $this->assertSame([(string)$course->id],array_column($courses,'id'));$this->assertSame(30,$courses[0]['capacity']);
         $this->entitlements()->assertOk()->assertJsonPath('courseIds',['98']);
     }
+    public function test_credit_packs_are_not_sent_to_roboquest_as_courses(): void {
+        $school=$this->user('school@credits.test');$connection=$this->connection($school);
+        $grade=Course::withoutEvents(fn()=>Course::create(['title'=>'Grade 1','slug'=>'grade-1','type'=>'course','api_course_id'=>27,'course_code'=>'grade-1-b3a464']));
+        $credits=Course::withoutEvents(fn()=>Course::create(['title'=>'Product 1 - 10 Credits (Free Trial)','slug'=>'skill2school-product-10-credits','type'=>'course','course_code'=>'S2S-CREDIT-10']));
+        $order=Order::create(['buyer_id'=>$school->id,'invoice_id'=>'inv-c','status'=>'completed','payment_status'=>'paid']);
+        foreach([$grade,$credits] as $c) Enrollment::create(['order_id'=>$order->id,'user_id'=>$school->id,'course_id'=>$c->id,'has_access'=>1]);
+        $this->assertSame([(string)$grade->id],array_column($this->snapshot($connection)['courses'],'id'),'only the real course reaches RoboQuest');
+        $this->assertTrue($school->fresh()->hasPurchasedCourses(),'a credit pack still counts as a purchase for the Dashboard button');
+    }
     public function test_mapper_outage_uses_the_last_good_list_fails_closed_without_one_and_is_not_called_without_lab_orders(): void {
         $school=$this->user('school@lab.test');$connection=$this->connection($school);
         $this->mapper();$this->assertSame([],$this->snapshot($connection)['courses']);Http::assertNothingSent();
