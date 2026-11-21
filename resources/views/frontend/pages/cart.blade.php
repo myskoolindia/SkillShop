@@ -42,7 +42,9 @@
                                     <tr>
                                         <td class="product__thumb">
                                             <a href="{{ route('course.show', $product->options['slug']) }}"><img
-                                                    src="{{ asset($product->options['image']) }}" alt=""></a>
+                                                    src="{{ asset($product->options['image']) }}"
+                                                    onerror="this.onerror=null;this.src='{{ asset('frontend/img/courses/course_thumb01.jpg') }}';"
+                                                    alt=""></a>
                                         </td>
                                         <td class="product__name">
                                             <a

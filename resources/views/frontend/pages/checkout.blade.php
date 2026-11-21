@@ -101,7 +101,7 @@
                                                 <td class="ps-3 py-3">
                                                     <div class="d-flex align-items-center gap-3">
                                                         @if(!empty($item->options['image']))
-                                                            <img src="{{ asset($item->options['image']) }}" alt="{{ $item->name }}" style="width: 54px; height: 38px; object-fit: cover; border-radius: 6px;">
+                                                            <img src="{{ asset($item->options['image']) }}" onerror="this.onerror=null;this.src='{{ asset('frontend/img/courses/course_thumb01.jpg') }}';" alt="{{ $item->name }}" style="width: 54px; height: 38px; object-fit: cover; border-radius: 6px;">
                                                         @endif
                                                         <div>
                                                             <span class="fw-semibold text-dark d-block">{{ $item->name }}</span>
@@ -254,12 +254,12 @@
                                     </div>
                                 @endif
                             @else
-                                <div class="col-lg-3 col-6 col-sm-4">
+                                <div class="col-12 mt-3">
                                     <form action="{{ route('pay-via-free-gateway') }}" method="POST">
                                         @csrf
-                                        <button class="wsus__single_payment border-0">
-                                            <img src="{{ asset('uploads/website-images/buy_now.png') }}"
-                                                alt="Pay with stripe" class="img-fluid w-100">
+                                        <button type="submit" class="btn btn-primary buy-now-btn w-100 py-3 shadow-sm d-flex align-items-center justify-content-center gap-2" style="font-size: 16px; font-weight: 800; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                            <i class="fas fa-bolt me-1"></i>
+                                            <span>{{ __('Buy Now (Free)') }}</span>
                                         </button>
                                     </form>
                                 </div>
@@ -449,12 +449,12 @@
                                     </div>
                                 @endif
                             @else
-                                <div class="col-lg-3 col-6 col-sm-4">
+                                <div class="col-12 mt-3">
                                     <form action="{{ route('pay-via-free-gateway') }}" method="POST">
                                         @csrf
-                                        <button class="wsus__single_payment border-0">
-                                            <img src="{{ asset('uploads/website-images/buy_now.png') }}"
-                                                alt="Pay with stripe" class="img-fluid w-100">
+                                        <button type="submit" class="btn btn-primary buy-now-btn w-100 py-3 shadow-sm d-flex align-items-center justify-content-center gap-2" style="font-size: 16px; font-weight: 800; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                            <i class="fas fa-bolt me-1"></i>
+                                            <span>{{ __('Buy Now (Free)') }}</span>
                                         </button>
                                     </form>
                                 </div>
