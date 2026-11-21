@@ -1820,7 +1820,7 @@ class DashboardController extends BaseController
     public function orders()
     {
         $data['title'] = trans("orders");
-        $sellerId = (user()->role_id != 1) ? $this->userId : null;
+        $sellerId = (isAdmin() || hasPermission('orders')) ? null : $this->userId;
         $numRows = $this->orderAdminModel->getOrdersCount($sellerId);
         $data['pager'] = paginate($this->perPage, $numRows);
         $data['orders'] = $this->orderAdminModel->getOrdersPaginated($this->perPage, $data['pager']->offset, $sellerId);
@@ -1836,13 +1836,12 @@ class DashboardController extends BaseController
      */
     public function orderDetails($id)
     {
-        // checkPermission('orders');
         $data['title'] = trans("order");
 
         $data['order'] = getOrder($id);
-        // if (empty($data['order'])) {
-        //     return redirect()->to(adminUrl('orders'));
-        // }
+        if (empty($data['order'])) {
+            return redirect()->to(dashboardUrl('orders'));
+        }
         $data['orderProducts'] = $this->orderAdminModel->getOrderItems($id);
         $data['transaction'] = $this->orderAdminModel->getTransactionByOrderId($id);
 
@@ -1857,7 +1856,7 @@ class DashboardController extends BaseController
     public function transactions()
     {
         $data['title'] = trans("transactions");
-        $sellerId = (user()->role_id != 1) ? $this->userId : null;
+        $sellerId = (isAdmin() || hasPermission('orders')) ? null : $this->userId;
         $numRows = $this->orderAdminModel->getTransactionsCount($sellerId);
         $data['pager'] = paginate($this->perPage, $numRows);
         $data['transactions'] = $this->orderAdminModel->getTransactionsPaginated($this->perPage, $data['pager']->offset, $sellerId);

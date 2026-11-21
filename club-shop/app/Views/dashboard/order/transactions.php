@@ -11,7 +11,7 @@
                             <i class="fa fa-filter"></i>&nbsp;&nbsp;<?= trans("filter"); ?>
                         </button>
                         <div class="collapse navbar-collapse" id="collapseFilter">
-                            <form action="<?= adminUrl('transactions'); ?>" method="get" id="formFilterTransactions">
+                            <form action="<?= dashboardUrl('transactions'); ?>" method="get" id="formFilterTransactions">
                                 <div class="item-table-filter" style="width: 80px; min-width: 80px;">
                                     <label><?= trans("show"); ?></label>
                                     <select name="show" class="form-control">

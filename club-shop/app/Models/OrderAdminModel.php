@@ -175,7 +175,7 @@ class OrderAdminModel extends BaseModel
     }
 
     //filter by values
-    public function filterOrders($formMethod = 'GET')
+    public function filterOrders($formMethod = 'GET', $includeSelect = true)
     {
         $data = [
             'status' => inputGet('status'),
@@ -206,19 +206,25 @@ class OrderAdminModel extends BaseModel
             $data['q'] = str_replace('#', '', $data['q']);
             $this->builder->where('orders.order_number', $data['q']);
         }
-        $this->builder->select('orders.*, 
-        (SELECT username FROM users WHERE orders.buyer_id = users.id) AS buyer_username, 
-        (SELECT slug FROM users WHERE orders.buyer_id = users.id) AS buyer_slug');
+        if ($includeSelect) {
+            $this->builder->select('orders.*, 
+            (SELECT username FROM users WHERE orders.buyer_id = users.id) AS buyer_username, 
+            (SELECT slug FROM users WHERE orders.buyer_id = users.id) AS buyer_slug');
+        }
     }
 
     //get orders count
     public function getOrdersCount($sellerId = null)
     {
-        $this->filterOrders();
+        $this->filterOrders('GET', false);
         if (!empty($sellerId)) {
-            $this->builder->join('order_items', 'order_items.order_id = orders.id', 'inner')
-                ->where('order_items.seller_id', clrNum($sellerId))
-                ->groupBy('orders.id');
+            $this->builder->join('order_items', 'order_items.order_id = orders.id', 'left')
+                ->groupStart()
+                    ->where('order_items.seller_id', clrNum($sellerId))
+                    ->orWhere('orders.buyer_id', clrNum($sellerId))
+                ->groupEnd();
+            $row = $this->builder->select('COUNT(DISTINCT orders.id) AS total_count')->get()->getRow();
+            return (int)($row->total_count ?? 0);
         }
         return $this->builder->countAllResults();
     }
@@ -238,10 +244,13 @@ class OrderAdminModel extends BaseModel
     //get paginated orders
     public function getOrdersPaginated($perPage, $offset, $sellerId = null)
     {
-        $this->filterOrders();
+        $this->filterOrders('GET', true);
         if (!empty($sellerId)) {
-            $this->builder->join('order_items', 'order_items.order_id = orders.id', 'inner')
-                ->where('order_items.seller_id', clrNum($sellerId))
+            $this->builder->join('order_items', 'order_items.order_id = orders.id', 'left')
+                ->groupStart()
+                    ->where('order_items.seller_id', clrNum($sellerId))
+                    ->orWhere('orders.buyer_id', clrNum($sellerId))
+                ->groupEnd()
                 ->groupBy('orders.id');
         }
         return $this->builder->orderBy('orders.id DESC')->limit($perPage, $offset)->get()->getResult();
@@ -382,11 +391,17 @@ class OrderAdminModel extends BaseModel
     //get transactions count
     public function getTransactionsCount($sellerId = null)
     {
-        $this->filterTransactions();
+        $this->filterTransactions('GET', false);
         if (!empty($sellerId)) {
-            $this->builderTransactions->join('order_items', 'order_items.order_id = transactions.order_id', 'inner')
-                ->where('order_items.seller_id', clrNum($sellerId))
-                ->groupBy('transactions.id');
+            $this->builderTransactions->join('order_items', 'order_items.order_id = transactions.order_id', 'left')
+                ->join('orders', 'orders.id = transactions.order_id', 'left')
+                ->groupStart()
+                    ->where('order_items.seller_id', clrNum($sellerId))
+                    ->orWhere('transactions.user_id', clrNum($sellerId))
+                    ->orWhere('orders.buyer_id', clrNum($sellerId))
+                ->groupEnd();
+            $row = $this->builderTransactions->select('COUNT(DISTINCT transactions.id) AS total_count')->get()->getRow();
+            return (int)($row->total_count ?? 0);
         }
         return $this->builderTransactions->countAllResults();
     }
@@ -394,10 +409,15 @@ class OrderAdminModel extends BaseModel
     //get paginated transactions
     public function getTransactionsPaginated($perPage, $offset, $sellerId = null)
     {
-        $this->filterTransactions();
+        $this->filterTransactions('GET', true);
         if (!empty($sellerId)) {
-            $this->builderTransactions->join('order_items', 'order_items.order_id = transactions.order_id', 'inner')
-                ->where('order_items.seller_id', clrNum($sellerId))
+            $this->builderTransactions->join('order_items', 'order_items.order_id = transactions.order_id', 'left')
+                ->join('orders', 'orders.id = transactions.order_id', 'left')
+                ->groupStart()
+                    ->where('order_items.seller_id', clrNum($sellerId))
+                    ->orWhere('transactions.user_id', clrNum($sellerId))
+                    ->orWhere('orders.buyer_id', clrNum($sellerId))
+                ->groupEnd()
                 ->groupBy('transactions.id');
         }
         return $this->builderTransactions->orderBy('transactions.created_at DESC')->limit($perPage, $offset)->get()->getResult();
@@ -411,7 +431,7 @@ class OrderAdminModel extends BaseModel
     }
 
     //filter transactions
-    public function filterTransactions($formMethod = 'GET')
+    public function filterTransactions($formMethod = 'GET', $includeSelect = true)
     {
         $q = inputGet('q');
         if ($formMethod == 'POST') {
@@ -425,10 +445,12 @@ class OrderAdminModel extends BaseModel
                 $this->builderTransactions->where('transactions.order_id', 0);
             }
         }
-        $this->builderTransactions->select('transactions.*, 
-        (SELECT order_number FROM orders WHERE transactions.order_id = orders.id) AS order_number,
-        (SELECT username FROM users WHERE transactions.user_id = users.id) AS user_username,
-        (SELECT slug FROM users WHERE transactions.user_id = users.id) AS user_slug');
+        if ($includeSelect) {
+            $this->builderTransactions->select('transactions.*, 
+            (SELECT order_number FROM orders WHERE transactions.order_id = orders.id) AS order_number,
+            (SELECT username FROM users WHERE transactions.user_id = users.id) AS user_username,
+            (SELECT slug FROM users WHERE transactions.user_id = users.id) AS user_slug');
+        }
     }
 
     //get transactions limited
