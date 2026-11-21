@@ -285,7 +285,8 @@
       let course = courses.find(item =>
         String(item.id) === String(courseId) ||
         String(item.lms_id) === String(courseId) ||
-        String(item.api_course_id) === String(courseId)
+        String(item.api_course_id) === String(courseId) ||
+        String(item.slug) === String(courseId)
       );
 
       if (course) {

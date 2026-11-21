@@ -183,16 +183,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (isBundleMode) {
       // For bundle mode, sort sequentially by Grade 1 -> Grade 5
-      const gradeOrder = { '27': 1, '2': 2, '52': 3, '53': 4, '54': 5, '10': 1, '1': 2, '5': 3, '13': 4, '14': 5 };
+      const gradeOrder = { '27': 1, '1': 1, '2': 2, '10': 2, '52': 3, '5': 3, '53': 4, '13': 4, '54': 5, '14': 5 };
       filteredCourses = courses.filter(c => {
         const id = String(c.api_course_id || c.id || '');
         const title = String(c.title || '');
         return gradeOrder[id] !== undefined || /Grade\s*[1-5]/i.test(title);
       });
       filteredCourses.sort((a, b) => {
-        const ordA = gradeOrder[String(a.api_course_id)] ?? (gradeOrder[String(a.id)] ?? (gradeOrder[String(a.lms_id)] ?? 99));
-        const ordB = gradeOrder[String(b.api_course_id)] ?? (gradeOrder[String(b.id)] ?? (gradeOrder[String(b.lms_id)] ?? 99));
-        return ordA - ordB;
+        const getOrder = c => {
+          const m = String(c.title || '').match(/Grade\s*([1-5])/i);
+          if (m) return parseInt(m[1], 10);
+          return gradeOrder[String(c.api_course_id)] ?? (gradeOrder[String(c.id)] ?? (gradeOrder[String(c.lms_id)] ?? 99));
+        };
+        return getOrder(a) - getOrder(b);
       });
     } else {
       const targetTypes = targetType ? targetType.split(',').map(s => s.trim()).filter(Boolean) : [];
