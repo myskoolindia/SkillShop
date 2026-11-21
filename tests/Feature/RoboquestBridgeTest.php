@@ -40,6 +40,17 @@ class RoboquestBridgeTest extends TestCase {
         $body+=['schoolId'=>'school-one','timestamp'=>time(),'nonce'=>bin2hex(random_bytes(20))];$raw=json_encode($body);
         return $this->call('POST',$path,[],[],[],['CONTENT_TYPE'=>'application/json','HTTP_ACCEPT'=>'application/json','HTTP_X_ROBOQUEST_SIGNATURE'=>hash_hmac('sha256',$raw,$key??str_repeat('x',40))],$raw);
     }
+    public function test_roboquest_sign_in_offers_the_way_back_to_roboquest_when_already_signed_in(): void {
+        $teacher=$this->user('back@teacher.test','teacher');
+        // The page's data, without rendering the site layout (its settings are not seeded in tests).
+        \Illuminate\Support\Facades\View::shouldReceive('make')->andReturnUsing(fn($name,$data=[])=>new class($data) implements \Illuminate\Contracts\Support\Renderable { public function __construct(private array $data){} public function getData(){return $this->data;} public function render(){return '';} });
+        $page=function(?User $user,array $query=[]){ $request=\Illuminate\Http\Request::create('/roboquest/sign-in','GET',$query); $request->setUserResolver(fn()=>$user); return app(\App\Http\Controllers\Frontend\RoboquestController::class)->signIn($request); };
+        $signedIn=$page($teacher,['role'=>'teacher']);
+        $this->assertSame($teacher->id,$signedIn->original->getData()['signedIn']->id,'Back after signing in shows "Back to RoboQuest", not the form');
+        $this->assertStringContainsString('no-store',$signedIn->headers->get('Cache-Control'));
+        $this->assertNull($page($teacher,['role'=>'teacher','switch'=>1])->original->getData()['signedIn'],'"Use another account" shows the form');
+        $this->assertNull($page(null)->original->getData()['signedIn'],'signed out: the form');
+    }
     public function test_launch_code_is_scoped_single_use_and_only_paid_courses_are_returned(): void {
         $school=$this->user('school@one.test');$this->connection($school);$paid=$this->paidCourse($school);$this->paidCourse($school,'pending');$this->paidCourse($school,'refunded');
         $launch=app(RoboquestService::class)->launch($school);parse_str(parse_url($launch,PHP_URL_QUERY),$query);

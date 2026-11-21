@@ -94,6 +94,11 @@ class ProductCourseMapService
             if ($lastPage < 1 || $lastPage > 100) throw new RuntimeException('Invalid mapper pagination.');
             foreach ($payload['data'] as $row) {
                 if (is_array($row['courses'] ?? null)) {
+                    // Courses sold on Skillvation itself (category "s2s", or a product that is only its own course) are bought
+                    // through the course checkout, which already gives access. They are not Club Shop products: their IDs
+                    // must never match Club Shop orders.
+                    $ids = array_map(fn ($item) => (string) ($item['course_id'] ?? ''), $row['courses']);
+                    if (($row['category_id'] ?? null) === 's2s' || ($ids && count(array_unique($ids)) === 1 && $ids[0] === 'course:' . ($row['product_id'] ?? ''))) continue;
                     // Product first: one product and everything it includes.
                     $key = $this->text($row['product_id'] ?? '', 80);
                     if ($key === '' || !preg_match('/^[A-Za-z0-9_-]+$/', $key)) throw new RuntimeException('Invalid mapped product.');
