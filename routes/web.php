@@ -193,7 +193,9 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
                         $coverFile = $apiCourseData['cover_image'] ?? null;
                         $localImg = file_exists(public_path("uploads/courses/camps/{$id}.png"))
                             ? "uploads/courses/camps/{$id}.png"
-                            : (file_exists(public_path("uploads/courses/u4s/{$id}.png")) ? "uploads/courses/u4s/{$id}.png" : null);
+                            : (file_exists(public_path("uploads/courses/ttt/{$id}.png"))
+                                ? "uploads/courses/ttt/{$id}.png"
+                                : (file_exists(public_path("uploads/courses/u4s/{$id}.png")) ? "uploads/courses/u4s/{$id}.png" : null));
                         $thumb = $localImg ?: ($coverFile ? "{$apiBase}/assets/images/event/cover/{$coverFile}" : 'designs/img/TTT-1.png');
                         $price = (float)($apiCourseData['price'] ?? 0);
                         
@@ -405,6 +407,10 @@ Route::group(['middleware' => 'maintenance.mode'], function () {
                 $localImg = asset("uploads/courses/camps/{$c['id']}.png");
             } elseif ($cSlug && file_exists(public_path("uploads/courses/camps/{$cSlug}.png"))) {
                 $localImg = asset("uploads/courses/camps/{$cSlug}.png");
+            } elseif (file_exists(public_path("uploads/courses/ttt/{$c['id']}.png"))) {
+                $localImg = asset("uploads/courses/ttt/{$c['id']}.png");
+            } elseif ($cSlug && file_exists(public_path("uploads/courses/ttt/{$cSlug}.png"))) {
+                $localImg = asset("uploads/courses/ttt/{$cSlug}.png");
             } elseif (file_exists(public_path("uploads/courses/u4s/{$c['id']}.png"))) {
                 $localImg = asset("uploads/courses/u4s/{$c['id']}.png");
             } elseif ($cSlug && file_exists(public_path("uploads/courses/u4s/{$cSlug}.png"))) {
