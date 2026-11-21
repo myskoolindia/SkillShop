@@ -1801,6 +1801,12 @@ function getShippingMethodsByLocation(stateId) {
                 setTimeout(function () {
                     $('#cart_shipping_methods_container').show();
                     $('.cart-shipping-loader').hide();
+                    if (typeof checkShippingMethodVisibility === 'function') {
+                        checkShippingMethodVisibility();
+                    }
+                    if (typeof checkGuestShippingMethodVisibility === 'function') {
+                        checkGuestShippingMethodVisibility();
+                    }
                 }, 400);
             }
         }

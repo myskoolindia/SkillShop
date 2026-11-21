@@ -183,7 +183,23 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-12">
+                                            <!-- SECTION 2: Delivery Option (Hidden when shipping cost is 0 / free; shown when amount has a value) -->
+                                            <?php
+                                            $initialGuestHasShippingCost = false;
+                                            if (!empty($shippingMethods)) {
+                                                foreach ($shippingMethods as $sm) {
+                                                    if (!empty($sm->methods)) {
+                                                        foreach ($sm->methods as $m) {
+                                                            if (!empty($m->cost) && (float)$m->cost > 0) {
+                                                                $initialGuestHasShippingCost = true;
+                                                                break 2;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            ?>
+                                            <div class="col-12 tab-shipping-method-section" id="section_shipping_method_guest" style="<?= $initialGuestHasShippingCost ? '' : 'display: none !important;'; ?>">
                                                 <div id="cart_shipping_methods_container" class="shipping-methods-container">
                                                     <?= view("cart/_shipping_methods"); ?>
                                                 </div>
@@ -286,6 +302,36 @@
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
+    function checkGuestShippingMethodVisibility() {
+        var hasCost = false;
+        var flag = document.getElementById('has_shipping_cost_flag');
+        if (flag) {
+            hasCost = (flag.value === '1');
+        } else {
+            var costEls = document.querySelectorAll('#cart_shipping_methods_container .option-cost');
+            costEls.forEach(function (el) {
+                var val = parseFloat(el.textContent.replace(/[^0-9.]/g, ''));
+                if (val > 0) hasCost = true;
+            });
+        }
+        var sec = document.getElementById('section_shipping_method_guest');
+        if (sec) {
+            sec.style.setProperty('display', hasCost ? 'block' : 'none', 'important');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        checkGuestShippingMethodVisibility();
+
+        var shippingContainer = document.getElementById('cart_shipping_methods_container');
+        if (shippingContainer && window.MutationObserver) {
+            var shippingObserver = new MutationObserver(function() {
+                checkGuestShippingMethodVisibility();
+            });
+            shippingObserver.observe(shippingContainer, { childList: true, subtree: true });
+        }
+    });
+
     document.addEventListener('click', function (e) {
         var btn = e.target.closest('.btn-express-confirm-trigger');
         if (!btn) return;

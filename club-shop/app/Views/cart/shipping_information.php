@@ -124,8 +124,23 @@
                                         <?php endif; ?>
                                     </div>
 
-                                    <!-- SECTION 2: Delivery Option -->
-                                    <div class="tab-checkout tab-checkout-open" style="background:#fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                                    <!-- SECTION 2: Delivery Option (Hidden when shipping cost is 0 / free; shown when amount has a value) -->
+                                    <?php
+                                    $initialHasShippingCost = false;
+                                    if (!empty($shippingMethods)) {
+                                        foreach ($shippingMethods as $sm) {
+                                            if (!empty($sm->methods)) {
+                                                foreach ($sm->methods as $m) {
+                                                    if (!empty($m->cost) && (float)$m->cost > 0) {
+                                                        $initialHasShippingCost = true;
+                                                        break 2;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    ?>
+                                    <div class="tab-checkout tab-checkout-open tab-shipping-method-section" id="section_shipping_method" style="background:#fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); <?= $initialHasShippingCost ? '' : 'display: none !important;'; ?>">
                                         <h2 class="title m-b-15" style="font-size: 17px; font-weight: 700; color: #1e293b;">
                                             <span class="badge badge-primary mr-2" style="font-size: 13px; border-radius: 50%; width: 24px; height: 24px; line-height: 18px; display: inline-flex; align-items: center; justify-content: center; background-color: #2563eb;">2</span>
                                             <?= trans("shipping_method"); ?>
@@ -475,7 +490,35 @@ endif; ?>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
+    function checkShippingMethodVisibility() {
+        var hasCost = false;
+        var flag = document.getElementById('has_shipping_cost_flag');
+        if (flag) {
+            hasCost = (flag.value === '1');
+        } else {
+            var costEls = document.querySelectorAll('#cart_shipping_methods_container .option-cost');
+            costEls.forEach(function (el) {
+                var val = parseFloat(el.textContent.replace(/[^0-9.]/g, ''));
+                if (val > 0) hasCost = true;
+            });
+        }
+        var sec = document.getElementById('section_shipping_method');
+        if (sec) {
+            sec.style.setProperty('display', hasCost ? 'block' : 'none', 'important');
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
+        checkShippingMethodVisibility();
+
+        var shippingContainer = document.getElementById('cart_shipping_methods_container');
+        if (shippingContainer && window.MutationObserver) {
+            var shippingObserver = new MutationObserver(function() {
+                checkShippingMethodVisibility();
+            });
+            shippingObserver.observe(shippingContainer, { childList: true, subtree: true });
+        }
+
         <?php if (!empty($selectedStateId)): ?>
             if (typeof getShippingMethodsByLocation === 'function') {
                 getShippingMethodsByLocation(<?= esc($selectedStateId); ?>);

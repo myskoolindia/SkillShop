@@ -1,16 +1,42 @@
 <?php $hasMethods = false;
 $showButton = true;
+$hasShippingCost = false;
 
 if (!empty($shippingMethods)) {
     foreach ($shippingMethods as $shippingMethod) {
         if (!empty($shippingMethod->methods) && countItems($shippingMethod->methods) > 0) {
             $hasMethods = true;
+            foreach ($shippingMethod->methods as $m) {
+                if (!empty($m->cost) && (float)$m->cost > 0) {
+                    $hasShippingCost = true;
+                }
+            }
         } else {
             $showButton = false;
         }
     }
 }
+?>
+<input type="hidden" id="has_shipping_cost_flag" value="<?= $hasShippingCost ? '1' : '0'; ?>">
+<?php if (!$hasShippingCost): ?>
+    <style>
+        #section_shipping_method,
+        #section_shipping_method_guest,
+        .tab-shipping-method-section {
+            display: none !important;
+        }
+    </style>
+<?php else: ?>
+    <style>
+        #section_shipping_method,
+        #section_shipping_method_guest,
+        .tab-shipping-method-section {
+            display: block !important;
+        }
+    </style>
+<?php endif; ?>
 
+<?php
 if ($hasMethods == false):
     if (!empty($stateId) && $stateId > 0):?>
         <p class="msg-no-delivery text-danger"><?= trans("no_delivery_is_made_to_address"); ?></p>
