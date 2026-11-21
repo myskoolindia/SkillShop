@@ -9,7 +9,10 @@ use Illuminate\Support\Facades\DB;
 class RoboquestController extends Controller {
     public function signIn(Request $request) {
         $role = in_array($request->query('role'), ['teacher','student','school'], true) ? $request->query('role') : 'student';
-        return response()->view('auth.roboquest-signin', compact('role'))->header('Cache-Control','no-store');
+        // Already signed in (e.g. Back after signing in): offer the way back to RoboQuest instead of the form.
+        $user = $request->user('web');
+        $signedIn = $user && in_array($user->role, ['school','teacher','student'], true) && !$request->boolean('switch') ? $user : null;
+        return response()->view('auth.roboquest-signin', compact('role', 'signedIn'))->header('Cache-Control','no-store');
     }
     public function settings(Request $request, RoboquestService $service) {
         abort_unless($request->user()->role === 'school', 403);

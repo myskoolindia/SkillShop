@@ -8,6 +8,12 @@
 @section('contents')
 <main class="rq-signin">
     <small>ROBOQUEST LEARNING LAB</small>
+    @if(!empty($signedIn))
+    <h1>{{ __('You’re signed in') }}</h1>
+    <p>{{ __('As') }} <strong>{{ $signedIn->name }}</strong> ({{ __(['school'=>'School Admin','teacher'=>'Teacher','student'=>'Student'][$signedIn->role] ?? 'Student') }}).</p>
+    <a href="{{ route('roboquest.launch') }}" class="btn btn-two w-100" id="rq-back-to-roboquest">{{ __('Back to RoboQuest') }}</a>
+    <a class="rq-login-help" href="{{ route('roboquest.signin', ['role' => $role, 'switch' => 1]) }}">{{ __('Use another account') }}</a>
+    @else
     <h1>{{ __('Welcome to your learning space') }}</h1>
     <p>{{ __('Choose your account type and sign in to your school’s RoboQuest.') }}</p>
     @if($errors->any())<div class="alert" role="alert">{{ $errors->first() }}</div>@endif
@@ -24,6 +30,7 @@
         <button type="submit" class="btn btn-two w-100">{{ __('Sign in to RoboQuest') }}</button>
         <a class="rq-login-help" href="{{ route('password.request') }}">{{ __('Forgot your password?') }}</a>
     </form>
+    @endif
     <p style="font-size:13px;margin-top:22px">{{ __('Use the account provided by your school. Your courses, assignments and permissions follow your verified account.') }}</p>
 </main>
 @endsection
