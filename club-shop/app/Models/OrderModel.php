@@ -177,6 +177,12 @@ class OrderModel extends BaseModel
             log_message('error', '[OrderModel] syncOrderSafely failed: ' . $e->getMessage());
         }
 
+        try {
+            \App\Libraries\LaravelShopOrderSync::syncOrderSafely($orderId);
+        } catch (\Throwable $e) {
+            log_message('error', '[OrderModel] LaravelShopOrderSync failed: ' . $e->getMessage());
+        }
+
         return $orderId;
     }
 
@@ -211,11 +217,11 @@ class OrderModel extends BaseModel
         // echo '<pre>';
         // print_r($checkoutItems);
         // exit();
-        $hasOrderMarkupRate = $this->db->fieldExists('markup_rate', 'order_products');
+        $hasOrderMarkupRate = $this->db->fieldExists('markup_rate', 'order_items');
         if (!$hasOrderMarkupRate) {
             try {
                 $forge = \Config\Database::forge();
-                $forge->addColumn('order_products', [
+                $forge->addColumn('order_items', [
                     'markup_rate' => [
                         'type'       => 'DECIMAL',
                         'constraint' => '5,2',
@@ -226,7 +232,7 @@ class OrderModel extends BaseModel
                 ]);
                 $hasOrderMarkupRate = true;
             } catch (\Throwable $e) {
-                log_message('error', 'Auto-add markup_rate to order_products failed: ' . $e->getMessage());
+                log_message('error', 'Auto-add markup_rate to order_items failed: ' . $e->getMessage());
                 $hasOrderMarkupRate = false;
             }
         }
@@ -442,6 +448,11 @@ class OrderModel extends BaseModel
                 //add invoice
                 $this->addInvoice($order->id);
                 \App\Libraries\RoboQuestUnlocks::syncOrderSafely($order->id);
+                try {
+                    \App\Libraries\LaravelShopOrderSync::syncOrderSafely($order->id);
+                } catch (\Throwable $e) {
+                    log_message('error', '[OrderModel] LaravelShopOrderSync failed: ' . $e->getMessage());
+                }
             }
         }
     }
@@ -747,6 +758,11 @@ class OrderModel extends BaseModel
                 if ($this->builderOrderItems->where('id', $orderProduct->id)->update($data)) {
                     $this->builder->where('id', $orderProduct->order_id)->update(['payment_status' => 'payment_received']);
                     \App\Libraries\RoboQuestUnlocks::syncOrderSafely($orderProduct->order_id);
+                    try {
+                        \App\Libraries\LaravelShopOrderSync::syncOrderSafely($orderProduct->order_id);
+                    } catch (\Throwable $e) {
+                        log_message('error', '[OrderModel] LaravelShopOrderSync failed: ' . $e->getMessage());
+                    }
                 }
                 return true;
             }
@@ -1054,6 +1070,11 @@ class OrderModel extends BaseModel
                 if ($this->builderOrderItems->where('order_id', $orderId)->update($data)) {
                     $updated = $this->builder->where('id', $orderId)->update(['status' => 2, 'updated_at' => date('Y-m-d H:i:s')]);
                     \App\Libraries\RoboQuestUnlocks::syncOrderSafely($orderId);
+                    try {
+                        \App\Libraries\LaravelShopOrderSync::syncOrderSafely($orderId);
+                    } catch (\Throwable $e) {
+                        log_message('error', '[OrderModel] LaravelShopOrderSync failed: ' . $e->getMessage());
+                    }
                     return $updated;
                 }
             }

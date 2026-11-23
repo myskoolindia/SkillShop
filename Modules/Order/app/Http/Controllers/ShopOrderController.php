@@ -17,6 +17,12 @@ class ShopOrderController extends Controller
             checkAdminHasPermissionAndThrowException('order.management');
         }
 
+        try {
+            \App\Services\ClubShopOrderSyncService::syncAll();
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('[ShopOrderController] ClubShopOrderSyncService sync failed: ' . $e->getMessage());
+        }
+
         $query = ShopOrder::with(['items', 'user']);
 
         if ($request->filled('keyword')) {
@@ -54,6 +60,12 @@ class ShopOrderController extends Controller
     {
         if (function_exists('checkAdminHasPermissionAndThrowException')) {
             checkAdminHasPermissionAndThrowException('order.management');
+        }
+
+        try {
+            \App\Services\ClubShopOrderSyncService::syncAll();
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('[ShopOrderController] ClubShopOrderSyncService sync failed: ' . $e->getMessage());
         }
 
         $orders = ShopOrder::with(['items', 'user'])
