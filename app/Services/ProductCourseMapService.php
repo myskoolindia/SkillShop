@@ -79,7 +79,7 @@ class ProductCourseMapService
         $products = [];
         $skus = [];
         $add = function (string $key, string $title, string $sku) use (&$products, &$skus) {
-            $products[$key] ??= ['title' => $title, 'courses' => [], 'kits' => [], 'labs' => [], 'lms' => [], 'lmsCategories' => []];
+            $products[$key] ??= ['title' => $title, 'courses' => [], 'kits' => [], 'labs' => [], 'lms' => [], 'lmsCategories' => [], 's2sGrades' => [], 's2sDomains' => []];
             if ($sku !== '') $skus[mb_strtolower($sku)] = $key;
         };
         $course = function (string $key, int $courseId, string $title, string $typeName, string $productTitle) use (&$products) {
@@ -120,6 +120,11 @@ class ProductCourseMapService
                             $products[$key]['lms'][] = $m[1];
                         } elseif (preg_match('/^lms-category:([a-z0-9-]{1,80})$/', $id, $m)) {
                             $products[$key]['lmsCategories'][] = $m[1];
+                        } elseif (preg_match('/^s2s-grade:(9|10)$/', $id, $m)) {
+                            // Skill2Skool Grades 9–10: a whole class, or one domain of one class.
+                            $products[$key]['s2sGrades'][] = (int) $m[1];
+                        } elseif (preg_match('/^s2s-domain:([a-z0-9-]{1,40}):(9|10)$/', $id, $m)) {
+                            $products[$key]['s2sDomains'][] = $m[1] . ':' . $m[2];
                         }
                         // Other kinds are ignored, so the mapper can add new ones without breaking access.
                     }
@@ -228,7 +233,7 @@ class ProductCourseMapService
     /** Robot kits, Skill Lab sections and lab LMS (single, or whole categories) included with the paid products. */
     public function unlocksForBuyers(array $portalUserIds): array
     {
-        $empty = ['kits' => [], 'labs' => [], 'lms' => [], 'lmsCategories' => []];
+        $empty = ['kits' => [], 'labs' => [], 'lms' => [], 'lmsCategories' => [], 's2sGrades' => [], 's2sDomains' => []];
         if (!$this->enabled()) return $empty;
         // The mapper is only asked when this person has paid shop orders.
         $keys = $this->paidProductKeys($portalUserIds);

@@ -117,6 +117,20 @@ class ProductCourseMapTest extends TestCase {
         $unlocks=$this->snapshot($connection)['unlocks']['school'];
         $this->assertSame(['G6-K01'],$unlocks['kits']);$this->assertSame(['food','herbal-heritage'],$unlocks['lms']);
     }
+    public function test_skill2skool_9_10_classes_and_domains_reach_roboquest(): void {
+        config(['services.collab.product_course_map_url'=>'https://feed.test/api/course-product-map']);
+        Http::fake(['feed.test/*'=>Http::response(['status'=>'success','data'=>[
+            ['product_id'=>'bundle_cat_90_9','product_sku'=>'S2S-9','product_title'=>'Skill2Skool Class 9','courses'=>[['course_id'=>'s2s-grade:9'],['course_id'=>'s2s-grade:11']]],
+            ['product_id'=>'404','product_sku'=>'S2S-FIN-10','product_title'=>'Finance – Class 10','courses'=>[['course_id'=>'s2s-domain:finance:10'],['course_id'=>'s2s-domain:Bad:10']]],
+        ],'pagination'=>['last_page'=>1]])]);
+        $school=$this->user('school@lab.test');$connection=$this->connection($school);
+        $shop=DB::connection('clubshop');$buyer=$shop->table('users')->insertGetId(['email'=>'school@lab.test','email_status'=>1]);
+        $order=$shop->table('orders')->insertGetId(['buyer_id'=>$buyer,'payment_status'=>'payment_received']);
+        $shop->table('order_items')->insert([['order_id'=>$order,'product_id'=>900,'product_sku'=>'S2S-9','order_status'=>'processing'],['order_id'=>$order,'product_id'=>404,'product_sku'=>'S2S-FIN-10','order_status'=>'processing']]);
+        $unlocks=$this->snapshot($connection)['unlocks']['school'];
+        $this->assertSame([9],$unlocks['s2sGrades']);$this->assertSame(['finance:10'],$unlocks['s2sDomains']);
+        $this->assertTrue($school->fresh()->hasPurchasedCourses(),'a Skill2Skool purchase opens RoboQuest at login');
+    }
     public function test_credit_packs_are_not_sent_to_roboquest_as_courses(): void {
         $school=$this->user('school@credits.test');$connection=$this->connection($school);
         $grade=Course::withoutEvents(fn()=>Course::create(['title'=>'Grade 1','slug'=>'grade-1','type'=>'course','api_course_id'=>27,'course_code'=>'grade-1-b3a464']));
@@ -160,10 +174,10 @@ class ProductCourseMapTest extends TestCase {
         $shop->table('order_items')->insert([['order_id'=>$order,'product_id'=>500,'product_sku'=>'cat-1','order_status'=>'processing'],['order_id'=>$order,'product_id'=>27,'product_sku'=>'grade-1','order_status'=>'processing']]);
         $this->labOrder('teacher@lab.test',91);
         $mine=$this->snapshot($connection);
-        $this->assertSame(['kits'=>['G7-K02','G7-K03'],'labs'=>[],'lms'=>[],'lmsCategories'=>[]],$mine['unlocks']['school']);
+        $this->assertSame(['kits'=>['G7-K02','G7-K03'],'labs'=>[],'lms'=>[],'lmsCategories'=>[],'s2sGrades'=>[],'s2sDomains'=>[]],$mine['unlocks']['school']);
         $this->assertSame([],array_column($mine['courses'],'id'));
         $teacherView=$this->snapshot($connection,$teacher);
-        $this->assertSame(['kits'=>[],'labs'=>['ar-vr:basic'],'lms'=>[],'lmsCategories'=>[]],$teacherView['unlocks']['personal'],'a teacher\'s own purchase is theirs');
+        $this->assertSame(['kits'=>[],'labs'=>['ar-vr:basic'],'lms'=>[],'lmsCategories'=>[],'s2sGrades'=>[],'s2sDomains'=>[]],$teacherView['unlocks']['personal'],'a teacher\'s own purchase is theirs');
         $this->assertSame(['G7-K02','G7-K03'],$teacherView['unlocks']['school']['kits'],'the school\'s purchase reaches its teachers');
     }
     public function test_lab_lms_categories_and_single_lms_reach_roboquest_and_the_master_check(): void {
