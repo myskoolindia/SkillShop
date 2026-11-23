@@ -3235,7 +3235,7 @@
             <i class="fa-solid fa-screwdriver-wrench"></i>
           </div>
           <div>
-            <div class="text-xs font-bold uppercase text-slate-400">Step 01</div>
+            <!-- <div class="text-xs font-bold uppercase text-slate-400">Step 01</div> -->
             <div class="text-white font-bold text-base">Lab Setup</div>
             <p class="text-slate-300 text-xs mt-0.5 m-0 leading-normal">Infrastructure, tools & equipment</p>
           </div>
@@ -3248,7 +3248,7 @@
             <i class="fa-solid fa-microchip"></i>
           </div>
           <div>
-            <div class="text-xs font-bold uppercase text-cyan-400">Step 02 &bull; LATAA OS</div>
+            <!-- <div class="text-xs font-bold uppercase text-cyan-400">Step 02 &bull; LATAA OS</div> -->
             <div class="text-cyan-200 font-extrabold text-base">Academic Intelligence</div>
             <p class="text-slate-200 text-xs mt-0.5 m-0 leading-normal">Lesson planning & practical projects</p>
           </div>
@@ -3260,7 +3260,7 @@
             <i class="fa-solid fa-graduation-cap"></i>
           </div>
           <div>
-            <div class="text-xs font-bold uppercase text-slate-400">Step 03</div>
+            <!-- <div class="text-xs font-bold uppercase text-slate-400">Step 03</div> -->
             <div class="text-white font-bold text-base">Student Mastery</div>
             <p class="text-slate-300 text-xs mt-0.5 m-0 leading-normal">Experiential learning for ICSE & State Boards</p>
           </div>

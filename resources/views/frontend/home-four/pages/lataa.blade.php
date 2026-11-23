@@ -915,7 +915,7 @@
       <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:9999px; background:#e0f2fe; border:1px solid #7dd3fc; color:#0369a1; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">
         <i class="fa-solid fa-coins text-cyan-600"></i> AI Teacher LATAA-OS Credits
       </div>
-      <h2 class="display-6 font-weight-bold text-dark mb-3">
+      <h2 class="display-6 text-dark mb-3" style="font-weight:800 !important; letter-spacing:-0.5px;">
         Create My Curriculum
       </h2>
       <p class="text-secondary" style="font-size:1.05rem;">
@@ -962,7 +962,7 @@
           </div>
 
           <div>
-            <button type="button" onclick="buyCreditProduct(10, event)" id="credit-btn-10" class="btn btn-success w-100 py-3 fw-bold rounded-3 shadow-sm d-flex align-items-center justify-content-center gap-2" style="border-radius:14px; font-size:0.95rem;">
+            <button type="button" onclick="buyCreditProduct(10, event)" id="credit-btn-10" class="btn w-100 py-3 fw-bold rounded-3 shadow-sm d-flex align-items-center justify-content-center gap-2" style="background:#059669 !important; color:#ffffff !important; border:none !important; border-radius:14px; font-size:0.95rem; box-shadow:0 4px 14px rgba(5,150,105,0.25);">
               <i class="fa-solid fa-gift"></i>
               <span>Buy Now (Free)</span>
             </button>
@@ -1189,6 +1189,8 @@ window.buyLataaCourse = async function(courseId, credits, price, e) {
   }
 };
 
+const lataaApiBaseUrl = '{{ rtrim(env("APP_API_BASE", "http://devcollab.local"), "/") }}';
+
 function renderLataaCreateCourses(courses, container) {
   if (!courses || courses.length === 0) return;
 
@@ -1208,8 +1210,8 @@ function renderLataaCreateCourses(courses, container) {
       iconBg: 'linear-gradient(135deg, #34d399 0%, #14b8a6 100%)',
       iconShadow: '0 4px 12px rgba(20,184,166,0.3)',
       creditsColor: '#059669',
-      btnClass: 'btn-success',
-      btnStyle: 'border-radius:14px; font-size:0.95rem;',
+      btnClass: 'btn-emerald',
+      btnStyle: 'background:#059669 !important; color:#ffffff !important; border:none !important; border-radius:14px; font-size:0.95rem; box-shadow:0 4px 14px rgba(5,150,105,0.25);',
       checkColor: 'text-success'
     },
     {
@@ -1261,7 +1263,7 @@ function renderLataaCreateCourses(courses, container) {
       if (rawCover.startsWith('http') || rawCover.startsWith('/')) {
         coverImgUrl = rawCover;
       } else {
-        coverImgUrl = 'http://devcollab.local/assets/images/event/cover/' + rawCover;
+        coverImgUrl = lataaApiBaseUrl + '/assets/images/event/cover/' + rawCover;
       }
     }
 
@@ -1341,7 +1343,7 @@ async function loadLataaCreateCourses() {
   const container = document.getElementById('lataa-create-products-grid');
   if (!container) return;
 
-  const directApiUrl = 'http://devcollab.local/api/collab-courses?type=15';
+  const directApiUrl = lataaApiBaseUrl + '/api/collab-courses?type=15';
   const proxyApiUrl = '{{ url("/api/collab-courses?type=15") }}';
 
   let courses = [];

@@ -599,7 +599,7 @@
           </div>
 
           <div>
-            <button type="button" onclick="buyCreditProduct(10, event)" id="credit-btn-10" class="w-full py-3.5 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-sm transition-all duration-200 shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2">
+            <button type="button" onclick="buyCreditProduct(10, event)" id="credit-btn-10" class="w-full py-3.5 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-sm transition-all duration-200 shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2" style="background-color: #059669 !important;">
               <i class="fa-solid fa-gift"></i>
               <span>Buy Now (Free)</span>
             </button>
@@ -776,6 +776,8 @@ window.buyLataaCourse = async function(courseId, credits, price, e) {
   }
 };
 
+const s2sApiBaseUrl = '{{ rtrim(env("APP_API_BASE", "http://devcollab.local"), "/") }}';
+
 function renderS2SIntegrateCourses(courses, container) {
   if (!courses || courses.length === 0) return;
 
@@ -789,6 +791,7 @@ function renderS2SIntegrateCourses(courses, container) {
       iconBg: 'bg-gradient-to-tr from-emerald-400 to-teal-500 shadow-emerald-500/30',
       creditsColor: 'text-emerald-600',
       btnClass: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20',
+      btnStyle: 'background-color:#059669 !important; color:#ffffff !important;',
       checkColor: 'text-emerald-500'
     },
     {
@@ -832,7 +835,7 @@ function renderS2SIntegrateCourses(courses, container) {
       if (rawCover.startsWith('http') || rawCover.startsWith('/')) {
         coverImgUrl = rawCover;
       } else {
-        coverImgUrl = 'http://devcollab.local/assets/images/event/cover/' + rawCover;
+        coverImgUrl = s2sApiBaseUrl + '/assets/images/event/cover/' + rawCover;
       }
     }
 
@@ -909,7 +912,7 @@ function renderS2SIntegrateCourses(courses, container) {
         </div>
 
         <div>
-          <button type="button" onclick="buyLataaCourse(${courseId}, ${credits}, ${price}, event)" class="w-full py-3.5 px-6 rounded-2xl ${theme.btnClass} active:scale-95 text-sm transition-all duration-200 shadow-md flex items-center justify-center gap-2">
+          <button type="button" onclick="buyLataaCourse(${courseId}, ${credits}, ${price}, event)" class="w-full py-3.5 px-6 rounded-2xl ${theme.btnClass} active:scale-95 text-sm transition-all duration-200 shadow-md flex items-center justify-center gap-2" style="${theme.btnStyle || ''}">
             <i class="fa-solid ${price === 0 ? 'fa-gift' : 'fa-bolt'}"></i>
             <span>${price === 0 ? 'Buy Now (Free)' : 'Buy Now'}</span>
           </button>
@@ -926,7 +929,7 @@ async function loadS2SIntegrateCourses() {
   const container = document.getElementById('s2s-integrate-products-grid');
   if (!container) return;
 
-  const directApiUrl = 'http://devcollab.local/api/collab-courses?type=15';
+  const directApiUrl = s2sApiBaseUrl + '/api/collab-courses?type=15';
   const proxyApiUrl = '{{ url("/api/collab-courses?type=15") }}';
 
   let courses = [];
