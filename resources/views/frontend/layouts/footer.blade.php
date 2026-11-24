@@ -92,7 +92,7 @@
                                         <li><a href="{{ url($footerMenuTwo['link']) }}">{{ $footerMenuTwo['label'] }}</a></li>
                                     @endforeach
                                 @endif
-                                <li><a href="{{ url('/sso/shop') }}?target=affiliate-program">{{ __('Affiliate Program') }}</a></li>
+                                <!-- <li><a href="{{ url('/sso/shop') }}?target=affiliate-program">{{ __('Affiliate Program') }}</a></li> -->
                             </ul>
                         </div>
                     </div>

@@ -29,6 +29,18 @@ if (version_compare(PHP_VERSION, $minPhpVersion, '<')) {
  *---------------------------------------------------------------
  */
 
+// On reverse proxy or alias environments (e.g. Hostinger / LiteSpeed / subfolders),
+// normalize SCRIPT_NAME and PHP_SELF so CodeIgniter 4's SiteURIFactory accurately strips
+// the /club-shop base path from REQUEST_URI instead of treating /club-shop as a route segment.
+if (isset($_SERVER['REQUEST_URI']) && str_starts_with($_SERVER['REQUEST_URI'], '/club-shop')) {
+    if (!isset($_SERVER['SCRIPT_NAME']) || !str_starts_with($_SERVER['SCRIPT_NAME'], '/club-shop')) {
+        $_SERVER['SCRIPT_NAME'] = '/club-shop/index.php';
+    }
+    if (isset($_SERVER['PHP_SELF']) && !str_starts_with($_SERVER['PHP_SELF'], '/club-shop')) {
+        $_SERVER['PHP_SELF'] = '/club-shop/index.php';
+    }
+}
+
 // Path to the front controller (this file)
 define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR);
 

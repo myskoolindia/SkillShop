@@ -181,6 +181,13 @@ class ClubShopOrderSyncService
                 ]);
             }
 
+            // Sync order to LeadDemo CRM
+            try {
+                \App\Services\LeadDemoSyncService::syncOrder($shopOrder);
+            } catch (\Throwable $e) {
+                Log::warning('[ClubShopOrderSyncService] LeadDemo sync skipped: ' . $e->getMessage());
+            }
+
             return true;
         } catch (\Throwable $e) {
             Log::error("[ClubShopOrderSyncService] Failed to sync order {$order->id}: " . $e->getMessage());
