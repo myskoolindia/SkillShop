@@ -517,8 +517,13 @@
                                         </div>
                                     <?php endif; ?>
 
-                                    <!-- Checkout Button -->
-                                    <div class="row-custom m-t-24 m-b-15">
+                                    <!-- Checkout Button (hidden on cart page without removing flow) -->
+                                    <style>
+                                        .cart-checkout-btn-wrap {
+                                            display: none !important;
+                                        }
+                                    </style>
+                                    <div class="row-custom m-t-24 m-b-15 cart-checkout-btn-wrap" style="display:none !important;" aria-hidden="true">
                                         <?php if (empty($cart->is_valid)): ?>
                                             <a href="javascript:void(0)" class="btn btn-block btn-custom"><?= trans("continue_to_checkout"); ?></a>
                                         <?php else:

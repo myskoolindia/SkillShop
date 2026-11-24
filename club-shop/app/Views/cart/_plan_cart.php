@@ -640,10 +640,27 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                         'grand_total'  => round($cartGrand)
                                     ]);
                                     $skillvationBase = rtrim(env('LARAVEL_APP_URL', str_replace('/club-shop', '', rtrim(base_url(), '/'))), '/');
+
+                                    // Only hide Continue to Checkout on designated lab cart pages without removing checkout flow
+                                    $hideCheckoutOnPage = false;
+                                    $reqUri = $_SERVER['REQUEST_URI'] ?? '';
+                                    if (preg_match('~/(?:basic-cart|advance-cart|skillvation-cart|skillvation-advance-cart|skillvation-premium-cart)(?:[/?#]|$)~i', $reqUri)) {
+                                        $hideCheckoutOnPage = true;
+                                    } elseif (!empty($planKey) && in_array($planKey, ['basic', 'composite-basic', 'advance', 'composite-advance', 'skillvation', 'skillvation-advance', 'skilllab-advance', 'skillvation-premium', 'skilllab-premium'], true)) {
+                                        $hideCheckoutOnPage = true;
+                                    }
                                     ?>
 
+                                    <?php if ($hideCheckoutOnPage): ?>
+                                    <style>
+                                        .plan-cart-checkout-btn-wrap {
+                                            display: none !important;
+                                        }
+                                    </style>
+                                    <?php endif; ?>
+
                                     <!-- 1. Primary Action: Continue to Checkout -->
-                                    <div class="row-custom m-t-24 m-b-10">
+                                    <div class="row-custom m-t-24 m-b-10 plan-cart-checkout-btn-wrap"<?= $hideCheckoutOnPage ? ' style="display:none !important;" aria-hidden="true"' : ''; ?>>
                                         <?php if (empty($cart->is_valid)): ?>
                                             <a href="javascript:void(0)" class="btn btn-block btn-custom"><?= trans("continue_to_checkout"); ?></a>
                                         <?php else:
@@ -666,7 +683,7 @@ $ic = $planIcons[$planKey]   ?? 'fa-cube';
                                     </div>
 
                                     <!-- 2. Secondary Action: Request Detailed Proposal to Email -->
-                                    <div class="row-custom m-t-5 m-b-15">
+                                    <div class="row-custom <?= $hideCheckoutOnPage ? 'm-t-20' : 'm-t-5'; ?> m-b-15">
                                         <style>
                                             #sendProposalBtn {
                                                 background-color: #f0f9ff !important;
