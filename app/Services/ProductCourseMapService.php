@@ -19,7 +19,10 @@ use RuntimeException;
  *   lms-category:ID     a whole category of those labs: RoboQuest unlocks all its LMS
  * The older course-first feed ({course_id, products:[...]}) is still read, so either URL works.
  *
- * Products are matched to paid Club Shop order lines by product ID, or by SKU (bundles such as "bundle_cat_72_1" CAT-1).
+ * Products are matched to paid Club Shop order lines by product ID, or by SKU. A lab bundle (Composite Skill Lab 68/72,
+ * Skillvation Lab 74/114 …) is one order line for the bundle product with its chosen components in bundle_items; it
+ * matches the mapper's "bundle_cat_<bundle ID>_<category ID>" for every Club Shop category it has components of
+ * (e.g. bundle_cat_72_1: Agriculture and Gardening of bundle 72), and the bundle's own product ID.
  * The mapper only describes product contents; access always comes from a paid Club Shop order.
  * Changes in the mapper reach RoboQuest within 15 minutes (cache), at the person's next RoboQuest launch.
  */
@@ -170,7 +173,38 @@ class ProductCourseMapService
         return $shop->table('order_items')->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->whereIn('orders.buyer_id', $buyers)->where('orders.payment_status', 'payment_received')
             ->where(fn($query) => $query->whereNull('order_items.order_status')->orWhereNotIn('order_items.order_status', ['cancelled', 'refund_approved']))
-            ->select('order_items.product_id', 'order_items.product_sku')->distinct()->get()->all();
+            ->select(array_merge(['order_items.product_id', 'order_items.product_sku'], $this->hasBundleItems($shop) ? ['order_items.bundle_items'] : []))
+            ->distinct()->get()->all();
+    }
+
+    private ?bool $bundleItems = null;
+    private function hasBundleItems($shop): bool
+    {
+        return $this->bundleItems ??= $shop->getSchemaBuilder()->hasColumn('order_items', 'bundle_items');
+    }
+
+    /**
+     * Mapper keys of the bundle categories bought: "bundle_cat_<bundle product>_<category>" for each Club Shop category
+     * with at least one component in the bundle line (quantity above zero).
+     */
+    private function bundleCategoryKeys(array $lines): array
+    {
+        $components = [];
+        foreach ($lines as $line) {
+            $items = json_decode((string) ($line->bundle_items ?? ''), true);
+            if ($line->product_id === null || !is_array($items)) continue;
+            foreach ($items as $item) {
+                if (is_array($item) && (int) ($item['qty'] ?? 0) > 0 && (int) ($item['product_id'] ?? 0) > 0) $components[(int) $line->product_id][] = (int) $item['product_id'];
+            }
+        }
+        if (!$components) return [];
+        $categories = DB::connection('clubshop')->table('products')->whereIn('id', array_unique(array_merge(...array_values($components))))
+            ->pluck('category_id', 'id');
+        $keys = [];
+        foreach ($components as $bundle => $ids) foreach ($ids as $id) {
+            if (!empty($categories[$id])) $keys['bundle_cat_' . $bundle . '_' . (int) $categories[$id]] = true;
+        }
+        return array_keys($keys);
     }
 
     /** Mapper product keys these portal users paid for (by product ID, or by SKU for bundles). */
@@ -185,6 +219,7 @@ class ProductCourseMapService
             $sku = mb_strtolower(trim((string) ($line->product_sku ?? '')));
             if ($sku !== '' && isset($catalog['skus'][$sku])) $keys[$catalog['skus'][$sku]] = true;
         }
+        foreach ($this->bundleCategoryKeys($lines) as $key) if (isset($catalog['products'][$key])) $keys[$key] = true;
         $keys = array_keys($keys);
         sort($keys);
         return $keys;
