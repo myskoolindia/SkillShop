@@ -90,8 +90,14 @@ abstract class BaseController extends Controller
         // Load App Context Service
         service('appContext');
 
-        // prevent iframe
-        $this->response->setHeader('Content-Security-Policy', "frame-ancestors 'none';");
+        // Framing: only this site and LATAA OS (RoboQuest) schools, which run the checkout in a frame of their own.
+        // Default: any https://*.skillvation.com school (e.g. digilab). Others: roboquest.frameAncestors in .env
+        // (space-separated https origins). Every other site still cannot frame the shop (clickjacking).
+        $ancestors = ["'self'", 'https://*.skillvation.com'];
+        foreach (preg_split('/\s+/', trim((string) env('roboquest.frameAncestors'))) as $origin) {
+            if (preg_match('#^https://(\*\.)?[a-z0-9.-]+(:\d{1,5})?$#i', $origin)) $ancestors[] = strtolower($origin);
+        }
+        $this->response->setHeader('Content-Security-Policy', 'frame-ancestors ' . implode(' ', array_unique($ancestors)) . ';');
 
         // Preload any models, libraries, etc, here.
         $this->session = \Config\Services::session();

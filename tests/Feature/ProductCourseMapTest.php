@@ -22,7 +22,8 @@ class ProductCourseMapTest extends TestCase {
         $shop=Schema::connection('clubshop');
         $shop->create('users',function(Blueprint $t){$t->increments('id');$t->string('email');$t->tinyInteger('email_status')->default(0);$t->tinyInteger('banned')->default(0);});
         $shop->create('orders',function(Blueprint $t){$t->increments('id');$t->integer('buyer_id');$t->string('payment_status')->nullable();});
-        $shop->create('order_items',function(Blueprint $t){$t->increments('id');$t->bigInteger('order_id');$t->integer('product_id')->nullable();$t->string('product_sku')->nullable();$t->string('order_status')->nullable();});
+        $shop->create('order_items',function(Blueprint $t){$t->increments('id');$t->bigInteger('order_id');$t->integer('product_id')->nullable();$t->string('product_sku')->nullable();$t->string('order_status')->nullable();$t->text('bundle_items')->nullable();});
+        $shop->create('products',function(Blueprint $t){$t->increments('id');$t->integer('category_id')->nullable();});
     }
     private int $mapperStatus = 200;
     private bool $mapperFaked = false;
@@ -189,5 +190,35 @@ class ProductCourseMapTest extends TestCase {
         \App\Models\SchoolMember::create(['school_id'=>$school->id,'user_id'=>$student->id,'role_in_school'=>'student','status'=>'active']);
         $this->assertTrue($student->fresh()->hasPurchasedCourses(),'a student of a school that bought a lab category');
         $this->assertFalse($this->user('other@lab.test','student')->hasPurchasedCourses(),'nobody else');
+    }
+
+    public function test_a_paid_lab_bundle_unlocks_the_mapped_categories_it_has_components_of(): void {
+        // Live mapper rows (2026-11-25): bundle_cat_<bundle>_<Club Shop category>.
+        config(['services.collab.product_course_map_url'=>'https://feed.test/api/course-product-map']);
+        Http::fake(['feed.test/*'=>Http::response(['status'=>'success','data'=>[
+            ['product_id'=>'bundle_cat_72_1','product_sku'=>'CAT-1','product_title'=>'Agriculture and Gardening','courses'=>[['course_id'=>'lms:food'],['course_id'=>'lms:herbal-heritage']]],
+            ['product_id'=>'bundle_cat_72_6','product_sku'=>'CAT-6','product_title'=>'ECE','courses'=>[['course_id'=>'lms:ece']]],
+            ['product_id'=>'bundle_cat_72_5','product_sku'=>'CAT-5','product_title'=>'Healthcare','courses'=>[['course_id'=>'lms:life-cycle-of-medicine']]],
+            ['product_id'=>'bundle_cat_68_7','product_sku'=>'CAT-7','product_title'=>'Design Thinking','courses'=>[['course_id'=>'lms:design-thinking']]],
+            ['product_id'=>'bundle_cat_114_19','product_sku'=>'STEM','product_title'=>'STEM','courses'=>[['course_id'=>'lms-category:skillvation-stem']]],
+        ],'pagination'=>['last_page'=>1]])]);
+        $school=$this->user('school@lab.test');$connection=$this->connection($school);
+        $shop=DB::connection('clubshop');
+        // Components: 201/202 Agriculture (1), 206 ECE (6), 205 Healthcare (5, not chosen: quantity 0), 207 Design Thinking (7), 219 STEM (19).
+        foreach ([201=>1,202=>1,206=>6,205=>5,207=>7,219=>19,218=>18] as $id=>$category) $shop->table('products')->insert(['id'=>$id,'category_id'=>$category]);
+        $buyer=$shop->table('users')->insertGetId(['email'=>'school@lab.test','email_status'=>1]);
+        $order=$shop->table('orders')->insertGetId(['buyer_id'=>$buyer,'payment_status'=>'payment_received']);
+        $shop->table('order_items')->insert([
+            ['order_id'=>$order,'product_id'=>72,'product_sku'=>'H2KN25H23-BUNDLE','order_status'=>'processing','bundle_items'=>json_encode([
+                ['comp_id'=>1,'product_id'=>201,'qty'=>2],['comp_id'=>2,'product_id'=>202,'qty'=>1],['comp_id'=>3,'product_id'=>206,'qty'=>1],['comp_id'=>4,'product_id'=>205,'qty'=>0],['comp_id'=>5,'product_id'=>218,'qty'=>3]])],
+            ['order_id'=>$order,'product_id'=>114,'product_sku'=>'SVLAB-BUNDLE','order_status'=>'processing','bundle_items'=>json_encode([['product_id'=>219,'qty'=>1,'unit_price'=>10,'is_main'=>0]])],
+        ]);
+        // Design Thinking of the OTHER bundle (68) was not bought: category keys belong to their own bundle.
+        $unlocks=$this->snapshot($connection)['unlocks']['school'];
+        $this->assertSame(['ece','food','herbal-heritage'],$unlocks['lms']);
+        $this->assertSame(['skillvation-stem'],$unlocks['lmsCategories']);
+        // A cancelled bundle line gives nothing.
+        $shop->table('order_items')->update(['order_status'=>'cancelled']);
+        $this->assertSame([],$this->snapshot($connection)['unlocks']['school']['lms']);
     }
 }
