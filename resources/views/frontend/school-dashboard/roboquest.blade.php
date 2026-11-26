@@ -101,7 +101,7 @@
                                placeholder="{{ env('DEFAULT_ROBOQUEST_URL') }}" 
                                value="{{ old('base_url', $connection?->base_url ?? env('DEFAULT_ROBOQUEST_URL')) }}">
                         <div class="form-text text-muted">
-                            {{ __('The primary URL of the DigiLab RoboQuest server (e.g. http://localhost:8080 for local testing or https://digilab.skillvation.com in production). Do NOT enter the Skillvation portal address.') }}
+                            {{ __('The primary URL of the DigiLab RoboQuest server (e.g. https://digilab.skillvation.com online, or the school computer\'s address such as http://192.168.1.50:8080 for an offline school). Do NOT enter the Skillvation portal address.') }}
                         </div>
                     </div>
 
