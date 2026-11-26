@@ -48,7 +48,10 @@ class ShopPaymentVerifier
             ->orderByDesc('id')->limit(20)->get();
         foreach ($orders as $order) {
             try {
-                if (\Illuminate\Support\Facades\Cache::add('shop-payment-check:' . $order->id, 1, 600)) $this->verify($order, false);
+                // At most every 10 minutes per order; when the cache cannot be written the order is checked anyway.
+                try { $due = \Illuminate\Support\Facades\Cache::add('shop-payment-check:' . $order->id, 1, 600); }
+                catch (\Throwable $cacheError) { $due = true; Log::warning('[ShopPayment] cache unavailable: ' . $cacheError->getMessage()); }
+                if ($due) $this->verify($order, false);
             } catch (\Throwable $error) {
                 Log::error('[ShopPayment] order ' . $order->order_number . ' could not be checked: ' . $error->getMessage());
             }

@@ -43,11 +43,13 @@ class ProductCourseMapService
      */
     public function catalog(): array
     {
-        $cached = Cache::get(self::CACHE_KEY);
+        try { $cached = Cache::get(self::CACHE_KEY); } catch (\Throwable $error) { $cached = null; Log::warning('Product-course mapper cache unreadable: ' . $error->getMessage()); }
         if (is_array($cached) && time() - ($cached['fetchedAt'] ?? 0) < self::FRESH_SECONDS) return $cached['catalog'];
         try {
             $catalog = $this->fetch();
-            Cache::forever(self::CACHE_KEY, ['fetchedAt' => time(), 'catalog' => $catalog]);
+            // A cache that cannot be written (e.g. storage not writable on the host) must not discard a good list.
+            try { Cache::forever(self::CACHE_KEY, ['fetchedAt' => time(), 'catalog' => $catalog]); }
+            catch (\Throwable $error) { Log::warning('Product-course mapper list not cached: ' . $error->getMessage()); }
             return $catalog;
         } catch (\Throwable $error) {
             Log::warning('Product-course mapper unavailable: ' . $error->getMessage());
