@@ -86,12 +86,26 @@ class RoboquestShopController extends RoboquestController
         $status = fn ($o) => (int) $o->status === 2 ? 'cancelled'
             : ($o->payment_status === 'pending_payment' ? ($o->payment_method === 'cash_on_delivery' ? 'processing' : 'pending_payment')
             : ((int) $o->status === 1 ? 'completed' : 'processing'));
-        return response()->json(['orders' => $orders->map(fn ($o) => [
+        $list = $orders->map(fn ($o) => [
             'number' => (string) $o->order_number, 'date' => (string) $o->created_at, 'status' => $status($o),
             'total' => (float) $o->price_total, 'currency' => $o->price_currency ?: 'INR',
             'items' => $items->get($o->id, collect())->map(fn ($i) => ['title' => (string) $i->product_title, 'quantity' => (int) ($i->product_quantity ?? 1),
                 'price' => (float) ($i->product_total_price ?? $i->product_unit_price ?? 0)])->values(),
-        ])->values()])->header('Cache-Control', 'no-store');
+        ]);
+        // Orders from the product pages (shop_orders); paid once Razorpay confirmed them.
+        if (\Illuminate\Support\Facades\Schema::hasTable('shop_orders')) {
+            $verified = \Illuminate\Support\Facades\Schema::hasColumn('shop_orders', 'payment_verified_at');
+            $store = \App\Models\ShopOrder::with('items')->where(fn ($q) => $q->where('user_id', $user->id)->orWhereRaw('LOWER(customer_email) = ?', [mb_strtolower($user->email)]))
+                ->where('order_number', 'not like', 'SKILLSHOP-%')->orderByDesc('id')->limit($input['limit'] ?? 20)->get();
+            $list = $list->concat($store->map(fn ($o) => [
+                'number' => (string) $o->order_number, 'date' => (string) $o->created_at,
+                'status' => $o->order_status === 'cancelled' ? 'cancelled' : ($o->payment_status !== 'paid' || ($verified && !$o->payment_verified_at) ? 'pending_payment'
+                    : ($o->order_status === 'delivered' ? 'completed' : 'processing')),
+                'total' => (float) $o->total_amount, 'currency' => $o->currency ?: 'INR',
+                'items' => $o->items->map(fn ($i) => ['title' => (string) $i->product_title, 'quantity' => (int) $i->quantity, 'price' => (float) $i->total_price])->values(),
+            ]))->sortByDesc('date')->take($input['limit'] ?? 20);
+        }
+        return response()->json(['orders' => $list->values()])->header('Cache-Control', 'no-store');
     }
 
     /**

@@ -225,7 +225,8 @@ class ShopOrderController extends Controller
             'address_type' => $validated['address_type'] ?? 'School / Institution',
             'payment_method' => $validated['payment_method'] ?? 'razorpay',
             'payment_id' => $validated['payment_id'] ?? null,
-            'payment_status' => $validated['payment_status'] ?? 'paid',
+            // The page's own "paid" is not trusted: the order is paid once Razorpay confirms it (below).
+            'payment_status' => 'pending',
             'order_status' => 'pending',
             'subtotal' => $subtotal,
             'shipping_cost' => 0,
@@ -246,6 +247,10 @@ class ShopOrderController extends Controller
                 'total_price' => $item['unit_price'] * $item['quantity'],
             ]);
         }
+
+        // Paid only when Razorpay confirms this payment, captured for this order's real price (shop API prices).
+        if (($validated['payment_status'] ?? 'paid') === 'paid') app(\App\Services\ShopPaymentVerifier::class)->verify($shopOrder);
+        $shopOrder->refresh();
 
         // Post order details to POS API if payment is completed
         $posResult = null;

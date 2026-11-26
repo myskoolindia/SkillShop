@@ -250,4 +250,66 @@ class ProductCourseMapTest extends TestCase {
         $this->entitlements()->assertOk()->assertJsonPath('kits',['G6-K01'])->assertJsonPath('labs',['ar-vr:basic'])
             ->assertJsonPath('s2sDomains',['finance:9'])->assertJsonPath('s2sGrades',[]);
     }
+
+    /** Storefront orders (product pages): shop API prices, Razorpay payments, and the order tables. */
+    private function storefront(): void {
+        if(!Schema::hasTable('shop_orders'))Schema::create('shop_orders',function(Blueprint $t){$t->id();$t->string('order_number')->unique();$t->unsignedBigInteger('user_id')->nullable();$t->string('customer_name');$t->string('customer_email')->nullable();$t->string('customer_phone',20);$t->string('pincode',10);$t->string('city');$t->string('state');$t->string('country')->default('India');$t->text('address');$t->string('address_type')->default('Home');$t->string('payment_method')->default('razorpay');$t->string('payment_id')->nullable();$t->string('payment_status')->default('pending');$t->timestamp('payment_verified_at')->nullable();$t->string('order_status')->default('pending');$t->double('subtotal')->default(0);$t->double('shipping_cost')->default(0);$t->double('discount')->default(0);$t->double('total_amount')->default(0);$t->string('currency')->default('INR');$t->string('tracking_number')->nullable();$t->string('courier_partner')->nullable();$t->text('admin_notes')->nullable();$t->timestamps();});
+        if(!Schema::hasTable('shop_order_items'))Schema::create('shop_order_items',function(Blueprint $t){$t->id();$t->unsignedBigInteger('shop_order_id');$t->unsignedBigInteger('product_id')->nullable();$t->string('product_title');$t->string('product_image')->nullable();$t->double('unit_price')->default(0);$t->integer('quantity')->default(1);$t->double('total_price')->default(0);$t->timestamps();});
+        if(!Schema::hasTable('payment_gateways'))Schema::create('payment_gateways',function(Blueprint $t){$t->id();$t->string('key');$t->text('value')->nullable();$t->timestamps();});
+        DB::table('payment_gateways')->insert([['key'=>'razorpay_key','value'=>'rzp_test_key'],['key'=>'razorpay_secret','value'=>'test-secret']]);
+        putenv('SHOP_API_BASE_URL=https://shop.test/api/');$_ENV['SHOP_API_BASE_URL']=$_SERVER['SHOP_API_BASE_URL']='https://shop.test/api/';
+        config(['app.app_mode'=>'LIVE']);
+        \Illuminate\Support\Facades\Mail::fake();
+        Http::fake([
+            'shop.test/api/products/203'=>Http::response(['status'=>'success','data'=>['id'=>203,'title'=>'Timed Traffic Signal Kit (Grade 6)','price'=>12,'price_discounted'=>12]]),
+            'api.razorpay.com/v1/payments/pay_GOOD123'=>Http::response(['id'=>'pay_GOOD123','status'=>'captured','amount'=>1200,'currency'=>'INR']),
+            'api.razorpay.com/v1/payments/pay_LOW1234'=>Http::response(['id'=>'pay_LOW1234','status'=>'captured','amount'=>100,'currency'=>'INR']),
+            'api.razorpay.com/v1/payments/pay_AUTH123/capture'=>Http::response(['id'=>'pay_AUTH123','status'=>'captured','amount'=>1200,'currency'=>'INR']),
+            'api.razorpay.com/v1/payments/pay_AUTH123'=>Http::response(['id'=>'pay_AUTH123','status'=>'authorized','amount'=>1200,'currency'=>'INR']),
+            'api.razorpay.com/*'=>Http::response(['error'=>['description'=>'not found']],404),
+            'feed.test/*'=>Http::response(['status'=>'success','data'=>[['product_id'=>'203','product_sku'=>'H2NI2H2D1I0','product_title'=>'Timed Traffic Signal Kit (Grade 6)','courses'=>[['course_id'=>'kit:G6-K01']]]],'pagination'=>['last_page'=>1]]),
+            '*'=>Http::response([],200),
+        ]);
+        config(['services.collab.product_course_map_url'=>'https://feed.test/api/course-product-map']);
+    }
+    private function storefrontOrder(User $buyer,string $paymentId,float $claimedPrice=12,string $status='paid') {
+        return $this->actingAs($buyer)->postJson('/api/shop-orders/create',['customer_phone'=>'9999999999','payment_id'=>$paymentId,'payment_status'=>$status,
+            'items'=>[['product_id'=>203,'title'=>'Timed Traffic Signal Kit (Grade 6)','unit_price'=>$claimedPrice,'quantity'=>1]],'total_amount'=>$claimedPrice]);
+    }
+
+    public function test_a_storefront_order_counts_only_when_razorpay_confirms_the_real_price_was_paid(): void {
+        $this->storefront();
+        $school=$this->user('school@lab.test');$connection=$this->connection($school);
+        // Claiming "paid" with a ₹1 price and no real payment gets nothing.
+        $fake=$this->storefrontOrder($school,'pay_MADEUP99',1)->assertOk()->json('data');
+        $this->assertSame('pending',$fake['payment_status']);
+        $this->assertNull($fake['payment_verified_at']);
+        $this->assertSame([],$this->snapshot($connection)['unlocks']['school']['kits']);
+        $this->assertStringContainsString('not verified',\App\Models\ShopOrder::find($fake['id'])->admin_notes);
+        // Paying less than the shop price is caught.
+        $this->assertSame('pending',$this->storefrontOrder($school,'pay_LOW1234',1)->json('data.payment_status'));
+        // The real payment: verified, priced from the shop, and the kit unlocks.
+        $paid=$this->storefrontOrder($school,'pay_GOOD123',1)->assertOk()->json('data');
+        $this->assertSame('paid',$paid['payment_status']);
+        $this->assertNotNull($paid['payment_verified_at']);
+        $this->assertEquals(12,$paid['items'][0]['unit_price'],'the price comes from the shop, not the page');
+        $this->assertSame(['G6-K01'],$this->snapshot($connection)['unlocks']['school']['kits']);
+        // The same payment cannot pay for a second order; an authorised payment is captured.
+        $this->assertSame('pending',$this->storefrontOrder($school,'pay_GOOD123')->json('data.payment_status'));
+        $this->assertSame('paid',$this->storefrontOrder($school,'pay_AUTH123')->json('data.payment_status'));
+    }
+
+    public function test_orders_placed_before_verification_are_checked_by_the_command_without_changing_others(): void {
+        $this->storefront();
+        $school=$this->user('school@lab.test');$connection=$this->connection($school);
+        $make=function($paymentId)use($school){$o=\App\Models\ShopOrder::create(['order_number'=>'SKILLBOX-'.$paymentId,'user_id'=>$school->id,'customer_name'=>'School','customer_email'=>'school@lab.test','customer_phone'=>'9999999999','pincode'=>'560001','city'=>'B','state'=>'K','address'=>'x','payment_method'=>'razorpay','payment_id'=>$paymentId,'payment_status'=>'paid','total_amount'=>12]);
+            \App\Models\ShopOrderItem::create(['shop_order_id'=>$o->id,'product_id'=>203,'product_title'=>'Kit','unit_price'=>12,'quantity'=>1,'total_price'=>12]);return $o;};
+        $good=$make('pay_GOOD123');$bad=$make('pay_LOW1234');
+        $this->assertSame([],$this->snapshot($connection)['unlocks']['school']['kits'],'an unverified "paid" order unlocks nothing');
+        $this->artisan('shop-orders:verify')->assertSuccessful();
+        $this->assertNotNull($good->fresh()->payment_verified_at);
+        $this->assertNull($bad->fresh()->payment_verified_at);
+        $this->assertSame('paid',$bad->fresh()->payment_status,'existing orders keep their status');
+        $this->assertSame(['G6-K01'],$this->snapshot($connection)['unlocks']['school']['kits']);
+    }
 }
