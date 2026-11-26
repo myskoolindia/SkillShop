@@ -221,4 +221,19 @@ class ProductCourseMapTest extends TestCase {
         $shop->table('order_items')->update(['order_status'=>'cancelled']);
         $this->assertSame([],$this->snapshot($connection)['unlocks']['school']['lms']);
     }
+
+    public function test_the_master_check_includes_kits_skill_labs_and_skill2skool_for_offline_content_packs(): void {
+        config(['services.collab.product_course_map_url'=>'https://feed.test/api/course-product-map','services.roboquest.platform_key'=>str_repeat('p',40)]);
+        Http::fake(['feed.test/*'=>Http::response(['status'=>'success','data'=>[
+            ['product_id'=>'203','product_sku'=>'KIT-G6-1','product_title'=>'Timed Traffic Signal Kit','courses'=>[['course_id'=>'kit:G6-K01']]],
+            ['product_id'=>'91','product_sku'=>'ARVR-1','product_title'=>'AR/VR','courses'=>[['course_id'=>'lab:ar-vr:basic']]],
+            ['product_id'=>'404','product_sku'=>'S2S-FIN-9','product_title'=>'Finance – Class 9','courses'=>[['course_id'=>'s2s-domain:finance:9']]],
+        ],'pagination'=>['last_page'=>1]])]);
+        $school=$this->user('school@lab.test');$this->connection($school);
+        $teacher=$this->user('teacher@lab.test','teacher');
+        \App\Models\SchoolMember::create(['school_id'=>$school->id,'user_id'=>$teacher->id,'role_in_school'=>'teacher','status'=>'active']);
+        $this->labOrder('school@lab.test',203);$this->labOrder('school@lab.test',404);$this->labOrder('teacher@lab.test',91);
+        $this->entitlements()->assertOk()->assertJsonPath('kits',['G6-K01'])->assertJsonPath('labs',['ar-vr:basic'])
+            ->assertJsonPath('s2sDomains',['finance:9'])->assertJsonPath('s2sGrades',[]);
+    }
 }

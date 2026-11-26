@@ -18,8 +18,10 @@ class RoboquestPlatformController extends Controller {
         $apiIds=Course::whereIn('id',$ids)->whereNotNull('api_course_id')->pluck('api_course_id')
             // Courses included with paid Club Shop lab products of the school or its active teachers (Mapper API).
             ->merge($service->schoolLabCourseIds($connection))->unique()->map(fn($id)=>(string)$id)->sort()->values();
-        // Lab LMS bought by the school or its active teachers (single LMS, or whole categories that RoboQuest expands).
-        $lms = $service->schoolLms($connection);
-        return response()->json(['schoolId'=>$connection->school_id,'courseIds'=>$apiIds,'lms'=>$lms['lms'],'lmsCategories'=>$lms['lmsCategories']])->header('Cache-Control','no-store');
+        // Shop purchases of the school or its active teachers: Lab LMS (single, or whole categories RoboQuest expands), and
+        // robot kits, Skill Lab sections and Skill2Skool classes or domains (the content packs of protected offline schools).
+        $unlocks = $service->schoolUnlocks($connection);
+        return response()->json(['schoolId'=>$connection->school_id,'courseIds'=>$apiIds,'lms'=>$unlocks['lms'],'lmsCategories'=>$unlocks['lmsCategories'],
+            'kits'=>$unlocks['kits'],'labs'=>$unlocks['labs'],'s2sGrades'=>$unlocks['s2sGrades'],'s2sDomains'=>$unlocks['s2sDomains']])->header('Cache-Control','no-store');
     }
 }
