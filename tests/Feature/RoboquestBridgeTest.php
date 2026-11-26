@@ -263,4 +263,18 @@ class RoboquestBridgeTest extends TestCase {
         $this->assertSame((string)$shared->id,app(RoboquestService::class)->snapshot($connection)['courses'][0]['id']);
         $this->assertSame($shared->id.'-u'.$teacher->id,app(RoboquestService::class)->snapshot($connection,$teacher)['courses'][0]['id']);
     }
+
+    public function test_an_offline_school_can_save_its_school_network_address(): void {
+        config(['app.app_mode'=>'LIVE']);$school=$this->user('school@offline.test');$this->actingAs($school);
+        $save=fn(string $url)=>$this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class)
+            ->from('/school/roboquest')->post('/school/roboquest',['school_id'=>'fays-my-schole','base_url'=>$url,'shared_key'=>str_repeat('k',64)]);
+        foreach(['http://203.0.113.9:8080','http://digilab.example.com','http://192.168.1.50.example.com:8080','http://8.8.8.8'] as $public){
+            $save($public)->assertSessionHasErrors('base_url');
+            $this->assertNull(RoboquestConnection::where('school_user_id',$school->id)->first(),$public.' must be refused');
+        }
+        foreach(['http://192.168.1.50:8080','http://10.0.0.7:8080','http://172.20.1.2:8080','http://localhost:8085','https://digilab.skillvation.com'] as $allowed){
+            $save($allowed)->assertSessionHasNoErrors();
+            $this->assertSame($allowed,RoboquestConnection::where('school_user_id',$school->id)->value('base_url'));
+        }
+    }
 }

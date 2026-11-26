@@ -37,9 +37,10 @@ class RoboquestController extends Controller {
         $port = isset($url['port']) ? ':' . $url['port'] : '';
         $normalizedBaseUrl = $scheme . '://' . $host . $port;
 
-        $isLocal = ($scheme === 'http' && in_array($host, ['localhost', '127.0.0.1', '[::1]']));
-        if ($scheme !== 'https' && !$isLocal) {
-            return back()->withInput()->withErrors(['base_url' => __('Use HTTPS (e.g. https://digilab.skillvation.com), or HTTP on localhost for testing.')]);
+        // HTTP is allowed only inside a school: this computer, or an offline school's server on the school network
+        // (e.g. http://192.168.1.50:8080). The address is only where the browser is sent; this server never calls it.
+        if ($scheme !== 'https' && !($scheme === 'http' && self::onSchoolNetwork($host))) {
+            return back()->withInput()->withErrors(['base_url' => __('Use HTTPS (e.g. https://digilab.skillvation.com), or HTTP for a school-network address (e.g. http://192.168.1.50:8080) or localhost.')]);
         }
         if (RoboquestConnection::where('school_id', $data['school_id'])->where('school_user_id', '<>', $request->user()->id)->exists()) {
             return back()->withInput()->withErrors(['school_id' => __('School ID is already connected by another school.')]);
@@ -58,6 +59,12 @@ class RoboquestController extends Controller {
         ])->save();
 
         return back()->with('roboquest_saved', true);
+    }
+    /** localhost, or a private IPv4 address (10.x, 172.16-31.x, 192.168.x) as used on a school network. */
+    public static function onSchoolNetwork(string $host): bool {
+        if (in_array(strtolower($host), ['localhost', '127.0.0.1', '[::1]'], true)) return true;
+        return filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false
+            && filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE) === false;
     }
     public function launch(Request $request, RoboquestService $service) {
         $user = $request->user('web') ?? $request->user('admin') ?? auth('admin')->user() ?? auth('web')->user();
