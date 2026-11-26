@@ -326,4 +326,24 @@ class ProductCourseMapTest extends TestCase {
         $this->assertTrue(Schema::hasColumn('shop_orders','payment_verified_at'));
         $this->assertNotNull($order->fresh()->payment_verified_at);
     }
+
+    public function test_a_storefront_problem_never_blocks_the_purchase_check(): void {
+        $this->storefront();
+        Schema::drop('shop_order_items');
+        $school=$this->user('school@lab.test');$connection=$this->connection($school);
+        $this->labOrder('school@lab.test',203);
+        $this->assertSame(['G6-K01'],$this->snapshot($connection)['unlocks']['school']['kits'],'the Club Shop purchase still counts');
+    }
+
+    public function test_purchases_still_unlock_when_the_cache_cannot_be_written(): void {
+        // E.g. a host where storage/framework/cache is not writable.
+        $this->storefront();
+        $school=$this->user('school@lab.test');$connection=$this->connection($school);
+        $order=\App\Models\ShopOrder::create(['order_number'=>'SKILLBOX-NOCACHE','user_id'=>$school->id,'customer_name'=>'School','customer_email'=>'school@lab.test','customer_phone'=>'9999999999','pincode'=>'560001','city'=>'B','state'=>'K','address'=>'x','payment_method'=>'razorpay','payment_id'=>'pay_GOOD123','payment_status'=>'paid','total_amount'=>12]);
+        \App\Models\ShopOrderItem::create(['shop_order_id'=>$order->id,'product_id'=>203,'product_title'=>'Kit','unit_price'=>12,'quantity'=>1,'total_price'=>12]);
+        \Illuminate\Support\Facades\Cache::shouldReceive('get')->andReturn(null);
+        \Illuminate\Support\Facades\Cache::shouldReceive('forever')->andThrow(new \RuntimeException('Permission denied'));
+        \Illuminate\Support\Facades\Cache::shouldReceive('add')->andThrow(new \RuntimeException('Permission denied'));
+        $this->assertSame(['G6-K01'],$this->snapshot($connection)['unlocks']['school']['kits']);
+    }
 }
