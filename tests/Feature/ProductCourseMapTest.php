@@ -252,8 +252,8 @@ class ProductCourseMapTest extends TestCase {
     }
 
     /** Storefront orders (product pages): shop API prices, Razorpay payments, and the order tables. */
-    private function storefront(): void {
-        if(!Schema::hasTable('shop_orders'))Schema::create('shop_orders',function(Blueprint $t){$t->id();$t->string('order_number')->unique();$t->unsignedBigInteger('user_id')->nullable();$t->string('customer_name');$t->string('customer_email')->nullable();$t->string('customer_phone',20);$t->string('pincode',10);$t->string('city');$t->string('state');$t->string('country')->default('India');$t->text('address');$t->string('address_type')->default('Home');$t->string('payment_method')->default('razorpay');$t->string('payment_id')->nullable();$t->string('payment_status')->default('pending');$t->timestamp('payment_verified_at')->nullable();$t->string('order_status')->default('pending');$t->double('subtotal')->default(0);$t->double('shipping_cost')->default(0);$t->double('discount')->default(0);$t->double('total_amount')->default(0);$t->string('currency')->default('INR');$t->string('tracking_number')->nullable();$t->string('courier_partner')->nullable();$t->text('admin_notes')->nullable();$t->timestamps();});
+    private function storefront(bool $verifiedColumn=true): void {
+        if(!Schema::hasTable('shop_orders'))Schema::create('shop_orders',function(Blueprint $t)use($verifiedColumn){$t->id();$t->string('order_number')->unique();$t->unsignedBigInteger('user_id')->nullable();$t->string('customer_name');$t->string('customer_email')->nullable();$t->string('customer_phone',20);$t->string('pincode',10);$t->string('city');$t->string('state');$t->string('country')->default('India');$t->text('address');$t->string('address_type')->default('Home');$t->string('payment_method')->default('razorpay');$t->string('payment_id')->nullable();$t->string('payment_status')->default('pending');if($verifiedColumn)$t->timestamp('payment_verified_at')->nullable();$t->string('order_status')->default('pending');$t->double('subtotal')->default(0);$t->double('shipping_cost')->default(0);$t->double('discount')->default(0);$t->double('total_amount')->default(0);$t->string('currency')->default('INR');$t->string('tracking_number')->nullable();$t->string('courier_partner')->nullable();$t->text('admin_notes')->nullable();$t->timestamps();});
         if(!Schema::hasTable('shop_order_items'))Schema::create('shop_order_items',function(Blueprint $t){$t->id();$t->unsignedBigInteger('shop_order_id');$t->unsignedBigInteger('product_id')->nullable();$t->string('product_title');$t->string('product_image')->nullable();$t->double('unit_price')->default(0);$t->integer('quantity')->default(1);$t->double('total_price')->default(0);$t->timestamps();});
         if(!Schema::hasTable('payment_gateways'))Schema::create('payment_gateways',function(Blueprint $t){$t->id();$t->string('key');$t->text('value')->nullable();$t->timestamps();});
         DB::table('payment_gateways')->insert([['key'=>'razorpay_key','value'=>'rzp_test_key'],['key'=>'razorpay_secret','value'=>'test-secret']]);
@@ -299,17 +299,31 @@ class ProductCourseMapTest extends TestCase {
         $this->assertSame('paid',$this->storefrontOrder($school,'pay_AUTH123')->json('data.payment_status'));
     }
 
-    public function test_orders_placed_before_verification_are_checked_by_the_command_without_changing_others(): void {
+    public function test_orders_placed_before_verification_are_checked_at_sync_and_by_the_command_without_changing_others(): void {
         $this->storefront();
         $school=$this->user('school@lab.test');$connection=$this->connection($school);
         $make=function($paymentId)use($school){$o=\App\Models\ShopOrder::create(['order_number'=>'SKILLBOX-'.$paymentId,'user_id'=>$school->id,'customer_name'=>'School','customer_email'=>'school@lab.test','customer_phone'=>'9999999999','pincode'=>'560001','city'=>'B','state'=>'K','address'=>'x','payment_method'=>'razorpay','payment_id'=>$paymentId,'payment_status'=>'paid','total_amount'=>12]);
             \App\Models\ShopOrderItem::create(['shop_order_id'=>$o->id,'product_id'=>203,'product_title'=>'Kit','unit_price'=>12,'quantity'=>1,'total_price'=>12]);return $o;};
         $good=$make('pay_GOOD123');$bad=$make('pay_LOW1234');
-        $this->assertSame([],$this->snapshot($connection)['unlocks']['school']['kits'],'an unverified "paid" order unlocks nothing');
+        // RoboQuest's next sync checks both with Razorpay: the real payment unlocks, the underpaid one does not.
+        $this->assertSame(['G6-K01'],$this->snapshot($connection)['unlocks']['school']['kits']);
         $this->artisan('shop-orders:verify')->assertSuccessful();
         $this->assertNotNull($good->fresh()->payment_verified_at);
         $this->assertNull($bad->fresh()->payment_verified_at);
         $this->assertSame('paid',$bad->fresh()->payment_status,'existing orders keep their status');
         $this->assertSame(['G6-K01'],$this->snapshot($connection)['unlocks']['school']['kits']);
+    }
+
+    public function test_without_commands_an_earlier_order_is_verified_when_roboquest_next_asks_and_the_column_is_added(): void {
+        // Hostinger: no migrations, no artisan, no cron. The order was saved as "paid" by the old page.
+        $this->storefront(false);
+        $this->assertFalse(Schema::hasColumn('shop_orders','payment_verified_at'));
+        $school=$this->user('school@lab.test');$connection=$this->connection($school);
+        $order=\App\Models\ShopOrder::create(['order_number'=>'SKILLBOX-OLD','user_id'=>$school->id,'customer_name'=>'School','customer_email'=>'school@lab.test','customer_phone'=>'9999999999','pincode'=>'560001','city'=>'B','state'=>'K','address'=>'x','payment_method'=>'razorpay','payment_id'=>'pay_GOOD123','payment_status'=>'paid','total_amount'=>12]);
+        \App\Models\ShopOrderItem::create(['shop_order_id'=>$order->id,'product_id'=>203,'product_title'=>'Kit','unit_price'=>12,'quantity'=>1,'total_price'=>12]);
+        // The next sync (RoboQuest's snapshot) checks it with Razorpay and the kit unlocks.
+        $this->assertSame(['G6-K01'],$this->snapshot($connection)['unlocks']['school']['kits']);
+        $this->assertTrue(Schema::hasColumn('shop_orders','payment_verified_at'));
+        $this->assertNotNull($order->fresh()->payment_verified_at);
     }
 }
