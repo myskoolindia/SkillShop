@@ -20,6 +20,35 @@ class ShopPaymentVerifier
         return rtrim((string) env('SHOP_API_BASE_URL', env('STUDENT_SHOP_API_BASE_URL', 'https://test.myskill.club/api/')), '/') . '/';
     }
 
+    /** Adds payment_verified_at when the migration has not run (Hostinger deploys cannot run commands). */
+    public static function ensureColumn(): bool
+    {
+        try {
+            if (!Schema::hasTable('shop_orders')) return false;
+            if (!Schema::hasColumn('shop_orders', 'payment_verified_at')) {
+                Schema::table('shop_orders', fn ($table) => $table->timestamp('payment_verified_at')->nullable());
+            }
+            return true;
+        } catch (\Throwable $error) {
+            Log::warning('[ShopPayment] payment_verified_at could not be added: ' . $error->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Checks this school's (or person's) unverified storefront orders now: RoboQuest asks what they bought at every
+     * sync, so no command or cron is needed. Each order is checked at most every 10 minutes; statuses never change.
+     */
+    public function verifyPendingFor(array $userIds, array $emails): void
+    {
+        if (!self::ensureColumn()) return;
+        $orders = ShopOrder::whereNull('payment_verified_at')->where('payment_method', 'razorpay')->whereNotNull('payment_id')
+            ->where('order_number', 'not like', 'SKILLSHOP-%')->where('order_status', '<>', 'cancelled')->where('created_at', '>=', now()->subDays(90))
+            ->where(fn ($q) => $q->whereIn('user_id', $userIds ?: [0])->orWhereIn(DB::raw('LOWER(customer_email)'), $emails ?: ['']))
+            ->orderByDesc('id')->limit(20)->get();
+        foreach ($orders as $order) if (\Illuminate\Support\Facades\Cache::add('shop-payment-check:' . $order->id, 1, 600)) $this->verify($order, false);
+    }
+
     /** Server prices: product_id => unit price. Throws when an item has no product or the shop cannot price it. */
     public function prices(array $items): array
     {
@@ -53,7 +82,7 @@ class ShopPaymentVerifier
     public function verify(ShopOrder $order, bool $hold = true): ?string
     {
         try {
-            if (!Schema::hasColumn('shop_orders', 'payment_verified_at')) throw new RuntimeException('run the migrations (payment_verified_at)');
+            if (!self::ensureColumn()) throw new RuntimeException('the payment_verified_at column could not be added');
             if ($order->payment_verified_at) return null;
             $paymentId = (string) $order->payment_id;
             if (!preg_match('/^pay_[A-Za-z0-9]{6,40}$/', $paymentId)) throw new RuntimeException('no Razorpay payment ID');
