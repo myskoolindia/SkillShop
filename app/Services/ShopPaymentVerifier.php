@@ -46,7 +46,13 @@ class ShopPaymentVerifier
             ->where('order_number', 'not like', 'SKILLSHOP-%')->where('order_status', '<>', 'cancelled')->where('created_at', '>=', now()->subDays(90))
             ->where(fn ($q) => $q->whereIn('user_id', $userIds ?: [0])->orWhereIn(DB::raw('LOWER(customer_email)'), $emails ?: ['']))
             ->orderByDesc('id')->limit(20)->get();
-        foreach ($orders as $order) if (\Illuminate\Support\Facades\Cache::add('shop-payment-check:' . $order->id, 1, 600)) $this->verify($order, false);
+        foreach ($orders as $order) {
+            try {
+                if (\Illuminate\Support\Facades\Cache::add('shop-payment-check:' . $order->id, 1, 600)) $this->verify($order, false);
+            } catch (\Throwable $error) {
+                Log::error('[ShopPayment] order ' . $order->order_number . ' could not be checked: ' . $error->getMessage());
+            }
+        }
     }
 
     /** Server prices: product_id => unit price. Throws when an item has no product or the shop cannot price it. */
@@ -119,8 +125,13 @@ class ShopPaymentVerifier
             $reason = $error instanceof RuntimeException ? $error->getMessage() : 'verification failed';
             if (!$error instanceof RuntimeException) Log::warning('[ShopPayment] ' . $error->getMessage());
             $note = 'Payment not verified automatically: ' . $reason . '.';
-            $order->forceFill(['payment_status' => $hold && $order->payment_status === 'paid' ? 'pending' : $order->payment_status,
-                'admin_notes' => trim(str_replace($note, '', (string) $order->admin_notes) . "\n" . $note)])->save();
+            try {
+                $order->forceFill(['payment_status' => $hold && $order->payment_status === 'paid' ? 'pending' : $order->payment_status,
+                    'admin_notes' => trim(str_replace($note, '', (string) $order->admin_notes) . "\n" . $note)])->save();
+            } catch (\Throwable $saveError) {
+                Log::error('[ShopPayment] ' . $order->order_number . ': ' . $saveError->getMessage());
+            }
+            Log::warning('[ShopPayment] ' . $order->order_number . ' not verified: ' . $reason);
             return $reason;
         }
     }

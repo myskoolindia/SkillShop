@@ -190,13 +190,19 @@ class ProductCourseMapService
     /** Verified storefront order lines of these users (by account, or by the email the order was placed with). */
     private function storefrontLines(array $userIds, array $emails): array
     {
-        if (!ShopPaymentVerifier::ensureColumn()) return [];
-        app(ShopPaymentVerifier::class)->verifyPendingFor($userIds, $emails);
-        return DB::table('shop_order_items')->join('shop_orders', 'shop_orders.id', '=', 'shop_order_items.shop_order_id')
-            ->whereNotNull('shop_orders.payment_verified_at')->where('shop_orders.payment_status', 'paid')->where('shop_orders.order_status', '<>', 'cancelled')
-            ->where(fn ($q) => $q->whereIn('shop_orders.user_id', $userIds ?: [0])->orWhereIn(DB::raw('LOWER(shop_orders.customer_email)'), $emails ?: ['']))
-            ->whereNotNull('shop_order_items.product_id')
-            ->select('shop_order_items.product_id', DB::raw('NULL as product_sku'))->distinct()->get()->all();
+        // Never lets a storefront problem block the purchase check (courses, Club Shop): it is logged and skipped.
+        try {
+            if (!ShopPaymentVerifier::ensureColumn()) return [];
+            app(ShopPaymentVerifier::class)->verifyPendingFor($userIds, $emails);
+            return DB::table('shop_order_items')->join('shop_orders', 'shop_orders.id', '=', 'shop_order_items.shop_order_id')
+                ->whereNotNull('shop_orders.payment_verified_at')->where('shop_orders.payment_status', 'paid')->where('shop_orders.order_status', '<>', 'cancelled')
+                ->where(fn ($q) => $q->whereIn('shop_orders.user_id', $userIds ?: [0])->orWhereIn(DB::raw('LOWER(shop_orders.customer_email)'), $emails ?: ['']))
+                ->whereNotNull('shop_order_items.product_id')
+                ->select('shop_order_items.product_id', DB::raw('NULL as product_sku'))->distinct()->get()->all();
+        } catch (\Throwable $error) {
+            Log::error('[ShopPayment] storefront orders skipped in the purchase check: ' . $error->getMessage());
+            return [];
+        }
     }
 
     private ?bool $bundleItems = null;

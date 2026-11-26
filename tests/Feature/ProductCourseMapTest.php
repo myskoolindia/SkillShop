@@ -326,4 +326,12 @@ class ProductCourseMapTest extends TestCase {
         $this->assertTrue(Schema::hasColumn('shop_orders','payment_verified_at'));
         $this->assertNotNull($order->fresh()->payment_verified_at);
     }
+
+    public function test_a_storefront_problem_never_blocks_the_purchase_check(): void {
+        $this->storefront();
+        Schema::drop('shop_order_items');
+        $school=$this->user('school@lab.test');$connection=$this->connection($school);
+        $this->labOrder('school@lab.test',203);
+        $this->assertSame(['G6-K01'],$this->snapshot($connection)['unlocks']['school']['kits'],'the Club Shop purchase still counts');
+    }
 }
