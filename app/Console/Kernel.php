@@ -40,6 +40,8 @@ class Kernel extends ConsoleKernel
         $cronExpression = "*/$live_mail_send_minutes * * * *";
 
         $schedule->command('prenotification:live')->cron($cronExpression)->withoutOverlapping();
+        // Storefront payments that could not be confirmed with Razorpay when the order was placed.
+        $schedule->command('shop-orders:verify --days=7')->everyTenMinutes()->withoutOverlapping();
     }
 
     /**

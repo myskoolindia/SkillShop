@@ -24,6 +24,7 @@ class ShopOrder extends Model
         'payment_method',
         'payment_id',
         'payment_status',
+        'payment_verified_at',
         'order_status',
         'subtotal',
         'shipping_cost',
@@ -34,6 +35,8 @@ class ShopOrder extends Model
         'courier_partner',
         'admin_notes',
     ];
+
+    protected $casts = ['payment_verified_at' => 'datetime'];
 
     public function items()
     {

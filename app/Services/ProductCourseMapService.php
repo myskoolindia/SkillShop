@@ -2,7 +2,7 @@
 namespace App\Services;
 
 use App\Models\{RoboquestConnection, SchoolMember, User};
-use Illuminate\Support\Facades\{Cache, DB, Http, Log};
+use Illuminate\Support\Facades\{Cache, DB, Http, Log, Schema};
 use RuntimeException;
 
 /**
@@ -79,7 +79,7 @@ class ProductCourseMapService
         $products = [];
         $skus = [];
         $add = function (string $key, string $title, string $sku) use (&$products, &$skus) {
-            $products[$key] ??= ['title' => $title, 'courses' => [], 'kits' => [], 'labs' => [], 'lms' => [], 'lmsCategories' => []];
+            $products[$key] ??= ['title' => $title, 'courses' => [], 'kits' => [], 'labs' => [], 'lms' => [], 'lmsCategories' => [], 's2sGrades' => [], 's2sDomains' => []];
             if ($sku !== '') $skus[mb_strtolower($sku)] = $key;
         };
         $course = function (string $key, int $courseId, string $title, string $typeName, string $productTitle) use (&$products) {
@@ -120,6 +120,11 @@ class ProductCourseMapService
                             $products[$key]['lms'][] = $m[1];
                         } elseif (preg_match('/^lms-category:([a-z0-9-]{1,80})$/', $id, $m)) {
                             $products[$key]['lmsCategories'][] = $m[1];
+                        } elseif (preg_match('/^s2s-grade:(9|10)$/', $id, $m)) {
+                            // Skill2Skool Grades 9–10: a whole class, or one domain of one class.
+                            $products[$key]['s2sGrades'][] = (int) $m[1];
+                        } elseif (preg_match('/^s2s-domain:([a-z0-9-]{1,40}):(9|10)$/', $id, $m)) {
+                            $products[$key]['s2sDomains'][] = $m[1] . ':' . $m[2];
                         }
                         // Other kinds are ignored, so the mapper can add new ones without breaking access.
                     }
@@ -161,20 +166,36 @@ class ProductCourseMapService
         return array_values(array_unique(array_map(fn ($line) => (int) $line->product_id, array_filter($this->paidLines($portalUserIds), fn ($line) => $line->product_id !== null))));
     }
 
-    /** Paid, not cancelled or refunded Club Shop order lines (product ID and SKU) of these portal users. */
+    /**
+     * Paid, not cancelled or refunded order lines (product ID and SKU) of these portal users: Club Shop orders, and
+     * storefront orders (product pages, shop_orders) whose payment Razorpay confirmed (ShopPaymentVerifier).
+     */
     private function paidLines(array $portalUserIds): array
     {
-        $emails = User::whereIn('id', $portalUserIds)->where('status', 'active')
-            ->pluck('email')->filter()->map(fn($email) => mb_strtolower(trim($email)))->unique()->values();
-        if ($emails->isEmpty()) return [];
+        $users = User::whereIn('id', $portalUserIds)->where('status', 'active')->get(['id', 'email']);
+        $emails = $users->pluck('email')->filter()->map(fn($email) => mb_strtolower(trim($email)))->unique()->values();
+        if ($users->isEmpty()) return [];
+        $lines = $this->storefrontLines($users->pluck('id')->all(), $emails->all());
+        if ($emails->isEmpty()) return $lines;
         $shop = DB::connection('clubshop');
         $buyers = $shop->table('users')->whereIn(DB::raw('LOWER(email)'), $emails)->where('email_status', 1)->where('banned', 0)->pluck('id');
-        if ($buyers->isEmpty()) return [];
-        return $shop->table('order_items')->join('orders', 'orders.id', '=', 'order_items.order_id')
+        if ($buyers->isEmpty()) return $lines;
+        return array_merge($lines, $shop->table('order_items')->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->whereIn('orders.buyer_id', $buyers)->where('orders.payment_status', 'payment_received')
             ->where(fn($query) => $query->whereNull('order_items.order_status')->orWhereNotIn('order_items.order_status', ['cancelled', 'refund_approved']))
             ->select(array_merge(['order_items.product_id', 'order_items.product_sku'], $this->hasBundleItems($shop) ? ['order_items.bundle_items'] : []))
-            ->distinct()->get()->all();
+            ->distinct()->get()->all());
+    }
+
+    /** Verified storefront order lines of these users (by account, or by the email the order was placed with). */
+    private function storefrontLines(array $userIds, array $emails): array
+    {
+        if (!Schema::hasTable('shop_orders') || !Schema::hasColumn('shop_orders', 'payment_verified_at')) return [];
+        return DB::table('shop_order_items')->join('shop_orders', 'shop_orders.id', '=', 'shop_order_items.shop_order_id')
+            ->whereNotNull('shop_orders.payment_verified_at')->where('shop_orders.payment_status', 'paid')->where('shop_orders.order_status', '<>', 'cancelled')
+            ->where(fn ($q) => $q->whereIn('shop_orders.user_id', $userIds ?: [0])->orWhereIn(DB::raw('LOWER(shop_orders.customer_email)'), $emails ?: ['']))
+            ->whereNotNull('shop_order_items.product_id')
+            ->select('shop_order_items.product_id', DB::raw('NULL as product_sku'))->distinct()->get()->all();
     }
 
     private ?bool $bundleItems = null;
@@ -228,7 +249,7 @@ class ProductCourseMapService
     /** Robot kits, Skill Lab sections and lab LMS (single, or whole categories) included with the paid products. */
     public function unlocksForBuyers(array $portalUserIds): array
     {
-        $empty = ['kits' => [], 'labs' => [], 'lms' => [], 'lmsCategories' => []];
+        $empty = ['kits' => [], 'labs' => [], 'lms' => [], 'lmsCategories' => [], 's2sGrades' => [], 's2sDomains' => []];
         if (!$this->enabled()) return $empty;
         // The mapper is only asked when this person has paid shop orders.
         $keys = $this->paidProductKeys($portalUserIds);

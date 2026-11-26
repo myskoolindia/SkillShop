@@ -195,10 +195,17 @@ class RoboquestService {
             abort(503, 'Lab course access is temporarily unavailable. Existing access is unchanged; try again shortly.');
         }
     }
-    /** Lab LMS bought by the school and its active teachers, for the master's content check. Fails closed like labCourses. */
-    public function schoolLms(RoboquestConnection $connection): array {
-        try { $unlocks = $this->productCourses->unlocksForBuyers($this->productCourses->schoolBuyerIds($connection)); }
+    /**
+     * Everything the school and its active teachers bought through the shop (robot kits, Skill Lab sections, Lab LMS,
+     * Skill2Skool classes and domains), for the master's content check. Fails closed like labCourses.
+     */
+    public function schoolUnlocks(RoboquestConnection $connection): array {
+        try { return $this->productCourses->unlocksForBuyers($this->productCourses->schoolBuyerIds($connection)); }
         catch (\Throwable $error) { report($error); abort(503, 'Lab access is temporarily unavailable. Existing access is unchanged; try again shortly.'); }
+    }
+    /** Lab LMS bought by the school and its active teachers, for the master's content check. */
+    public function schoolLms(RoboquestConnection $connection): array {
+        $unlocks = $this->schoolUnlocks($connection);
         return ['lms' => $unlocks['lms'], 'lmsCategories' => $unlocks['lmsCategories']];
     }
     /** Lab-mapped course IDs for the school and its active teachers, for the master's content check. */
